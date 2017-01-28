@@ -1,0 +1,59 @@
+module {
+
+	name 'spider';
+	
+	dependencies {
+		module 'gross-cc-dung';
+		module 'gross-runtime';
+		module 'caterpillar';
+		module 'elk';
+	}
+
+	loader 'gross-java-runtime';
+	loader 'gross-cc';
+	loader 'gross-cc-dung';
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/javascript.gro';
+			prefix 'Spi';
+			outputPath './src/parser/gross/';
+			updateOnly 'true';
+#			arg '-v';
+#			arg '-v';
+#			arg '-v';
+		}
+
+		
+		cc {
+			src { path './src/'; }  
+			natpad.cc.args {}
+			destdir './compiled/'; 
+			depdir 'deps';
+		}
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libspider.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'spider';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

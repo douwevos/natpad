@@ -1,0 +1,35 @@
+module {
+
+	name 'jaguar-bytecode';
+	
+	dependencies {
+		module 'glib';	
+		module 'caterpillar';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { src { path './src/'; }  destdir './compiled/'; depdir 'deps'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libjaguarbytecode.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'jaguarbytecode';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

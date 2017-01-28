@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Natpad
+Exec=natpad %U
+Terminal=false
+Type=Application
+StartupNotify=true
+MimeType=text/plain;
+Icon=natpad_32
+Categories=GNOME;GTK;Utility;TextEditor;
+X-Ubuntu-Gettext-Domain=natpad

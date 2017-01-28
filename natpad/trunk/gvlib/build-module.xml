@@ -1,0 +1,47 @@
+<project name="build-gvlib" default="clean">
+
+	<property name="module-name" value="gvlib"/>
+
+	<cc-config id="lib-set-gvlib">
+			<cc-config refid="module.cc.config"/>
+	</cc-config>
+
+	<cc-config id="lib-set-ut-gvlib">
+			<cc-config refid="module.cc.config"/>
+	</cc-config>
+
+	<import file="${natpad.build}/module.inc" optional="false"/>
+	
+
+	<target name="module-compile">
+		<echo>building module ${module-name}</echo>
+		<mkdir dir="build/main/"/>
+		<cc srcdir="src/" destdir="build/main">
+			<cc-config refid="module.cc.config"/>
+		</cc>
+
+		<cc srcdir="auxiliaries/" destdir="build/main">
+			<cc-config refid="lib-set-${module-name}"/>
+		</cc>
+
+	</target>
+
+
+	<target name="module-ut-compile">
+		<mkdir dir="build/ut/main/"/>
+		<cc srcdir="src/" destdir="build/ut/main/">
+			<cc-config refid="module.cc.config"/>
+		</cc>
+
+		<cc srcdir="auxiliaries/" destdir="build/ut/main/">
+			<cc-config refid="lib-set-${module-name}"/>
+		</cc>
+	</target>
+
+
+	<target name="clean">
+		<delete dir="build"/>
+	</target>
+
+	
+</project>

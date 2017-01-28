@@ -1,0 +1,23 @@
+<project name="build-jaguar-decompiler" default="module-build">
+
+	<property name="module-name" value="jaguar-decompiler"/>
+
+
+	<cc-config id="lib-set-jaguar-decompiler">
+		<cc-config refid="module.gtk3.config"/>
+		<cc-config refid="module.caterpillar.config"/>
+		<cc-config refid="module.jaguar.bytecode.config"/>
+	</cc-config>
+	
+	
+
+	<cc-config id="lib-set-ut-jaguar-decompiler">
+		<cc-config refid="module.gtk3.config"/>
+		<cc-config refid="module.ut.caterpillar.config"/>
+		<cc-config refid="module.ut.jaguar.bytecode.config"/>
+	</cc-config>
+		
+	<import file="${natpad.build}/module.inc" optional="false"/>
+
+
+</project>

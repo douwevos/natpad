@@ -1,0 +1,315 @@
+Natpad has a fased modify-draw-cycle. With modify-draw-cycle the whole path of a change in the model until the eventual
+visual effect of it. I.e. moving the cursor right will move the virtual window in the text one character to the right. 
+This will generate an exposure event to occur. 
+
+
+Fase 1 : collecting all display/view/painting properties.
+
+	setting: boolean 	line-wrapping
+	setting: boolean	line-numbers
+	given:   int		viewport X position
+	given:   int		viewport Y position
+	given:   int		viewport width
+	given:   int		viewport height
+ 
+
+Fase 2 : updating the line info, document info
+
+
+Fase 3 : paint lines marked to be painted and paint cursor.    
+
+
+
+
+There are different scenarios:
+
+
+PLAIN_CHAR_INSERT
+
+	Plain insert means a plain character is being inserted.
+	
+	1. Check if a mark is in place. If so remove marked text.
+	
+	2. Insert char in model.
+	
+	3. 
+
+	
+	
+import NatString;
+
+class NatConfiguration {
+	flag label="show_line_numbers";
+	
+	map NatFileTypeMap "file_types" {
+		key=NatFileType.id;
+		type=NatFileType;
+	}
+}
+
+class NatFileType {
+	mandatory NatString id;
+	list "extension" {
+		type=NatString;
+	}
+	
+	text label="document_clazz"; 
+}
+	
+	
+	
+	
+
+
+
+
+A Project is a more structured representation of a map on the file system. The
+information of the project is stored in a project file in a yaml format. 
+Normaly the items are stored 
+
+
+
+The project Natpad includes the header files for GTK and during linking it uses
+the libraries. In Eclipse you would configure the include directories as part of
+a project, in Natpad this is not possible. Every project consists of its own map
+plus additional projects. Thus the extra headers should be added as a seperate
+project
+
+	natpad ( project >> type: C )
+	+-- src ( source folder )
+	    +-- ...
+	        ...
+	+-- GTK (project reference)
+	    +-- GLib (project reference)
+	 
+	 
+	GTK ( project >> type: C-Library )
+	+-- gtk-2.0 ( library )
+	+-- gtk ( header folder )
+	    +-- ...h
+	        ...h
+	+-- GLib (project reference)
+	
+
+ 
+ 
+ 
+A resource is the reference to a file or another source of data (i.e: an URL).
+The resource can be opened via a call to NatResourceService.open(NatResource*) this
+will ask all register NatIResourceHandler's to report wether they are capable of
+opening the specified resource. In case of multiple NatIResourceHandlers the one
+with the highest ranking key will receive a request top open the specified Resource.
+Once a IResourceHandler opened a Resource it will return an IResourceEditor which will
+be stored by the ResourceService.     
+
+
+A TextResource is representing a text. The text is split up by blocks where 
+every block can hold a number of lines. The blocks are represented as an
+ordered list where the index of each block can change over time. A block has
+either a valid content or an undetermined content. If the block has a valid
+content the number of lines is known otherwise it is an estimated value. A
+block with a valid content can have its data in memory in the form of lines or
+on the disc where it is either stored in the original file or in a journal
+file. 
+
+
+
+class TextBlockSnapshot {
+	
+}
+
+
+interface ITextBlock {
+	int getBlockVersion();
+	int getLineCount();
+	TextBlockSnapshot getSnapshot();
+	TextBlockStorageInfo getStorageInfo();
+}
+
+
+class TextBlockValid implemented ITextBlock {
+	List<TextLine> lines;
+//	TextLine getLineAt(int index);
+}
+
+
+class TextBlockUndetermined implemented ITextBlock {
+}
+
+
+
+class TextResource {
+	List<ITextBlock> block_list;
+	int version;
+
+	void lock();
+	void unlock();
+	
+	TextSnapshot getSnapshot();
+	int getTextVersion();
+
+	ITextBlock getBlock(int index);
+	int getBlockCount();
+	
+	TextBlockValid getValidBlockAtIndex(int index);
+	TextBlockValid getValidBlockAtLocation(long location);
+}
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ResourceService service;
+service.registerHandleFactory(new DocumentResourceHandlerFactory());
+
+Resource resource = workspace.createResource("./test.txt");
+DocumentResourceHandler resource_handler = service.getResourceHandler(resource, "document-factory");
+
+
+ResourceEditorService editor_service;
+
+
+-------------------------------------------------------------------------
+class EditorService {
+	IResourceEditor createResourceEditor(Resource, String preferred_opener);
+}
+
+
+
+
+
+
+
+class ResourceService {
+	void registerHandlerFactory(IResourceHandlerFactory);
+	IResourceHandler getResourceHandler(Resource, String factory_name);
+}
+
+class Resource {
+	String					path;
+	int					float_count;
+	Map<String, IResourceContentHandler> 	handlers;
+	IResourceHandler 			modify_lock;
+	ResourceStamp				source_stamp;
+	
+	IResourceContentHandler getDefaultHandler();
+	void registerHandler(IResourceContentHandler handler) {
+		handlers.put(handler);
+		handler.increaseRefCount();
+	}
+}
+
+class ResourceStamp {
+	long mtime, size;
+	boolean equals(ResourceStamp stamp_a, ResourceStamp stamp_b);
+}
+
+
+interface IResourceContentHandler {
+	String getName(); 
+	int refCount();		// for garbage collection
+	increaseRefCount();
+}
+
+interface IResourceEditor {
+}
+
+
+
+
+class DocumentContentHandler implements IResourceHandler {
+	List<Snapshot> history;
+	Snpashot snapshot;
+	
+	DocumentResourceHandler(Resource);
+	
+	Snapshot getCurrentContent();
+	
+}
+
+
+class DocumentEditor {
+	DocumentResourceHandler document_handler;
+	public DocumentEditor(DocumentResourceHandler document_handler);
+	
+}
+
+
+
+
+
+
+
+FileContentHandler implement IResourceContentHandler {
+
+	FileContent getCurrentContent();
+
+}
+
+
+
+interface CatIOutputStream {
+	write(char ch);
+	write(char *data, int count);
+}
+
+interface CatIInputStream {
+	char read();
+	
+}
+
+
+
+
+
+
+If we have two editors with a different content type and thus different implementation of the
+IResourceContentHandler then it is important to know how to handle versions. Lets imagine we have
+e normal text editor and we have an Hexadecimal editor. The text editor converts a plain text
+in a text model based on lines and blocks. Converting it from and to text form is an expensive
+task and therefore the hex editor can not be hard linked (that is the hex editor will not be updated
+when the content of the text editor is changed). If the user now clicks on the hex editor it would
+be nice that the user will be able to somehow detect or select a change. See example dialog below
+
+
+  +-------------------------+
+  |  Import content from:   |
+  |     [ ]  Filesystem     |
+  |     [*]  TextEditor     |
+  |                         |
+  |            [OK][Cancel] |
+  +-------------------------+
+
+
+
+
+Indexer and tokenizers.
+
+The indexer typically parses a set of resources whereas the tokenizer (lexer) only parses single
+files and outputs tokens. The indexer stores the structure of a file like the headers of functions,
+ structures, fields and errors. The model created by the indexer should be reducable so it only
+holds key information like global structures, fields and function names but no local variables and
+no compilation errors. The indexer its goal is to provide the programmer with two types of information:
+1. code completion [local] (the user presses ctrl+space and as a result all possible options are shown)
+2. compile errors [global] statistical break down of files with compile errors.
+
+

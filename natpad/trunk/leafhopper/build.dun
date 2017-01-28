@@ -1,0 +1,39 @@
+module {
+
+	name 'leafhopper';
+	
+	dependencies {
+		module 'gtk3';
+		module 'x11';
+		module 'caterpillar';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { 
+			natpad.cc.args {}
+			src { path './src/'; }  
+			destdir './compiled/';
+		}
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libleafhopper.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'leafhopper';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

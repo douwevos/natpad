@@ -1,0 +1,35 @@
+module {
+
+	name 'shoveler';
+	
+	dependencies {
+		module 'glib';
+		module 'caterpillar';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { src { path './src/c/'; } destdir './compiled/'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libshoveler.a'; }
+	}	
+
+	export {
+		lib {
+			path '.';
+			libname 'shoveler';
+		}
+		headers {
+			dir './src/c/';
+		}
+	}
+	
+
+
+}

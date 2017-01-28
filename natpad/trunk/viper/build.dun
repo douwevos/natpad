@@ -1,0 +1,34 @@
+module {
+
+	name 'viper';
+	
+	dependencies {
+		module 'gtk3';
+		module 'leafhopper';
+		module 'worm';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { src { path './src/'; }  destdir './compiled/'; depdir './deps/'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libviper.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'viper';
+		}
+		headers {
+			dir './src/c/';
+		}
+	}
+}

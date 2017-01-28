@@ -1,0 +1,32 @@
+<project name="build-caterpillar" default="clean">
+
+	<property name="module-name" value="caterpillar"/>
+
+	<cc-config id="lib-set-caterpillar">
+		<cc-config refid="module.glib.config"/>
+	</cc-config>
+
+	<cc-config id="lib-set-ut-caterpillar">
+		<cc-config refid="module.glib.config"/>
+	</cc-config>
+
+
+	<import file="${natpad.build}/module.inc" optional="false"/>
+	
+	<target name="module-ut-build" depends="module-ut-compile, module-ut-archive">
+
+		<clink srcdir="build/ut/test/" output="build/${module-name}-ut">
+			<cc-config refid="module.ut.${module-name}.config"/>
+			<cc-config refid="module.gtk3.config"/>
+			<cc-config refid="module.cc.dbg.config"/>
+		</clink>
+		
+	</target>
+	
+		
+
+	<target name="clean">
+		<delete dir="build"/>
+	</target>
+
+</project>

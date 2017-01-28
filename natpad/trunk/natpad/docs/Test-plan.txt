@@ -1,0 +1,34 @@
+                                                                              execution    memory
+
+* Description: Start Natpad
+  Expected:    Natpad is started
+
+* Description: Select file -> new
+  Expected:    A new empty editor is opened and a node is added to
+               the explorer with the name "untitled"
+
+
+------------------------------------------------------------------
+
+Projects
+
+* Description: Add a new non-existing project.
+  Expected:    The roject is openend and visible in explorer
+               A natpad-project.sht file is created.
+
+
+------------------------------------------------------------------
+
+Java auto-completion.
+
+* Description: Create a partial import statement : "import java.util."
+               and press Ctrl+Space.
+  Expected:    A list with the available classes in java.util.
+
+
+
+
+
+
+
+

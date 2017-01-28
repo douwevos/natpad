@@ -1,0 +1,34 @@
+module {
+
+	name 'codeparsing';
+	
+	dependencies {
+		module 'gvlib';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { src { path './src/'; }  destdir './compiled/'; depdir './dep/'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libcodeparsing.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'codeparsing';
+		}
+		headers {
+			dir './include/';
+		}
+	}
+
+
+}
