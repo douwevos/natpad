@@ -1,0 +1,45 @@
+terminal SEMICOLON, IDENTIFIER, STRINGLITERAL, CHARACTERLITERAL, KWALL, KWRANGE, KWREVERSE_RANGE, APOSTROPHE;
+terminal LEFTPAREN, RIGHTPAREN, BAR, KWTO, KWDOWNTO, DOT, COMMA, ARROW, NUMBERLITERAL;
+
+
+rev_seq_stats                     ⟶
+                                  ⟶ rev_seq_stats procedure_call_stat ;
+ 
+procedure_call_stat               ⟶ name SEMICOLON ;
+                                  
+name                              ⟶ IDENTIFIER
+                                  ⟶ STRINGLITERAL 
+                                  ⟶ name gen_association_list ;
+
+
+gen_association_list              ⟶ LEFTPAREN association_elements RIGHTPAREN ;
+
+association_elements              ⟶ association_element
+                                  ⟶ association_elements COMMA association_element ;
+
+association_element               ⟶ name ARROW expr
+                                  ⟶ expr ;
+
+expr                              ⟶ name
+                                  ⟶ NUMBERLITERAL		
+                                  ⟶ LEFTPAREN expr RIGHTPAREN 
+                                  ⟶ aggregate
+                                  ;
+
+aggregate                         ⟶ rev_element_association_list2 RIGHTPAREN
+                                  ⟶ LEFTPAREN choices ARROW expr RIGHTPAREN ;
+
+rev_element_association_list2     ⟶ LEFTPAREN element_association COMMA element_association
+                                  ⟶ rev_element_association_list2 COMMA element_association ;
+                                  
+element_association               ⟶ choices ARROW expr
+                                  ⟶ expr ;
+
+choices                           ⟶ choice opt_more_choices ;
+
+opt_more_choices                  ⟶
+                                  ⟶ opt_more_choices BAR choice ;
+
+choice                            ⟶ expr
+                                  ;
+                                  

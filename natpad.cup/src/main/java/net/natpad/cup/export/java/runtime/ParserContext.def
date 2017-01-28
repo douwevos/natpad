@@ -1,0 +1,75 @@
+package [%org.natpad.cup.simplecalc.runtime%];
+
+import [%java.util.Stack%];
+
+public class [%ParserContext%] {
+
+	public final [%Scanner%] scanner;
+
+	/** Internal flag to indicate when parser should quit. */
+	protected boolean _done_parsing = false;
+
+	/** Indication of the index for top of stack (for use by actions). */
+	public int tos;
+
+	/** The current lookahead Symbol. */
+	protected [%Symbol%] cur_token;
+
+	/** The parse stack itself. */
+	protected [%Stack%] stack = new [%Stack%]();
+
+
+	/** Lookahead Symbols used for attempting error recovery "parse aheads". */
+	protected [%Symbol%] lookahead[];
+
+	/** Position in lookahead input buffer used for "parse ahead". */
+	protected int lookahead_pos;
+
+	
+	public [%ParserContext%]([%Scanner%] scanner) {
+		this.scanner = scanner;
+	}
+	
+	
+
+	/* . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . */
+
+	/**
+	 * This method is called to indicate that the parser should quit. This is
+	 * normally called by an accept action, but can be used to cancel parsing
+	 * early in other circumstances if desired.
+	 */
+	public void doneParsing() {
+		_done_parsing = true;
+	}
+
+	
+
+	
+	
+	public [%Symbol%] peek() {
+		return ([%Symbol%]) stack.peek();
+	}
+
+	public [%Symbol%] pop() {
+		tos--;
+		return ([%Symbol%]) stack.pop();
+	}
+
+	
+	public void push([%Symbol%] symbol) {
+		stack.push(symbol);
+	}
+
+
+
+	public void shift([%Symbol%] symbol) {
+		stack.push(symbol);
+		tos++;
+	}
+
+	public [%Symbol%] getFromTop(int reverseIndex) {
+		return ([%Symbol%]) stack.elementAt(tos-reverseIndex);
+	}
+	
+}

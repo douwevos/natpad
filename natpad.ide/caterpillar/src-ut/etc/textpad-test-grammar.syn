@@ -1,0 +1,11 @@
+; test grammar 
+
+[Syntax]
+HexPrefix = 0x
+
+[Syntax]
+HexPrefix = 0x
+
+[Keywords 1]
+public
+class

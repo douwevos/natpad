@@ -1,0 +1,47 @@
+module {
+
+	name 'leafhopper.test';
+	
+	dependencies {
+		module 'leafhopper';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc {
+			natpad.cc.args {}
+			src { path './src-ut/'; }  
+			destdir './compiled-ut/';
+			depdir 'deps-ut'; 
+		}
+	}
+
+	package {
+
+		natpad.pre.link {}	
+	
+		clink {
+			src { path './compiled-ut/'; }
+			output './leafhopper-ut';
+			natpad.cc.args {}
+		}
+
+
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'leafhopper';
+		}
+		headers {
+			dir './src-ut/';
+		}
+	}
+
+
+}

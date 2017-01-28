@@ -1,0 +1,34 @@
+module {
+
+	name 'jordanella';
+	
+	dependencies {
+		module 'elk';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { src { path './src/'; }  destdir './compiled/'; depdir './deps/'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libjordanella.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'jordanella';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

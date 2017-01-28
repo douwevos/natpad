@@ -1,0 +1,23 @@
+{
+	generators : [
+		{
+			type : "caterpillar",
+			dest-dir : "./src/c/parser/generated",
+			
+			
+			namespace-prefix : "Sho",
+			
+			parser-name : "lr_parser,LR_PARSER,LrParser",
+			
+			
+			extra-debug-info : true,
+			symbol-info : true, 
+			debug-level : "WARN"
+			
+		}	
+	]
+	
+	
+	
+	 
+}

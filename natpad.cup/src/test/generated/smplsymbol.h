@@ -1,0 +1,33 @@
+#ifndef SMPLSYMBOL_H_
+#define SMPLSYMBOL_H_
+
+/* terminals */
+#define SMPL_SYMBOL_TERM_EOF          0
+#define SMPL_SYMBOL_TERM_ERROR        1
+#define SMPL_SYMBOL_TERM_DOT          2
+#define SMPL_SYMBOL_TERM_IDENTIFIER   3
+#define SMPL_SYMBOL_TERM_OPMUL        4
+#define SMPL_SYMBOL_TERM_OPDIV        5
+#define SMPL_SYMBOL_TERM_OPPLUS       6
+#define SMPL_SYMBOL_TERM_OPMINUS      7
+#define SMPL_SYMBOL_TERM_OPEQ         8
+#define SMPL_SYMBOL_TERM_OPNE         9
+#define SMPL_SYMBOL_TERM_ASSIGN       10
+#define SMPL_SYMBOL_TERM_LEFTPAREN    11
+#define SMPL_SYMBOL_TERM_RIGHTPAREN   12
+#define SMPL_SYMBOL_TERM_SEMICOLON    13
+#define SMPL_SYMBOL_TERMINAL_COUNT 14
+
+  /* non terminals */
+#define SMPL_SYMBOL_NONTERM_$START             0
+#define SMPL_SYMBOL_NONTERM_PROGRAM            1
+#define SMPL_SYMBOL_NONTERM_STATEMENTS         2
+#define SMPL_SYMBOL_NONTERM_STATEMENT          3
+#define SMPL_SYMBOL_NONTERM_ASSIGN_STATEMENT   4
+#define SMPL_SYMBOL_NONTERM_EXPR               5
+#define SMPL_SYMBOL_NONTERM_TERM               6
+#define SMPL_SYMBOL_NONTERM_FACT               7
+#define SMPL_SYMBOL_NONTERM_PRIM               8
+#define SMPL_SYMBOL_NONTERM_QUALIFIED_NAME     9
+#define SMPL_SYMBOL_NONTERMINAL_COUNT 10
+#endif /* SMPLSYMBOL_H_ */

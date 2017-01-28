@@ -1,0 +1,34 @@
+<project name="build-shoveler" default="clean">
+
+	<property name="module-name" value="shoveler"/>
+
+	<cc-config id="lib-set-shoveler">
+		<cc-config refid="module.glib.config"/>
+		<cc-config refid="module.caterpillar.config"/>
+	</cc-config>
+
+	<cc-config id="lib-set-ut-shoveler">
+		<cc-config refid="module.glib.config"/>
+		<cc-config refid="module.ut.caterpillar.config"/>
+	</cc-config>
+
+
+	<import file="${natpad.build}/module.inc" optional="false"/>
+	
+	<target name="module-ut-build" depends="module-ut-compile, module-ut-archive">
+
+		<!--clink srcdir="build/ut/test/" output="build/${module-name}-ut">
+			<cc-config refid="module.ut.shoveler.config"/>
+			<cc-config refid="module.gtk3.config"/>
+			<cc-config refid="module.cc.config"/>
+		</clink-->
+		
+	</target>
+	
+		
+
+	<target name="clean">
+		<delete dir="build"/>
+	</target>
+
+</project>

@@ -1,0 +1,51 @@
+<project name="build-mule" default="module-clean">
+
+	<property name="module-name" value="mule"/>
+
+	<cc-config id="lib-set-mule">
+		<cc-config refid="module.gtk3.config"/>
+		<cc-config refid="module.caterpillar.config"/>
+		<cc-config refid="module.shoveler.config"/>
+		<cc-config refid="module.cow.config"/>
+		<cc-config refid="module.leafhopper.config"/>
+		<cc-config refid="module.chameleon.config"/>
+		<cc-config refid="module.dragonfly.config"/>
+		<cc-config refid="module.viper.config"/>
+		<cc-config refid="module.viper.explorer.config"/>
+		<cc-config refid="module.moose.config"/>
+		<cc-config refid="module.moose.explorer.config"/>
+		<cc-config refid="module.worm.config"/>
+		<cc-config refid="module.elk.config"/>
+	</cc-config>
+	
+
+	<cc-config id="lib-set-ut-mule">
+		<cc-config refid="module.gtk3.config"/>
+		<cc-config refid="module.ut.caterpillar.config"/>
+		<cc-config refid="module.ut.shoveler.config"/>
+		<cc-config refid="module.ut.cow.config"/>
+		<cc-config refid="module.ut.leafhopper.config"/>
+		<cc-config refid="module.ut.dragonfly.config"/>
+		<cc-config refid="module.ut.chameleon.config"/>
+		<cc-config refid="module.ut.viper.config"/>
+		<cc-config refid="module.ut.viper.explorer.config"/>
+		<cc-config refid="module.ut.moose.config"/>
+		<cc-config refid="module.ut.moose.explorer.config"/>
+		<cc-config refid="module.ut.worm.config"/>
+		<cc-config refid="module.ut.elk.config"/>
+	</cc-config>
+		
+	<import file="${natpad.build}/module.inc" optional="false"/>
+
+	
+	<target name="module-compile">
+		<ant antfile="build.xml"/>
+		<antcall target="module.module-compile"/>
+	</target>
+
+	<target name="module-ut-compile">
+		<ant antfile="build.xml"/>
+		<antcall target="module.module-ut-compile"/>
+	</target>
+
+</project>

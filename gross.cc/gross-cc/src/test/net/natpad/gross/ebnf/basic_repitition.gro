@@ -1,0 +1,14 @@
+terminal ID, SEMI, BOOK;
+
+program          ≣ a         ⟶ ID:i BOOK+ SEMI;
+ 
+imports ｟
+｠
+
+
+type String program;
+
+ 
+code program ≣ a                        ｟ result = ""+i+s; ｠
+ 
+ 

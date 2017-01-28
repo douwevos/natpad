@@ -1,0 +1,36 @@
+module {
+
+	name 'cow';
+	
+	dependencies {
+		module 'gtk3';
+		module 'shoveler';	
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		XmlToHInclude { file './src/ui/cowgladedialog.glade'; }
+		cc { src { path './src/'; }  destdir './compiled/'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libcow.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'cow';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

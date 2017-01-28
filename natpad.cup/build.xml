@@ -1,0 +1,41 @@
+<project name="natpad.cup-build" default="jar">
+
+
+    <target name="clean">
+    	<delete dir="build/"/>
+    </target>
+	
+	
+    <target name="compile">
+    	<mkdir dir="build/classes"/>
+        <javac destdir="build/classes" srcdir="src/main" debug="true" target="1.5" source="1.5"/>
+    	<copy file="src/main/java/net/natpad/cup/ant/taskdefs.properties" todir="build/classes/net/natpad/cup/ant/"></copy>
+    	<copy todir="build/classes/">
+    		<fileset dir="src/main/java/">
+	    		<include name="net/natpad/cup/export/java/runtime/**/*.def"/>
+	    		<include name="net/natpad/cup/export/caterpillar/runtime/**/*.c"/>
+	    		<include name="net/natpad/cup/export/caterpillar/runtime/**/*.h"/>
+			</fileset>
+    	</copy>
+    </target>
+	
+	<target name="jar" depends="compile">
+		<jar basedir="build/classes" destfile="build/natpad-cup.jar">
+			<manifest>
+				<attribute name="Main-Class" value="net.natpad.cup.Main"/>
+			</manifest>
+		</jar>
+	</target>
+
+
+    <target name="build-self">
+    	<java jar="build/natpad-cup.jar" fork="true">
+    		<arg value="--config"/>
+    		<arg value="./src/main/java/net/natpad/cup/model/parser/natpad_cup.json"/>
+    		<arg value="./src/main/java/net/natpad/cup/model/parser/natpad_cup.cup"/>
+    	</java>
+	</target>
+
+
+	
+</project>

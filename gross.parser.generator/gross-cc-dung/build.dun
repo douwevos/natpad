@@ -1,0 +1,42 @@
+module {
+
+	name 'gross-cc-dung';
+	
+	dependencies {
+		module 'gross-cc';
+		module 'gross-java-runtime';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+	
+	compile {
+		javac { 
+			src { path './src/'; } 
+			destdir './compiled/';
+		}
+	}
+
+	package {
+	
+		jar { 
+			in { 
+				path './compiled/';
+				exclude '.*Task.class';
+				exclude '.*Action.class';
+				exclude '.*Session.class';
+			}
+			destfile './gross-cc-dung.jar';
+		}
+	}	
+
+
+	export {
+		lib {
+			path './gross-cc-dung.jar';
+		}
+	}
+
+
+}

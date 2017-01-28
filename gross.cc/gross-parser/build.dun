@@ -1,0 +1,56 @@
+module {
+
+	name 'gross-parser';
+	
+	dependencies {
+		module 'gross-cc-dung';
+		module 'gross-runtime';
+		module 'caterpillar';
+	}
+
+	loader 'gross-java-runtime';
+	loader 'gross-cc';
+	loader 'gross-cc-dung';
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/gross_grammar.gro';
+			ast './etc/gross_grammar.grt';
+			prefix 'Gro';
+			outputPath './src-gen/';
+			updateOnly 'true';
+		}
+		
+		cc {
+			src { path './src/'; }  
+			src { path './src-gen/'; }  
+			natpad.cc.args {}
+			destdir './compiled/'; 
+			depdir 'deps';
+		}
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libgross-parser.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'gross-parser';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

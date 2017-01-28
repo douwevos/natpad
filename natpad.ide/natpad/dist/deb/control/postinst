@@ -1,0 +1,49 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    configure)
+        # register natpad as a gnome-text-editor in the alternatives system
+        update-alternatives \
+            --install \
+                /usr/bin/gnome-text-editor \
+                gnome-text-editor \
+                /usr/bin/natpad \
+                50 
+# DV           --slave \
+# DV               /usr/share/man/man1/gnome-text-editor.1.gz \
+# DV               gnome-text-editor.1.gz \
+# DV               /usr/share/man/man1/gedit.1.gz
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 0
+    ;;
+esac
+
+# Automatically added by dh_installmenu
+if [ "$1" = "configure" ] && [ -x "`which update-menus 2>/dev/null`" ]; then
+	update-menus
+fi
+# End automatically added section
+# Automatically added by dh_gconf
+# DV if [ "$1" = "configure" ]; then
+# DV	gconf-schemas --register natpad-file-browser.schemas gedit.schemas 
+# DVfi
+# End automatically added section
+# Automatically added by dh_desktop
+if [ "$1" = "configure" ] && which update-desktop-database >/dev/null 2>&1 ; then
+	update-desktop-database -q
+fi
+# End automatically added section
+# Automatically added by dh_pysupport
+# DV if which update-python-modules >/dev/null 2>&1; then
+# DV	update-python-modules  gedit.dirs
+# DVfi
+# End automatically added section
+

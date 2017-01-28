@@ -1,0 +1,18 @@
+{
+	generators : [
+		{
+			type : "caterpillar",
+			dest-dir : "${basedir}/src/parser/generated/",
+			
+			namespace-prefix : "Jag",
+			
+			extra-debug-info : true,
+			symbol-info : true, 
+			debug-level : "WARN"
+		}	
+	]
+	
+	
+	
+	 
+}

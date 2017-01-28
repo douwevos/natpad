@@ -1,0 +1,16 @@
+{
+	generators : [
+		{
+			type : "caterpillar",
+			dest-dir : "${basedir}/src-cup/generated/",
+			
+			namespace-prefix : "Smpl",
+			
+			symbol-text : "true"
+		}	
+	]
+	
+	
+	
+	 
+}

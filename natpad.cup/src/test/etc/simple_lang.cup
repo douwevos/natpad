@@ -1,0 +1,55 @@
+terminal	DOT, IDENTIFIER, OPMUL, OPDIV, OPPLUS, OPMINUS, OPEQ, OPNE, ASSIGN;
+terminal	LEFTPAREN, RIGHTPAREN, SEMICOLON;
+
+non terminal String  program, statements, statement, assign_statement, expr, term, fact, prim, qualified_name;
+
+/*----------------------------------------------------------------*/ 
+
+start with program;
+
+/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . */ 
+
+
+program ::=
+				statements
+			;
+
+statements ::=
+				statements statement
+			|	statement
+			;
+
+statement ::=
+				assign_statement
+			;
+
+
+assign_statement ::=
+				qualified_name ASSIGN expr SEMICOLON
+			;
+
+
+expr ::= 
+				expr OPPLUS term 
+			|	expr OPMINUS term
+			|	term
+	;
+
+term ::=
+				fact OPMUL prim
+			|	fact OPDIV prim
+			|	prim
+			;
+
+prim ::=
+				IDENTIFIER
+			|	LEFTPAREN expr RIGHTPAREN
+			;
+
+
+			
+qualified_name ::=
+				qualified_name DOT IDENTIFIER
+			|	IDENTIFIER
+			;
+

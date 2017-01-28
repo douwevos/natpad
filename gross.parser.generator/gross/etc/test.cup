@@ -1,0 +1,289 @@
+action code {:
+
+#include <caterpillar.h>
+#include "grosymbol.h"
+#include "../bnf/grobnfproduction.h"
+#include "../bnf/grobnfrhs.h"
+#include "../bnf/grobnfspec.h"
+#include "../bnf/grobnfsymbolpart.h"
+#include "../bnf/grobnfcodepart.h"
+#include "../bnf/grobnfsymboldeflist.h"
+#include "../bnf/grobnfstacktype.h"
+
+:}
+
+terminal
+  PACKAGE, IMPORT, CODE, ACTION, PARSER, TERMINAL, NON, INIT, SCAN, WITH, 
+  START, SEMI, COMMA, STAR, DOT, COLON, COLON_COLON_EQUALS, BAR, PRECEDENCE,
+  LEFT, RIGHT, NONASSOC, PERCENT_PREC, LBRACK, RBRACK, NONTERMINAL;
+
+terminal   ID, CODE_STRING;
+
+non terminal
+  package_spec, import_list, action_code_part, 
+  code_parts, code_part, opt_semi, non_terminal,
+  parser_code_part, start_spec, 
+  import_spec, import_id, init_code, scan_code, symbol, 
+  type_id, term_name_list, non_term_name_list, 
+  new_non_term_id, empty,
+  precedence_list, preced, terminal_list, precedence_l, declares_term, 
+  declares_non_term;
+  
+non terminal spec;
+non terminal 		rhs;
+non terminal 				prod_part;
+non terminal 		prod_part_list;
+non terminal 		rhs_list, production, production_list;
+non terminal 		symbol_list;
+
+non terminal   nt_id, symbol_id, label_id, opt_label, terminal_id,
+                     term_id, robust_id, new_term_id, multipart_id;
+
+/*----------------------------------------------------------------*/ 
+
+start with spec;
+
+
+spec ::=				  package_spec import_list code_parts symbol_list:sl precedence_list start_spec production_list:pl
+						|
+						/* error recovery assuming something went wrong before symbols 
+						   and we have TERMINAL or NON TERMINAL to sync on.  if we get
+						   an error after that, we recover inside symbol_list or 
+						   production_list 
+						*/
+						  error symbol_list:sl precedence_list start_spec production_list:pl
+						;
+
+
+package_spec ::=		  PACKAGE multipart_id SEMI
+						| empty
+						;
+
+
+import_list ::=			  import_list import_spec
+						| empty
+						;
+
+
+import_spec ::=			  IMPORT import_id SEMI
+						;
+
+
+// allow any order; all parts are optional. [CSA, 23-Jul-1999]
+// (we check in the part action to make sure we don't have 2 of any part)
+code_part ::=			  action_code_part
+						| parser_code_part
+						| init_code
+						| scan_code
+						;
+
+code_parts ::= 
+						| code_parts code_part
+						;
+
+
+action_code_part ::=	  ACTION CODE CODE_STRING:user_code opt_semi
+						;
+
+
+parser_code_part ::=	  PARSER CODE CODE_STRING:user_code opt_semi
+						;
+
+
+init_code ::=			  INIT WITH CODE_STRING:user_code opt_semi
+						;
+
+
+scan_code ::=			  SCAN WITH CODE_STRING:user_code opt_semi
+						;
+
+
+symbol_list ::=			  symbol_list:sl symbol:s
+						| symbol:s
+						;
+
+
+symbol ::=				  TERMINAL     type_id:ti declares_term:tl
+							
+						| TERMINAL             declares_term:tl
+						| non_terminal type_id:ti declares_non_term:tl
+						| non_terminal         declares_non_term:tl
+						|
+						/* error recovery productions -- sync on semicolon */
+						  TERMINAL error SEMI
+						| non_terminal error SEMI
+						;
+
+
+declares_term ::=		  term_name_list:tnl SEMI
+						;
+
+declares_non_term ::=	  non_term_name_list:tnl SEMI
+						;
+
+term_name_list ::=		  term_name_list:tnl COMMA new_term_id:nti
+						| new_term_id:nti
+						;
+
+
+non_term_name_list ::=	  non_term_name_list:tnl COMMA new_non_term_id:nti
+						| new_non_term_id:nti
+						;
+
+
+
+precedence_list ::=		  precedence_l
+						| empty
+						; 
+
+
+precedence_l ::=		  precedence_l preced
+						| preced
+						;
+
+
+preced ::=				  PRECEDENCE LEFT terminal_list SEMI
+						| PRECEDENCE RIGHT terminal_list SEMI
+						| PRECEDENCE NONASSOC terminal_list SEMI
+						;
+
+
+terminal_list ::=		  terminal_list COMMA terminal_id
+						| terminal_id
+						;
+
+
+terminal_id ::=			  term_id:sym
+						;
+
+term_id ::=				  symbol_id:sym
+						;
+
+
+start_spec ::=			  START WITH nt_id:start_name SEMI
+						| empty
+						;
+
+
+production_list ::=		  production_list:pl production:p
+						| production:p
+						;
+
+production ::=			  nt_id:lhs_id  COLON_COLON_EQUALS rhs_list:rhsl SEMI
+						| error SEMI:s
+						;
+
+
+rhs_list ::=			  rhs_list:rl BAR rhs:r
+						| rhs:r
+						;
+
+
+rhs ::=					  prod_part_list:ppl PERCENT_PREC term_id:term_name 
+						| prod_part_list:ppl 
+						;
+
+
+
+
+prod_part_list ::=		  prod_parts
+						| empty
+						;
+
+
+prod_parts ::=			  prod_parts prod_part
+						| prod_part
+						;
+
+
+prod_part ::=			  LPAREN sub_list RPAREN
+						| prod_sym_part
+						;
+
+
+sub_list ::=			  sub_list BAR sub_entry
+						| sub_entry
+						;
+
+sub_entry ::=			  
+
+prod_sym_part ::=		  symbol_id:symid opt_label:labid
+						| CODE_STRING:code_str
+						;
+
+opt_label ::=			  COLON label_id:labid
+						| empty 
+						;
+
+multipart_id ::=		  multipart_id:ba DOT robust_id:ad
+						| robust_id:an_id 
+						;
+
+import_id ::= 			  multipart_id DOT STAR 
+						| multipart_id
+						;
+
+
+type_id ::=				  multipart_id:mi
+						| type_id:ti LBRACK RBRACK
+						;
+
+
+new_term_id ::= 
+						ID:term_id
+					;
+
+
+new_non_term_id ::=
+						ID:non_term_id
+					;
+
+nt_id ::=
+						ID:the_id  
+					|	error
+					;
+
+symbol_id ::=
+						ID:the_id  
+					|	error
+					;
+
+
+label_id ::= 
+						robust_id:the_id
+					;
+
+robust_id ::= /* all ids that aren't reserved words in Java */
+						ID:the_id 
+						/* package is reserved. */
+						/* import is reserved. */
+					|	CODE
+					|	ACTION
+					|	PARSER
+					|	TERMINAL
+					|	NON
+					|	NONTERMINAL
+					|	INIT
+					|	SCAN
+					|	WITH
+					|	START
+					|	PRECEDENCE
+					|	LEFT
+					|	RIGHT
+					|	NONASSOC
+					|	error
+					;
+
+non_terminal ::= 
+						NON TERMINAL
+					|	NONTERMINAL
+					;
+
+opt_semi ::=
+						/* nothing */
+					|	SEMI
+					;
+
+empty ::=
+						/* nothing */
+					;

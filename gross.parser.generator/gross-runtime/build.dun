@@ -1,0 +1,41 @@
+module {
+
+	name 'gross-runtime';
+	
+	dependencies {
+		module 'caterpillar';
+		module 'gobject';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { 
+			natpad.cc.args {}
+			src { path './src/'; } 
+			depdir 'deps';
+			destdir './compiled/'; 
+		}
+	}
+
+	package {
+		ar { 
+			srcdir './compiled/'; 
+			destfile './libgross-runtime.a';
+		}
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'gross-runtime';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+}

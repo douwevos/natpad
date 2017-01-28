@@ -1,0 +1,30 @@
+
+
+RealValue blah2() {
+	Value x = this;
+	NonValue y = x;
+	return y;
+}
+
+RealValue blah2() {
+	RealValue x = this;
+	RealValue y = x;
+	return y;
+}
+
+
+
+RealValue blah() {
+	Value x = this;
+	NonValue y = x;
+	x.callMe();
+	return y;
+}
+
+
+RealValue blah() {
+	ActualClass x = this;
+	RealValue y = x;
+	x.callMe();
+	return y;
+}

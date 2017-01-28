@@ -1,0 +1,22 @@
+terminal SEMI, COLON, COMMA, ID, X, ZZ;
+
+
+main                         ⟶ names SEMI;
+
+
+names                        ⟶ names jan COLON
+                             ⟶ names COMMA ID
+                             ⟶ ID;
+
+
+jan                          ⟶ deep X
+                             ⟶ deep;
+
+deep                         ⟶ ZZ
+                             ⟶ names;
+        
+imports ｟｠        
+        
+type TerminalDeclarationList main;        
+        
+code main ｟ result = null; ｠        

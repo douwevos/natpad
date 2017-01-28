@@ -1,0 +1,21 @@
+{
+	generators : [
+		{
+			type : "caterpillar",
+			dest-dir : "${basedir}/src/parser/generated/",
+			
+			namespace-prefix : "Gro",
+			
+			
+			parser-name : "lr_parser,LR_PARSER,LrParser",
+			parser-actions-name  : "parser_actions,PARSER_ACTIONS,ParserActions",
+			symbol-name  : "symbol,SYMBOL,Symbol",
+			
+			extra-debug-info : false,
+			debug-level : "WARN"
+			
+		}	
+	]
+	
+	 
+}

@@ -1,0 +1,29 @@
+<project name="caterpillar.sht" default="build">
+	
+	<property name="natpad.cup.jar" location="../../natpad.cup/build/natpad-cup.jar"/>
+	<available property="natpad.cup.jar.exists" file="${natpad.cup.jar}"/>
+	
+    <target name="build-natpad-cup" unless="natpad.cup.jar.exists">
+		<ant antfile="../../natpad.cup/build.xml" dir="../../natpad.cup/"/>
+    </target>
+	
+	<!--target name="generate-parser" depends="build-natpad-cup"-->
+	<target name="generate-parser" depends="build-natpad-cup">
+    	<typedef classpath="../../natpad.cup/build/natpad-cup.jar" resource="net/natpad/cup/ant/taskdefs.properties"/>
+    	
+		<natpadcup grammar="./src/java/net/natpad/sht/sht.cup" jsonconfig="./src/java/net/natpad/sht/parser-config.json"/>
+		
+		<natpadcup grammar="./src/c/sht.cup" jsonconfig="./src/c/parser-config.json"/>
+	</target>
+	
+	
+	<mkdir dir="./src/java/"/>
+	
+	<target name="build" depends="generate-parser">
+	</target>
+	
+</project>
+
+
+
+
