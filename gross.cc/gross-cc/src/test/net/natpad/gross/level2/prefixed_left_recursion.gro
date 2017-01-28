@@ -1,9 +1,0 @@
-terminal IDENTIFIER, LEFTPAREN, RIGHTPAREN, COMMA;
-
-main                 ⟶ prefixed_list RIGHTPAREN ;
-
-prefixed_list        ⟶ LEFTPAREN expr COMMA expr
-                     ⟶ prefixed_list COMMA expr ;
-
-expr                 ⟶ IDENTIFIER ;
-                                  

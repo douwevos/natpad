@@ -1,7 +1,0 @@
-action code {:
-
-#include <caterpillar.h>
-:}
-
-terminal
-  PACKAGE;
