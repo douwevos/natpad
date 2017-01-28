@@ -1,0 +1,432 @@
+
+/*================================================================*/ 
+/* 
+  JavaCup Specification for the JavaCup Specification Language
+  by Scott Hudson, GVU Center, Georgia Tech, August 1995
+  and Frank Flannery, Department of Computer Science, Princeton Univ,
+  July 1996
+  Bug Fixes: C. Scott Ananian, Dept of Electrical Engineering, Princeton
+  University, October 1996. [later Massachusetts Institute of Technology]
+
+
+  This JavaCup specification is used to implement JavaCup itself.
+  It specifies the parser for the JavaCup specification language.
+  (It also serves as a reasonable example of what a typical JavaCup
+  spec looks like).
+
+  The specification has the following parts:
+    Package and import declarations
+      These serve the same purpose as in a normal Java source file
+      (and will appear in the generated code for the parser). In this 
+      case we are part of the java_cup package and we import both the
+      java_cup runtime system and Hashtable from the standard Java
+      utilities package.
+
+    Action code
+      This section provides code that is included with the class encapsulating
+      the various pieces of user code embedded in the grammar (i.e., the
+      semantic actions).  This provides a series of helper routines and
+      data structures that the semantic actions use.
+
+    Parser code    
+      This section provides code included in the parser class itself.  In
+      this case we override the default error reporting routines.
+
+    Init with and scan with 
+      These sections provide small bits of code that initialize, then 
+      indicate how to invoke the scanner.
+
+    Symbols and grammar
+      These sections declare all the terminal and non terminal symbols 
+      and the types of objects that they will be represented by at runtime,
+      then indicate the start symbol of the grammar (), and finally provide
+      the grammar itself (with embedded actions).
+
+    Operation of the parser
+      The parser acts primarily by accumulating data structures representing
+      various parts of the specification.  Various small parts (e.g., single
+      code strings) are stored as static variables of the emit class and
+      in a few cases as variables declared in the action code section.  
+      Terminals, non terminals, and productions, are maintained as collection
+      accessible via static methods of those classes.  In addition, two 
+      symbol tables are kept:  
+	symbols   maintains the name to object mapping for all symbols
+	non_terms maintains a separate mapping containing only the non terms
+
+      Several intermediate working structures are also declared in the action
+      code section.  These include: rhs_parts, rhs_pos, and lhs_nt which
+      build up parts of the current production while it is being parsed.
+	
+  Author(s)
+    Scott Hudson, GVU Center, Georgia Tech.
+    Frank Flannery, Department of Computer Science, Princeton Univ.
+    C. Scott Ananian, Department of Electrical Engineering, Princeton Univ.
+
+  Revisions
+    v0.9a   First released version                     [SEH] 8/29/95
+    v0.9b   Updated for beta language (throws clauses) [SEH] 11/25/95
+    v0.10a  Made many improvements/changes. now offers:
+              return value
+              left/right positions and propagations
+              cleaner label references
+              precedence and associativity for terminals
+              contextual precedence for productions
+              [FF] 7/3/96
+    v0.10b  Fixed %prec directive so it works like it's supposed to.
+              [CSA] 10/10/96
+    v0.10g   Added support for array types on symbols.
+              [CSA] 03/23/98
+    v0.10i  Broaden set of IDs allowed in multipart_id and label_id so
+            that only java reserved words (and not CUP reserved words like
+            'parser' and 'start') are prohibited.  Allow reordering of
+	    action code, parser code, init code, and scan with sections,
+	    and made closing semicolon optional for these sections.
+	    Added 'nonterminal' as a terminal symbol, finally fixing a
+	    spelling mistake that's been around since the beginning.
+	    For backwards compatibility, you can still misspell the
+	    word if you like.
+*/
+/*================================================================*/ 
+
+
+action code {:
+
+#include <caterpillar.h>
+#include "cuscupsymbol.h"
+#include "../cusparsercontextext.h"
+#include "../../model/cussymbolpart.h"
+#include "../../model/cusactionpart.h"
+#include "../../model/cusrhs.h"
+#include "../../model/cusproduction.h"
+#include "../../model/cusmodel.h"
+
+:}
+
+
+terminal
+  PACKAGE, IMPORT, CODE, ACTION, PARSER, TERMINAL, NON, INIT, SCAN, WITH, 
+  START, SEMI, COMMA, STAR, DOT, COLON, COLON_COLON_EQUALS, BAR, PRECEDENCE,
+  LEFT, RIGHT, NONASSOC, PERCENT_PREC, LBRACK, RBRACK, NONTERMINAL;
+
+terminal CatStringWo  ID, CODE_STRING;
+
+non terminal
+  package_spec, import_list, action_code_part, 
+  code_parts, code_part, opt_semi, non_terminal,
+  parser_code_part, symbol_list, start_spec, 
+  multipart_id, import_spec, import_id, init_code, scan_code, symbol, 
+  type_id, term_name_list, non_term_name_list, 
+  new_term_id, new_non_term_id, empty,
+  precedence_list, preced, terminal_list, precedence_l, declares_term, 
+  declares_non_term;
+  
+non terminal CusModel		spec;
+non terminal CusRhs			rhs;
+non terminal 				prod_part;
+non terminal CatArrayWo		prod_part_list;
+non terminal CatArrayWo		rhs_list, production, production_list;
+
+non terminal CatStringWo  nt_id, symbol_id, label_id, opt_label, terminal_id,
+                     term_id, robust_id;
+
+/*----------------------------------------------------------------*/ 
+
+start with spec;
+
+
+spec ::=				  package_spec import_list code_parts symbol_list precedence_list start_spec production_list:pl
+							{:
+								RESULT = cus_model_new(pl);
+							:}
+						|
+						/* error recovery assuming something went wrong before symbols 
+						   and we have TERMINAL or NON TERMINAL to sync on.  if we get
+						   an error after that, we recover inside symbol_list or 
+						   production_list 
+						*/
+						  error symbol_list precedence_list start_spec production_list:pl
+							{:
+								RESULT = cus_model_new(pl);
+							:}
+						;
+
+
+package_spec ::=		  PACKAGE multipart_id SEMI
+						| empty
+						;
+
+
+import_list ::=			  import_list import_spec
+						| empty
+						;
+
+
+import_spec ::=			  IMPORT import_id SEMI
+						;
+
+
+// allow any order; all parts are optional. [CSA, 23-Jul-1999]
+// (we check in the part action to make sure we don't have 2 of any part)
+code_part ::=			  action_code_part
+						| parser_code_part
+						| init_code
+						| scan_code
+						;
+
+code_parts ::= 
+						| code_parts code_part
+						;
+
+
+action_code_part ::=	  ACTION CODE CODE_STRING:user_code opt_semi
+						;
+
+
+parser_code_part ::=	  PARSER CODE CODE_STRING:user_code opt_semi
+						;
+
+
+init_code ::=			  INIT WITH CODE_STRING:user_code opt_semi
+						;
+
+
+scan_code ::=			  SCAN WITH CODE_STRING:user_code opt_semi
+						;
+
+
+symbol_list ::=			  symbol_list symbol
+						| symbol
+						;
+
+
+symbol ::=				  TERMINAL     type_id:ti declares_term:tl
+							{:
+								cus_parser_context_ext_set_stack_type(parser_context, (CatStringWo *) ti, (CatArrayWo *) tl);
+							:}
+							
+						| TERMINAL             declares_term
+						| non_terminal type_id declares_non_term
+						| non_terminal         declares_non_term
+						|
+						/* error recovery productions -- sync on semicolon */
+						  TERMINAL error SEMI
+						| non_terminal error SEMI
+						;
+
+
+declares_term ::=		  term_name_list:tnl SEMI
+							{:
+								RESULT = tnl;
+							:}
+						;
+
+declares_non_term ::=	  non_term_name_list SEMI
+						;
+
+term_name_list ::=		  term_name_list:tnl COMMA new_term_id:nti
+							{: 
+								CatArrayWo *term_list = (CatArrayWo *) tnl; 
+								cat_array_wo_append(term_list, nti); 
+								RESULT=term_list;
+							:}
+						| new_term_id:nti
+							{:
+								CatArrayWo *term_list = cat_array_wo_new();
+								cat_array_wo_append(term_list, nti);
+								RESULT=term_list;
+							:}
+						;
+
+
+non_term_name_list ::=	  non_term_name_list COMMA new_non_term_id
+						| new_non_term_id
+						;
+
+
+
+precedence_list ::=		  precedence_l
+						| empty
+						; 
+
+
+precedence_l ::=		  precedence_l preced
+						| preced
+						;
+
+
+preced ::=				  PRECEDENCE LEFT terminal_list SEMI
+						| PRECEDENCE RIGHT terminal_list SEMI
+						| PRECEDENCE NONASSOC terminal_list SEMI
+						;
+
+
+terminal_list ::=		  terminal_list COMMA terminal_id
+						| terminal_id
+						;
+
+
+terminal_id ::=			  term_id:sym
+						;
+
+term_id ::=				  symbol_id:sym
+						;
+
+
+start_spec ::=			  START WITH nt_id:start_name SEMI
+						| empty
+						;
+
+
+production_list ::=		  production_list:pl production:p
+							{:
+								RESULT = pl;
+								cat_array_wo_append_all(pl, p);
+							:}
+						| production:p
+							{:
+								RESULT = p;
+							:}
+						;
+
+production ::=			  nt_id:lhs_id  COLON_COLON_EQUALS rhs_list:rhsl SEMI
+							{:
+								RESULT = cat_array_wo_new();
+								CatIIterator *iter = cat_array_wo_iterator(rhsl);
+								while(cat_iiterator_has_next(iter)) {
+									CusRhs *rhs = (CusRhs *) cat_iiterator_next(iter);
+									CusProduction *prod = cus_production_new(lhs_id, rhs);
+									cat_array_wo_append(RESULT, prod);
+									cat_unref_ptr(prod);
+								}
+								cat_unref_ptr(iter);
+								
+							:}
+						| error SEMI
+						;
+
+
+rhs_list ::=			  rhs_list:rl BAR rhs:r
+							{:
+								RESULT = rl;
+								cat_array_wo_append(RESULT, (GObject *) r);
+							:}
+						| rhs:r
+							{:
+								RESULT = cat_array_wo_new();
+								cat_array_wo_append(RESULT, (GObject *) r);
+							:}
+						;
+
+
+rhs ::=					  prod_part_list:ppl PERCENT_PREC term_id:term_name 
+							{:
+								RESULT = cus_rhs_new(ppl, term_name);
+							:} 
+						| prod_part_list:ppl 
+							{:
+								RESULT = cus_rhs_new(ppl, NULL);
+							:} 
+						;
+
+
+prod_part_list ::=		  prod_part_list:ppl prod_part:pp
+							{:
+								cat_array_wo_append(ppl, (GObject *) pp);
+								RESULT = ppl;
+							:} 
+						| empty
+							{:
+								RESULT = cat_array_wo_new();
+							:} 
+						;
+
+
+prod_part ::=			  symbol_id:symid opt_label:labid
+							{:
+								RESULT = cus_symbol_part_new(symid, labid);
+							:}
+						| CODE_STRING:code_str
+							{:
+								RESULT = cus_action_part_new(code_str);
+							:}
+						;
+
+opt_label ::=			  COLON label_id:labid
+						| empty 
+						;
+
+multipart_id ::=		  multipart_id DOT robust_id:another_id 
+						| robust_id:an_id 
+						;
+
+import_id ::= 			  multipart_id DOT STAR 
+						| multipart_id
+						;
+
+
+type_id ::=				  multipart_id
+						| type_id LBRACK RBRACK
+						;
+
+
+new_term_id ::= 
+						  ID:term_id
+							{:
+								RESULT = cus_parser_context_ext_create_term(parser_context, (CatStringWo *) term_id);
+							:} 
+					;
+
+
+new_non_term_id ::=
+						ID:non_term_id
+					;
+
+nt_id ::=
+						ID:the_id {: RESULT=the_id; :} 
+					|	error
+					;
+
+symbol_id ::=
+						ID:the_id {: RESULT=the_id; :} 
+					|	error
+					;
+
+
+label_id ::= 
+						robust_id:the_id
+					;
+
+robust_id ::= /* all ids that aren't reserved words in Java */
+						ID:the_id
+						/* package is reserved. */
+						/* import is reserved. */
+					|	CODE
+					|	ACTION
+					|	PARSER
+					|	TERMINAL
+					|	NON
+					|	NONTERMINAL
+					|	INIT
+					|	SCAN
+					|	WITH
+					|	START
+					|	PRECEDENCE
+					|	LEFT
+					|	RIGHT
+					|	NONASSOC
+					|	error
+					;
+
+non_terminal ::= 
+						NON TERMINAL
+					|	NONTERMINAL
+					;
+
+opt_semi ::=
+						/* nothing */
+					|	SEMI
+					;
+
+empty ::=
+						/* nothing */
+					;

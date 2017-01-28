@@ -1,0 +1,95 @@
+module {
+
+	name 'mule';
+	
+	dependencies {
+		module 'gross-cc-dung';
+		module 'gross-runtime';
+		module 'glib';	
+		module 'elk';
+	}
+
+	loader 'gross-java-runtime';
+	loader 'gross-cc';
+	loader 'gross-cc-dung';
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/lua.gro';
+			prefix 'MulLua';
+			outputPath './src/lua/parser/gross/';
+			updateOnly 'true';
+		}
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/vhdl.gro';
+			prefix 'MulVhdl';
+			outputPath './src/vhdl/parser/gross/';
+			updateOnly 'true';
+		}
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/python.gro';
+			prefix 'MulPyt';
+			outputPath './src/python/parser/gross/';
+			updateOnly 'true';
+		}
+
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/eiffel.gro';
+			prefix 'MulEif';
+			outputPath './src/eiffel/parser/gross/';
+			updateOnly 'true';
+		}
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/php.gro';
+			prefix 'MulPhp';
+			outputPath './src/php/parser/gross/';
+			updateOnly 'true';
+		}
+
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/rust.gro';
+			prefix 'MulRust';
+			outputPath './src/rust/parser/gross/';
+			updateOnly 'true';
+		}
+		cc { 
+			natpad.cc.args {}
+			src { path './src/'; }  
+			destdir './compiled/'; 
+			depdir 'deps'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libmule.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'mule';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

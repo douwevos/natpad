@@ -1,0 +1,51 @@
+module {
+
+	name 'natpad.cup';
+	
+	klm  '[%=module.directory%]';
+	
+	dependencies {
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+	
+	compile {
+		javac { 
+			src { path './src/main/java/'; }
+			destdir './compiled/';
+		}
+	}
+
+	package {
+	
+		echo '[%klm%]';
+	
+		jar { 
+			in { 
+				path './compiled/';
+				exclude '.*Task.class';
+				exclude '.*Session.class';
+			}
+			in {
+				path '[%=module.directory%]/src/main/java';
+				include '.*.h';			
+				include '.*.c';
+				include '.*.def';
+			}
+			destfile './natpad-cup.jar';
+			
+			manifestfile './etc/MANIFEST.MF';
+		}
+	}	
+
+
+	export {
+		lib {
+			path './natpad-cup.jar';
+		}
+	}
+
+
+}

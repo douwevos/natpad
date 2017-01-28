@@ -1,0 +1,37 @@
+module {
+
+	name 'gross-java-runtime';
+	
+	dependencies {
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+	
+	compile {
+		javac {
+			src { path './src/'; } 
+			destdir './compiled/'; 
+		}
+	}
+
+	package {
+	
+		jar { 
+			in { 
+				path './compiled/';
+			}
+			destfile './gross-java-runtime.jar';
+		}
+	}	
+
+
+	export {
+		lib {
+			path './gross-java-runtime.jar';
+		}
+	}
+
+
+}

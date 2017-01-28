@@ -1,0 +1,27 @@
+terminal SEMICOLON, IDENTIFIER, STRINGLITERAL, CHARACTERLITERAL, KWALL, KWRANGE, KWREVERSE_RANGE, APOSTROPHE;
+terminal LEFTPAREN, RIGHTPAREN, BAR, KWTO, KWDOWNTO, DOT, COMMA, ARROW, NUMBERLITERAL;
+
+non terminal rev_seq_stats, procedure_call_stat, name, gen_association_list, association_elements, association_element; 
+non terminal expr; 
+
+rev_seq_stats                     ::=
+                                   |  rev_seq_stats procedure_call_stat ;
+ 
+procedure_call_stat               ::= name SEMICOLON ;
+                                  
+name                              ::= IDENTIFIER
+                                   |  STRINGLITERAL 
+                                   |  name gen_association_list ;
+
+
+gen_association_list              ::= LEFTPAREN association_elements RIGHTPAREN ;
+
+association_elements              ::= association_element
+                                   |  association_elements COMMA association_element ;
+
+association_element               ::= name ARROW expr
+                                   |  expr ;
+
+expr                              ::= name
+                                   |  NUMBERLITERAL		
+                                   |  LEFTPAREN expr RIGHTPAREN ;

@@ -1,0 +1,52 @@
+terminal LBRACE, RBRACE, COMMA, NIL, SEMICOLON, LPARREN, RPARREN;
+terminal ID, ASSIGN_VALUE_EOL, STRING, NUMBER;
+
+
+sht_file                 ⟶ sht_block:b ;
+
+
+sht_block                ⟶ reference:r 
+                         ⟶ sht_block:b reference:r ;
+
+
+
+reference_block          ⟶ reference_block:rb reference:ref 
+                         ⟶ reference:ref ;
+
+reference                ⟶ block_reference:r
+                         ⟶ property_reference:r 
+                         ⟶ simple_reference:r ;
+
+
+simple_reference         ⟶ ID:i simple_value:v SEMICOLON ;
+
+
+block_reference          ⟶ ID:i block_value:s
+                         ⟶ ID:i list_value:s ;
+
+
+property_reference       ⟶ ID:i ASSIGN_VALUE_EOL:v ;
+
+
+block_value              ⟶ block_body:b ;
+
+
+list_value               ⟶ LBRACE values:el RBRACE ;
+
+			
+block_body               ⟶ LBRACE                    RBRACE
+                         ⟶ LBRACE reference_block:nb RBRACE ;
+
+values                   ⟶ values:el COMMA value:e
+                         ⟶ value:e ;
+			
+			
+value                    ⟶ block_value:s
+                         ⟶ list_value:s
+                         ⟶ simple_value:v ;
+			
+
+simple_value             ⟶ STRING:s
+                         ⟶ NUMBER:s
+                         ⟶ NIL ;
+

@@ -1,0 +1,82 @@
+terminal COLON_COLON_EQUALS, SEMI, RIGHT_DOUBLE_ARROW, ID, COLON, COMMA;
+terminal TERMINAL, STAR, PLUS, EXCL, LPAREN, RPAREN, BAR, INDEX_MARK, CODE, CODE_TEXT, NUMBER,LSQUARE,RSQUARE, IMPORTS, TYPE;
+
+non terminal spec, term_decl_list, term_decl, ids, production_list, production;
+non terminal  rhs_rule_list, rhs_rule,rhs_rule_part_list,rhs_rule_part,rhs_entry_complete, opt_label;
+non terminal rhs_entry, opt_kabel, rhs_sub_list, rhs_sub, imports_code, type_definition_list;
+non terminal type_definition, code_definition_list, code_definition, prod_rule_ref;
+
+spec                  ::= term_decl_list  production_list:  imports_code  type_definition_list  code_definition_list;
+
+term_decl_list         ::= term_decl_list term_decl
+                         | ;
+
+term_decl              ::= TERMINAL ids SEMI
+                         | TERMINAL SEMI;
+
+ids                   ::= ids COMMA ID
+                       | ID;
+
+
+
+
+
+
+production_list       ::= production_list:plist production:prod
+                        | production:prod ;
+
+production            ::= ID:lhsName rhs_rule_list:ruleList SEMI;
+
+
+rhs_rule_list         ::= rhs_rule_list:ruleList rhs_rule:rule
+                        | rhs_rule:rule;
+
+rhs_rule              ::= RIGHT_DOUBLE_ARROW rhs_rule_part_list:rulePartList
+                        | INDEX_MARK ID:imark RIGHT_DOUBLE_ARROW rhs_rule_part_list:rulePartList;
+
+rhs_rule_part_list    ::= rhs_rule_part_list:rulePartList rhs_rule_part:rulePart
+                        | ;
+
+rhs_rule_part         ::= rhs_entry_complete:entry;
+
+rhs_entry_complete    ::= rhs_entry:entry
+                        | rhs_entry:entry STAR
+                        | rhs_entry:entry PLUS
+                        | rhs_entry:entry EXCL;
+
+
+rhs_entry             ::= LPAREN rhs_sub_list:sub RPAREN
+                        | ID:symName opt_label:label;
+
+opt_label             ::= COLON ID:label
+                        | ;
+
+rhs_sub_list          ::= rhs_sub_list:subList BAR rhs_sub:sub
+                        | rhs_sub:sub;
+
+rhs_sub               ::= rhs_sub rhs_entry_complete
+                        | rhs_entry_complete;
+
+
+
+imports_code           ::= IMPORTS CODE_TEXT;
+
+
+
+type_definition_list  ::= type_definition_list  type_definition
+                        | ;
+
+
+type_definition       ::= TYPE ID ids SEMI;
+
+code_definition_list  ::= code_definition_list code_definition
+                        | ;
+
+code_definition       ::= CODE prod_rule_ref CODE_TEXT;
+
+prod_rule_ref         ::= ID LSQUARE ID RSQUARE
+                        | ID
+                        | ID INDEX_MARK ID
+                        | ID INDEX_MARK NUMBER;
+
+

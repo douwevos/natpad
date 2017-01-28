@@ -1,0 +1,10 @@
+terminal AS, IDENT, COMMA, SELF;
+
+idents_or_self     ⟶ ident_or_self
+                   ⟶ ident_or_self AS ident
+                   ⟶ idents_or_self COMMA ident_or_self ;
+
+ident_or_self      ⟶ ident
+                   ⟶ SELF ;
+
+ident              ⟶ IDENT ;

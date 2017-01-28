@@ -1,0 +1,46 @@
+
+import net.natpad.dung.expression.ExpressionHelper;
+import net.natpad.dung.expression.IExpressionValue;
+import net.natpad.dung.expression.StringLiteral;
+
+terminal	LBRACK, RBRACK, NIL;
+terminal 	ID, DOT, NUMBER;
+terminal 	String STRING;
+
+non terminal IExpressionValue			expression, value, variable_value, primitive_value;
+
+
+start with expression;
+
+
+expression ::=
+				value:v  {: RESULT=v; :}
+			|	expression:e DOT ID:i {:
+					RESULT = e.getById(i);			
+			:}
+			;
+
+
+value ::=
+				variable_value:v {: RESULT=v; :}
+			|	primitive_value:v {: RESULT=v; :}
+			;
+
+		
+variable_value ::=
+				ID:i {:
+					ExpressionHelper exprHelper = (ExpressionHelper) cupContext;
+					RESULT = exprHelper.getById(i);
+				:}
+			|	ID:i LBRACK expression:e RBRACK {:
+					ExpressionHelper exprHelper = (ExpressionHelper) cupContext;
+					IExpressionValue iev = exprHelper.getById(i);
+					RESULT = iev.getById(e);			
+				:}
+			;
+
+primitive_value ::=
+			  STRING:s {: RESULT=new StringLiteral(s); :}
+			| NUMBER
+			| NIL
+			;

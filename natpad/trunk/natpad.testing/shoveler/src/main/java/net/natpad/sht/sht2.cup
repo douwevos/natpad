@@ -1,0 +1,99 @@
+import net.natpad.sht.model.SimpleValue;
+
+terminal	LBRACE, RBRACE, COMMA, NIL, SEMICOLON, LPARREN, RPARREN;
+
+
+terminal String	ID, ASSIGN_VALUE_EOL, STRING, NUMBER;
+
+non terminal String  sht_file, node_block, node, multi_node, value_list, template_call, template_def, template_id_list, template_arg, multi_node_or_value, multi_node_body;
+
+non terminal SimpleValue	value, property_node, map_node;
+
+start with sht_file;
+
+
+sht_file ::=
+				node_block
+			;
+
+			
+
+node_block ::=
+			  node_block node
+			| node
+			;
+
+node ::=
+ 	 	 	  multi_node
+ 	 	 	| property_node
+ 	 	 	| map_node SEMICOLON
+ 	 	 	| template_def
+ 	 	 	;
+
+
+multi_node ::=
+			  ID template_call multi_node_body
+			;
+
+
+multi_node_body ::=
+			  LBRACE node_block                     RBRACE
+			| LBRACE multi_node_or_value COMMA value_list RBRACE
+			| LBRACE                                RBRACE
+			;
+			  
+
+
+template_call ::=
+			| LPARREN value_list RPARREN
+			;
+
+
+
+template_def ::=
+			  ID LPARREN template_id_list RPARREN SEMICOLON
+			| ID LPARREN                  RPARREN SEMICOLON
+			;
+
+template_id_list ::=
+			  template_arg
+			| template_id_list COMMA template_arg
+			;
+
+template_arg ::=
+			  ID
+			| ID value
+			| ID multi_node
+			;
+
+property_node ::=
+  	  	  	  ID:i ASSIGN_VALUE_EOL:v {: RESULT = new SimpleValue(v); RESULT.setId(i); :}
+  	  	  	;
+
+
+
+map_node ::=
+			  ID:i value:v {: RESULT = v; v.setId(i); :}
+			;
+
+value_list ::=
+  	  	  	  multi_node_or_value
+  	  	  	| value_list COMMA multi_node_or_value
+  	  	  	;
+
+multi_node_or_value ::=
+			  value
+			| multi_node
+			;
+
+value ::=
+			  STRING:s {:
+			  	RESULT = new SimpleValue(s);
+			  :}
+			| NUMBER:s {:
+				RESULT = new SimpleValue(s);
+			:}
+			| NIL {:
+				RESULT = new SimpleValue(null);
+			:}
+			;

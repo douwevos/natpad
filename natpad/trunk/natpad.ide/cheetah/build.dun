@@ -1,0 +1,35 @@
+module {
+
+	name 'cheetah';
+	
+	dependencies {
+		module 'codeparsing';
+		module 'elk';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { src { path './src/'; }  destdir './compiled/'; depdir './dep/'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libcheetah.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'cheetah';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

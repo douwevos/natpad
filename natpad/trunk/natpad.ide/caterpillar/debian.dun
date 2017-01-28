@@ -1,0 +1,18 @@
+module {
+
+	name 'caterpillar.debian';
+	
+	
+	
+	debianFiles '[%=modules["caterpillar#debian"].directory%]/etc/deb';
+	
+	compile {
+		echo 'deb-files: [%debianFiles%]';
+		
+	}
+	
+	package {
+	}
+	
+
+}

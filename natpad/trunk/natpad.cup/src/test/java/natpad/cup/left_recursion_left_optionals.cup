@@ -1,0 +1,10 @@
+terminal ID, SEMI;
+
+non terminal list, stat, opt_semi;
+
+list                  ::= opt_semi list stat;
+
+stat                  ::= ID ;
+
+opt_semi              ::= SEMI | ;
+

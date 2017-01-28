@@ -1,0 +1,712 @@
+
+/*================================================================*/ 
+/* 
+  JavaCup Specification for the JavaCup Specification Language
+  by Scott Hudson, GVU Center, Georgia Tech, August 1995
+  and Frank Flannery, Department of Computer Science, Princeton Univ,
+  July 1996
+  Bug Fixes: C. Scott Ananian, Dept of Electrical Engineering, Princeton
+  University, October 1996. [later Massachusetts Institute of Technology]
+
+
+  This JavaCup specification is used to implement JavaCup itself.
+  It specifies the parser for the JavaCup specification language.
+  (It also serves as a reasonable example of what a typical JavaCup
+  spec looks like).
+
+  The specification has the following parts:
+    Package and import declarations
+      These serve the same purpose as in a normal Java source file
+      (and will appear in the generated code for the parser). In this 
+      case we are part of the java_cup package and we import both the
+      java_cup runtime system and Hashtable from the standard Java
+      utilities package.
+
+    Action code
+      This section provides code that is included with the class encapsulating
+      the various pieces of user code embedded in the grammar (i.e., the
+      semantic actions).  This provides a series of helper routines and
+      data structures that the semantic actions use.
+
+    Parser code    
+      This section provides code included in the parser class itself.  In
+      this case we override the default error reporting routines.
+
+    Init with and scan with 
+      These sections provide small bits of code that initialize, then 
+      indicate how to invoke the scanner.
+
+    Symbols and grammar
+      These sections declare all the terminal and non terminal symbols 
+      and the types of objects that they will be represented by at runtime,
+      then indicate the start symbol of the grammar (), and finally provide
+      the grammar itself (with embedded actions).
+
+    Operation of the parser
+      The parser acts primarily by accumulating data structures representing
+      various parts of the specification.  Various small parts (e.g., single
+      code strings) are stored as static variables of the emit class and
+      in a few cases as variables declared in the action code section.  
+      Terminals, non terminals, and productions, are maintained as collection
+      accessible via static methods of those classes.  In addition, two 
+      symbol tables are kept:  
+	symbols   maintains the name to object mapping for all symbols
+	non_terms maintains a separate mapping containing only the non terms
+
+      Several intermediate working structures are also declared in the action
+      code section.  These include: rhs_parts, rhs_pos, and lhs_nt which
+      build up parts of the current production while it is being parsed.
+	
+  Author(s)
+    Scott Hudson, GVU Center, Georgia Tech.
+    Frank Flannery, Department of Computer Science, Princeton Univ.
+    C. Scott Ananian, Department of Electrical Engineering, Princeton Univ.
+
+  Revisions
+    v0.9a   First released version                     [SEH] 8/29/95
+    v0.9b   Updated for beta language (throws clauses) [SEH] 11/25/95
+    v0.10a  Made many improvements/changes. now offers:
+              return value
+              left/right positions and propagations
+              cleaner label references
+              precedence and associativity for terminals
+              contextual precedence for productions
+              [FF] 7/3/96
+    v0.10b  Fixed %prec directive so it works like it's supposed to.
+              [CSA] 10/10/96
+    v0.10g   Added support for array types on symbols.
+              [CSA] 03/23/98
+    v0.10i  Broaden set of IDs allowed in multipart_id and label_id so
+            that only java reserved words (and not CUP reserved words like
+            'parser' and 'start') are prohibited.  Allow reordering of
+	    action code, parser code, init code, and scan with sections,
+	    and made closing semicolon optional for these sections.
+	    Added 'nonterminal' as a terminal symbol, finally fixing a
+	    spelling mistake that's been around since the beginning.
+	    For backwards compatibility, you can still misspell the
+	    word if you like.
+*/
+/*================================================================*/ 
+
+import net.natpad.cup.FatalCupException;
+import net.natpad.cup.export.java.Emit;
+import net.natpad.cup.model.bnf.ActionPart;
+import net.natpad.cup.model.bnf.NonTerminal;
+import net.natpad.cup.model.bnf.Production;
+import net.natpad.cup.model.bnf.ProductionPart;
+import net.natpad.cup.model.bnf.SymbolPart;
+import net.natpad.cup.model.bnf.Terminal;
+import net.natpad.cup.model.bnf.Symbol;
+import net.natpad.cup.model.bnf.BnfModel;
+import net.natpad.cup.model.parser.NewLexer;
+import net.natpad.cup.model.parser.ParserHelper;
+import net.natpad.cup.state.Assoc;
+import java.util.Hashtable;
+
+/*----------------------------------------------------------------*/ 
+
+action code {:
+
+	ParserHelper parserHelper = new ParserHelper();
+
+	public Parser parser;
+
+	public Actions(Parser parser) {
+		this.parser = parser;
+	}
+
+:};
+
+
+parser code {:
+
+	public final BnfModel model = new BnfModel();
+
+	/** the lexer used */
+	public NewLexer lexer;
+
+
+  /* override error routines */
+
+  public void report_fatal_error(
+    String   message,
+    Object   info)
+    {
+//      done_parsing();
+      lexer.emit_error(message);
+      System.err.println("Can't recover from previous error(s), giving up.");
+      System.exit(1);
+    }
+
+    public void report_error(String message, Object info)
+    {
+      lexer.emit_error(message);
+    }
+:};
+
+/*----------------------------------------------------------------*/ 
+
+init with {: lexer.init(); :};
+scan with {: return lexer.next_token(); :};
+
+/*----------------------------------------------------------------*/ 
+
+terminal
+  PACKAGE, IMPORT, CODE, ACTION, PARSER, TERMINAL, NON, INIT, SCAN, WITH, 
+  START, SEMI, COMMA, STAR, DOT, COLON, COLON_COLON_EQUALS, BAR, PRECEDENCE,
+  LEFT, RIGHT, NONASSOC, PERCENT_PREC, LBRACK, RBRACK, NONTERMINAL;
+
+terminal String  ID, CODE_STRING;
+
+non terminal
+  spec, package_spec, import_list, action_code_part, 
+  code_parts, code_part, opt_semi, non_terminal,
+  parser_code_part, symbol_list, start_spec, production_list, 
+  multipart_id, import_spec, import_id, init_code, scan_code, symbol, 
+  type_id, term_name_list, non_term_name_list, production, prod_part_list, 
+  prod_part, new_term_id, new_non_term_id, rhs_list, rhs, empty,
+  precedence_list, preced, terminal_list, precedence_l, declares_term, 
+  declares_non_term;
+
+non terminal String  nt_id, symbol_id, label_id, opt_label, terminal_id,
+                     term_id, robust_id;
+
+/*----------------------------------------------------------------*/ 
+
+start with spec;
+
+
+spec ::= 
+	{:
+          /* declare "error" as a terminal */
+          parserHelper.symbols.put("error", new SymbolPart(parser.model.error));
+
+          /* declare start non terminal */
+          parserHelper.non_terms.put("$START", parser.model.START_nt);
+	:}
+	package_spec
+	import_list
+	code_parts
+	symbol_list
+	precedence_list
+	start_spec
+	production_list
+	|
+	/* error recovery assuming something went wrong before symbols 
+	   and we have TERMINAL or NON TERMINAL to sync on.  if we get
+	   an error after that, we recover inside symbol_list or 
+	   production_list 
+	*/
+	error 
+	symbol_list
+	precedence_list
+	start_spec
+	production_list
+	;
+
+
+package_spec ::= 
+	PACKAGE
+	multipart_id
+	{:
+	  /* save the package name */
+	  Emit.setPackageName(parserHelper.multipart_name);
+
+	  /* reset the accumulated multipart name */
+	  parserHelper.multipart_name = new String();
+	:}
+	SEMI
+	|
+	empty
+	;
+
+
+import_list ::=
+	import_list
+	import_spec
+	|
+	empty
+	;
+
+
+import_spec ::=
+	IMPORT 
+	import_id 
+	{: 
+	  /* save this import on the imports list */
+	  Emit.importListPush(parserHelper.multipart_name);
+
+	  /* reset the accumulated multipart name */
+	  parserHelper.multipart_name = new String();
+	:}
+	SEMI
+	;
+
+
+// allow any order; all parts are optional. [CSA, 23-Jul-1999]
+// (we check in the part action to make sure we don't have 2 of any part)
+code_part ::=
+	action_code_part | parser_code_part | init_code | scan_code ;
+
+code_parts ::= 
+	| code_parts code_part;
+
+
+action_code_part ::= 
+	ACTION CODE CODE_STRING:user_code opt_semi
+	{:
+				if (Emit.getActionCode() != null) {
+					parser.lexer.emit_error("Redundant action code (skipping)");
+				} else {
+					/* save the user included code string */
+					Emit.setActionCode(user_code);
+				}
+	:}
+	;
+
+
+parser_code_part ::= 
+	PARSER CODE CODE_STRING:user_code opt_semi
+	{:
+				if (Emit.getParserCode() != null) {
+					parser.lexer.emit_error("Redundant parser code (skipping)");
+				} else {
+					/* save the user included code string */
+					Emit.setParserCode(user_code);
+				}
+	:}
+	;
+
+
+init_code ::= 
+	INIT WITH CODE_STRING:user_code opt_semi
+	{: 
+				if (Emit.getInitCode() != null) {
+					parser.lexer.emit_error("Redundant init code (skipping)");
+				} else {
+					/* save the user code */
+					Emit.setInitCode(user_code);
+				}
+	:}
+	;
+
+
+scan_code ::=
+	SCAN WITH CODE_STRING:user_code opt_semi
+	{: 
+				if (Emit.getScanCode() != null) {
+					parser.lexer.emit_error("Redundant scan code (skipping)");
+				} else {
+					/* save the user code */
+					Emit.setScanCode(user_code);
+				}
+	:}
+	;
+
+
+symbol_list ::= 
+	  symbol_list symbol
+	| symbol
+	;
+
+
+symbol ::= 
+	  TERMINAL     type_id declares_term
+	| TERMINAL             declares_term
+	| non_terminal type_id declares_non_term
+	| non_terminal         declares_non_term
+	|
+	/* error recovery productions -- sync on semicolon */
+
+	TERMINAL
+	error 
+	{:
+	  /* reset the accumulated multipart name */
+	  parserHelper.multipart_name = new String();
+	:}
+	SEMI
+	|
+	non_terminal
+	error 
+	{:
+	  /* reset the accumulated multipart name */
+	  parserHelper.multipart_name = new String();
+	:}
+	SEMI
+	;
+
+
+declares_term ::=
+	term_name_list
+	{: 
+	  /* reset the accumulated multipart name */
+	  parserHelper.multipart_name = new String();
+	:}
+	SEMI
+	;
+
+declares_non_term ::=
+	non_term_name_list
+	{: 
+	  /* reset the accumulated multipart name */
+	  parserHelper.multipart_name = new String();
+	:}
+	SEMI
+	;
+
+term_name_list ::= term_name_list COMMA new_term_id | new_term_id;
+
+
+non_term_name_list ::=
+	non_term_name_list
+	COMMA
+	new_non_term_id
+	|
+	new_non_term_id
+	;
+
+
+
+precedence_list ::= precedence_l | empty; 
+
+
+precedence_l ::= precedence_l preced | preced;
+
+
+preced ::= 
+	PRECEDENCE LEFT 
+	{:
+	  parserHelper.update_precedence(Assoc.left);
+	:}	
+        terminal_list SEMI
+	|
+	PRECEDENCE RIGHT 
+	{:
+	  parserHelper.update_precedence(Assoc.right);
+	:}	
+        terminal_list SEMI
+	|
+	PRECEDENCE NONASSOC 
+	{:
+	  parserHelper.update_precedence(Assoc.nonassoc);
+	:}	
+        terminal_list SEMI
+	;
+
+
+terminal_list ::= terminal_list COMMA terminal_id
+	|
+	terminal_id
+	;
+
+
+terminal_id ::= term_id:sym
+	{:	
+	  parserHelper.add_precedence(sym);
+	  RESULT = sym;
+	:};
+	  
+
+term_id ::= symbol_id:sym
+        {:
+				/* check that the symbol_id is a terminal */
+				if (parserHelper.symbols.get(sym) == null) {
+					/* issue a message */
+					parser.lexer.emit_error("Terminal \"" + sym + "\" has not been declared");
+				}
+				RESULT = sym;
+         :};
+
+
+start_spec ::= 
+	START WITH nt_id:start_name 
+	{: 
+				/* verify that the name has been declared as a non terminal */
+				NonTerminal nt = (NonTerminal) parserHelper.non_terms.get(start_name);
+				if (nt == null) {
+					parser.lexer.emit_error("Start non terminal \"" + start_name + "\" has not been declared");
+				} else {
+					/* remember the non-terminal for later */
+					parserHelper.start_nt = nt;
+					parser.model.createStartProduction(nt);
+					parserHelper.new_rhs();
+				}
+	:}
+	SEMI
+	|
+	empty
+	;
+
+
+production_list ::=
+					production_list production
+				|	production
+				;
+
+production ::=
+					nt_id:lhs_id {:
+							/* lookup the lhs nt */
+							parserHelper.lhs_nt = (NonTerminal) parserHelper.non_terms.get(lhs_id);
+							
+							/* if it wasn't declared, emit a message */
+							if (parserHelper.lhs_nt == null) {
+								if (parser.lexer.error_count == 0)
+									parser.lexer.emit_error("LHS non terminal \"" + lhs_id + "\" has not been declared");
+							}
+			
+							/* reset the rhs accumulation */
+							parserHelper.new_rhs();
+						:} COLON_COLON_EQUALS rhs_list SEMI
+				|	error {: parser.lexer.emit_error("Syntax Error"); :} SEMI
+				;
+
+
+rhs_list ::= 
+					rhs_list BAR rhs
+				|	rhs
+				;
+
+
+rhs ::= 
+	prod_part_list PERCENT_PREC term_id:term_name {:
+				Symbol sym = null;
+				if (parserHelper.lhs_nt != null) {
+					/* Find the precedence symbol */
+					if (term_name == null) {
+						System.err.println("No terminal for contextual precedence");
+						sym = null;
+					} else {
+						sym = ((SymbolPart) parserHelper.symbols.get(term_name)).getSymbol();
+					}
+					/* build the production */
+					Production p;
+					if ((sym != null) && (sym instanceof Terminal)) {
+						p = new Production(parser.model.getNextProductionIndex(), parserHelper.lhs_nt, parserHelper.rhs_parts, parserHelper.rhs_pos, ((Terminal) sym).precedenceNum(),
+										((Terminal) sym).precedenceSide());
+						parser.model.add(p);
+
+						((SymbolPart) parserHelper.symbols.get(term_name)).getSymbol().note_use();
+					} else {
+						System.err.println("Invalid terminal " + term_name + " for contextual precedence assignment");
+						p = new Production(parser.model.getNextProductionIndex(), parserHelper.lhs_nt, parserHelper.rhs_parts, parserHelper.rhs_pos);
+						parser.model.add(p);
+					}
+
+					/*
+					 * if we have no start non-terminal declared and this is the
+					 * first production, make its lhs nt the start_nt and build
+					 * a special start production for it.
+					 */
+					if (parserHelper.start_nt == null) {
+						parserHelper.start_nt = parserHelper.lhs_nt;
+
+						Production startProduction = parser.model.createStartProduction(parserHelper.lhs_nt);
+						if ((sym != null) && (sym instanceof Terminal)) {
+							startProduction.set_precedence_num(((Terminal) sym).precedenceNum());
+							startProduction.set_precedence_side(((Terminal) sym).precedenceSide());
+						}
+						parserHelper.new_rhs();
+					}
+				}
+
+				/* reset the rhs accumulation in any case */
+				parserHelper.new_rhs();
+	:}
+	|
+	prod_part_list 
+	{: 
+				if (parserHelper.lhs_nt != null) {
+					/* build the production */
+					Production p = new Production(parser.model.getNextProductionIndex(), parserHelper.lhs_nt, parserHelper.rhs_parts, parserHelper.rhs_pos);
+					parser.model.add(p);
+
+					/*
+					 * if we have no start non-terminal declared and this is the
+					 * first production, make its lhs nt the start_nt and build
+					 * a special start production for it.
+					 */
+					if (parserHelper.start_nt == null) {
+						parserHelper.start_nt = parserHelper.lhs_nt;
+
+						/* build a special start production */
+						parser.model.createStartProduction(parserHelper.lhs_nt);
+
+					}
+				}
+
+				/* reset the rhs accumulation in any case */
+				parserHelper.new_rhs();
+	:} 
+	;
+
+
+prod_part_list ::= 
+						prod_part_list prod_part 
+					|	empty
+					;
+
+
+prod_part ::=
+						symbol_id:symid opt_label:labid
+							{: 
+										/* try to look up the id */
+										ProductionPart symb = (ProductionPart) parserHelper.symbols.get(symid);
+						
+										/* if that fails, symbol is undeclared */
+										if (symb == null) {
+											if (parserHelper.addUndefinedSymbol(symid)) {
+												parser.lexer.emit_error("Symbol \"" + symid + "\" has not been declared");
+											}
+										} else {
+											/* add a labeled production part */
+											parserHelper.add_rhs_part(parserHelper.add_lab(symb, labid));
+										}
+							:}
+					|	CODE_STRING:code_str
+							{: 
+										/* add a new production part */
+										parserHelper.add_rhs_part(new ActionPart(code_str));
+							:}
+					;
+
+
+
+
+opt_label ::=
+						COLON label_id:labid {: RESULT = labid; :}
+					|	empty {: RESULT = null; :}
+					;
+
+multipart_id ::=
+						multipart_id DOT robust_id:another_id {: parserHelper.append_multipart(another_id); :}
+					|	robust_id:an_id {: parserHelper.append_multipart(an_id); :}
+					;
+
+import_id ::= 
+						multipart_id DOT STAR {: parserHelper.append_multipart("*"); :}
+					|	multipart_id
+					;
+
+
+type_id ::=
+						multipart_id
+					|	type_id LBRACK RBRACK {: parserHelper.multipart_name = parserHelper.multipart_name.concat("[]"); :}
+					;
+
+
+new_term_id ::= 
+						ID:term_id 
+							{: 
+								/* see if this terminal has been declared before */
+								if (parserHelper.symbols.get(term_id) != null) {
+									/* issue a message */
+									parser.lexer.emit_error("Symbol \"" + term_id + "\" has already been declared");
+								} else {
+									/* if no type declared, declare one */
+									if (parserHelper.multipart_name.equals("")) {
+										parserHelper.append_multipart("Object");
+									}
+									/* build a production_part and put it in the table */
+									Terminal newTerm = new Terminal(parser.model.getNextTerminalIndex(), term_id, parserHelper.multipart_name);
+									parser.model.terminals.add(newTerm);
+									parserHelper.symbols.put(term_id, new SymbolPart(newTerm));
+								}
+							:}
+					;
+
+
+new_non_term_id ::=
+						ID:non_term_id
+							{: 
+								/* see if this non terminal has been declared before */
+								if (parserHelper.symbols.get(non_term_id) != null) {
+									/* issue a message */
+									parser.lexer.emit_error("Symbol \"" + non_term_id + "\" has already been declared");
+								} else {
+									if (parserHelper.multipart_name.equals("")) {
+										parserHelper.append_multipart("Object");
+									}
+									/* build the non terminal object */
+									NonTerminal this_nt = new NonTerminal(parser.model.getNextNonTerminalIndex(), non_term_id, parserHelper.multipart_name);
+									parser.model.nonTerminals.add(this_nt);
+						
+									/* put it in the non_terms table */
+									parserHelper.non_terms.put(non_term_id, this_nt);
+						
+									/* build a production_part and put it in the symbols table */
+									parserHelper.symbols.put(non_term_id, new SymbolPart(this_nt));
+								}
+							:}
+					;
+
+nt_id ::=
+						ID:the_id {: RESULT = the_id; :}
+					|	error
+							{:
+								parser.lexer.emit_error("Illegal use of reserved word");
+								RESULT="ILLEGAL";
+							:}
+					;
+
+symbol_id ::=
+						ID:the_id {: RESULT = the_id; :}
+					|	error
+							{:
+								parser.lexer.emit_error("Illegal use of reserved word");
+								RESULT="ILLEGAL";
+							:}
+					;
+
+
+label_id ::= 
+						robust_id:the_id {: RESULT = the_id; :}
+					;
+
+
+robust_id ::= /* all ids that aren't reserved words in Java */
+						ID:the_id	{: RESULT = the_id; :}
+						/* package is reserved. */
+						/* import is reserved. */
+					|	CODE		{: RESULT = "code"; :}
+					|	ACTION	{: RESULT = "action"; :}
+					|	PARSER	{: RESULT = "parser"; :}
+					|	TERMINAL	{: RESULT = "terminal"; :}
+					|	NON		{: RESULT = "non"; :}
+					|	NONTERMINAL   {: RESULT = "nonterminal"; :}
+					|	INIT		{: RESULT = "init"; :}
+					|	SCAN		{: RESULT = "scan"; :}
+					|	WITH		{: RESULT = "with"; :}
+					|	START		{: RESULT = "start"; :}
+					|	PRECEDENCE	{: RESULT = "precedence"; :}
+					|	LEFT		{: RESULT = "left"; :}
+					|	RIGHT		{: RESULT = "right"; :}
+					|	NONASSOC	{: RESULT = "nonassoc"; :}
+					|	error
+						{:
+							parser.lexer.emit_error("Illegal use of reserved word");
+							RESULT="ILLEGAL";
+						:}
+					;
+
+non_terminal ::= 
+						NON TERMINAL
+					|	NONTERMINAL
+					;
+
+opt_semi ::=
+						/* nothing */
+					|	SEMI
+					;
+
+empty ::=
+						/* nothing */
+					;
+
+
+
+
+
+
+
+
+

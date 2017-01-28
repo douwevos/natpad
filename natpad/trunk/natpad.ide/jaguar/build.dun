@@ -1,0 +1,65 @@
+module {
+
+	name 'jaguar';
+	
+	dependencies {
+		module 'glib';	
+		module 'zlib';	
+		module 'natpad.cup';
+		module 'caterpillar';
+		module 'jaguar-bytecode';
+		module 'jaguar-decompiler';
+		module 'elk';
+		module 'gross-cc-dung';
+		module 'gross-runtime';
+	}
+
+	loader 'natpad.cup';
+	loader 'gross-java-runtime';
+	loader 'gross-cc';
+	loader 'gross-cc-dung';
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+	
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/java_grammar.gro';
+			prefix 'Jag';
+			outputPath './src-generated/';
+			updateOnly 'true';
+#			arg '-v';
+#			arg '-v';
+#			arg '-v';
+		}
+	
+		
+		natpadCup {
+			grammar './etc/java_15.cup';
+			jsonconfig './etc/parser-config.json';
+			updateOnly 'true';
+		}
+		cc { src { path './src/'; }  destdir './compiled/'; depdir 'deps'; }
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libjaguar.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'jaguar';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

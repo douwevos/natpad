@@ -1,0 +1,369 @@
+terminal FUNCTION,VAR,RETURN,IF,ELSE,THIS,FOR,ID, NULL, TRUE, FALSE, NUMBER, STRING;
+terminal LPAREN,RPAREN,LBRACE,RBRACE,SEMI,COMMA;
+terminal ASS_IS,QUESTION,COLON,OP_LOR,OP_LAND, OP_BOR, OP_BXOR, OP_BAND;
+terminal DELETE, VOID, TYPEOF, OP_INC, OP_DEC, OP_ADD, OP_SUB, OP_NEG, OP_NOT, OP_MUL, OP_DIV, OP_MOD, OP_SHL, OP_SHR, OP_SHRR;
+terminal OP_LT, OP_GT, OP_LE, OP_GE, INSTANCE_OF, IN, OP_EQ, OP_NE, OP_TEQ, OP_TNE;
+
+terminal OP_ASS_MUL, OP_ASS_DIV, OP_ASS_MOD, OP_ASS_ADD, OP_ASS_SUB, OP_ASS_SHL, OP_ASS_SHR, OP_ASS_SHRR, OP_ASS_AND, OP_ASS_XOR, OP_ASS_OR;
+terminal NEW, LBRACK, RBRACK, DOT, REGULAR_EXPRESSION;
+
+terminal SWITCH, CASE, DEFAULT, DO, WHILE, WITH, CONTINUE, BREAK, THROW, TRY, CATCH, FINALLY, GET, SET, DEBUGGER;
+
+program                      ⟶ SourceElements
+                             ⟶ ;
+
+# A.1 lexical grammar
+
+Literal
+                             ⟶ NULL
+                             ⟶ BooleanLiteral 
+#                             ⟶ NumericLiteral 
+#                             ⟶ StringLiteral 
+#                             ⟶ RegularExpressionLiteral
+                             ⟶ REGULAR_EXPRESSION 
+                             ⟶ NUMBER 
+                             ⟶ STRING
+                             ;
+
+
+BooleanLiteral
+                             ⟶ TRUE 
+                             ⟶ FALSE ;
+
+# A.3 expressions
+
+PrimaryExpression
+                             ⟶ THIS
+                             ⟶ ID
+                             ⟶ Literal
+                             ⟶ ArrayLiteral
+                             ⟶ ObjectLiteral
+                             ⟶ LPAREN Expression RPAREN ;
+
+ArrayLiteral
+#                             ⟶ LBRACK ElOpt RBRACK
+                             ⟶ LBRACK Elision RBRACK
+                             ⟶ LBRACK RBRACK
+                             ⟶ LBRACK ElementList RBRACK
+                             ⟶ LBRACK ElementList COMMA         RBRACK
+                             ⟶ LBRACK ElementList COMMA Elision RBRACK ;
+
+ElementList
+                             ⟶ AssignmentExpression
+                             ⟶ Elision AssignmentExpression
+                             ⟶ ElementList COMMA AssignmentExpression
+                             ⟶ ElementList COMMA Elision AssignmentExpression ;
+
+
+Elision
+                             ⟶ COMMA
+                             ⟶ Elision COMMA ;
+
+ObjectLiteral
+                             ⟶ LBRACE RBRACE
+                             ⟶ LBRACE PropertyNameAndValueList RBRACE
+                             ⟶ LBRACE PropertyNameAndValueList COMMA RBRACE ;
+
+PropertyNameAndValueList
+                             ⟶ PropertyAssignment
+                             ⟶ PropertyNameAndValueList COMMA PropertyAssignment ;
+
+PropertyAssignment
+                             ⟶ PropertyName COLON AssignmentExpression
+                             ⟶ GET PropertyName LPAREN RPAREN LBRACE FunctionBody RBRACE
+                             ⟶ SET PropertyName LPAREN PropertySetParameterList RPAREN LBRACE FunctionBody RBRACE
+							;
+
+PropertyName
+#                             ⟶ IdentifierName
+#                             ⟶ StringLiteral
+#                             ⟶ NumericLiteral ;
+                             ⟶ ID ;
+
+PropertySetParameterList
+#                             ⟶ Identifier ;
+                             ⟶ ID ;
+
+MemberExpression
+                             ⟶ PrimaryExpression
+                             ⟶ FunctionExpression
+                             ⟶ MemberExpression LBRACK Expression RBRACK
+                             ⟶ MemberExpression DOT ID
+                             ⟶ NEW MemberExpression Arguments ;
+
+NewExpression
+                             ⟶ MemberExpression
+                             ⟶ NEW NewExpression ;
+
+CallExpression
+                             ⟶ MemberExpression Arguments
+                             ⟶ CallExpression Arguments
+                             ⟶ CallExpression LBRACK Expression RBRACK
+                             ⟶ CallExpression DOT ID
+                              ;
+
+Arguments
+                             ⟶ LPAREN RPAREN
+                             ⟶ LPAREN ArgumentList RPAREN ;
+
+ArgumentList
+                             ⟶ AssignmentExpression
+                             ⟶ ArgumentList COMMA AssignmentExpression ;
+
+LeftHandSideExpression
+                             ⟶ NewExpression
+                             ⟶ CallExpression ;
+
+PostfixExpression
+                             ⟶ LeftHandSideExpression
+                             ⟶ LeftHandSideExpression  OP_INC
+                             ⟶ LeftHandSideExpression  OP_DEC ;
+
+UnaryExpression
+                             ⟶ PostfixExpression
+                             ⟶ DELETE UnaryExpression
+                             ⟶ VOID UnaryExpression
+                             ⟶ TYPEOF UnaryExpression
+                             ⟶ OP_INC UnaryExpression
+                             ⟶ OP_DEC UnaryExpression
+                             ⟶ OP_ADD UnaryExpression
+                             ⟶ OP_SUB UnaryExpression
+                             ⟶ OP_NEG UnaryExpression
+                             ⟶ OP_NOT UnaryExpression ;
+
+MultiplicativeExpression
+                             ⟶ UnaryExpression
+                             ⟶ MultiplicativeExpression OP_MUL UnaryExpression
+                             ⟶ MultiplicativeExpression OP_DIV UnaryExpression
+                             ⟶ MultiplicativeExpression OP_MOD UnaryExpression ;
+
+AdditiveExpression
+                             ⟶ MultiplicativeExpression
+                             ⟶ AdditiveExpression OP_ADD MultiplicativeExpression
+                             ⟶ AdditiveExpression OP_SUB MultiplicativeExpression ;
+
+ShiftExpression
+                             ⟶ AdditiveExpression
+                             ⟶ ShiftExpression OP_SHL AdditiveExpression
+                             ⟶ ShiftExpression OP_SHR AdditiveExpression
+                             ⟶ ShiftExpression OP_SHRR AdditiveExpression ;
+
+RelationalExpression
+                             ⟶ ShiftExpression
+                             ⟶ RelationalExpression OP_LT ShiftExpression
+                             ⟶ RelationalExpression OP_GT ShiftExpression
+                             ⟶ RelationalExpression OP_LE ShiftExpression
+                             ⟶ RelationalExpression OP_GE ShiftExpression
+                             ⟶ RelationalExpression INSTANCE_OF ShiftExpression
+                             ⟶ RelationalExpression IN ShiftExpression ;
+
+RelationalExpressionNoIn
+                             ⟶ ShiftExpression
+                             ⟶ RelationalExpressionNoIn OP_LT ShiftExpression
+                             ⟶ RelationalExpressionNoIn OP_GT ShiftExpression
+                             ⟶ RelationalExpressionNoIn OP_LE ShiftExpression
+                             ⟶ RelationalExpressionNoIn OP_GE ShiftExpression
+                             ⟶ RelationalExpressionNoIn INSTANCE_OF ShiftExpression ;
+
+EqualityExpression
+                             ⟶ RelationalExpression
+                             ⟶ EqualityExpression OP_EQ RelationalExpression
+                             ⟶ EqualityExpression OP_NE RelationalExpression
+                             ⟶ EqualityExpression OP_TEQ RelationalExpression
+                             ⟶ EqualityExpression OP_TNE RelationalExpression ;
+
+EqualityExpressionNoIn
+                             ⟶ RelationalExpressionNoIn
+                             ⟶ EqualityExpressionNoIn OP_EQ RelationalExpressionNoIn
+                             ⟶ EqualityExpressionNoIn OP_NE RelationalExpressionNoIn
+                             ⟶ EqualityExpressionNoIn OP_TEQ RelationalExpressionNoIn
+                             ⟶ EqualityExpressionNoIn OP_TNE RelationalExpressionNoIn ;
+
+BitwiseANDExpression
+                             ⟶ EqualityExpression
+                             ⟶ BitwiseANDExpression OP_BAND EqualityExpression ;
+
+BitwiseANDExpressionNoIn
+                             ⟶ EqualityExpressionNoIn
+                             ⟶ BitwiseANDExpressionNoIn OP_BAND EqualityExpressionNoIn ;
+
+BitwiseXORExpression
+                             ⟶ BitwiseANDExpression
+                             ⟶ BitwiseXORExpression OP_BXOR BitwiseANDExpression ;
+
+BitwiseXORExpressionNoIn
+                             ⟶ BitwiseANDExpressionNoIn
+                             ⟶ BitwiseXORExpressionNoIn OP_BXOR BitwiseANDExpressionNoIn ;
+
+BitwiseORExpression
+                             ⟶ BitwiseXORExpression
+                             ⟶ BitwiseORExpression OP_BOR BitwiseXORExpression ;
+
+BitwiseORExpressionNoIn
+                             ⟶ BitwiseXORExpressionNoIn
+                             ⟶ BitwiseORExpressionNoIn OP_BOR BitwiseXORExpressionNoIn ;
+
+LogicalANDExpression
+                             ⟶ BitwiseORExpression
+                             ⟶ LogicalANDExpression OP_LAND BitwiseORExpression ;
+
+LogicalANDExpressionNoIn
+                             ⟶ BitwiseORExpressionNoIn
+                             ⟶ LogicalANDExpressionNoIn OP_LAND BitwiseORExpressionNoIn ;
+
+LogicalORExpression
+                             ⟶ LogicalANDExpression
+                             ⟶ LogicalORExpression OP_LOR LogicalANDExpression ;
+
+LogicalORExpressionNoIn
+                             ⟶ LogicalANDExpressionNoIn
+                             ⟶ LogicalORExpressionNoIn OP_LOR LogicalANDExpressionNoIn ;
+
+ConditionalExpression
+                             ⟶ LogicalORExpression
+                             ⟶ LogicalORExpression QUESTION AssignmentExpression COLON AssignmentExpression ;
+
+ConditionalExpressionNoIn
+                             ⟶ LogicalORExpressionNoIn
+                             ⟶ LogicalORExpressionNoIn QUESTION AssignmentExpression COLON AssignmentExpressionNoIn ;
+
+AssignmentExpression
+                             ⟶ ConditionalExpression
+                             ⟶ LeftHandSideExpression ASS_IS AssignmentExpression
+                             ⟶ LeftHandSideExpression AssignmentOperator AssignmentExpression ;
+
+AssignmentExpressionNoIn
+                             ⟶ ConditionalExpressionNoIn
+                             ⟶ LeftHandSideExpression ASS_IS AssignmentExpressionNoIn
+                             ⟶ LeftHandSideExpression AssignmentOperator AssignmentExpressionNoIn ;
+
+
+AssignmentOperator
+                             ⟶ OP_ASS_MUL
+                             ⟶ OP_ASS_DIV 	
+                             ⟶ OP_ASS_MOD 
+                             ⟶ OP_ASS_ADD 
+                             ⟶ OP_ASS_SUB
+                             ⟶ OP_ASS_SHL 	
+                             ⟶ OP_ASS_SHR
+                             ⟶ OP_ASS_SHRR 	
+                             ⟶ OP_ASS_AND 
+                             ⟶ OP_ASS_XOR 
+                             ⟶ OP_ASS_OR ;
+
+Expression
+                             ⟶ AssignmentExpression
+                             ⟶ Expression COMMA AssignmentExpression ;
+
+ExpressionNoIn
+                             ⟶ AssignmentExpressionNoIn
+                             ⟶ ExpressionNoIn COMMA AssignmentExpressionNoIn ;
+
+# A.4 Statements
+
+
+Statement
+                             ⟶ Block
+                             ⟶ VariableStatement
+                             ⟶ ExpressionStatement
+                             ⟶ TryStatement
+                             ⟶ DebuggerStatement
+                              ;
+
+Block
+                             ⟶ LBRACE StatementList RBRACE
+                             ⟶ LBRACE                RBRACE
+                             ;
+
+StatementList
+                             ⟶ Statement
+                             ⟶ StatementList Statement ;
+
+VariableStatement
+                             ⟶ VAR VariableDeclarationList SEMI ;
+
+VariableDeclarationList
+                             ⟶ VariableDeclaration
+                             ⟶ VariableDeclarationList COMMA VariableDeclaration ;
+
+VariableDeclarationListNoIn
+                             ⟶ VariableDeclarationNoIn
+                             ⟶ VariableDeclarationListNoIn COMMA VariableDeclarationNoIn ;
+
+VariableDeclaration
+                             ⟶ ID Initialiser 
+                             ⟶ ID;
+
+VariableDeclarationNoIn
+                             ⟶ ID InitialiserNoIn
+                             ⟶ ID ;
+
+Initialiser
+                             ⟶ ASS_IS AssignmentExpression ;
+
+InitialiserNoIn
+                             ⟶ ASS_IS AssignmentExpressionNoIn ;
+
+ExpressionStatement
+                             ⟶ Expression SEMI ;
+
+
+
+
+TryStatement 
+                             ⟶ TRY Block Catch
+                             ⟶ TRY Block Finally
+                             ⟶ TRY Block Catch Finally;
+
+Catch
+                             ⟶ CATCH LPAREN ID RPAREN Block ;
+
+Finally
+                             ⟶ FINALLY Block ;
+
+DebuggerStatement 
+                             ⟶ DEBUGGER SEMI ;
+
+
+# A.5 Functions and programs
+
+
+FunctionDeclaration
+                             ⟶ FUNCTION ID LPAREN FormalParameterList RPAREN LBRACE FunctionBody RBRACE
+                             ⟶ FUNCTION ID LPAREN                     RPAREN LBRACE FunctionBody RBRACE
+                             ;
+
+FunctionExpression
+                             ⟶ FUNCTION ID LPAREN FormalParameterList RPAREN LBRACE FunctionBody RBRACE
+                             ⟶ FUNCTION    LPAREN FormalParameterList RPAREN LBRACE FunctionBody RBRACE
+                             ⟶ FUNCTION ID LPAREN                     RPAREN LBRACE FunctionBody RBRACE
+                             ⟶ FUNCTION    LPAREN                     RPAREN LBRACE FunctionBody RBRACE
+                             ;
+
+FormalParameterList
+                             ⟶ ID
+                             ⟶ FormalParameterList COMMA ID ;
+
+FunctionBody
+                             ⟶ SourceElements
+                             ⟶ ;
+
+
+SourceElements
+                             ⟶ SourceElement
+                             ⟶ SourceElements SourceElement;
+
+SourceElement
+                             ⟶ Statement
+                             ⟶ FunctionDeclaration;
+
+
+
+imports ｟
+｠
+
+
+type TerminalDeclarationList Statement;
+
+
+code Statement                         ｟				result = new Specification(td, pl, im, tl, cl); ｠

@@ -1,0 +1,6 @@
+module-name 'Moduletje';
+java {
+  java_source_folders {'src/main/java'}
+  libraries {}
+  jre_name 'java';
+}

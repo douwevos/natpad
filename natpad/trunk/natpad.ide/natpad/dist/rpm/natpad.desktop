@@ -1,0 +1,15 @@
+[Desktop Entry]
+Categories=GTK;Gnome;Utility:TextEditor;
+GenericName=Natpad IDE
+Name=Natpad
+MimeType=text/plain
+Exec=natpad %U
+Icon=/usr/share/pixmaps/natpad_48.xpm
+Type=Application
+Terminal=false;
+InitialPreference=8
+X-KDE-StartupNorify=true
+X-SuSE-translate=true
+X-DocPath=natpad/index.html
+X-DBUS-StartupType=Multi
+X-DBUS-ServiceName=org.natpad

@@ -1,0 +1,3 @@
+
+17-2-2012	Added support for fast scrolling using direct calls to X11. Added option in preferences screen in the menu 'View'
+11-2-2012	Added (again) single-instance option to preferences (it was always on in version 1.1)

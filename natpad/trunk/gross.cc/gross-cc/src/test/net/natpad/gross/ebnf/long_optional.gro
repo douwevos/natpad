@@ -1,0 +1,15 @@
+terminal ID, SEMI, VAR;
+
+program          ≣ a            ⟶ ID:i [ID SEMI];
+                                
+ 
+ 
+imports ｟
+｠
+
+
+type String program;
+
+ 
+code program ≣ a                        ｟ result = ""+i+s; ｠
+ 

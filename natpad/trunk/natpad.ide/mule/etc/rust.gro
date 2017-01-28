@@ -1,0 +1,1439 @@
+# https://raw.githubusercontent.com/rust-lang/rust/master/src/grammar/parser-lalr.y
+#
+#// Copyright 2015 The Rust Project Developers. See the COPYRIGHT
+#// file at the top-level directory of this distribution and at
+#// http://rust-lang.org/COPYRIGHT.
+#//
+#// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+#// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+#// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+#// option. This file may not be copied, modified, or distributed
+#// except according to those terms.
+
+
+terminal SHL, SHR, LE, EQEQ, NE, GE, ANDAND, OROR, SHLEQ, SHREQ, MINUSEQ, ANDEQ, OREQ, PLUSEQ, STAREQ, SLASHEQ, CARETEQ;
+terminal PERCENTEQ, DOTDOT, DOTDOTDOT, MOD_SEP, RARROW, LARROW, FAT_ARROW, LIT_BYTE, LIT_CHAR, LIT_INTEGER, LIT_FLOAT;
+terminal LIT_STR, LIT_STR_RAW, LIT_BYTE_STR, LIT_BYTE_STR_RAW, IDENT, UNDERSCORE, LIFETIME;
+
+# kewords
+terminal SELF, STATIC, AS, BREAK, CRATE, ELSE, ENUM, EXTERN, FALSE, FN, FOR, IF, IMPL, IN, LET, LOOP, MATCH, MOD, MOVE;
+terminal MUT, PRIV, PUB, REF, RETURN, STRUCT, TRUE, TRAIT, TYPE, UNSAFE, USE, WHILE, CONTINUE, PROC, BOX, CONST, WHERE;
+terminal TYPEOF, INNER_DOC_COMMENT, OUTER_DOC_COMMENT, SHEBANG, SHEBANG_LINE, STATIC_LIFETIME;
+
+terminal L_LSQBRACE, L_RSQBRACE, L_LPAREN, L_RPAREN, L_LCUBRACE, L_RCUBRACE, L_LT, L_GT;
+terminal L_COMMA, L_DOT, L_SEMI, L_AMPERSAND, L_COLON, L_HASH, L_AT, L_NEG, L_QUESTIONMARK, L_EXCLAMATION, L_VERTICAL_LINE, L_CIRCUMFLEX;
+terminal L_PLUS, L_MINUS, L_MUL, L_DIV, L_IS, L_MOD, L_DOLLAR;
+
+#////////////////////////////////////////////////////////////////////////
+#// Part 1: Items and attributes
+#////////////////////////////////////////////////////////////////////////
+crate                                    ⟶ maybe_shebang inner_attrs maybe_mod_items
+                                         ⟶ maybe_shebang maybe_mod_items ;
+
+maybe_shebang                            ⟶ SHEBANG_LINE
+                                         ⟶  ;
+
+maybe_inner_attrs                        ⟶ inner_attrs
+                                         ⟶  ;
+
+inner_attrs                              ⟶ inner_attr
+                                         ⟶ inner_attrs inner_attr ;
+
+inner_attr                               ⟶ SHEBANG L_LSQBRACE meta_item L_RSQBRACE
+                                         ⟶ INNER_DOC_COMMENT ;
+
+maybe_outer_attrs                        ⟶ outer_attrs
+                                         ⟶ ;
+
+outer_attrs                              ⟶ outer_attr
+                                         ⟶ outer_attrs outer_attr ;
+
+outer_attr                               ⟶ L_HASH L_LSQBRACE meta_item L_RSQBRACE
+                                         ⟶ OUTER_DOC_COMMENT ;
+
+meta_item                                ⟶ ident
+                                         ⟶ ident L_IS lit
+                                         ⟶ ident L_LPAREN meta_seq L_RPAREN
+                                         ⟶ ident L_LPAREN meta_seq L_COMMA L_RPAREN ;
+
+meta_seq                                 ⟶
+                                         ⟶ meta_item
+                                         ⟶ meta_seq L_COMMA meta_item ;
+
+maybe_mod_items                          ⟶ mod_items
+                                         ⟶ ;
+
+mod_items                                ⟶ mod_item
+                                         ⟶ mod_items mod_item ;
+
+attrs_and_vis                            ⟶ maybe_outer_attrs visibility ;
+
+mod_item                                 ⟶ attrs_and_vis item ;
+
+# // items that can appear outside of a fn block
+item                                     ⟶ stmt_item
+                                         ⟶ item_macro ;
+
+# // items that can appear in "stmts"
+stmt_item                                ⟶ item_static
+                                         ⟶ item_const
+                                         ⟶ item_type
+                                         ⟶ block_item
+                                         ⟶ view_item ;
+
+item_static                              ⟶ STATIC ident L_COLON ty L_IS expr L_SEMI
+                                         ⟶ STATIC MUT ident L_COLON ty L_IS expr L_SEMI ;
+
+item_const                               ⟶ CONST ident L_COLON ty L_IS expr L_SEMI ;
+
+item_macro                               ⟶ path_expr L_EXCLAMATION maybe_ident parens_delimited_token_trees L_SEMI
+                                         ⟶ path_expr L_EXCLAMATION maybe_ident braces_delimited_token_trees
+                                         ⟶ path_expr L_EXCLAMATION maybe_ident brackets_delimited_token_trees L_SEMI ;
+
+view_item                                ⟶ use_item
+                                         ⟶ extern_fn_item
+                                         ⟶ EXTERN CRATE ident L_SEMI
+                                         ⟶ EXTERN CRATE ident AS ident L_SEMI ;
+
+extern_fn_item                           ⟶ EXTERN maybe_abi item_fn ;
+
+use_item                                 ⟶ USE view_path L_SEMI ;
+
+view_path                                ⟶ path_no_types_allowed
+                                         ⟶ path_no_types_allowed MOD_SEP L_LCUBRACE                L_RCUBRACE
+                                         ⟶                       MOD_SEP L_LCUBRACE                L_RCUBRACE
+                                         ⟶ path_no_types_allowed MOD_SEP L_LCUBRACE idents_or_self L_RCUBRACE
+                                         ⟶                       MOD_SEP L_LCUBRACE idents_or_self L_RCUBRACE
+                                         ⟶ path_no_types_allowed MOD_SEP L_LCUBRACE idents_or_self L_COMMA L_RCUBRACE
+                                         ⟶                       MOD_SEP L_LCUBRACE idents_or_self L_COMMA L_RCUBRACE
+                                         ⟶ path_no_types_allowed MOD_SEP L_MUL
+                                         ⟶                               L_LCUBRACE                L_RCUBRACE
+                                         ⟶                               L_LCUBRACE idents_or_self L_RCUBRACE
+                                         ⟶                               L_LCUBRACE idents_or_self L_COMMA L_RCUBRACE
+                                         ⟶ path_no_types_allowed AS ident ;
+
+block_item                               ⟶ item_fn
+                                         ⟶ item_unsafe_fn
+                                         ⟶ item_mod
+                                         ⟶ item_foreign_mod
+                                         ⟶ item_struct
+                                         ⟶ item_enum
+                                         ⟶ item_trait
+                                         ⟶ item_impl ;
+
+maybe_ty_ascription                      ⟶ L_COLON ty_sum
+                                         ⟶  ;
+
+maybe_init_expr                          ⟶ L_IS expr
+                                         ⟶  ;
+
+# // structs
+item_struct                              ⟶ STRUCT ident generic_params maybe_where_clause struct_decl_args
+                                         ⟶ STRUCT ident generic_params struct_tuple_args maybe_where_clause L_SEMI
+                                         ⟶ STRUCT ident generic_params maybe_where_clause L_SEMI ;
+
+struct_decl_args                         ⟶ L_LCUBRACE struct_decl_fields L_RCUBRACE
+                                         ⟶ L_LCUBRACE struct_decl_fields L_COMMA L_RCUBRACE ;
+
+struct_tuple_args                        ⟶ L_LPAREN struct_tuple_fields L_RPAREN
+                                         ⟶ L_LPAREN struct_tuple_fields L_COMMA L_RPAREN ;
+
+struct_decl_fields                       ⟶ struct_decl_field
+                                         ⟶ struct_decl_fields L_COMMA struct_decl_field ;
+
+struct_decl_field                        ⟶ attrs_and_vis ident L_COLON ty_sum ;
+
+struct_tuple_fields                      ⟶ struct_tuple_field
+                                         ⟶ struct_tuple_fields L_COMMA struct_tuple_field ;
+
+struct_tuple_field                       ⟶ attrs_and_vis ty_sum ;
+
+#// enums
+item_enum                                ⟶ ENUM ident generic_params maybe_where_clause L_LCUBRACE enum_defs L_RCUBRACE
+                                         ⟶ ENUM ident generic_params maybe_where_clause L_LCUBRACE enum_defs L_COMMA L_RCUBRACE ;
+
+enum_defs                                ⟶ enum_def
+                                         ⟶ enum_defs L_COMMA enum_def
+                                         ⟶ ;
+
+enum_def                                 ⟶ attrs_and_vis ident enum_args ;
+
+enum_args                                ⟶ L_LCUBRACE struct_decl_fields L_RCUBRACE
+                                         ⟶ L_LCUBRACE struct_decl_fields L_COMMA L_RCUBRACE
+                                         ⟶ L_LPAREN maybe_ty_sums L_RPAREN
+                                         ⟶ L_IS expr
+                                         ⟶ ;
+
+item_mod                                 ⟶ MOD ident L_SEMI
+                                         ⟶ MOD ident L_LCUBRACE maybe_mod_items L_RCUBRACE
+                                         ⟶ MOD ident L_LCUBRACE inner_attrs maybe_mod_items L_RCUBRACE ;
+
+item_foreign_mod                         ⟶ EXTERN maybe_abi L_LCUBRACE maybe_foreign_items L_RCUBRACE
+                                         ⟶ EXTERN maybe_abi L_LCUBRACE inner_attrs maybe_foreign_items L_RCUBRACE ;
+
+maybe_abi                                ⟶ str
+                                         ⟶ ;
+
+maybe_foreign_items                      ⟶ foreign_items
+                                         ⟶ ;
+
+foreign_items                            ⟶ foreign_item
+                                         ⟶ foreign_items foreign_item ;
+
+foreign_item                             ⟶ attrs_and_vis STATIC item_foreign_static
+                                         ⟶ attrs_and_vis item_foreign_fn
+                                         ⟶ attrs_and_vis UNSAFE item_foreign_fn ;
+
+item_foreign_static                      ⟶ maybe_mut ident L_COLON ty L_SEMI ;
+
+item_foreign_fn                          ⟶ FN ident generic_params fn_decl_allow_variadic maybe_where_clause L_SEMI ;
+
+fn_decl_allow_variadic                   ⟶ fn_params_allow_variadic ret_ty ;
+
+fn_params_allow_variadic                 ⟶ L_LPAREN L_RPAREN
+                                         ⟶ L_LPAREN params L_RPAREN
+                                         ⟶ L_LPAREN params L_COMMA L_RPAREN
+                                         ⟶ L_LPAREN params L_COMMA DOTDOTDOT L_RPAREN ;
+
+visibility                               ⟶ PUB
+                                         ⟶ ;
+
+idents_or_self                           ⟶ idents_self_opt_as
+                                         ⟶ idents_or_self L_COMMA idents_self_opt_as ;
+
+idents_self_opt_as                       ⟶ ident_or_self AS ident
+                                         ⟶ ident_or_self;
+
+ident_or_self                            ⟶ ident
+                                         ⟶ SELF ;
+
+item_type                                ⟶ TYPE ident generic_params maybe_where_clause L_IS ty_sum L_SEMI ;
+
+for_sized                                ⟶ FOR L_QUESTIONMARK ident
+                                         ⟶ FOR ident L_QUESTIONMARK
+                                         ⟶ ;
+
+item_trait                               ⟶ maybe_unsafe TRAIT ident generic_params for_sized maybe_ty_param_bounds maybe_where_clause L_LCUBRACE maybe_trait_items L_RCUBRACE ;
+
+maybe_trait_items                        ⟶ trait_items
+                                         ⟶ ;
+
+trait_items                              ⟶ trait_item
+                                         ⟶ trait_items trait_item ;
+
+trait_item                               ⟶ trait_const
+                                         ⟶ trait_type
+                                         ⟶ trait_method ;
+
+trait_const                              ⟶ maybe_outer_attrs CONST ident maybe_ty_ascription maybe_const_default L_SEMI ;
+
+maybe_const_default                      ⟶ L_IS expr
+                                         ⟶ ;
+
+trait_type                               ⟶ maybe_outer_attrs TYPE ty_param L_SEMI ;
+
+maybe_unsafe                             ⟶ UNSAFE
+                                         ⟶ ;
+
+trait_method                             ⟶ type_method
+                                         ⟶ method ;
+
+type_method                              ⟶ attrs_and_vis maybe_unsafe FN ident generic_params fn_decl_with_self_allow_anon_params maybe_where_clause L_SEMI
+                                         ⟶ attrs_and_vis maybe_unsafe EXTERN maybe_abi FN ident generic_params fn_decl_with_self_allow_anon_params maybe_where_clause L_SEMI ;
+
+method                                   ⟶ attrs_and_vis maybe_unsafe FN ident generic_params fn_decl_with_self_allow_anon_params maybe_where_clause inner_attrs_and_block
+                                         ⟶ attrs_and_vis maybe_unsafe EXTERN maybe_abi FN ident generic_params fn_decl_with_self_allow_anon_params maybe_where_clause inner_attrs_and_block ;
+
+impl_method                              ⟶ attrs_and_vis maybe_unsafe FN ident generic_params fn_decl_with_self maybe_where_clause inner_attrs_and_block
+                                         ⟶ attrs_and_vis maybe_unsafe EXTERN maybe_abi FN ident generic_params fn_decl_with_self maybe_where_clause inner_attrs_and_block
+;
+
+#// There are two forms of impl:
+#//
+#// impl (<...>)? TY { ... }
+#// impl (<...>)? TRAIT for TY { ... }
+#//
+#// Unfortunately since TY can begin with L_LT itself -- as part of a
+#// TyQualifiedPath type -- there's an s/r conflict when we see L_LT after IMPL:
+#// should we reduce one of the early rules of TY (such as maybe_once)
+#// or shall we continue shifting into the generic_params list for the
+#// impl?
+#//
+#// The production parser disambiguates a different case here by
+#// permitting / requiring the user to provide parens around types when
+#// they are ambiguous with traits. We do the same here, regrettably,
+#// by splitting ty into ty and ty_prim.
+item_impl                                ⟶ maybe_unsafe IMPL generic_params ty_prim_sum maybe_where_clause L_LCUBRACE maybe_inner_attrs maybe_impl_items L_RCUBRACE
+                                         ⟶ maybe_unsafe IMPL generic_params L_LPAREN ty L_RPAREN maybe_where_clause L_LCUBRACE maybe_inner_attrs maybe_impl_items L_RCUBRACE
+                                         ⟶ maybe_unsafe IMPL generic_params trait_ref FOR ty_sum maybe_where_clause L_LCUBRACE maybe_inner_attrs maybe_impl_items L_RCUBRACE
+                                         ⟶ maybe_unsafe IMPL generic_params L_EXCLAMATION trait_ref FOR ty_sum maybe_where_clause L_LCUBRACE maybe_inner_attrs maybe_impl_items L_RCUBRACE
+                                         ⟶ maybe_unsafe IMPL generic_params trait_ref FOR DOTDOT L_LCUBRACE L_RCUBRACE
+                                         ⟶ maybe_unsafe IMPL generic_params L_EXCLAMATION trait_ref FOR DOTDOT L_LCUBRACE L_RCUBRACE
+;
+
+maybe_impl_items                         ⟶ impl_items
+                                         ⟶  
+;
+
+impl_items                               ⟶ impl_item
+                                         ⟶ impl_item impl_items   
+;
+
+impl_item                                ⟶ impl_method
+                                         ⟶ attrs_and_vis item_macro
+                                         ⟶ impl_const
+                                         ⟶ impl_type
+;
+
+impl_const                               ⟶ attrs_and_vis item_const 
+;
+
+impl_type                                ⟶ attrs_and_vis TYPE ident generic_params L_IS ty_sum L_SEMI  
+;
+
+item_fn                                  ⟶ FN ident generic_params fn_decl maybe_where_clause inner_attrs_and_block
+;
+
+item_unsafe_fn                           ⟶ UNSAFE FN ident generic_params fn_decl maybe_where_clause inner_attrs_and_block
+                                         ⟶ UNSAFE EXTERN maybe_abi FN ident generic_params fn_decl maybe_where_clause inner_attrs_and_block
+;
+
+fn_decl                                  ⟶ fn_params ret_ty 
+;
+
+fn_decl_with_self                        ⟶ fn_params_with_self ret_ty 
+;
+
+fn_decl_with_self_allow_anon_params      ⟶ fn_anon_params_with_self ret_ty   
+;
+
+fn_params                                ⟶ L_LPAREN maybe_params L_RPAREN  
+;
+
+fn_anon_params                           ⟶ L_LPAREN anon_param anon_params_allow_variadic_tail L_RPAREN
+                                         ⟶ L_LPAREN L_RPAREN                                            
+;
+
+fn_params_with_self                      ⟶ L_LPAREN maybe_mut SELF maybe_ty_ascription maybe_comma_params L_RPAREN
+                                         ⟶ L_LPAREN L_AMPERSAND maybe_mut SELF maybe_ty_ascription maybe_comma_params L_RPAREN
+                                         ⟶ L_LPAREN L_AMPERSAND lifetime maybe_mut SELF maybe_ty_ascription maybe_comma_params L_RPAREN
+                                         ⟶ L_LPAREN maybe_params L_RPAREN                                                       
+;
+
+fn_anon_params_with_self                 ⟶ L_LPAREN maybe_mut SELF maybe_ty_ascription maybe_comma_anon_params L_RPAREN
+                                         ⟶ L_LPAREN L_AMPERSAND maybe_mut SELF maybe_ty_ascription maybe_comma_anon_params L_RPAREN
+                                         ⟶ L_LPAREN L_AMPERSAND lifetime maybe_mut SELF maybe_ty_ascription maybe_comma_anon_params L_RPAREN
+                                         ⟶ L_LPAREN maybe_anon_params L_RPAREN                                                       
+;
+
+maybe_params                             ⟶ params
+                                         ⟶ params L_COMMA
+                                         ⟶   
+;
+
+params                                   ⟶ param
+                                         ⟶ params L_COMMA param 
+;
+
+param                                    ⟶ pat L_COLON ty_sum
+;
+
+inferrable_params                        ⟶ inferrable_param
+                                         ⟶ inferrable_params L_COMMA inferrable_param
+;
+
+inferrable_param                         ⟶ pat maybe_ty_ascription 
+;
+
+maybe_unboxed_closure_kind               ⟶
+                                         ⟶ L_COLON
+                                         ⟶ L_AMPERSAND maybe_mut L_COLON
+;
+
+maybe_comma_params                       ⟶ L_COMMA
+                                         ⟶ L_COMMA params
+                                         ⟶ L_COMMA params L_COMMA
+                                         ⟶ 
+;
+
+maybe_comma_anon_params                  ⟶ L_COMMA
+                                         ⟶ L_COMMA anon_params
+                                         ⟶ L_COMMA anon_params L_COMMA
+                                         ⟶  
+;
+
+maybe_anon_params                        ⟶ anon_params
+                                         ⟶ anon_params L_COMMA
+                                         ⟶      
+;
+
+anon_params                              ⟶ anon_param
+                                         ⟶ anon_params L_COMMA anon_param
+;
+
+#// anon means it's allowed to be anonymous (type-only), but it can
+#// still have a name
+anon_param                               ⟶ named_arg L_COLON ty
+                                         ⟶ ty
+;
+
+anon_params_allow_variadic_tail          ⟶ L_COMMA DOTDOTDOT
+                                         ⟶ L_COMMA anon_param anon_params_allow_variadic_tail
+                                         ⟶                                          
+;
+
+named_arg                                ⟶ ident
+                                         ⟶ UNDERSCORE
+                                         ⟶ L_AMPERSAND ident
+                                         ⟶ L_AMPERSAND UNDERSCORE
+                                         ⟶ ANDAND ident
+                                         ⟶ ANDAND UNDERSCORE
+                                         ⟶ MUT ident         
+;
+
+ret_ty                                   ⟶ RARROW
+                                         ⟶ RARROW ty
+                                         ⟶  
+;
+
+generic_params                           ⟶ L_LT lifetimes L_GT
+                                         ⟶ L_LT lifetimes L_COMMA L_GT
+                                         ⟶ L_LT lifetimes SHR
+                                         ⟶ L_LT lifetimes L_COMMA SHR
+                                         ⟶ L_LT lifetimes L_COMMA ty_params L_GT
+                                         ⟶ L_LT lifetimes L_COMMA ty_params L_COMMA L_GT
+                                         ⟶ L_LT lifetimes L_COMMA ty_params SHR
+                                         ⟶ L_LT lifetimes L_COMMA ty_params L_COMMA SHR
+                                         ⟶ L_LT ty_params L_GT
+                                         ⟶ L_LT ty_params L_COMMA L_GT
+                                         ⟶ L_LT ty_params SHR
+                                         ⟶ L_LT ty_params L_COMMA SHR
+                                         ⟶                               
+;
+
+maybe_where_clause                       ⟶
+                                         ⟶ where_clause
+;
+
+where_clause                             ⟶ WHERE where_predicates
+                                         ⟶ WHERE where_predicates L_COMMA     
+;
+
+where_predicates                         ⟶ where_predicate
+                                         ⟶ where_predicates L_COMMA where_predicate
+;
+
+where_predicate                          ⟶ maybe_for_lifetimes lifetime L_COLON bounds
+                                         ⟶ maybe_for_lifetimes ty L_COLON ty_param_bounds 
+;
+
+maybe_for_lifetimes                      ⟶ FOR L_LT lifetimes L_GT
+                                         ⟶
+;   
+
+ty_params                                ⟶ ty_param
+                                         ⟶ ty_params L_COMMA ty_param
+;
+
+#// A path with no type parameters; e.g. `foo::bar::Baz`
+#//
+#// These show up in 'use' view-items, because these are processed
+#// without respect to types.
+path_no_types_allowed                    ⟶ ident
+                                         ⟶ MOD_SEP ident
+                                         ⟶ SELF
+                                         ⟶ MOD_SEP SELF
+                                         ⟶ path_no_types_allowed MOD_SEP ident 
+;
+
+#// A path with a lifetime and type parameters, with no double colons
+#// before the type parameters; e.g. `foo::bar<'a>::Baz<T>`
+#//
+#// These show up in "trait references", the components of
+#// type-parameter bounds lists, as well as in the prefix of the
+#// path_generic_args_and_bounds rule, which is the full form of a
+#// named typed expression.
+#//
+#// They do not have (nor need) an extra '::' before L_LT because
+#// unlike in expr context, there are no "less-than" type exprs to
+#// be ambiguous with.
+path_generic_args_without_colons         ⟶ 
+  ident
+                                         ⟶ 
+  ident generic_args
+                                         ⟶ 
+  ident L_LPAREN maybe_ty_sums L_RPAREN ret_ty
+                                         ⟶ 
+  path_generic_args_without_colons MOD_SEP ident
+                                         ⟶ 
+  path_generic_args_without_colons MOD_SEP ident generic_args
+                                         ⟶ 
+  path_generic_args_without_colons MOD_SEP ident L_LPAREN maybe_ty_sums L_RPAREN ret_ty 
+;
+
+generic_args                             ⟶ L_LT generic_values L_GT
+                                         ⟶ L_LT generic_values SHR
+                                         ⟶ L_LT generic_values GE
+                                         ⟶ L_LT generic_values SHREQ 
+#// If generic_args starts with "<<", the first arg must be a
+#// TyQualifiedPath because that's the only type that can start with a
+#// L_LT. This rule parses that as the first ty_sum and then continues
+#// with the rest of generic_values.
+                                         ⟶ SHL ty_qualified_path_and_generic_values L_GT
+                                         ⟶ SHL ty_qualified_path_and_generic_values SHR
+                                         ⟶ SHL ty_qualified_path_and_generic_values GE
+                                         ⟶ SHL ty_qualified_path_and_generic_values SHREQ 
+;
+
+generic_values                           ⟶ maybe_lifetimes maybe_ty_sums_and_or_bindings 
+;
+
+maybe_ty_sums_and_or_bindings            ⟶ ty_sums
+                                         ⟶ ty_sums L_COMMA
+                                         ⟶ ty_sums L_COMMA bindings
+                                         ⟶ bindings
+                                         ⟶ bindings L_COMMA
+                                         ⟶           
+;
+
+maybe_bindings                           ⟶ L_COMMA bindings
+                                         ⟶        
+;
+
+#////////////////////////////////////////////////////////////////////////
+#// Part 2: Patterns
+#////////////////////////////////////////////////////////////////////////
+pat                                      ⟶ UNDERSCORE
+                                         ⟶ L_AMPERSAND pat
+                                         ⟶ L_AMPERSAND MUT pat
+                                         ⟶ ANDAND pat
+                                         ⟶ L_LPAREN L_RPAREN
+                                         ⟶ L_LPAREN pat_tup L_RPAREN
+                                         ⟶ L_LPAREN pat_tup L_COMMA L_RPAREN
+                                         ⟶ L_LSQBRACE pat_vec L_RSQBRACE
+                                         ⟶ lit_or_path
+                                         ⟶ lit_or_path DOTDOTDOT lit_or_path
+                                         ⟶ path_expr L_LCUBRACE pat_struct L_RCUBRACE
+                                         ⟶ path_expr L_LPAREN DOTDOT L_RPAREN
+                                         ⟶ path_expr L_LPAREN pat_tup L_RPAREN
+                                         ⟶ path_expr L_EXCLAMATION maybe_ident delimited_token_trees
+                                         ⟶ binding_mode ident
+                                         ⟶              ident L_AT pat
+                                         ⟶ binding_mode ident L_AT pat
+                                         ⟶ BOX pat
+                                         ⟶ L_LT ty_sum maybe_as_trait_ref L_GT MOD_SEP ident
+                                         ⟶ SHL ty_sum maybe_as_trait_ref L_GT MOD_SEP ident maybe_as_trait_ref L_GT MOD_SEP ident
+;
+
+pats_or                                  ⟶ pat
+                                         ⟶ pats_or L_VERTICAL_LINE pat 
+;
+
+binding_mode                             ⟶ REF
+                                         ⟶ REF MUT
+                                         ⟶ MUT        
+;
+
+lit_or_path                              ⟶ path_expr
+                                         ⟶ lit
+                                         ⟶ L_MINUS lit     
+;
+
+pat_field                                ⟶                  ident
+                                         ⟶     binding_mode ident
+                                         ⟶ BOX              ident
+                                         ⟶ BOX binding_mode ident
+                                         ⟶              ident L_COLON pat
+                                         ⟶ binding_mode ident L_COLON pat
+;
+
+pat_fields                               ⟶ pat_field
+                                         ⟶ pat_fields L_COMMA pat_field  
+;
+
+pat_struct                               ⟶ pat_fields
+                                         ⟶ pat_fields L_COMMA
+                                         ⟶ pat_fields L_COMMA DOTDOT
+                                         ⟶ DOTDOT                     
+;
+
+pat_tup                                  ⟶ pat
+                                         ⟶ pat_tup L_COMMA pat
+;
+
+pat_vec                                  ⟶ pat_vec_elts
+                                         ⟶ pat_vec_elts                             L_COMMA
+                                         ⟶ pat_vec_elts     DOTDOT
+                                         ⟶ pat_vec_elts L_COMMA DOTDOT
+                                         ⟶ pat_vec_elts     DOTDOT L_COMMA pat_vec_elts
+                                         ⟶ pat_vec_elts     DOTDOT L_COMMA pat_vec_elts L_COMMA
+                                         ⟶ pat_vec_elts L_COMMA DOTDOT L_COMMA pat_vec_elts
+                                         ⟶ pat_vec_elts L_COMMA DOTDOT L_COMMA pat_vec_elts L_COMMA
+                                         ⟶                  DOTDOT L_COMMA pat_vec_elts
+                                         ⟶                  DOTDOT L_COMMA pat_vec_elts L_COMMA
+                                         ⟶                  DOTDOT
+                                         ⟶                                         
+;
+
+pat_vec_elts                             ⟶ pat
+                                         ⟶ pat_vec_elts L_COMMA pat
+;
+
+#////////////////////////////////////////////////////////////////////////
+#// Part 3: Types
+#////////////////////////////////////////////////////////////////////////
+ty                                       ⟶ ty_prim
+                                         ⟶ ty_closure
+                                         ⟶ L_LT ty_sum maybe_as_trait_ref L_GT MOD_SEP ident
+                                         ⟶ SHL ty_sum maybe_as_trait_ref L_GT MOD_SEP ident maybe_as_trait_ref L_GT MOD_SEP ident
+                                         ⟶ L_LPAREN ty_sums L_RPAREN
+                                         ⟶ L_LPAREN ty_sums L_COMMA L_RPAREN
+                                         ⟶ L_LPAREN L_RPAREN                                                                              
+;
+
+ty_prim                                  ⟶  path_generic_args_without_colons
+                                         ⟶  MOD_SEP path_generic_args_without_colons
+                                         ⟶  SELF MOD_SEP path_generic_args_without_colons
+                                         ⟶ BOX ty
+                                         ⟶ L_MUL maybe_mut_or_const ty
+                                         ⟶ L_AMPERSAND ty
+                                         ⟶ L_AMPERSAND MUT ty
+                                         ⟶ ANDAND ty
+                                         ⟶ ANDAND MUT ty
+                                         ⟶ L_AMPERSAND lifetime maybe_mut ty
+                                         ⟶ ANDAND lifetime maybe_mut ty
+                                         ⟶ L_LSQBRACE ty L_RSQBRACE
+                                         ⟶ L_LSQBRACE ty L_COMMA DOTDOT expr L_RSQBRACE
+                                         ⟶ L_LSQBRACE ty L_SEMI expr L_RSQBRACE
+                                         ⟶ TYPEOF L_LPAREN expr L_RPAREN
+                                         ⟶ UNDERSCORE
+                                         ⟶ ty_bare_fn
+                                         ⟶ ty_proc
+                                         ⟶ for_in_type
+;
+
+ty_bare_fn                               ⟶                         FN ty_fn_decl
+                                         ⟶ UNSAFE                  FN ty_fn_decl
+                                         ⟶        EXTERN maybe_abi FN ty_fn_decl
+                                         ⟶ UNSAFE EXTERN maybe_abi FN ty_fn_decl 
+;
+
+ty_fn_decl                               ⟶ generic_params fn_anon_params ret_ty 
+;
+
+ty_closure                               ⟶ UNSAFE L_VERTICAL_LINE anon_params L_VERTICAL_LINE maybe_bounds ret_ty
+                                         ⟶        L_VERTICAL_LINE anon_params L_VERTICAL_LINE maybe_bounds ret_ty
+                                         ⟶ UNSAFE OROR maybe_bounds ret_ty
+                                         ⟶        OROR maybe_bounds ret_ty                
+;
+
+ty_proc                                  ⟶ PROC generic_params fn_params maybe_bounds ret_ty 
+;
+
+for_in_type                              ⟶ FOR L_LT maybe_lifetimes L_GT for_in_type_suffix 
+;
+
+for_in_type_suffix                       ⟶ ty_proc
+                                         ⟶ ty_bare_fn
+                                         ⟶ trait_ref
+                                         ⟶ ty_closure
+;
+
+maybe_mut                                ⟶ MUT
+                                         ⟶  
+;
+
+maybe_mut_or_const                       ⟶ MUT
+                                         ⟶ CONST
+                                         ⟶  
+;
+
+ty_qualified_path_and_generic_values     ⟶ ty_qualified_path maybe_bindings
+                                         ⟶ ty_qualified_path L_COMMA ty_sums maybe_bindings
+;
+
+ty_qualified_path                        ⟶ ty_sum AS trait_ref L_GT MOD_SEP ident
+                                         ⟶ ty_sum AS trait_ref L_GT MOD_SEP ident L_PLUS ty_param_bounds 
+;
+
+maybe_ty_sums                            ⟶ ty_sums
+                                         ⟶ ty_sums L_COMMA
+                                         ⟶  
+;
+
+ty_sums                                  ⟶ ty_sum
+                                         ⟶ ty_sums L_COMMA ty_sum 
+;
+
+ty_sum                                   ⟶ ty
+                                         ⟶ ty L_PLUS ty_param_bounds 
+;
+
+ty_prim_sum                              ⟶ ty_prim
+                                         ⟶ ty_prim L_PLUS ty_param_bounds 
+;
+
+maybe_ty_param_bounds                    ⟶ L_COLON ty_param_bounds
+                                         ⟶               
+;
+
+ty_param_bounds                          ⟶ boundseq
+                                         ⟶  
+;
+
+boundseq                                 ⟶ polybound
+                                         ⟶ boundseq L_PLUS polybound 
+;
+
+polybound                                ⟶ FOR L_LT maybe_lifetimes L_GT bound
+                                         ⟶ bound
+                                         ⟶ L_QUESTIONMARK bound 
+;
+
+bindings                                 ⟶ binding
+                                         ⟶ bindings L_COMMA binding 
+;
+
+binding                                  ⟶ ident L_IS ty 
+;
+
+ty_param                                 ⟶ ident maybe_ty_param_bounds maybe_ty_default
+                                         ⟶ ident L_QUESTIONMARK ident maybe_ty_param_bounds maybe_ty_default 
+;
+
+maybe_bounds                             ⟶ 
+  L_COLON bounds
+                                         ⟶   
+;
+
+bounds                                   ⟶ bound
+                                         ⟶ bounds L_PLUS bound 
+;
+
+bound                                    ⟶ lifetime
+                                         ⟶ trait_ref
+;
+
+maybe_ltbounds                           ⟶ 
+  L_COLON ltbounds
+                                         ⟶             
+;
+
+ltbounds                                 ⟶ lifetime
+                                         ⟶ ltbounds L_PLUS lifetime 
+;
+
+maybe_ty_default                         ⟶ L_IS ty_sum
+                                         ⟶      
+;
+
+maybe_lifetimes                          ⟶ lifetimes
+                                         ⟶ lifetimes L_COMMA
+                                         ⟶  
+;
+
+lifetimes                                ⟶ lifetime_and_bounds
+                                         ⟶ lifetimes L_COMMA lifetime_and_bounds 
+;
+
+lifetime_and_bounds                      ⟶ LIFETIME maybe_ltbounds
+                                         ⟶ STATIC_LIFETIME                
+;
+
+lifetime                                 ⟶ LIFETIME
+                                         ⟶ STATIC_LIFETIME  
+;
+
+trait_ref                                ⟶  path_generic_args_without_colons
+                                         ⟶  MOD_SEP path_generic_args_without_colons 
+;
+
+#////////////////////////////////////////////////////////////////////////
+#// Part 4: Blocks, statements, and expressions
+#////////////////////////////////////////////////////////////////////////
+inner_attrs_and_block                    ⟶ L_LCUBRACE maybe_inner_attrs maybe_stmts L_RCUBRACE        
+;
+
+block                                    ⟶ L_LCUBRACE maybe_stmts L_RCUBRACE                         
+;
+
+maybe_stmts                              ⟶ stmts
+                                         ⟶ stmts nonblock_expr
+                                         ⟶ nonblock_expr
+                                         ⟶               
+;
+
+#// There are two sub-grammars within a "stmts: exprs" derivation
+#// depending on whether each stmt-expr is a block-expr form; this is to
+#// handle the "semicolon rule" for stmt sequencing that permits
+#// writing
+#//
+#//     if foo { bar } 10
+#//
+#// as a sequence of two stmts (one if-expr stmt, one lit-10-expr
+#// stmt). Unfortunately by permitting juxtaposition of exprs in
+#// sequence like that, the non-block expr grammar has to have a
+#// second limited sub-grammar that excludes the prefix exprs that
+#// are ambiguous with binops. That is to say:
+#//
+#//     {10} - 1
+#//
+#// should parse as (progn (progn 10) (- 1)) not (- (progn 10) 1), that
+#// is to say, two statements rather than one, at least according to
+#// the mainline rust parser.
+#//
+#// So we wind up with a 3-way split in exprs that occur in stmt lists:
+#// block, nonblock-prefix, and nonblock-nonprefix.
+#//
+#// In non-stmts contexts, expr can relax this trichotomy.
+#//
+#// There is also one other expr subtype: nonparen_expr disallows exprs
+#// surrounded by parens (including tuple expressions), this is
+#// necessary for BOX (place) expressions, so a parens expr following
+#// the BOX is always parsed as the place.
+stmts                                    ⟶ stmt
+                                         ⟶ stmts stmt     
+;
+
+stmt                                     ⟶ let
+                                         ⟶                 stmt_item
+                                         ⟶             PUB stmt_item
+                                         ⟶ outer_attrs     stmt_item
+                                         ⟶ outer_attrs PUB stmt_item
+                                         ⟶ full_block_expr
+                                         ⟶ block
+                                         ⟶ nonblock_expr L_SEMI
+                                         ⟶ L_SEMI                   
+;
+
+maybe_exprs                              ⟶ exprs
+                                         ⟶ exprs L_COMMA
+                                         ⟶  
+;
+
+maybe_expr                               ⟶ expr
+                                         ⟶  
+;
+
+exprs                                    ⟶ expr
+                                         ⟶ exprs L_COMMA expr       
+;
+
+path_expr                                ⟶ path_generic_args_with_colons
+                                         ⟶ MOD_SEP path_generic_args_with_colons
+                                         ⟶ SELF MOD_SEP path_generic_args_with_colons 
+;
+
+#// A path with a lifetime and type parameters with double colons before
+#// the type parameters; e.g. `foo::bar::<'a>::Baz::<T>`
+#//
+#// These show up in expr context, in order to disambiguate from "less-than"
+#// expressions.
+path_generic_args_with_colons            ⟶ ident
+                                         ⟶ path_generic_args_with_colons MOD_SEP ident
+                                         ⟶ path_generic_args_with_colons MOD_SEP generic_args 
+;
+
+#// the braces-delimited macro is a block_expr so it doesn't appear here
+macro_expr                               ⟶ path_expr L_EXCLAMATION maybe_ident parens_delimited_token_trees
+                                         ⟶ path_expr L_EXCLAMATION maybe_ident brackets_delimited_token_trees 
+;
+
+nonblock_expr                            ⟶ lit
+                                         ⟶ 
+  path_expr
+                                         ⟶ SELF
+                                         ⟶ macro_expr
+                                         ⟶ path_expr L_LCUBRACE struct_expr_fields L_RCUBRACE
+                                         ⟶ nonblock_expr L_DOT path_generic_args_with_colons
+                                         ⟶ nonblock_expr L_DOT LIT_INTEGER
+                                         ⟶ nonblock_expr L_LSQBRACE maybe_expr L_RSQBRACE
+                                         ⟶ nonblock_expr L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ L_LSQBRACE vec_expr L_RSQBRACE
+                                         ⟶ L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ CONTINUE
+                                         ⟶ CONTINUE lifetime
+                                         ⟶ RETURN
+                                         ⟶ RETURN expr
+                                         ⟶ BREAK
+                                         ⟶ BREAK lifetime
+                                         ⟶ nonblock_expr LARROW expr
+                                         ⟶ nonblock_expr L_IS expr
+                                         ⟶ nonblock_expr SHLEQ expr
+                                         ⟶ nonblock_expr SHREQ expr
+                                         ⟶ nonblock_expr MINUSEQ expr
+                                         ⟶ nonblock_expr ANDEQ expr
+                                         ⟶ nonblock_expr OREQ expr
+                                         ⟶ nonblock_expr PLUSEQ expr
+                                         ⟶ nonblock_expr STAREQ expr
+                                         ⟶ nonblock_expr SLASHEQ expr
+                                         ⟶ nonblock_expr CARETEQ expr
+                                         ⟶ nonblock_expr PERCENTEQ expr
+                                         ⟶ nonblock_expr OROR expr
+                                         ⟶ nonblock_expr ANDAND expr
+                                         ⟶ nonblock_expr EQEQ expr
+                                         ⟶ nonblock_expr NE expr
+                                         ⟶ nonblock_expr L_LT expr
+                                         ⟶ nonblock_expr L_GT expr
+                                         ⟶ nonblock_expr LE expr
+                                         ⟶ nonblock_expr GE expr
+                                         ⟶ nonblock_expr L_VERTICAL_LINE expr
+                                         ⟶ nonblock_expr L_CIRCUMFLEX expr
+                                         ⟶ nonblock_expr L_AMPERSAND expr
+                                         ⟶ nonblock_expr SHL expr
+                                         ⟶ nonblock_expr SHR expr
+                                         ⟶ nonblock_expr L_PLUS expr
+                                         ⟶ nonblock_expr L_MINUS expr
+                                         ⟶ nonblock_expr L_MUL expr
+                                         ⟶ nonblock_expr L_DIV expr
+                                         ⟶ nonblock_expr L_MOD expr
+                                         ⟶ nonblock_expr DOTDOT
+                                         ⟶ nonblock_expr DOTDOT expr
+                                         ⟶               DOTDOT expr
+                                         ⟶               DOTDOT
+                                         ⟶ nonblock_expr AS ty
+                                         ⟶ BOX nonparen_expr
+                                         ⟶  BOX L_LPAREN maybe_expr L_RPAREN nonblock_expr
+                                         ⟶ expr_qualified_path
+                                         ⟶ nonblock_prefix_expr
+;
+
+expr                                     ⟶ lit
+                                         ⟶ 
+  path_expr
+                                         ⟶ SELF
+                                         ⟶ macro_expr
+                                         ⟶ path_expr L_LCUBRACE struct_expr_fields L_RCUBRACE
+                                         ⟶ expr L_DOT path_generic_args_with_colons
+                                         ⟶ expr L_DOT LIT_INTEGER
+                                         ⟶ expr L_LSQBRACE maybe_expr L_RSQBRACE
+                                         ⟶ expr L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ L_LSQBRACE vec_expr L_RSQBRACE
+                                         ⟶ CONTINUE
+                                         ⟶ CONTINUE ident
+                                         ⟶ RETURN
+                                         ⟶ RETURN expr
+                                         ⟶ BREAK
+                                         ⟶ BREAK ident
+                                         ⟶ expr LARROW expr
+                                         ⟶ expr L_IS expr
+                                         ⟶ expr SHLEQ expr
+                                         ⟶ expr SHREQ expr
+                                         ⟶ expr MINUSEQ expr
+                                         ⟶ expr ANDEQ expr
+                                         ⟶ expr OREQ expr
+                                         ⟶ expr PLUSEQ expr
+                                         ⟶ expr STAREQ expr
+                                         ⟶ expr SLASHEQ expr
+                                         ⟶ expr CARETEQ expr
+                                         ⟶ expr PERCENTEQ expr
+                                         ⟶ expr OROR expr
+                                         ⟶ expr ANDAND expr
+                                         ⟶ expr EQEQ expr
+                                         ⟶ expr NE expr
+                                         ⟶ expr L_LT expr
+                                         ⟶ expr L_GT expr
+                                         ⟶ expr LE expr
+                                         ⟶ expr GE expr
+                                         ⟶ expr L_VERTICAL_LINE expr
+                                         ⟶ expr L_CIRCUMFLEX expr
+                                         ⟶ expr L_AMPERSAND expr
+                                         ⟶ expr SHL expr
+                                         ⟶ expr SHR expr
+                                         ⟶ expr L_PLUS expr
+                                         ⟶ expr L_MINUS expr
+                                         ⟶ expr L_MUL expr
+                                         ⟶ expr L_DIV expr
+                                         ⟶ expr L_MOD expr
+                                         ⟶ expr DOTDOT
+                                         ⟶ expr DOTDOT expr
+                                         ⟶      DOTDOT expr
+                                         ⟶      DOTDOT
+                                         ⟶ expr AS ty
+                                         ⟶ BOX nonparen_expr
+                                         ⟶  BOX L_LPAREN maybe_expr L_RPAREN expr
+                                         ⟶ expr_qualified_path
+                                         ⟶ block_expr
+                                         ⟶ block
+                                         ⟶ nonblock_prefix_expr
+;
+
+nonparen_expr                            ⟶ lit
+                                         ⟶ 
+  path_expr
+                                         ⟶ SELF
+                                         ⟶ macro_expr
+                                         ⟶ path_expr L_LCUBRACE struct_expr_fields L_RCUBRACE
+                                         ⟶ nonparen_expr L_DOT path_generic_args_with_colons
+                                         ⟶ nonparen_expr L_DOT LIT_INTEGER
+                                         ⟶ nonparen_expr L_LSQBRACE maybe_expr L_RSQBRACE
+                                         ⟶ nonparen_expr L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ L_LSQBRACE vec_expr L_RSQBRACE
+                                         ⟶ CONTINUE
+                                         ⟶ CONTINUE ident
+                                         ⟶ RETURN
+                                         ⟶ RETURN expr
+                                         ⟶ BREAK
+                                         ⟶ BREAK ident
+                                         ⟶ nonparen_expr LARROW nonparen_expr
+                                         ⟶ nonparen_expr L_IS nonparen_expr
+                                         ⟶ nonparen_expr SHLEQ nonparen_expr
+                                         ⟶ nonparen_expr SHREQ nonparen_expr
+                                         ⟶ nonparen_expr MINUSEQ nonparen_expr
+                                         ⟶ nonparen_expr ANDEQ nonparen_expr
+                                         ⟶ nonparen_expr OREQ nonparen_expr
+                                         ⟶ nonparen_expr PLUSEQ nonparen_expr
+                                         ⟶ nonparen_expr STAREQ nonparen_expr
+                                         ⟶ nonparen_expr SLASHEQ nonparen_expr
+                                         ⟶ nonparen_expr CARETEQ nonparen_expr
+                                         ⟶ nonparen_expr PERCENTEQ nonparen_expr
+                                         ⟶ nonparen_expr OROR nonparen_expr
+                                         ⟶ nonparen_expr ANDAND nonparen_expr
+                                         ⟶ nonparen_expr EQEQ nonparen_expr
+                                         ⟶ nonparen_expr NE nonparen_expr
+                                         ⟶ nonparen_expr L_LT nonparen_expr
+                                         ⟶ nonparen_expr L_GT nonparen_expr
+                                         ⟶ nonparen_expr LE nonparen_expr
+                                         ⟶ nonparen_expr GE nonparen_expr
+                                         ⟶ nonparen_expr L_VERTICAL_LINE nonparen_expr
+                                         ⟶ nonparen_expr L_CIRCUMFLEX nonparen_expr
+                                         ⟶ nonparen_expr L_AMPERSAND nonparen_expr
+                                         ⟶ nonparen_expr SHL nonparen_expr
+                                         ⟶ nonparen_expr SHR nonparen_expr
+                                         ⟶ nonparen_expr L_PLUS nonparen_expr
+                                         ⟶ nonparen_expr L_MINUS nonparen_expr
+                                         ⟶ nonparen_expr L_MUL nonparen_expr
+                                         ⟶ nonparen_expr L_DIV nonparen_expr
+                                         ⟶ nonparen_expr L_MOD nonparen_expr
+                                         ⟶ nonparen_expr DOTDOT
+                                         ⟶ nonparen_expr DOTDOT nonparen_expr
+                                         ⟶               DOTDOT nonparen_expr
+                                         ⟶               DOTDOT
+                                         ⟶ nonparen_expr AS ty
+                                         ⟶ BOX nonparen_expr
+                                         ⟶  BOX L_LPAREN maybe_expr L_RPAREN expr
+                                         ⟶ expr_qualified_path
+                                         ⟶ block_expr
+                                         ⟶ block
+                                         ⟶ nonblock_prefix_expr
+;
+
+expr_nostruct                            ⟶ lit
+                                         ⟶ 
+  path_expr
+                                         ⟶ SELF
+                                         ⟶ macro_expr
+                                         ⟶ expr_nostruct L_DOT path_generic_args_with_colons
+                                         ⟶ expr_nostruct L_DOT LIT_INTEGER
+                                         ⟶ expr_nostruct L_LSQBRACE maybe_expr L_RSQBRACE
+                                         ⟶ expr_nostruct L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ L_LSQBRACE vec_expr L_RSQBRACE
+                                         ⟶ L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ CONTINUE
+                                         ⟶ CONTINUE ident
+                                         ⟶ RETURN
+                                         ⟶ RETURN expr
+                                         ⟶ BREAK
+                                         ⟶ BREAK ident
+                                         ⟶ expr_nostruct LARROW expr_nostruct
+                                         ⟶ expr_nostruct L_IS expr_nostruct
+                                         ⟶ expr_nostruct SHLEQ expr_nostruct
+                                         ⟶ expr_nostruct SHREQ expr_nostruct
+                                         ⟶ expr_nostruct MINUSEQ expr_nostruct
+                                         ⟶ expr_nostruct ANDEQ expr_nostruct
+                                         ⟶ expr_nostruct OREQ expr_nostruct
+                                         ⟶ expr_nostruct PLUSEQ expr_nostruct
+                                         ⟶ expr_nostruct STAREQ expr_nostruct
+                                         ⟶ expr_nostruct SLASHEQ expr_nostruct
+                                         ⟶ expr_nostruct CARETEQ expr_nostruct
+                                         ⟶ expr_nostruct PERCENTEQ expr_nostruct
+                                         ⟶ expr_nostruct OROR expr_nostruct
+                                         ⟶ expr_nostruct ANDAND expr_nostruct
+                                         ⟶ expr_nostruct EQEQ expr_nostruct
+                                         ⟶ expr_nostruct NE expr_nostruct
+                                         ⟶ expr_nostruct L_LT expr_nostruct
+                                         ⟶ expr_nostruct L_GT expr_nostruct
+                                         ⟶ expr_nostruct LE expr_nostruct
+                                         ⟶ expr_nostruct GE expr_nostruct
+                                         ⟶ expr_nostruct L_VERTICAL_LINE expr_nostruct
+                                         ⟶ expr_nostruct L_CIRCUMFLEX expr_nostruct
+                                         ⟶ expr_nostruct L_AMPERSAND expr_nostruct
+                                         ⟶ expr_nostruct SHL expr_nostruct
+                                         ⟶ expr_nostruct SHR expr_nostruct
+                                         ⟶ expr_nostruct L_PLUS expr_nostruct
+                                         ⟶ expr_nostruct L_MINUS expr_nostruct
+                                         ⟶ expr_nostruct L_MUL expr_nostruct
+                                         ⟶ expr_nostruct L_DIV expr_nostruct
+                                         ⟶ expr_nostruct L_MOD expr_nostruct
+                                         ⟶ expr_nostruct DOTDOT
+                                         ⟶ expr_nostruct DOTDOT expr_nostruct
+                                         ⟶               DOTDOT expr_nostruct
+                                         ⟶               DOTDOT
+                                         ⟶ expr_nostruct AS ty
+                                         ⟶ BOX nonparen_expr
+                                         ⟶  BOX L_LPAREN maybe_expr L_RPAREN expr_nostruct
+                                         ⟶ expr_qualified_path
+                                         ⟶ block_expr
+                                         ⟶ block
+                                         ⟶ nonblock_prefix_expr_nostruct
+;
+
+nonblock_prefix_expr_nostruct            ⟶ L_MINUS expr_nostruct
+                                         ⟶ L_EXCLAMATION expr_nostruct
+                                         ⟶ L_MUL expr_nostruct
+                                         ⟶ L_AMPERSAND maybe_mut expr_nostruct
+                                         ⟶ ANDAND maybe_mut expr_nostruct
+                                         ⟶ lambda_expr_nostruct
+                                         ⟶ MOVE lambda_expr_nostruct
+                                         ⟶ proc_expr_nostruct
+;
+
+nonblock_prefix_expr                     ⟶ L_MINUS expr
+                                         ⟶ L_EXCLAMATION expr
+                                         ⟶ L_MUL expr
+                                         ⟶ L_AMPERSAND maybe_mut expr
+                                         ⟶ ANDAND maybe_mut expr
+                                         ⟶ lambda_expr
+                                         ⟶ MOVE lambda_expr
+                                         ⟶ proc_expr
+;
+
+expr_qualified_path                      ⟶ L_LT ty_sum maybe_as_trait_ref L_GT MOD_SEP ident maybe_qpath_params
+                                         ⟶ SHL ty_sum maybe_as_trait_ref L_GT MOD_SEP ident maybe_as_trait_ref L_GT MOD_SEP ident
+                                         ⟶ SHL ty_sum maybe_as_trait_ref L_GT MOD_SEP ident generic_args maybe_as_trait_ref L_GT MOD_SEP ident
+                                         ⟶ SHL ty_sum maybe_as_trait_ref L_GT MOD_SEP ident maybe_as_trait_ref L_GT MOD_SEP ident generic_args
+                                         ⟶ SHL ty_sum maybe_as_trait_ref L_GT MOD_SEP ident generic_args maybe_as_trait_ref L_GT MOD_SEP ident generic_args
+;
+
+maybe_qpath_params                       ⟶ MOD_SEP generic_args
+                                         ⟶                
+;
+
+maybe_as_trait_ref                       ⟶ AS trait_ref
+                                         ⟶        
+;
+
+lambda_expr                              ⟶ 
+  OROR ret_ty expr
+                                         ⟶ 
+  L_VERTICAL_LINE maybe_unboxed_closure_kind L_VERTICAL_LINE ret_ty expr
+                                         ⟶ 
+  L_VERTICAL_LINE inferrable_params L_VERTICAL_LINE ret_ty expr
+                                         ⟶ 
+  L_VERTICAL_LINE L_AMPERSAND maybe_mut L_COLON inferrable_params L_VERTICAL_LINE ret_ty expr
+                                         ⟶ 
+  L_VERTICAL_LINE L_COLON inferrable_params L_VERTICAL_LINE ret_ty expr               
+;
+
+lambda_expr_nostruct                     ⟶ 
+  OROR expr_nostruct
+                                         ⟶ 
+  L_VERTICAL_LINE maybe_unboxed_closure_kind L_VERTICAL_LINE  expr_nostruct
+                                         ⟶ 
+  L_VERTICAL_LINE inferrable_params L_VERTICAL_LINE expr_nostruct
+                                         ⟶ 
+  L_VERTICAL_LINE L_AMPERSAND maybe_mut L_COLON inferrable_params L_VERTICAL_LINE expr_nostruct
+                                         ⟶ 
+  L_VERTICAL_LINE L_COLON inferrable_params L_VERTICAL_LINE expr_nostruct               
+
+;
+
+proc_expr                                ⟶ 
+  PROC L_LPAREN L_RPAREN expr
+                                         ⟶ 
+  PROC L_LPAREN inferrable_params L_RPAREN expr      
+;
+
+proc_expr_nostruct                       ⟶  PROC L_LPAREN L_RPAREN expr_nostruct
+                                         ⟶  PROC L_LPAREN inferrable_params L_RPAREN expr_nostruct  
+;
+
+vec_expr                                 ⟶ maybe_exprs
+                                         ⟶ exprs L_SEMI expr 
+;
+
+struct_expr_fields                       ⟶ field_inits
+                                         ⟶ field_inits L_COMMA
+                                         ⟶ maybe_field_inits default_field_init
+;
+
+maybe_field_inits                        ⟶ field_inits
+                                         ⟶ field_inits L_COMMA
+                                         ⟶  
+;
+
+field_inits                              ⟶ field_init
+                                         ⟶ field_inits L_COMMA field_init 
+;
+
+field_init                               ⟶ ident L_COLON expr  
+;
+
+default_field_init                       ⟶ DOTDOT expr   
+;
+
+block_expr                               ⟶ expr_match
+                                         ⟶ expr_if
+                                         ⟶ expr_if_let
+                                         ⟶ expr_while
+                                         ⟶ expr_while_let
+                                         ⟶ expr_loop
+                                         ⟶ expr_for
+                                         ⟶ UNSAFE block
+                                         ⟶ path_expr L_EXCLAMATION maybe_ident braces_delimited_token_trees
+;
+
+full_block_expr                          ⟶ block_expr
+                                         ⟶ full_block_expr L_DOT path_generic_args_with_colons
+                                         ⟶ full_block_expr L_DOT path_generic_args_with_colons L_LSQBRACE maybe_expr L_RSQBRACE
+                                         ⟶ full_block_expr L_DOT path_generic_args_with_colons L_LPAREN maybe_exprs L_RPAREN
+                                         ⟶ full_block_expr L_DOT LIT_INTEGER                                      
+;
+
+expr_match                               ⟶ MATCH expr_nostruct L_LCUBRACE L_RCUBRACE
+                                         ⟶ MATCH expr_nostruct L_LCUBRACE match_clauses                       L_RCUBRACE
+                                         ⟶ MATCH expr_nostruct L_LCUBRACE match_clauses nonblock_match_clause L_RCUBRACE
+                                         ⟶ MATCH expr_nostruct L_LCUBRACE               nonblock_match_clause L_RCUBRACE 
+;
+
+match_clauses                            ⟶ match_clause
+                                         ⟶ match_clauses match_clause
+;
+
+match_clause                             ⟶ nonblock_match_clause L_COMMA
+                                         ⟶ block_match_clause
+                                         ⟶ block_match_clause L_COMMA
+;
+
+nonblock_match_clause                    ⟶ maybe_outer_attrs pats_or maybe_guard FAT_ARROW nonblock_expr
+                                         ⟶ maybe_outer_attrs pats_or maybe_guard FAT_ARROW full_block_expr
+;
+
+block_match_clause                       ⟶ maybe_outer_attrs pats_or maybe_guard FAT_ARROW block
+;
+
+maybe_guard                              ⟶ IF expr_nostruct
+                                         ⟶                     
+;
+
+expr_if                                  ⟶ IF expr_nostruct block
+                                         ⟶ IF expr_nostruct block ELSE block_or_if             
+;
+
+expr_if_let                              ⟶ IF LET pat L_IS expr_nostruct block
+                                         ⟶ IF LET pat L_IS expr_nostruct block ELSE block_or_if 
+;
+
+block_or_if                              ⟶ block
+                                         ⟶ expr_if
+                                         ⟶ expr_if_let
+;
+
+expr_while                               ⟶ maybe_label WHILE expr_nostruct block               
+;
+
+expr_while_let                           ⟶ maybe_label WHILE LET pat L_IS expr_nostruct block   
+;
+
+expr_loop                                ⟶ maybe_label LOOP block                              
+;
+
+expr_for                                 ⟶ maybe_label FOR pat IN expr_nostruct block          
+;
+
+maybe_label                              ⟶ lifetime L_COLON
+                                         ⟶ 
+;
+
+let                                      ⟶ LET pat maybe_ty_ascription maybe_init_expr L_SEMI
+;
+
+#////////////////////////////////////////////////////////////////////////
+#// Part 5: Macros and misc. rules
+#////////////////////////////////////////////////////////////////////////
+lit                                      ⟶ LIT_BYTE
+                                         ⟶ LIT_CHAR
+                                         ⟶ LIT_INTEGER
+                                         ⟶ LIT_FLOAT
+                                         ⟶ TRUE
+                                         ⟶ FALSE
+                                         ⟶ str
+;
+
+str                                      ⟶ LIT_STR
+                                         ⟶ LIT_STR_RAW
+                                         ⟶ LIT_BYTE_STR
+                                         ⟶ LIT_BYTE_STR_RAW          
+;
+
+maybe_ident                              ⟶
+                                         ⟶ ident
+;
+
+ident                                    ⟶ IDENT                     
+;
+
+unpaired_token                           ⟶ SHL
+                                         ⟶ SHR
+                                         ⟶ LE
+                                         ⟶ EQEQ
+                                         ⟶ NE
+                                         ⟶ GE
+                                         ⟶ ANDAND
+                                         ⟶ OROR
+                                         ⟶ LARROW
+                                         ⟶ SHLEQ
+                                         ⟶ SHREQ
+                                         ⟶ MINUSEQ
+                                         ⟶ ANDEQ
+                                         ⟶ OREQ
+                                         ⟶ PLUSEQ
+                                         ⟶ STAREQ
+                                         ⟶ SLASHEQ
+                                         ⟶ CARETEQ
+                                         ⟶ PERCENTEQ
+                                         ⟶ DOTDOT
+                                         ⟶ DOTDOTDOT
+                                         ⟶ MOD_SEP
+                                         ⟶ RARROW
+                                         ⟶ FAT_ARROW
+                                         ⟶ LIT_BYTE
+                                         ⟶ LIT_CHAR
+                                         ⟶ LIT_INTEGER
+                                         ⟶ LIT_FLOAT
+                                         ⟶ LIT_STR
+                                         ⟶ LIT_STR_RAW
+                                         ⟶ LIT_BYTE_STR
+                                         ⟶ LIT_BYTE_STR_RAW
+                                         ⟶ IDENT
+                                         ⟶ UNDERSCORE
+                                         ⟶ LIFETIME
+                                         ⟶ SELF
+                                         ⟶ STATIC
+                                         ⟶ AS
+                                         ⟶ BREAK
+                                         ⟶ CRATE
+                                         ⟶ ELSE
+                                         ⟶ ENUM
+                                         ⟶ EXTERN
+                                         ⟶ FALSE
+                                         ⟶ FN
+                                         ⟶ FOR
+                                         ⟶ IF
+                                         ⟶ IMPL
+                                         ⟶ IN
+                                         ⟶ LET
+                                         ⟶ LOOP
+                                         ⟶ MATCH
+                                         ⟶ MOD
+                                         ⟶ MOVE
+                                         ⟶ MUT
+                                         ⟶ PRIV
+                                         ⟶ PUB
+                                         ⟶ REF
+                                         ⟶ RETURN
+                                         ⟶ STRUCT
+                                         ⟶ TRUE
+                                         ⟶ TRAIT
+                                         ⟶ TYPE
+                                         ⟶ UNSAFE
+                                         ⟶ USE
+                                         ⟶ WHILE
+                                         ⟶ CONTINUE
+                                         ⟶ PROC
+                                         ⟶ BOX
+                                         ⟶ CONST
+                                         ⟶ WHERE
+                                         ⟶ TYPEOF
+                                         ⟶ INNER_DOC_COMMENT
+                                         ⟶ OUTER_DOC_COMMENT
+                                         ⟶ SHEBANG
+                                         ⟶ STATIC_LIFETIME
+                                         ⟶ L_SEMI
+                                         ⟶ L_COMMA
+                                         ⟶ L_DOT
+                                         ⟶ L_AT
+                                         ⟶ L_HASH
+                                         ⟶ L_NEG
+                                         ⟶ L_COLON
+                                         ⟶ L_DOLLAR
+                                         ⟶ L_IS
+                                         ⟶ L_QUESTIONMARK
+                                         ⟶ L_EXCLAMATION
+                                         ⟶ L_LT
+                                         ⟶ L_GT
+                                         ⟶ L_MINUS
+                                         ⟶ L_AMPERSAND
+                                         ⟶ L_VERTICAL_LINE
+                                         ⟶ L_PLUS
+                                         ⟶ L_MUL
+                                         ⟶ L_DIV
+                                         ⟶ L_CIRCUMFLEX
+                                         ⟶ L_MOD                       
+;
+
+token_trees                              ⟶
+                                         ⟶ token_trees token_tree    
+;
+
+token_tree                               ⟶ delimited_token_trees
+                                         ⟶ unpaired_token         
+;
+
+delimited_token_trees                    ⟶ parens_delimited_token_trees
+                                         ⟶ braces_delimited_token_trees
+                                         ⟶ brackets_delimited_token_trees
+;
+
+parens_delimited_token_trees             ⟶ L_LPAREN token_trees L_RPAREN
+;
+
+braces_delimited_token_trees             ⟶ L_LCUBRACE token_trees L_RCUBRACE
+;
+
+brackets_delimited_token_trees           ⟶ L_LSQBRACE token_trees L_RSQBRACE
+;
+
+
+
+
+
+
+imports ｟
+
+	
+
+
+｠
+
+
+type TerminalDeclarationList token_tree;
+
+
+code generic_params ≣ 3                        ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+code generic_params ≣ 4                        ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+code generic_params ≣ 7                        ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+code generic_params ≣ 8                        ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+code generic_params ≣ 11                       ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+code generic_params ≣ 12                       ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+
+code generic_args  ≣ 2                       ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+code generic_args  ≣ 3                       ｟		grorun_fork_push_back_token(fork, "L_IS");		 ｠
+code generic_args  ≣ 4                       ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+
+code generic_args  ≣ 6                       ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+code generic_args  ≣ 7                       ｟		grorun_fork_push_back_token(fork, "L_IS");		 ｠
+code generic_args  ≣ 8                       ｟		grorun_fork_push_back_token(fork, "L_GT");		 ｠
+
+#generic_args                             ⟶ L_LT generic_values L_GT
+#                                         ⟶ L_LT generic_values SHR
+#                                         ⟶ L_LT generic_values GE
+#                                         ⟶ L_LT generic_values SHREQ 
+#                                         ⟶ SHL ty_qualified_path_and_generic_values L_GT
+#                                         ⟶ SHL ty_qualified_path_and_generic_values SHR
+#                                         ⟶ SHL ty_qualified_path_and_generic_values GE
+#                                         ⟶ SHL ty_qualified_path_and_generic_values SHREQ 
+#;
+
+

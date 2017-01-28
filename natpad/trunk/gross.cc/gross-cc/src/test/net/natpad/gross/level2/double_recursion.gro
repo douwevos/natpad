@@ -1,0 +1,28 @@
+terminal FUNCTION,VAR,RETURN,IF,ELSE,THIS,FOR,ID, NULL, TRUE, FALSE, NUMBER, STRING;
+terminal LPAREN,RPAREN,LBRACE,RBRACE,SEMI,COMMA;
+terminal ASS_IS,QUESTION,COLON,OP_LOR,OP_LAND, OP_BOR, OP_BXOR, OP_BAND;
+terminal DELETE, VOID, TYPEOF, OP_INC, OP_DEC, OP_ADD, OP_SUB, OP_NEG, OP_NOT, OP_MUL, OP_DIV, OP_MOD, OP_SHL, OP_SHR, OP_SHRR;
+terminal OP_LT, OP_GT, OP_LE, OP_GE, INSTANCE_OF, IN, OP_EQ, OP_NE, OP_TEQ, OP_TNE;
+
+terminal OP_ASS_MUL, OP_ASS_DIV, OP_ASS_MOD, OP_ASS_ADD, OP_ASS_SUB, OP_ASS_SHL, OP_ASS_SHR, OP_ASS_SHRR, OP_ASS_AND, OP_ASS_XOR, OP_ASS_OR;
+terminal NEW, LBRACK, RBRACK, DOT, REGULAR_EXPRESSION;
+
+terminal SWITCH, CASE, DEFAULT, DO, WHILE, WITH, CONTINUE, BREAK, THROW, TRY, CATCH, FINALLY, GET, SET, DEBUGGER;
+
+
+program                      ⟶ source_elements
+                             ⟶ ;
+ 
+source_elements              ⟶ source_elements source_element
+                             ⟶ source_element;
+
+source_element               ⟶ VAR ID SEMI
+                             ⟶ FUNCTION  LBRACE source_elements RBRACE
+                             ;
+
+        
+imports ｟｠        
+        
+type TerminalDeclarationList source_elements;        
+        
+code source_elements ｟ result = null; ｠        

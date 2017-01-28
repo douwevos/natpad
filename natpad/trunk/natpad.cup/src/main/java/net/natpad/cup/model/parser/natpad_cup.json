@@ -1,0 +1,12 @@
+{
+	generators : [
+		{
+			type : "java",
+			dest-dir : "./src/main/java/",
+			basePackage : "net.natpad.cup.model.parser.generated",
+			symbolClassName : "ParserSymbol",
+			parserClassName : "Parser"
+		}	
+	]
+	 
+}

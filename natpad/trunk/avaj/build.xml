@@ -1,0 +1,64 @@
+<project name="Avaj" default="jar">
+
+	
+	<property name="avaj.version" value="0.3"/>
+
+	
+    <target name="clean">
+    	<delete dir="build/"/>
+    </target>
+	
+	
+    <target name="compile">
+    	<mkdir dir="build/classes"/>
+        <javac destdir="build/classes" srcdir="src/main/java" debug="true" target="1.5" source="1.5">
+        	<classpath>
+        		<fileset dir="../avaj.bytecode/build/">
+				    <include name="avaj.bytecode.jar"/>
+				</fileset>
+        	</classpath>
+        </javac>
+    </target>
+	
+	<target name="jar" depends="compile">
+		<jar basedir="build/classes" destfile="build/avaj.jar">
+			<manifest>
+				<attribute name="Main-Class" value="net.natpad.avaj.Main"/>
+				<attribute name="Class-Path" value="avaj.bytecode.jar"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	
+	
+	<target name="src.tar.gz">
+		<tar destfile="build/avaj_${avaj.version}_src.tar.gz" longfile="gnu" compression="gzip">
+			<fileset dir="../">
+	    		<include name="avaj/**"/>
+	    		<exclude name="avaj/build/**"/>
+	    		<exclude name="avaj/bin/**"/>
+	    		<include name="avaj.bytecode/**"/>
+				<exclude name="avaj.bytecode/build/**"/>
+				<exclude name="avaj.bytecode/bin/**"/>
+			</fileset>
+		</tar>
+	</target>
+
+	<target name="bin.tar.gz">
+		<ant antfile="build.xml" dir="../avaj.bytecode/" target="jar"/>
+		<antcall target="jar"/>
+		<tar destfile="build/avaj_${avaj.version}_bin.tar.gz" longfile="gnu" compression="gzip">
+			<fileset dir=".//">
+				<include name="README.txt"/>
+			</fileset>
+			<fileset dir="./build/">
+				<include name="*.jar"/>
+			</fileset>
+			<fileset dir="../avaj.bytecode/build/">
+				<include name="*.jar"/>
+			</fileset>
+		</tar>
+	</target>
+	
+	
+</project>

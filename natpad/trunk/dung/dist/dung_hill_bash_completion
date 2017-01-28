@@ -1,0 +1,22 @@
+#
+# Bash completion for dung-hill
+
+_dung_hill() 
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="list-modules clear-modules install select list "
+
+    if [ "${prev}" = "select" ] ; then
+       WSS=`/usr/bin/dung-hill list | awk '{print substr($1,1)}'`
+       COMPREPLY=( $(compgen -W "${WSS}" -- ${cur}))
+    elif [ "${prev}" = "install" ] ; then
+       WSS=`ls | grep .hil$`
+       COMPREPLY=( $(compgen -W "${WSS}" -- ${cur}))
+    else
+   	 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    fi
+}
+complete -F _dung_hill dung-hill 

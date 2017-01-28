@@ -1,0 +1,62 @@
+<project name="build-dragonfly" default="module-build">
+
+	<property name="module-name" value="dragonfly"/>
+
+	<cc-config id="lib-set-dragonfly">
+		<cc-config refid="module.worm.config"/>
+		<cc-config refid="module.glib.config"/>
+		<cc-config refid="module.caterpillar.config"/>
+		<cc-config refid="module.gtk3.config"/>
+		<cc-config refid="module.chameleon.config"/>
+		<cc-config refid="module.shoveler.config"/>
+		<cc-config refid="module.cow.config"/>
+		<cc-config refid="module.leafhopper.config"/>
+		<cc-pkg-config package="gtk+-unix-print-3.0"/>
+	</cc-config>
+
+
+	<cc-config id="lib-set-ut-dragonfly">
+		<cc-config refid="module.ut.worm.config"/>
+		<cc-config refid="module.glib.config"/>
+		<cc-config refid="module.ut.caterpillar.config"/>
+		<cc-config refid="module.gtk3.config"/>
+		<cc-config refid="module.ut.chameleon.config"/>
+		<cc-config refid="module.ut.shoveler.config"/>
+		<cc-config refid="module.ut.cow.config"/>
+		<cc-config refid="module.ut.leafhopper.config"/>
+		<cc-pkg-config package="gtk+-unix-print-3.0"/>
+	</cc-config>
+
+	<import file="${natpad.build}/module.inc"/>
+
+	<target name="convert-glade">
+		<xml-to-hinclude file="src/preferences/ui/dragladeprefseditor.glade"/>
+		<xml-to-hinclude file="src/preferences/ui/dragladeprefscolormap.glade"/>
+		<xml-to-hinclude file="src/preferences/ui/dragladeprefstemplate.glade"/>
+		<xml-to-hinclude file="src/preferences/ui/dragladeprefstemplates.glade"/>
+	</target>
+
+	<target name="module-compile" depends="convert-glade">
+		<antcall target="module.module-compile"/>
+	</target>
+
+	<target name="module-ut-compile" depends="convert-glade">
+		<antcall target="module.module-ut-compile"/>
+	</target>
+
+
+	<!--target name="module-build" depends="module-compile, module-archive, module-link">
+	</target-->
+
+
+	<!--target name="module-ut-build" depends="module-ut-compile, module-ut-archive">
+		<clink srcdir="build/ut/test/" output="build/${module-name}-ut">
+			<cc-config refid="module.ut.${module-name}.config"/>
+			<cc-config refid="lib-set-ut-${module-name}"/>
+			<cc-config refid="module.cc.dbg.config"/>
+			<cc-strip-argument argument="-lrt"/>
+		</clink>
+	</target-->
+
+
+</project>

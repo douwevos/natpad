@@ -1,0 +1,19 @@
+{
+	generators : [
+		{
+			type : "java",
+			dest-dir : "${basedir}/src/java/",
+			
+			base-package : "net.natpad.dung.expression.generated",
+
+
+			symbol-class-name : "Symbol",
+			parser-class-name : "DungExprParser"
+			
+		}	
+	]
+	
+	
+	
+	 
+}

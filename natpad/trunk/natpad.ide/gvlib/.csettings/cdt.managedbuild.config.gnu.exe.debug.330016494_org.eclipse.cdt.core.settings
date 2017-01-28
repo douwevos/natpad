@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 5.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage2">
+	<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.330016494" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+		<externalSettings>
+			<externalSetting>
+				<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/gvlib"/>
+				<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/gvlib/Debug"/>
+				<entry flags="RESOLVED" kind="libraryFile" name="gvlib" srcPrefixMapping="" srcRootPath=""/>
+			</externalSetting>
+		</externalSettings>
+		<extensions>
+			<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+			<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+			<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+		</extensions>
+	</storageModule>
+</cproject>

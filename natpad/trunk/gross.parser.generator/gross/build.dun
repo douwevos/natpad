@@ -1,0 +1,75 @@
+module {
+
+	name 'gross';
+	
+	dependencies {
+		module 'natpad.cup';
+		module 'caterpillar';	
+		module 'gross-dung';
+		module 'gross-glibc-runtime';
+		module 'gross-cc-dung';
+		module 'gross-runtime';
+	}
+
+	loader 'natpad.cup';
+	loader 'gross-dung';
+
+	loader 'gross-java-runtime';
+	loader 'gross-cc';
+	loader 'gross-cc-dung';
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+
+
+		gross {
+			grammar './etc/gross.cup';
+			prefix 'gro';
+			outputPath './src/parser/gross/';
+		}
+
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/gross_grammar.gro';
+			prefix 'Gro';
+			outputPath './src-gen/';
+			updateOnly 'false';
+		}
+
+		
+		cc { 
+			src { path './src/'; } 
+			src { path './src/-gen'; } 
+			destdir './compiled/'; 
+		
+			arg '-O0';
+			arg '-ggdb';
+			arg '-Wall';
+		
+		}
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libgross.a'; }
+                clink {
+                        src './compiled/';
+                        output './gross';
+                }
+
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'gross';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+}
