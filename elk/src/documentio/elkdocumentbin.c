@@ -263,19 +263,19 @@ void elk_document_bin_store(ElkDocumentBin *document_bin, ChaIOAsync *async) {
 				VipPath *path = vip_fs_file_get_path((VipFSFile *) priv->vip_file);
 				CatStringWo *t = vip_path_to_string(path);
 				file = g_file_new_for_path(cat_string_wo_getchars(t));
-				cha_document_manager_write(priv->document_manager, priv->document, file, async);
+				cha_document_manager_write(priv->document_manager, priv->document, file, NULL, async);
 				cat_unref_ptr(t);
 			}
 		}
 	}
 }
 
-void elk_document_bin_store_as(ElkDocumentBin *document_bin, CatStringWo *path, ChaIOAsync *async) {
+void elk_document_bin_store_as(ElkDocumentBin *document_bin, CatStringWo *path, ChaIConverter *converter, ChaIOAsync *async) {
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private(document_bin);
 	if (priv->document) {
 		GFile *file = g_file_new_for_path(cat_string_wo_getchars(path));
 		ChaIOAsync *async_m = (ChaIOAsync *) elk_async_saved_as_new(document_bin, path, async);
-		cha_document_manager_write(priv->document_manager, priv->document, file, async_m);
+		cha_document_manager_write(priv->document_manager, priv->document, file, converter, async_m);
 		cat_unref_ptr(async_m);
 	}
 }

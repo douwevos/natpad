@@ -70,7 +70,7 @@ gboolean elk_document_bin_has_file(const ElkDocumentBin *document_bin);
 CatStringWo *elk_document_bin_get_name(ElkDocumentBin *document_bin);
 void elk_document_bin_store(ElkDocumentBin *document_bin, ChaIOAsync *async);
 
-void elk_document_bin_store_as(ElkDocumentBin *document_bin, CatStringWo *path, ChaIOAsync *async);
+void elk_document_bin_store_as(ElkDocumentBin *document_bin, CatStringWo *path, ChaIConverter *converter, ChaIOAsync *async);
 void elk_document_bin_set_path(ElkDocumentBin *document_bin, CatStringWo *path);
 
 void elk_document_bin_increase_usage(ElkDocumentBin *document_bin);

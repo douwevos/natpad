@@ -36,6 +36,8 @@ struct _ChaDocumentPrivate {
 	int version_seq;
 	CatAtomicReference *a_revision_saved;
 	CatAtomicReference *a_revision_ref;	// <ChaRevisionWo *> last stable edition
+	ChaLineEnd line_end_saved;
+	ChaLineEnd line_end_user;
 	ChaRevisionWo *e_revision;
 	ChaEnrichmentDataMapWo *enrichment_map;
 	CatWeakList *listeners;
@@ -118,6 +120,8 @@ void cha_document_construct(ChaDocument *document, struct _ChaDocumentManager *d
 	priv->big_file_mode = FALSE;
 	priv->read_only = FALSE;
 	priv->input_converter = cha_document_manager_get_converter(document_manager, NULL);
+	priv->line_end_saved = CHA_LINE_END_NONE;
+	priv->line_end_user = CHA_LINE_END_NONE;
 }
 
 
@@ -148,6 +152,20 @@ gboolean cha_document_is_big_file_mode(ChaDocument *document) {
 	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
 	return priv->big_file_mode;
 }
+
+
+ChaLineEnd cha_document_get_line_end_user(ChaDocument *document) {
+	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
+	return priv->line_end_user;
+}
+
+void cha_document_set_line_end_user(ChaDocument *document, ChaLineEnd line_end) {
+	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
+	if (priv->line_end_user!=line_end) {
+		priv->line_end_user = line_end;
+	}
+}
+
 
 struct _ChaDocumentManager *cha_document_get_document_manager(ChaDocument *document) {
 	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
@@ -552,6 +570,8 @@ static void l_notify_mode_changed(ChaDocument *document) {
 	ChaModeInfo mode_info;
 	mode_info.big_file_mode = priv->big_file_mode;
 	mode_info.read_only = priv->read_only;
+	mode_info.line_end_user = priv->line_end_user;
+	mode_info.line_end_saved = priv->line_end_saved;
 	CatIIterator *iter = cat_weak_list_iterator(priv->listeners);
 	while(cat_iiterator_has_next(iter)) {
 		ChaIDocumentListener *listener = (ChaIDocumentListener *) cat_iiterator_next(iter);

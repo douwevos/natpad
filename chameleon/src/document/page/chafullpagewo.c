@@ -50,8 +50,7 @@ static void l_page_enrich(ChaPageWo *page, ChaEnrichmentDataMapWo *a_map);
 static void l_page_impoverish(ChaPageWo *page);
 static void l_page_enrichment_remap(ChaPageWo *page, ChaEnrichmentDataMapWo *a_old_map, ChaEnrichmentDataMapWo *a_new_map, int add_idx, int rem_idx);
 
-
-static void l_page_write_to_stream(ChaPageWo *page, GOutputStream *out_stream);
+static gboolean l_page_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req);
 static void l_page_add_line(ChaPageWo *e_page, ChaLineWo *line);
 static void l_page_insert_line(ChaPageWo *e_page, ChaLineWo *line, int index) ;
 static void l_page_remove_range(ChaPageWo *e_page, int first, int last);
@@ -125,40 +124,23 @@ ChaFullPageWo *cha_full_page_wo_new(CatArrayWo *c_pages) {
 	return result;
 }
 
-static void l_page_write_to_stream(ChaPageWo *page, GOutputStream *out_stream) {
+static gboolean l_page_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) {
 	ChaFullPageWoPrivate *priv = cha_full_page_wo_get_instance_private((ChaFullPageWo *) page);
 	CatIIterator *iter = cat_array_wo_iterator(priv->line_array);
-	char let[] = { 13, 10, 13 };
+	gboolean result = TRUE;
 	while(cat_iiterator_has_next(iter)) {
 		ChaLineWo *line = (ChaLineWo *) cat_iiterator_next(iter);
 		cat_log_debug("line=%o", line);
 		CatStringWo *text = cha_line_wo_get_text(line);
 		const char *txt_data = cat_string_wo_getchars(text);
 		int txt_len = cat_string_wo_length(text);
-		gsize written = 0;
-		GError *error = NULL;
-		g_output_stream_write_all(out_stream, txt_data, txt_len, &written, NULL, (GError **) &error);
-		switch(cha_line_wo_get_line_end(line)) {
-			case CHA_LINE_END_CR :
-				g_output_stream_write_all(out_stream, let, 1, &written, NULL, (GError **) &error);
-				break;
-			case CHA_LINE_END_CRLF :
-				g_output_stream_write_all(out_stream, let, 2, &written, NULL, (GError **) &error);
-				break;
-			case CHA_LINE_END_LF :
-				g_output_stream_write_all(out_stream, let+1, 1, &written, NULL, (GError **) &error);
-				break;
-			case CHA_LINE_END_LFCR :
-				g_output_stream_write_all(out_stream, let+1, 2, &written, NULL, (GError **) &error);
-				break;
-			case CHA_LINE_END_NONE :
-				break;
-		}
-		if (error) {
-			cat_log_debug("error=%s", error->message);
+		if (!cha_page_wo_write_single_line(page, write_req, txt_data, txt_len, cha_line_wo_get_line_end(line))) {
+			result = FALSE;
+			break;
 		}
 	}
 	cat_unref_ptr(iter);
+	return result;
 }
 
 

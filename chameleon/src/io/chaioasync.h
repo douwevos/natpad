@@ -45,7 +45,7 @@ struct _ChaIOAsync {
 
 struct _ChaIOAsyncClass {
 	GObjectClass parent_class;
-	void (*finished)(ChaIOAsync *async, gboolean success, GError **error);
+	void (*finished)(ChaIOAsync *async, gboolean success, GError *error);
 };
 
 
@@ -55,7 +55,7 @@ void cha_io_async_construct(ChaIOAsync *async);
 
 ChaIOAsync *cha_io_async_new();
 
-void cha_io_async_finished(ChaIOAsync *async, gboolean success, GError **error);
+void cha_io_async_finished(ChaIOAsync *async, gboolean success, GError *error);
 
 G_END_DECLS
 

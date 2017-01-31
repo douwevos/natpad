@@ -43,7 +43,7 @@ G_DEFINE_TYPE_WITH_CODE(ElkAsyncBulkResult, elk_async_bulk_result, CHA_TYPE_IO_A
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
-static void l_async_finished(ChaIOAsync *async, gboolean success, GError **error);
+static void l_async_finished(ChaIOAsync *async, gboolean success, GError *error);
 
 
 static void elk_async_bulk_result_class_init(ElkAsyncBulkResultClass *clazz) {
@@ -107,7 +107,7 @@ gboolean elk_async_bulk_result_wait(ElkAsyncBulkResult *bulk_result) {
 	return result;
 }
 
-static void l_async_finished(ChaIOAsync *async, gboolean success, GError **error) {
+static void l_async_finished(ChaIOAsync *async, gboolean success, GError *error) {
 	ElkAsyncBulkResultPrivate *priv = elk_async_bulk_result_get_instance_private(ELK_ASYNC_BULK_RESULT(async));
 	cat_lock_lock(priv->lock);
 	if (success) {

@@ -40,6 +40,8 @@ typedef struct _ChaModeInfo ChaModeInfo;
 struct _ChaModeInfo {
 	gboolean read_only;
 	gboolean big_file_mode;
+	ChaLineEnd line_end_user;
+	ChaLineEnd line_end_saved;
 };
 
 struct _ChaIDocumentListenerInterface {

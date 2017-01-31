@@ -32,6 +32,7 @@
 struct _ChaWriteFileRequestPrivate {
 	ChaDocument *document;
 	GFile *file;
+	ChaIConverter *output_converter;
 	ChaIOAsync *async;
 };
 
@@ -64,6 +65,7 @@ static void l_dispose(GObject *object) {
 	ChaWriteFileRequest *instance = CHA_WRITE_FILE_REQUEST(object);
 	ChaWriteFileRequestPrivate *priv = cha_write_file_request_get_instance_private(instance);
 	cat_unref_ptr(priv->document);
+	cat_unref_ptr(priv->output_converter);
 	cat_unref_ptr(priv->file);
 	cat_unref_ptr(priv->async);
 	G_OBJECT_CLASS(cha_write_file_request_parent_class)->dispose(object);
@@ -78,13 +80,14 @@ static void l_finalize(GObject *object) {
 }
 
 
-ChaWriteFileRequest *cha_write_file_request_new(ChaDocument *document, GFile *file, ChaIOAsync *async) {
+ChaWriteFileRequest *cha_write_file_request_new(ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async) {
 	ChaWriteFileRequest *result = g_object_new(CHA_TYPE_WRITE_FILE_REQUEST, NULL);
 	cat_ref_anounce(result);
 	ChaWriteFileRequestPrivate *priv = cha_write_file_request_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	priv->document = cat_ref_ptr(document);
 	priv->file = cat_ref_ptr(file);
+	priv->output_converter = cat_ref_ptr(output_converter);
 	priv->async = cat_ref_ptr(async);
 	return result;
 }
@@ -94,15 +97,33 @@ static void l_run_request(WorRequest *request) {
 	ChaWriteFileRequestPrivate *priv = cha_write_file_request_get_instance_private(instance);
 	ChaRevisionWo *rev = cha_document_get_current_revision_ref(priv->document);
 	GFileOutputStream *out_stream = g_file_replace(priv->file, NULL, TRUE, 0, NULL, NULL);
+	ChaWriteReq write_req;
+	write_req.error = NULL;
+	write_req.out_stream = (GOutputStream *) out_stream;
+	write_req.needs_conversion = FALSE;
+	write_req.charset_converter = priv->output_converter;
+	ChaIConverter *input_converter = cha_document_get_input_converter(priv->document);
+
+	if (priv->output_converter!=input_converter) {
+		write_req.needs_conversion = TRUE;
+		if (priv->output_converter==NULL) {
+			write_req.charset_converter = input_converter;
+		}
+	}
+
+	write_req.force_line_end = cha_document_get_line_end_user(priv->document);
+
 	if (out_stream) {
 		int page_count = cha_revision_wo_page_count(rev);
 		int page_idx;
 		for(page_idx=0; page_idx<page_count; page_idx++) {
 			ChaPageWo *a_page = cha_revision_wo_page_at(rev, page_idx);
-			cha_page_wo_write_to_stream(a_page, (GOutputStream *) out_stream);
+			if (!cha_page_wo_write_to_stream(a_page, &write_req)) {
+				break;
+			}
 		}
 		g_output_stream_close((GOutputStream *) out_stream, NULL, NULL);
-		cha_io_async_finished(priv->async, TRUE, NULL);
+		cha_io_async_finished(priv->async, TRUE, write_req.error);
 		cha_document_set_saved_revision(priv->document, rev);
 	}
 	cat_unref_ptr(rev);

@@ -43,7 +43,7 @@ G_DEFINE_TYPE_WITH_CODE(ElkAsyncMooNodeUpdater, elk_async_moo_node_updater, CHA_
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
-void l_async_finished(ChaIOAsync *async, gboolean success, GError **error);
+void l_async_finished(ChaIOAsync *async, gboolean success, GError *error);
 
 static void elk_async_moo_node_updater_class_init(ElkAsyncMooNodeUpdaterClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -83,7 +83,7 @@ ElkAsyncMooNodeUpdater *elk_async_moo_node_updater_new(ElkEditorPanel *editor_pa
 	return result;
 }
 
-void l_async_finished(ChaIOAsync *async, gboolean success, GError **error) {
+void l_async_finished(ChaIOAsync *async, gboolean success, GError *error) {
 	ElkAsyncMooNodeUpdater *instance = ELK_ASYNC_MOO_NODE_UPDATER(async);
 	ElkAsyncMooNodeUpdaterPrivate *priv = elk_async_moo_node_updater_get_instance_private(instance);
 

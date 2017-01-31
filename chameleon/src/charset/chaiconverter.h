@@ -59,6 +59,7 @@ struct _ChaIConverterInterface {
 
 	gboolean (*forCharset)(ChaIConverter *self, const char *charset_name);
 	void (*convert)(ChaIConverter *self, ChaConvertRequest *request);
+	CatStringWo *(*getName)(ChaIConverter *self);
 };
 
 GType cha_iconverter_get_type(void);
@@ -66,5 +67,8 @@ GType cha_iconverter_get_type(void);
 gboolean cha_iconverter_for_charset(ChaIConverter *self, const char *charset_name);
 
 void cha_iconverter_convert(ChaIConverter *self, ChaConvertRequest *request);
+
+CatStringWo *cha_iconverter_get_name(ChaIConverter *self);
+
 
 #endif /* CHARSET_CHAICONVERTER_H_ */

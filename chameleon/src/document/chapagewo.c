@@ -115,10 +115,47 @@ void cha_page_wo_construct(ChaPageWo *page, gboolean editable) {
 //	return cha_page_wo_anchor(result, version);
 //}
 
-void cha_page_wo_write_to_stream(ChaPageWo *page, GOutputStream *out_stream) {
-	CHA_PAGE_WO_GET_CLASS(page)->writeToStream(page, out_stream);
+gboolean cha_page_wo_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) {
+	return CHA_PAGE_WO_GET_CLASS(page)->writeToStream(page, write_req);
 }
 
+static char let[] = { 13, 10, 13 };
+
+gboolean cha_page_wo_write_single_line(ChaPageWo *page, ChaWriteReq *write_req, const char *txt_data, int txt_len, ChaLineEnd line_end) {
+	int written;
+	GOutputStream *out_stream = write_req->out_stream;
+	if (!g_output_stream_write_all(out_stream, txt_data, txt_len, &written, NULL, (GError **) &(write_req->error))) {
+		return FALSE;
+	}
+
+	if (line_end==CHA_LINE_END_NONE) {
+		return TRUE;
+	}
+
+	if (write_req->force_line_end!=CHA_LINE_END_NONE) {
+		line_end = write_req->force_line_end;
+	}
+
+
+	gboolean result = TRUE;
+	switch(line_end) {
+		case CHA_LINE_END_CR :
+			result = g_output_stream_write_all(out_stream, let, 1, &written, NULL, (GError **) &(write_req->error));
+			break;
+		case CHA_LINE_END_CRLF :
+			result = g_output_stream_write_all(out_stream, let, 2, &written, NULL, (GError **) &(write_req->error));
+			break;
+		case CHA_LINE_END_LF :
+			result = g_output_stream_write_all(out_stream, let+1, 1, &written, NULL, (GError **) &(write_req->error));
+			break;
+		case CHA_LINE_END_LFCR :
+			result = g_output_stream_write_all(out_stream, let+1, 2, &written, NULL, (GError **) &(write_req->error));
+			break;
+		case CHA_LINE_END_NONE :
+			break;
+	}
+	return result;
+}
 
 gboolean cha_page_wo_is_line_marked(ChaPageWo *page, int line_index) {
 	ChaPageWoPrivate *priv = cha_page_wo_get_instance_private(page);
