@@ -25,7 +25,7 @@
 
 #include "chalinewo.h"
 #include "chalinemultireplace.h"
-#include "../charset/chacharsetconverter.h"
+#include "../charset/chaiconverter.h"
 #include <caterpillar.h>
 #include <gio/gio.h>
 
@@ -67,10 +67,20 @@ struct _ChaPageWo {
 	CatWo parent;
 };
 
+typedef struct _ChaWriteReq ChaWriteReq;
+
+struct _ChaWriteReq {
+	GOutputStream *out_stream;
+	ChaIConverter *charset_converter;
+	gboolean force_line_end;
+	GError *error;
+	gboolean needs_conversion;
+};
+
 struct _ChaPageWoClass {
 	CatWoClass parent_class;
 
-	void (*writeToStream)(ChaPageWo *page, GOutputStream *out_stream);
+	gboolean (*writeToStream)(ChaPageWo *page, ChaWriteReq *write_req);
 
 	void (*enrich)(ChaPageWo *page, ChaEnrichmentDataMapWo *a_map);
 	void (*impoverish)(ChaPageWo *page);
@@ -98,7 +108,7 @@ GType cha_page_wo_get_type();
 //ChaPageWo *cha_page_wo_new();
 //ChaPageWo *cha_page_wo_new_from(ChaPageWo *src_page, int version);
 
-void cha_page_wo_write_to_stream(ChaPageWo *page, GOutputStream *out_stream);
+gboolean cha_page_wo_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req);
 
 CatLock *cha_page_wo_get_lock(ChaPageWo *page);
 

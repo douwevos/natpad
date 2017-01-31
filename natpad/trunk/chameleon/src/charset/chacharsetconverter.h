@@ -57,6 +57,7 @@ ChaCharsetConverter *cha_charset_converter_new();
 
 ChaCharsetConverter *cha_charset_converter_open(const char *name, const char *filename);
 
+
 G_END_DECLS
 
 #endif /* CHARSET_CHACHARSETCONVERTER_H_ */

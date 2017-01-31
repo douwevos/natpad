@@ -56,6 +56,8 @@ ChaCharsetConverterFactory *cha_charset_converter_factory_new();
 
 ChaIConverter *cha_charset_converter_factory_get(ChaCharsetConverterFactory *factory, const char *charset);
 
+CatArrayWo *cha_charset_converter_factory_enlist_names(ChaCharsetConverterFactory *factory);
+
 G_END_DECLS
 
 #endif /* CHARSET_CHACHARSETCONVERTERFACTORY_H_ */

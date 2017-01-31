@@ -25,6 +25,7 @@
 
 #include <leafhopper.h>
 #include <caterpillar.h>
+#include <chameleon.h>
 
 G_BEGIN_DECLS
 
@@ -40,6 +41,13 @@ typedef struct _ElkDialogs               ElkDialogs;
 typedef struct _ElkDialogsPrivate        ElkDialogsPrivate;
 typedef struct _ElkDialogsClass          ElkDialogsClass;
 
+typedef struct _ElkSaveDialog ElkSaveDialog;
+
+struct _ElkSaveDialog {
+	ChaDocument *document;
+	CatStringWo *selected_charset;
+	ChaLineEnd selected_line_ends;
+};
 
 struct _ElkDialogs {
 	GObject parent;
@@ -54,7 +62,7 @@ GType elk_dialogs_get_type();
 
 ElkDialogs *elk_dialogs_new(LeaFrame *frame);
 
-CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs);
+CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs, ElkSaveDialog *save_dialog);
 
 GtkResponseType elk_dialogs_save_before_close(ElkDialogs *dialogs);
 

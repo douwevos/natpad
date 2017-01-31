@@ -90,6 +90,13 @@ ChaIConverter *cha_document_manager_get_converter(ChaDocumentManager *document_m
 	return cha_charset_converter_factory_get(priv->converter_factory, charset_name);
 }
 
+
+ChaCharsetConverterFactory *cha_document_manager_get_converter_factory(ChaDocumentManager *document_manager) {
+	ChaDocumentManagerPrivate *priv = cha_document_manager_get_instance_private(document_manager);
+	return priv->converter_factory;
+}
+
+
 void cha_document_manager_load(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file) {
 	ChaDocumentManagerPrivate *priv = cha_document_manager_get_instance_private(document_manager);
 	ChaLoadFileRequest *load_file_req = cha_load_file_request_new(document, file);
@@ -97,9 +104,9 @@ void cha_document_manager_load(ChaDocumentManager *document_manager, ChaDocument
 	cat_unref_ptr(load_file_req);
 }
 
-void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIOAsync *async) {
+void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async) {
 	ChaDocumentManagerPrivate *priv = cha_document_manager_get_instance_private(document_manager);
-	ChaWriteFileRequest *write_file_req = cha_write_file_request_new(document, file, async);
+	ChaWriteFileRequest *write_file_req = cha_write_file_request_new(document, file, output_converter, async);
 	wor_service_post_request(priv->wor_service, (WorRequest *) write_file_req);
 	cat_unref_ptr(write_file_req);
 }

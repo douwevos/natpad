@@ -123,6 +123,20 @@ ChaIConverter *cha_charset_converter_factory_get(ChaCharsetConverterFactory *fac
 	return result;
 }
 
+CatArrayWo *cha_charset_converter_factory_enlist_names(ChaCharsetConverterFactory *factory) {
+	ChaCharsetConverterFactoryPrivate *priv = cha_charset_converter_factory_get_instance_private(factory);
+	CatArrayWo *result = cat_array_wo_new();
+	CatIIterator *iter = cat_array_wo_iterator(priv->converters);
+	while(cat_iiterator_has_next(iter)) {
+		ChaIConverter *converter = cat_iiterator_next(iter);
+		CatStringWo *name = cha_iconverter_get_name(converter);
+		cat_array_wo_append(result, (GObject *)  name);
+	}
+	cat_unref_ptr(iter);
+
+
+	return result;
+}
 
 /********************* start CatIStringable implementation *********************/
 

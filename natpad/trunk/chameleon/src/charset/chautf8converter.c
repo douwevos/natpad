@@ -29,7 +29,7 @@
 #include <logging/catlog.h>
 
 struct _ChaUtf8ConverterPrivate {
-	void *dummy;
+	CatStringWo *name;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -73,6 +73,7 @@ ChaUtf8Converter *cha_utf8_converter_new() {
 	ChaUtf8Converter *result = g_object_new(CHA_TYPE_UTF8_CONVERTER, NULL);
 	cat_ref_anounce(result);
 	ChaUtf8ConverterPrivate *priv = cha_utf8_converter_get_instance_private(result);
+	priv->name = cat_string_wo_new_with("UTF-8");
 	return result;
 }
 
@@ -166,9 +167,15 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 	cat_string_wo_append_chars_len(request->output, base, out-base);
 }
 
+static CatStringWo *l_get_name(ChaIConverter *self) {
+	ChaUtf8ConverterPrivate *priv = cha_utf8_converter_get_instance_private(CHA_UTF8_CONVERTER(self));
+	return priv->name;
+}
+
 
 static void l_converter_iface_init(ChaIConverterInterface *iface) {
 	iface->convert = l_convert;
+	iface->getName = l_get_name;
 }
 
 

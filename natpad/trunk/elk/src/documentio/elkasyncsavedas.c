@@ -42,7 +42,7 @@ G_DEFINE_TYPE_WITH_CODE(ElkAsyncSavedAs, elk_async_saved_as, CHA_TYPE_IO_ASYNC,
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
-static void l_async_finished(ChaIOAsync *async, gboolean success, GError **error);
+static void l_async_finished(ChaIOAsync *async, gboolean success, GError *error);
 
 static void elk_async_saved_as_class_init(ElkAsyncSavedAsClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -85,7 +85,7 @@ ElkAsyncSavedAs *elk_async_saved_as_new(ElkDocumentBin *document_bin, CatStringW
 	return result;
 }
 
-static void l_async_finished(ChaIOAsync *async, gboolean success, GError **error) {
+static void l_async_finished(ChaIOAsync *async, gboolean success, GError *error) {
 	ElkAsyncSavedAsPrivate *priv = elk_async_saved_as_get_instance_private((ElkAsyncSavedAs *) async);
 	if (success) {
 		elk_document_bin_set_path(priv->document_bin, priv->path);

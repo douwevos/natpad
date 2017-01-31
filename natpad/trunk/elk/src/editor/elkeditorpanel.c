@@ -143,9 +143,18 @@ static void l_save(DraEditorPanel *editor_panel, gboolean do_save_as, ChaIOAsync
 	ElkAsyncMooNodeUpdater *moo_node_updater = elk_async_moo_node_updater_new((ElkEditorPanel *) editor_panel, async_response);
 	if (!elk_document_bin_has_file(priv->document_bin) || do_save_as) {
 		ElkDialogs *dialogs = elk_panel_owner_get_dialogs(panel_owner);
-		CatStringWo *save_name = elk_dialogs_save_file_selector(dialogs);
+		ElkSaveDialog save_dialog;
+		save_dialog.document = elk_document_bin_get_document(priv->document_bin);
+		save_dialog.selected_charset = NULL;
+		CatStringWo *save_name = elk_dialogs_save_file_selector(dialogs, &save_dialog);
 		if (save_name!=NULL) {
-			elk_document_bin_store_as(priv->document_bin, save_name, (ChaIOAsync *) moo_node_updater);
+			ChaIConverter *converter = NULL;
+			if (save_dialog.selected_charset!=NULL) {
+				ChaDocumentManager *doc_manager = cha_document_get_document_manager(save_dialog.document);
+				ChaCharsetConverterFactory *converter_factory = cha_document_manager_get_converter_factory(doc_manager);
+				converter = cha_charset_converter_factory_get(converter_factory, cat_string_wo_getchars(save_dialog.selected_charset));
+			}
+			elk_document_bin_store_as(priv->document_bin, save_name, converter, (ChaIOAsync *) moo_node_updater);
 		}
 	} else {
 		elk_document_bin_store(priv->document_bin, (ChaIOAsync *) moo_node_updater);

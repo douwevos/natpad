@@ -26,6 +26,7 @@
 #include "chaioasync.h"
 #include "../document/chadocument.h"
 #include "../charset/chaiconverter.h"
+#include "../charset/chacharsetconverterfactory.h"
 #include <caterpillar.h>
 #include <worm.h>
 #include <gio/gio.h>
@@ -60,9 +61,11 @@ ChaDocumentManager *cha_document_manager_new();
 
 ChaIConverter *cha_document_manager_get_converter(ChaDocumentManager *document_manager, const char *charset_name);
 
+ChaCharsetConverterFactory *cha_document_manager_get_converter_factory(ChaDocumentManager *document_manager);
+
 void cha_document_manager_load(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file);
 
-void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIOAsync *async);
+void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async);
 
 void cha_document_manager_post(ChaDocumentManager *document_manager, WorRequest *request);
 

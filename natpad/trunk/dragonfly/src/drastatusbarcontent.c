@@ -34,7 +34,9 @@ struct _DraStatusBarContentPrivate {
 	GtkWidget *w_lab_location;
 	GtkWidget *w_lab_mode;
 	GtkWidget *w_lab_read_only;
+	GtkWidget *w_lab_encoding;
 	ChaCursorWo *last_cursor;
+	CatStringWo *last_encoding_name;
 	ChaEditMode edit_mode;
 };
 
@@ -92,9 +94,13 @@ DraStatusBarContent *dra_status_bar_content_new() {
 	gtk_label_set_width_chars((GtkLabel *) priv->w_lab_mode, 15);
 	gtk_box_pack_start((GtkBox *) result, priv->w_lab_mode, FALSE,TRUE,4);
 
-	priv->w_lab_read_only = gtk_label_new("Insert");
+	priv->w_lab_read_only = gtk_label_new("Read only");
 	gtk_label_set_width_chars((GtkLabel *) priv->w_lab_read_only, 12);
 	gtk_box_pack_start((GtkBox *) result, priv->w_lab_read_only, FALSE,TRUE,4);
+
+	priv->w_lab_encoding = gtk_label_new("UTF-8");
+	gtk_label_set_width_chars((GtkLabel *) priv->w_lab_encoding, 12);
+	gtk_box_pack_start((GtkBox *) result, priv->w_lab_encoding, FALSE,TRUE,4);
 
 	gtk_widget_set_size_request((GtkWidget *) result, 300, 20);
 
@@ -142,6 +148,22 @@ static void l_update_cursor_location(DraStatusBarContent *status_bar_content) {
 	}
 }
 
+static void l_update_encoding(DraStatusBarContent *status_bar_content) {
+	DraStatusBarContentPrivate *priv = dra_status_bar_content_get_instance_private(status_bar_content);
+	if (priv->editor_panel) {
+		DraEditor *editor = dra_editor_panel_get_editor(priv->editor_panel);
+		ChaDocument *document = cha_editor_get_document((ChaEditor *) editor);
+		ChaIConverter *converter = cha_document_get_input_converter(document);
+		CatStringWo *encoding_name = cha_iconverter_get_name(converter);
+		if (!cat_string_wo_equal(encoding_name, priv->last_encoding_name)) {
+			priv->last_encoding_name = encoding_name;
+			gtk_label_set_text((GtkLabel *) priv->w_lab_encoding, cat_string_wo_getchars(encoding_name));
+		}
+	} else {
+		priv->last_cursor = NULL;
+		gtk_label_set_text((GtkLabel *) priv->w_lab_encoding, "--");
+	}
+}
 static void l_update_mode(DraStatusBarContent *status_bar_content) {
 	DraStatusBarContentPrivate *priv = dra_status_bar_content_get_instance_private(status_bar_content);
 	if (priv->editor_panel) {
@@ -207,6 +229,7 @@ void dra_status_bar_content_set_active_editor_panel(DraStatusBarContent *status_
 		cha_document_view_add_listener(document_view, CHA_IDOCUMENT_VIEW_LISTENER(status_bar_content));
 	}
 	l_update_cursor_location(status_bar_content);
+	l_update_encoding(status_bar_content);
 	l_update_mode(status_bar_content);
 	l_update_read_write_info(status_bar_content);
 }
@@ -229,7 +252,9 @@ static void l_document_view_listener_iface_init(ChaIDocumentViewListenerInterfac
 /********************* start ChaIDocumentListener implementation *********************/
 
 static void l_on_new_revision(ChaIDocumentListener *self, ChaRevisionWo *a_new_revision) {
-	l_update_cursor_location(DRA_STATUS_BAR_CONTENT(self));
+	DraStatusBarContent *status_bar = DRA_STATUS_BAR_CONTENT(self);
+	l_update_cursor_location(status_bar);
+	l_update_encoding(status_bar);
 }
 
 void l_on_mode_changed(ChaIDocumentListener *self, const ChaModeInfo *mode_info) {

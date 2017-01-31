@@ -42,3 +42,10 @@ void cha_iconverter_convert(ChaIConverter *self, ChaConvertRequest *request) {
 	g_return_if_fail(CHA_IS_ICONVERTER(self));
 	CHA_ICONVERTER_GET_INTERFACE(self)->convert(self, request);
 }
+
+CatStringWo *cha_iconverter_get_name(ChaIConverter *self) {
+	g_return_val_if_fail(CHA_IS_ICONVERTER(self), NULL);
+	return CHA_ICONVERTER_GET_INTERFACE(self)->getName(self);
+
+}
+

@@ -64,7 +64,7 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 static void l_anchor_children(CatWo *wo, int version);
 static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source);
 
-static void l_page_write_to_stream(ChaPageWo *page, GOutputStream *out_stream);
+static gboolean l_page_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req);
 static void l_page_hold_lines(ChaPageWo *page);
 static void l_page_release_lines(ChaPageWo *page);
 static int l_page_line_count(ChaPageWo *page);
@@ -179,69 +179,61 @@ static void l_build_lines(ChaMMapPageWo *page) {
 	cat_log_debug("build-lines:page=%p", page);
 }
 
-static void l_page_write_to_stream(ChaPageWo *page, GOutputStream *out_stream) {
+static gboolean l_page_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) {
 	ChaMMapPageWoPrivate *priv = cha_mmap_page_wo_get_instance_private((ChaMMapPageWo *) page);
+	gboolean force_per_line_write = write_req->needs_conversion;
 	CatLock *lock = cha_page_wo_get_lock((ChaPageWo *) page);
 	gboolean did_hold = FALSE;
 	cat_lock_lock(lock);
+	if (force_per_line_write) {
+		l_build_lines((ChaMMapPageWo *) page);
+	}
 	if (priv->lines) {
 		priv->lines_hold_cnt++;
 		did_hold = TRUE;
 	}
 	cat_lock_unlock(lock);
 
+	gboolean result = TRUE;
 	gsize written = 0;
 
 	if (priv->lines) {
 
 		int idx;
-		void *xtxt = NULL;
-		int xlen = 0;
+		void *txt_data = NULL;
+		int txt_len = 0;
 		ChaLineEnd line_end;
-		char let[] = { 13, 10, 13 };
 		for(idx=0; idx<priv->line_count; idx++) {
 			struct _ChaLineDescr *cld = priv->lines+idx;
 			if (cld->mapped) {
-				xtxt = cld->start2;
-				xlen = cld->length;
+				txt_data = cld->start2;
+				txt_len = cld->length;
 				line_end = cld->line_end;
 			} else {
 				ChaLineWo *real_line = (ChaLineWo *) cld->start2;
 				CatStringWo *real_text = cha_line_wo_get_text(real_line);
-				xtxt = (char *) cat_string_wo_getchars(real_text);
-				xlen = cat_string_wo_length(real_text);
+				txt_data = (char *) cat_string_wo_getchars(real_text);
+				txt_len = cat_string_wo_length(real_text);
 				line_end = cha_line_wo_get_line_end(real_line);
 			}
-			g_output_stream_write_all(out_stream, xtxt, xlen, &written, NULL, NULL);
-			switch(line_end) {
-				case CHA_LINE_END_CR :
-					g_output_stream_write_all(out_stream, let, 1, &written, NULL, NULL);
-					break;
-				case CHA_LINE_END_CRLF :
-					g_output_stream_write_all(out_stream, let, 2, &written, NULL, NULL);
-					break;
-				case CHA_LINE_END_LF :
-					g_output_stream_write_all(out_stream, let+1, 1, &written, NULL, NULL);
-					break;
-				case CHA_LINE_END_LFCR :
-					g_output_stream_write_all(out_stream, let+1, 2, &written, NULL, NULL);
-					break;
-				case CHA_LINE_END_NONE :
-					break;
+
+
+			if (!cha_page_wo_write_single_line(page, write_req, txt_data, txt_len, line_end)) {
+				result = FALSE;
+				break;
 			}
 		}
 
 	} else {
 		/* we can write the whole mmapped data section to the out_stream */
 		char *start = (char *) cha_mmap_get_data(priv->map) + priv->offset;
-		g_output_stream_write_all(out_stream, start, priv->length, &written, NULL, NULL);
+		result = g_output_stream_write_all(write_req->out_stream, start, priv->length, &written, NULL, (GError **) &(write_req->error));
 	}
-
-
 
 	if (did_hold) {
 		l_page_release_lines(page);
 	}
+	return result;
 }
 
 static void l_page_hold_lines(ChaPageWo *page) {

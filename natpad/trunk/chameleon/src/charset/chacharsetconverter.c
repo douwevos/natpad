@@ -44,6 +44,7 @@
 struct _ChaCharsetConverterPrivate {
 	gunichar *data;
 	const char *name;
+	CatStringWo *s_name;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -214,6 +215,7 @@ ChaCharsetConverter *cha_charset_converter_open(const char *name, const char *fi
 		ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(result);
 		priv->data = request.data;
 		priv->name = name;
+		priv->s_name = cat_string_wo_new_with(name);
 		return result;
 
 	}
@@ -284,10 +286,16 @@ static gboolean l_for_charset(ChaIConverter *self, const char *charset_name) {
 	return strcasecmp(priv->name, charset_name)==0;
 }
 
+static CatStringWo *l_get_name(ChaIConverter *self) {
+	ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(CHA_CHARSET_CONVERTER(self));
+	return priv->s_name;
+}
+
 
 static void l_converter_iface_init(ChaIConverterInterface *iface) {
 	iface->convert = l_convert;
 	iface->forCharset = l_for_charset;
+	iface->getName = l_get_name;
 }
 
 /********************* end ChaIConverter implementation *********************/

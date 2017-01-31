@@ -34,4 +34,6 @@ CatArrayWo *cha_page_wo_get_internal_list(ChaPageWo *page);
 int cha_page_wo_get_enrichment_count(ChaPageWo *page);
 CatLock *cha_page_wo_get_enrichment_lock(ChaPageWo *page);
 
+gboolean cha_page_wo_write_single_line(ChaPageWo *page, ChaWriteReq *write_req, const char *txt_data, int txt_len, ChaLineEnd line_end);
+
 #endif /* CHAPAGEWOPRIVATE_H_ */

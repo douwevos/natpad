@@ -42,7 +42,7 @@ G_DEFINE_TYPE_WITH_CODE(ChaAsyncBasic, cha_async_basic, CHA_TYPE_IO_ASYNC,
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
-static void l_finished(ChaIOAsync *async, gboolean success, GError **error);
+static void l_finished(ChaIOAsync *async, gboolean success, GError *error);
 
 static void cha_async_basic_class_init(ChaAsyncBasicClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -111,7 +111,7 @@ gboolean cha_async_basic_wait(ChaAsyncBasic *async_basic, long time_to_wait_ms) 
 	return result;
 }
 
-static void l_finished(ChaIOAsync *async, gboolean success, GError **error) {
+static void l_finished(ChaIOAsync *async, gboolean success, GError *error) {
 	ChaAsyncBasicPrivate *priv = cha_async_basic_get_instance_private(CHA_ASYNC_BASIC(async));
 	cat_lock_lock(priv->lock);
 	priv->success = success;

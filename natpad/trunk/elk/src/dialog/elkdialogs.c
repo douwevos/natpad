@@ -77,7 +77,7 @@ ElkDialogs *elk_dialogs_new(LeaFrame *frame) {
 
 
 
-CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs) {
+CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs, ElkSaveDialog *save_dialog) {
 	ElkDialogsPrivate *priv = elk_dialogs_get_instance_private(dialogs);
 	GtkWidget *top_window = gtk_widget_get_toplevel(GTK_WIDGET(priv->frame));
 
@@ -101,13 +101,19 @@ CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs) {
 	gtk_box_pack_start(w_encoding, w_cmb_encoding, FALSE, FALSE, 0);
 
 
-	CatStringWo *utf8_encoding = cat_string_wo_new_with("UTF-8");
-
-	GtkTreeIter iter;
-	gtk_list_store_clear(model);
-	gtk_list_store_append(model, &iter);
-	gtk_list_store_set(model, &iter, 0, cat_string_wo_getchars(utf8_encoding), 1, utf8_encoding, -1);
-
+	ChaDocumentManager *doc_manager = cha_document_get_document_manager(save_dialog->document);
+	ChaCharsetConverterFactory *factory = cha_document_manager_get_converter_factory(doc_manager);
+	CatArrayWo *converter_names = cha_charset_converter_factory_enlist_names(factory);
+	CatIIterator *iter = cat_array_wo_iterator(converter_names);
+	while(cat_iiterator_has_next(iter)) {
+		CatStringWo *name = (CatStringWo *) cat_iiterator_next(iter);
+		GtkTreeIter titer;
+		gtk_list_store_clear(model);
+		gtk_list_store_append(model, &titer);
+		gtk_list_store_set(model, &titer, 0, cat_string_wo_getchars(name), 1, name, -1);
+	}
+	cat_unref_ptr(iter);
+	cat_unref_ptr(converter_names);
 
 	gtk_file_chooser_set_extra_widget(file_chooser, w_encoding);
 
@@ -121,7 +127,17 @@ CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs) {
 		if (fname!=NULL) {
 			result = cat_string_wo_new_with(fname);
 		}
+
+
+		GtkTreeIter titer;
+		if (gtk_combo_box_get_active_iter(w_cmb_encoding, &titer)) {
+			CatStringWo *selected_converter = NULL;
+			gtk_tree_model_get_value(model, &titer, 1, &selected_converter);
+			save_dialog->selected_charset = selected_converter;
+		}
 	}
+
+
 	gtk_widget_destroy(dialog);
 	return result;
 }

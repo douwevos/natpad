@@ -24,6 +24,8 @@
 #define CHAMELEON_H_
 
 #include "chaeditor.h"
+#include "charset/chacharsetconverterfactory.h"
+#include "charset/chaiconverter.h"
 #include "document/chadocument.h"
 #include "document/charevisionreader.h"
 #include "document/chalineiterator.h"

@@ -75,6 +75,9 @@ int cha_document_get_id(ChaDocument *document);
 struct _ChaDocumentManager *cha_document_get_document_manager(ChaDocument *document);
 
 
+ChaLineEnd cha_document_get_line_end_user(ChaDocument *document);
+void cha_document_set_line_end_user(ChaDocument *document, ChaLineEnd line_end);
+
 void cha_document_set_big_file_mode(ChaDocument *document, gboolean big_file_mode);
 gboolean cha_document_is_big_file_mode(ChaDocument *document);
 

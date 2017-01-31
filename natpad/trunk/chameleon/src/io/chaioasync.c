@@ -63,7 +63,7 @@ static void l_finalize(GObject *object) {
 void cha_io_async_construct(ChaIOAsync *async) {
 }
 
-void cha_io_async_finished(ChaIOAsync *async, gboolean success, GError **error) {
+void cha_io_async_finished(ChaIOAsync *async, gboolean success, GError *error) {
 	if (async) {
 		ChaIOAsyncClass *as_class = CHA_IO_ASYNC_GET_CLASS(async);
 		if (as_class->finished) {
