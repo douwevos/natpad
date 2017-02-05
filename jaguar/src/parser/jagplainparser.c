@@ -80,6 +80,7 @@ static void _dispose(GObject *object) {
 	cat_unref_ptr(priv->keyword_printer);
 	cat_unref_ptr(priv->line_tag_printer);
 	cat_unref_ptr(priv->delagate);
+	cat_unref_ptr(priv->spell_helper);
 	cat_free_ptr(priv->token_cash);
 	priv->token_cash_size = 0;
 	G_OBJECT_CLASS(parent_class)->dispose(object);

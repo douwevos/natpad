@@ -56,7 +56,6 @@ struct _DraEditorPrivate {
 
 	CatStringWo *occurrence_text;
 
-
 	ChaLineLocationWo *tag_line_location;
 	long long tag_y_marker_view;
 	ChaLineLocationWo *tag_current_line_location;
@@ -64,9 +63,7 @@ struct _DraEditorPrivate {
 	int tag_timeout_tag;
 
 	CatStringWo *slot_key;
-
 };
-
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
@@ -190,6 +187,7 @@ void dra_editor_set_occurrence_text(DraEditor *editor, CatStringWo *text) {
 		cat_ref_swap(priv->occurrence_text, text);
 		ChaSearchQueryWo *query = cha_search_query_wo_new();
 		cha_search_query_wo_set_match_case(query, TRUE);
+		cha_search_query_wo_set_match_words(query, TRUE);
 		cha_search_query_wo_set_text(query, text);
 
 		DraDocumentView *document_view = (DraDocumentView *) cha_editor_get_document_view((ChaEditor *) editor);
@@ -199,23 +197,7 @@ void dra_editor_set_occurrence_text(DraEditor *editor, CatStringWo *text) {
 		dra_document_view_set_occurrences_rset(document_view, occurrences_rset);
 		cat_unref_ptr(occurrences_rset);
 		cat_unref_ptr(query);
-
-//		ChaOccurrencesResultSet *occ_rset = cha_occurrences_result_set_new(query, document);
-
-//		ChaRevisionWo *a_rev = cha_document_view_get_revision(document_view);
-//		int page_count = cha_revision_wo_page_count(a_rev);
-//		int page_idx;
-//		for(page_idx=0; page_idx<page_count; page_idx++) {
-//			ChaPageWo *a_page = cha_revision_wo_page_at(a_rev, page_idx);
-//			ChaLineWo *a_line = cha_revision_wo_line_at_location(a_rev, a_line_location);
-//
-//			DraLineInfoWo *line_info = (DraLineInfoWo *)
-//					cha_line_wo_get_slot_content_ref(a_line, priv->markup_idx, (GObject *) priv->a_markup_key);
-//		}
-//
-
 		cha_document_view_invalidate_lines((ChaDocumentView *) document_view);
-
 	}
 }
 
@@ -605,7 +587,6 @@ static gboolean l_key_press_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer
 
 				cat_log_debug("ptxt = %d %d", buf[0], buf[1]);
 
-
 				ChaDocumentView *document_view = cha_editor_get_document_view((ChaEditor *) data);
 				ChaEditMode mode = cha_document_view_get_edit_mode(document_view);
 				cat_log_debug("mode=%d", mode);
@@ -618,16 +599,6 @@ static gboolean l_key_press_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer
 	        }
 		}
 
-
-//		if (eev->string[0] != 0) {
-//			ChaDocumentView *document_view = cha_editor_get_document_view((ChaEditor *) data);
-//			ChaEditMode mode = cha_document_view_get_edit_mode(document_view);
-//			if (mode == CHA_EDIT_MODE_OVERWRITE) {
-//				uow = (ChaUow *) cha_uow_replace_text_new(cat_string_wo_new_with(eev->string));
-//			} else {
-//				uow = (ChaUow *) cha_uow_insert_text_new(cat_string_wo_new_with(eev->string));
-//			}
-//		}
 	} else if (ctrl_pressed) {
 		switch(key_val) {
 			case GDK_KEY_a : {
@@ -649,9 +620,6 @@ static gboolean l_key_press_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer
 					owner_window = gtk_widget_get_parent(owner_window);
 				}
 				cha_search_service_show_dialog(search_service, (GtkWindow *) owner_window, CHA_EDITOR(data));
-//				ChaSearchDialog *dialog = cha_search_dialog_new();
-//				cha_search_dialog_set_editor(dialog, CHA_EDITOR(data));
-//				cha_search_dialog_show(dialog);
 			} break;
 			case GDK_KEY_x : {
 				uow = (ChaUow *) cha_uow_clipboard_new(CHA_UOW_CLIPBOARD_CUT, FALSE);
@@ -758,9 +726,6 @@ static gboolean l_button_press_event_cb(GtkWidget *gwidget, GdkEventButton *eev,
 
 			cat_unref_ptr(a_rev);
 		}
-
-
-
 
 		editor_class->showContextMenu(editor, cursor, (int) eev->x, (int) eev->y, spell_tag);
 		cat_unref_ptr(spell_tag)
@@ -936,27 +901,12 @@ static gboolean l_enable_kill(DraEditor *editor) {
 //	ElkCompletionPopup *completion_popup = editor->completion_popup;
 //	gtk_window_move (GTK_WINDOW (completion_popup->popup_window), completion_popup->xpos, completion_popup->ypos);
 	return FALSE;
-
 }
-
-//void elk_editor_hide_auto_completion_popup(DraEditor *elk_editor) {
-////	if (priv->auto_complete_popup) {
-////		cat_log_debug("has-grab:%d, block-kill-asist=%d",priv->auto_complete_popup->has_grab, priv->do_not_kill_assist);
-////		if (!priv->auto_complete_popup->has_grab  && !priv->do_not_kill_assist) {
-////			cat_log_detail("hiding");
-////			gtk_widget_destroy(GTK_WIDGET(priv->auto_complete_popup->popup_window));
-////			priv->auto_complete_popup = NULL;
-////		}
-////	}
-//}
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-//	DraEditor *instance = DRA_EDITOR(self);
-//	DraEditorPrivate *priv = dra_editor_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

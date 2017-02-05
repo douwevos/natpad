@@ -55,8 +55,9 @@ static void cha_utf8_converter_init(ChaUtf8Converter *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	ChaUtf8Converter *instance = CHA_UTF8_CONVERTER(object);
-//	ChaUtf8ConverterPrivate *priv = cha_utf8_converter_get_instance_private(instance);
+	ChaUtf8Converter *instance = CHA_UTF8_CONVERTER(object);
+	ChaUtf8ConverterPrivate *priv = cha_utf8_converter_get_instance_private(instance);
+	cat_unref_ptr(priv->name);
 	G_OBJECT_CLASS(cha_utf8_converter_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -173,9 +174,19 @@ static CatStringWo *l_get_name(ChaIConverter *self) {
 }
 
 
+static gboolean l_for_charset(ChaIConverter *self, const char *charset_name) {
+	if (charset_name==NULL) {
+		return FALSE;
+	}
+
+	return strcasecmp("UTF8", charset_name)==0;
+}
+
+
 static void l_converter_iface_init(ChaIConverterInterface *iface) {
 	iface->convert = l_convert;
 	iface->getName = l_get_name;
+	iface->forCharset = l_for_charset;
 }
 
 

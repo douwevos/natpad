@@ -59,8 +59,12 @@ static void dra_augment_request_init(DraAugmentRequest *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraAugmentRequest *instance = DRA_AUGMENT_REQUEST(object);
-//	DraAugmentRequestPrivate *priv = dra_augment_request_get_instance_private(instance);
+	DraAugmentRequest *instance = DRA_AUGMENT_REQUEST(object);
+	DraAugmentRequestPrivate *priv = dra_augment_request_get_instance_private(instance);
+	cat_unref_ptr(priv->a_revision);
+	cat_unref_ptr(priv->document);
+	cat_unref_ptr(priv->slot_key);
+	cat_unref_ptr(priv->spell_helper);
 	G_OBJECT_CLASS(dra_augment_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -78,6 +82,7 @@ void dra_augment_request_construct(DraAugmentRequest *request, ChaDocument *docu
 	priv->document = cat_ref_ptr(document);
 	priv->a_revision = cat_ref_ptr(a_revision);
 	priv->slot_key = cat_ref_ptr(slot_key);
+	priv->spell_helper = NULL;
 	wor_request_construct((WorRequest *) request);
 	wor_request_set_time_out((WorRequest *) request, cat_date_current_time()+120);
 }
@@ -110,6 +115,7 @@ static void l_run_request(WorRequest *request) {
 	DraAugmentRequestPrivate *priv = dra_augment_request_get_instance_private(DRA_AUGMENT_REQUEST(request));
 	ChaRevisionWo *cur_revision = cha_document_get_current_revision_ref(priv->document);
 	int cur_pl_version = cha_revision_wo_get_page_list_version(cur_revision);
+	cat_unref_ptr(cur_revision);
 	int rev_pl_version = cha_revision_wo_get_page_list_version(priv->a_revision);
 	if (rev_pl_version<cur_pl_version) {
 		return;

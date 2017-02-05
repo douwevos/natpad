@@ -55,8 +55,12 @@ static void mul_rust_scanner_factory_init(MulRustScannerFactory *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	MulRustScannerFactory *instance = MUL_RUST_SCANNER_FACTORY(object);
-//	MulRustScannerFactoryPrivate *priv = mul_rust_scanner_factory_get_instance_private(instance);
+	MulRustScannerFactory *instance = MUL_RUST_SCANNER_FACTORY(object);
+	MulRustScannerFactoryPrivate *priv = mul_rust_scanner_factory_get_instance_private(instance);
+	cat_unref_ptr(priv->connected_symbols);
+	cat_unref_ptr(priv->keyword_mapping);
+	cat_unref_ptr(priv->symbol_provider);
+	cat_unref_ptr(priv->token_factory);
 	G_OBJECT_CLASS(mul_rust_scanner_factory_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -210,13 +214,15 @@ MulRustScannerFactory *mul_rust_scanner_factory_new(GroRunISymbolProvider *symbo
 	CatStringWo *t_block_comment = cat_string_wo_new_with("BLOCK_COMMENT");
 	GroRunSymbol *sym_block_comment = grorun_symbol_new(FALSE, t_block_comment, MUL_RUST_SYM_BLOCK_COMMENT);
 	cat_array_wo_append(connected_syms, (GObject *) sym_block_comment);
+	cat_unref_ptr(sym_block_comment);
+	cat_unref_ptr(t_block_comment);
 
 
 	CatStringWo *t_eol_comment = cat_string_wo_new_with("EOL_COMMENT");
 	GroRunSymbol *sym_eol = grorun_symbol_new(FALSE, t_eol_comment, 1000);
 	cat_array_wo_append(connected_syms, (GObject *) sym_eol);
-//	cat_unref_ptr(sym_eol);
-//	cat_unref_ptr(t_eol_comment);
+	cat_unref_ptr(sym_eol);
+	cat_unref_ptr(t_eol_comment);
 
 	priv->keyword_mapping = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 

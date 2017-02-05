@@ -179,6 +179,23 @@ ChaPageWo *cha_revision_wo_page_at(ChaRevisionWo *revision, int page_idx) {
 	return cha_page_list_wo_page_at(priv->page_list, page_idx);
 }
 
+
+ChaCursorWo *cha_revision_wo_create_end_of_revision_cursor(ChaRevisionWo *revision) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(revision);
+	int page_count = cha_page_list_wo_page_count(priv->page_list);
+	ChaPageWo *last_page = cha_page_list_wo_page_at(priv->page_list, page_count-1);
+	cha_page_wo_hold_lines(last_page);
+	int page_line_count = cha_page_wo_line_count(last_page);
+	const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(last_page, page_line_count-1, FALSE);
+	ChaLineLocationWo *end_ll = cha_line_location_wo_new_with(page_count-1, page_line_count-1);
+	ChaCursorWo *result = cha_cursor_wo_new_ll_offset(end_ll, utf8_text.text_len);
+	cat_unref_ptr(end_ll);
+	cha_utf8_text_cleanup(&utf8_text);
+	cha_page_wo_release_lines(last_page);
+	return result;
+}
+
+
 ChaCursorWo *cha_revision_wo_get_cursor(ChaRevisionWo *revision) {
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(revision);
 	return priv->cursor;

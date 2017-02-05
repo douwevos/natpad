@@ -184,7 +184,9 @@ static TerPrefsClazzWo *l_find_best_document_clazz(ElkIResourceHandler *self, Ca
 			CatIIterator *pat_iter = cat_array_wo_iterator(a_pattern_list);
 			while(result==NULL && cat_iiterator_has_next(pat_iter)) {
 				CatStringWo *pattern = (CatStringWo *) cat_iiterator_next(pat_iter);
-				CatRegexp *exp = cat_regexp_new(cat_string_wo_new_with(cat_string_wo_getchars(pattern)));
+				CatStringWo *cp = cat_string_wo_clone(pattern, CAT_CLONE_DEPTH_MAIN);
+				CatRegexp *exp = cat_regexp_new(cp);
+				cat_unref_ptr(cp);
 				cat_log_debug("pattern=%o", pattern);
 				if (cat_regexp_match(exp, a_filename)) {
 					result = a_ter_clazz;

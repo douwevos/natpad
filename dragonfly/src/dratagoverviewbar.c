@@ -71,8 +71,10 @@ static void dra_tag_overview_bar_init(DraTagOverviewBar *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraTagOverviewBar *instance = DRA_TAG_OVERVIEW_BAR(object);
-//	DraTagOverviewBarPrivate *priv = dra_tag_overview_bar_get_instance_private(instance);
+	DraTagOverviewBar *instance = DRA_TAG_OVERVIEW_BAR(object);
+	DraTagOverviewBarPrivate *priv = dra_tag_overview_bar_get_instance_private(instance);
+	cat_unref_ptr(priv->tagged_lines);
+	cat_unref_ptr(priv->zones);
 	G_OBJECT_CLASS(dra_tag_overview_bar_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

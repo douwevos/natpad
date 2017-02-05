@@ -1,0 +1,45 @@
+module {
+
+	name 'uchardet';
+	
+	
+	
+	dependencies {
+		module 'glib';
+		module 'gio';
+		module 'gobject';	
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { 
+			arg "-D_GLIBCXX_USE_CXX11_ABI=0";
+			src { path './src/'; }
+			natpad.cc.args {}
+		
+			destdir './compiled/'; 
+			depdir 'deps';
+		}
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libuchardet.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'uchardet';
+		}
+	
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

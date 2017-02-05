@@ -22,7 +22,6 @@
 
 #include "draprefsspellingpanel.h"
 #include "../drapreferenceswo.h"
-#include <aspell.h>
 
 #include "dragladeprefsspelling.h"
 
@@ -33,6 +32,7 @@
 
 struct _DraPrefsSpellingPanelPrivate {
 	CowIEntryAccessor *entry_accessor;
+	DraSpellHelper *spell_helper;
 	CatWo *e_prefs;
 	DraPrefsSpellingWo *e_prefs_spelling;
 
@@ -95,11 +95,13 @@ static void l_dict_changed(GtkWidget *cmb_dict , gpointer user_data);
 static void l_refresh_language_list(DraPrefsSpellingPanel *panel);
 static void l_max_nr_props_changed(GtkSpinButton *spin_button, gpointer user_data);
 
-DraPrefsSpellingPanel *dra_prefs_spelling_panel_new(CowIEntryAccessor *entry_accessor) {
+
+DraPrefsSpellingPanel *dra_prefs_spelling_panel_new(CowIEntryAccessor *entry_accessor, DraSpellHelper *spell_helper) {
 	DraPrefsSpellingPanel *result = g_object_new(DRA_TYPE_PREFS_SPELLING_PANEL, NULL);
 	cat_ref_anounce(result);
 	DraPrefsSpellingPanelPrivate *priv = dra_prefs_spelling_panel_get_instance_private(result);
 	priv->entry_accessor = cat_ref_ptr(entry_accessor);
+	priv->spell_helper = cat_ref_ptr(spell_helper);
 	priv->language_list = NULL;
 	priv->e_prefs_spelling = NULL;
 	priv->e_prefs = NULL;
@@ -180,24 +182,11 @@ static void l_max_nr_props_changed(GtkSpinButton *spin_button, gpointer user_dat
 
 static CatArrayWo *l_enlist_languages(DraPrefsSpellingPanel *panel) {
 	CatArrayWo *result = cat_array_wo_new();
-
-	struct AspellConfig *aspell_config = new_aspell_config();
-
-	AspellStringPairEnumeration *aspe = aspell_config_elements(aspell_config);
-	cat_log_error("enlisted-key:%p", aspe);
-	AspellDictInfoList *adil = get_aspell_dict_info_list(aspell_config);
-	AspellDictInfoEnumeration *adile = aspell_dict_info_list_elements(adil);
-	while(TRUE) {
-		const AspellDictInfo *adi = aspell_dict_info_enumeration_next(adile);
-		if (adi==NULL) {
-			break;
-		}
-		cat_log_error("nam=%s, jargo=%s, code=%s", adi->name, adi->jargon, adi->code);
-		CatStringWo *sp = cat_string_wo_new_with(adi->name);
-		cat_array_wo_append(result, (GObject *) sp);
-		cat_unref_ptr(sp);
+	DraPrefsSpellingPanelPrivate *priv = dra_prefs_spelling_panel_get_instance_private(panel);
+	if (priv->spell_helper) {
+		cat_unref_ptr(result);
+		result = dra_spell_helper_enlist_languages(priv->spell_helper);
 	}
-
 	return result;
 }
 

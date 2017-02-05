@@ -105,20 +105,21 @@ CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs, ElkSaveDialog *
 	ChaCharsetConverterFactory *factory = cha_document_manager_get_converter_factory(doc_manager);
 	CatArrayWo *converter_names = cha_charset_converter_factory_enlist_names(factory);
 	CatIIterator *iter = cat_array_wo_iterator(converter_names);
+	gtk_list_store_clear(model);
 	while(cat_iiterator_has_next(iter)) {
 		CatStringWo *name = (CatStringWo *) cat_iiterator_next(iter);
 		GtkTreeIter titer;
-		gtk_list_store_clear(model);
 		gtk_list_store_append(model, &titer);
 		gtk_list_store_set(model, &titer, 0, cat_string_wo_getchars(name), 1, name, -1);
 	}
 	cat_unref_ptr(iter);
-	cat_unref_ptr(converter_names);
 
 	gtk_file_chooser_set_extra_widget(file_chooser, w_encoding);
 
 	gtk_file_chooser_set_show_hidden(file_chooser, FALSE);
 	gtk_widget_show_all(dialog);
+
+	save_dialog->selected_charset = NULL;
 
 	gint response = gtk_dialog_run(GTK_DIALOG(dialog));
 	CatStringWo *result = NULL;
@@ -130,13 +131,18 @@ CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs, ElkSaveDialog *
 
 
 		GtkTreeIter titer;
+
 		if (gtk_combo_box_get_active_iter(w_cmb_encoding, &titer)) {
 			CatStringWo *selected_converter = NULL;
-			gtk_tree_model_get_value(model, &titer, 1, &selected_converter);
-			save_dialog->selected_charset = selected_converter;
+			GValue val = {0};
+			gtk_tree_model_get_value(model, &titer, 1, &val);
+			CatStringWo *nm = g_value_get_object(&val);
+			cat_log_debug("nm=%O", nm);
+			save_dialog->selected_charset = cat_ref_ptr(nm);	// TODO unref
 		}
 	}
 
+	cat_unref_ptr(converter_names);
 
 	gtk_widget_destroy(dialog);
 	return result;

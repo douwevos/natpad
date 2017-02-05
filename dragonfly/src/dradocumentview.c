@@ -116,7 +116,6 @@ static ChaLineLayout *l_create_line_layout(ChaDocumentView *document_view) {
 
 static void l_invalidate_revision(ChaDocumentView *document_view, ChaRevisionWo *a_rev) {
 	DraDocumentViewPrivate *priv = dra_document_view_get_instance_private((DraDocumentView *) document_view);
-//	cha_occurrences_result_set_set_revision(priv->occurrence_result_set, a_rev);
 	if (priv->occurrence_result_set) {
 		cha_occurences_result_set_set_revision(priv->occurrence_result_set, a_rev);
 	}
@@ -140,9 +139,6 @@ static void l_on_invalidate_line(ChaDocumentView *document_view, int page_index,
 	}
 	dra_line_layout_set_occurrences(dra_line_layout, occurrences);
 //	cat_unref_ptr(occurrences);
-
-//	cha_occurrences_result_set_at_line(priv->occurrence_result_set, page_index, page_line_index);
-
 }
 
 

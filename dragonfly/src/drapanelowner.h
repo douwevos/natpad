@@ -24,6 +24,7 @@
 #define DRAPANELOWNER_H_
 
 #include "draeditorpanel.h"
+#include "spell/draspellhelper.h"
 #include "document/draconnectormap.h"
 #include "macros/dramacromanager.h"
 #include <chameleon.h>
@@ -85,6 +86,7 @@ void dra_panel_owner_refresh_clipboard(DraPanelOwner *panel_owner);
 
 DraMacroManager *dra_panel_owner_get_macro_manager(DraPanelOwner *panel_owner);
 DraConnectorMap *dra_panel_owner_get_connector_map(DraPanelOwner *panel_owner);
+DraSpellHelper *dra_panel_owner_get_spell_helper(DraPanelOwner *panel_owner);
 
 void dra_panel_owner_setup_context_menu(DraPanelOwner *panel_owner, LeaActionGroup *ctx_menu_grp, DraEditor *editor, ChaCursorWo *cursor);
 

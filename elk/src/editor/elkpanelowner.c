@@ -102,6 +102,9 @@ ElkPanelOwner *elk_panel_owner_new(ElkIService *elk_service, MooService *moo_ser
 	ElkPreferencesService *elk_pref_service = elk_service_get_preferences_service((ElkService *) elk_service);
 	priv->dra_prefs_accessor = elk_preferences_services_get_chameleon_prefs_accessor(elk_pref_service);
 
+	DraSpellHelper *spell_helper = dra_panel_owner_get_spell_helper((DraPanelOwner *) result);
+	elk_preferences_service_set_spell_helper(elk_pref_service, spell_helper);
+
 	return result;
 }
 

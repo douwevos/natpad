@@ -26,6 +26,7 @@
 #include <chameleon.h>
 #include <caterpillar.h>
 #include <cow.h>
+#include "../../spell/draspellhelper.h"
 
 G_BEGIN_DECLS
 
@@ -53,7 +54,7 @@ struct _DraPrefsSpellingPanelClass {
 
 GType dra_prefs_spelling_panel_get_type();
 
-DraPrefsSpellingPanel *dra_prefs_spelling_panel_new(CowIEntryAccessor *entry_accessor);
+DraPrefsSpellingPanel *dra_prefs_spelling_panel_new(CowIEntryAccessor *entry_accessor, DraSpellHelper *spell_helper);
 
 G_END_DECLS
 

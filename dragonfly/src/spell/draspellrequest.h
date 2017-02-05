@@ -26,6 +26,7 @@
 #include <caterpillar.h>
 #include <chameleon.h>
 #include <worm.h>
+#include "draspellhelper.h"
 
 G_BEGIN_DECLS
 
@@ -53,7 +54,7 @@ struct _DraSpellRequestClass {
 
 GType dra_spell_request_get_type();
 
-DraSpellRequest *dra_spell_request_new(ChaDocument *document, ChaRevisionWo *a_new_revision, CatStringWo *slot_key);
+DraSpellRequest *dra_spell_request_new(DraSpellHelper *spell_helper, ChaDocument *document, ChaRevisionWo *a_new_revision, CatStringWo *slot_key);
 
 G_END_DECLS
 

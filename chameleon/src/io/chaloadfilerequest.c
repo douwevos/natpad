@@ -27,7 +27,7 @@
 #include "../document/page/chafullpagewo.h"
 #include "../document/page/chammappagewo.h"
 #include <gio/gio.h>
-#include <libguess.h>
+#include <uchardet.h>
 
 
 #include <logging/catlogdefs.h>
@@ -359,7 +359,12 @@ static void l_run_request(WorRequest *request) {
 	if (buflen>8192) {
 		buflen = 8192;
 	}
-	const char *encoding = libguess_determine_encoding(priv->raw_data, buflen, GUESS_REGION_RU);
+
+	uchardet_t udt = uchardet_new();
+	uchardet_handle_data(udt, priv->raw_data, buflen);
+	uchardet_data_end(udt);
+	const char *encoding = uchardet_get_charset(udt);
+
 	cat_log_error("encoding=%s", encoding);
 
 	ChaDocumentManager *document_manager = cha_document_get_document_manager(priv->document);

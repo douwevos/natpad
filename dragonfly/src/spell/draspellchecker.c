@@ -59,8 +59,11 @@ static void dra_spell_checker_init(DraSpellChecker *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraSpellChecker *instance = DRA_SPELL_CHECKER(object);
-//	DraSpellCheckerPrivate *priv = dra_spell_checker_get_instance_private(instance);
+	DraSpellChecker *instance = DRA_SPELL_CHECKER(object);
+	DraSpellCheckerPrivate *priv = dra_spell_checker_get_instance_private(instance);
+	cat_unref_ptr(priv->buf);
+	cat_unref_ptr(priv->input);
+	cat_unref_ptr(priv->spell_word.word);
 	G_OBJECT_CLASS(dra_spell_checker_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -146,6 +149,7 @@ const DraSpellWord dra_spell_checker_next_word(DraSpellChecker *checker) {
 	DraSpellCheckerPrivate *priv = dra_spell_checker_get_instance_private(checker);
 	cat_string_wo_clear(priv->buf);
 	gboolean has_chars = FALSE;
+	cat_unref_ptr(priv->spell_word.word);
 	while(TRUE) {
 
 		if (priv->lookahead[0]==-1) {

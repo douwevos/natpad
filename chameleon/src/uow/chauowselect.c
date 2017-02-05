@@ -234,6 +234,7 @@ static void l_uow_run(ChaUow *self, struct _ChaEditor *editor, ChaDocumentView *
 	if (!is_editable) {
 		cha_document_anchor_document(document);
 		cha_document_view_move_view_to_focus(document_view, FALSE);
+		cha_document_view_invalidate_lines(document_view);
 	}
 
 }

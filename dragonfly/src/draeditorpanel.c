@@ -91,9 +91,10 @@ static void dra_editor_panel_init(DraEditorPanel *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraEditorPanel *instance = DRA_EDITOR_PANEL(object);
-//	DraEditorPanelPrivate *priv = dra_editor_panel_get_instance_private(instance);
-//	cat_unref_ptr(priv->editor);
+	DraEditorPanel *instance = DRA_EDITOR_PANEL(object);
+	DraEditorPanelPrivate *priv = dra_editor_panel_get_instance_private(instance);
+	cat_unref_ptr(priv->line_info_key);
+	cat_unref_ptr(priv->occurrences_request);
 	G_OBJECT_CLASS(dra_editor_panel_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -386,11 +387,23 @@ static void l_on_enrichment_slot_notify(ChaIDocumentListener *self, ChaRevisionW
 		if (a_line_info) {
 			CatArrayWo *tags = dra_line_info_wo_get_line_tags(a_line_info);
 			if (tags && cat_array_wo_size(tags)>0) {
-				cat_int_array_wo_append(int_array, abs_line_index);
-				cat_log_trace("adding tagged-line=%d", abs_line_index);
+				CatIIterator *tag_iter = cat_array_wo_iterator(tags);
+				while(cat_iiterator_has_next(tag_iter)) {
+					DraLineTagWo *tag = (DraLineTagWo *) cat_iiterator_next(tag_iter);
+					DraTagType tt = dra_line_tag_wo_get_tag_type(tag);
+					if (tt==DRA_TAG_TYPE_PARSER_ERROR || tt==DRA_TAG_TYPE_SCANNER_ERROR) {
+						cat_int_array_wo_append(int_array, abs_line_index);
+						cat_log_trace("adding tagged-line=%d", abs_line_index);
+						cat_unref_ptr(line);
+						cat_unref_ptr(a_line_info);
+						break;
+					}
+				}
+				cat_unref_ptr(tag_iter);
 			}
+			cat_unref_ptr(a_line_info);
 		}
-
+		cat_unref_ptr(line);
 		abs_line_index++;
 	}
 	cat_unref_ptr(line_iter);

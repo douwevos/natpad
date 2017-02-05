@@ -66,6 +66,7 @@
 #include "../io/chadocumentmanager.h"
 #include "../preferences/chaprefscolormapwo.h"
 #include "chapagelayoutrequest.h"
+#include "../selection/chaselectionprivate.h"
 #include "chasurfacepool.h"
 
 #define FORCE_FULL_PAINT 0
@@ -106,6 +107,8 @@ struct _ChaDocumentViewPrivate {
 	GtkAdjustment *vadjustment;
 	CatAtomicInteger *selection_sequence;
 	ChaSelection *selection;
+	int selection_mod_count;
+
 
 	int last_revision_page_list_version;
 	CatArrayWo *pages_on_hold;
@@ -227,6 +230,7 @@ void cha_document_view_construct(ChaDocumentView *document_view, ChaDocument *do
 	priv->view_height = 0;
 	priv->selection_sequence = cat_atomic_integer_new();
 	priv->selection = NULL;
+	priv->selection_mod_count = -1;
 	priv->sub_line_cache = NULL;
 	priv->has_focus = TRUE;
 	priv->in_scroll = FALSE;
@@ -1519,15 +1523,14 @@ void cha_document_view_move_view_to_focus(ChaDocumentView *document_view, gboole
 		viewX = 0;
 	}
 
-
 	gint font_height = o_line_height;
 
 	long long int phy_y_cursor = cursor_y_top;
+	long long int page_end = viewY+view_height;
 
-	if (do_center) {
+	if (do_center && (phy_y_cursor<viewY ||  phy_y_cursor+font_height>page_end)) {
 		viewY = phy_y_cursor - view_height/2;
 	}
-	long long int page_end = viewY+view_height;
 
 	cat_log_debug("phy_y_cursor=%ld, font_height=%ld, viewY=%ld", phy_y_cursor, font_height, viewY);
 	if (phy_y_cursor<viewY) {
@@ -1801,6 +1804,7 @@ static void l_invalidate_revision(ChaDocumentView *document_view, ChaRevisionWo 
 	ChaDocumentViewPrivate *priv = cha_document_view_get_instance_private(document_view);
 	PangoContext *pango_context = priv->pango_context;
 
+	priv->selection_mod_count = priv->selection==NULL ? -1 : cha_selection_get_protected(priv->selection)->modification_count;
 
 //	ChaRevisionWo *revision_ref = cha_document_get_current_revision_ref(priv->document);
 	priv->last_slot_key_idx = cha_revision_wo_get_slot_index(revision_ref, (GObject *) priv->a_slot_key, priv->last_slot_key_idx);
@@ -2335,6 +2339,12 @@ static void l_on_new_revision(ChaIDocumentListener *self, ChaRevisionWo *a_new_r
 			gboolean new_has_form = cha_revision_wo_get_form(a_new_revision)!=NULL;
 			gboolean old_has_form = cha_revision_wo_get_form(prev_rev)!=NULL;
 			run_invalidate = old_has_form!=new_has_form;
+			if (!run_invalidate) {
+				if ((priv->selection==NULL && priv->selection_mod_count!=-1) ||
+						(priv->selection && cha_selection_get_protected(priv->selection)->modification_count!=priv->selection_mod_count)) {
+					run_invalidate = TRUE;
+				}
+			}
 		}
 
 		if (run_invalidate) {

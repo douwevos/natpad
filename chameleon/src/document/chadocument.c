@@ -299,8 +299,23 @@ void cha_document_anchor_document_full(ChaDocument *document, ChaDocumentAnchorM
 
 		if (a_new_rev != a_rev) {
 
-			if (a_rev==NULL || cha_revision_wo_get_content_version(a_new_rev)!=cha_revision_wo_get_content_version(a_rev)) {
+			if (a_rev==NULL) {
 				add_to_undo_redo = TRUE;
+			} else if (cha_revision_wo_get_content_version(a_new_rev)!=cha_revision_wo_get_content_version(a_rev)) {
+				add_to_undo_redo = TRUE;
+			} else {
+				int size = cat_linked_list_size(priv->e_revision_history);
+				if (size>=2) {
+					ChaRevisionWo *bt1 = (ChaRevisionWo *) cat_linked_list_get(priv->e_revision_history, size-1);
+					ChaRevisionWo *bt2 = (ChaRevisionWo *) cat_linked_list_get(priv->e_revision_history, size-2);
+					if (cha_revision_wo_get_content_version(bt1)!=cha_revision_wo_get_content_version(bt2)) {
+						add_to_undo_redo = TRUE;
+					} else {
+						anchor_mode=CHA_DOCUMENT_ANCHOR_MODE_REPLACE_LAST_HISTORY;
+					}
+				} else if (size>=1) {
+					anchor_mode=CHA_DOCUMENT_ANCHOR_MODE_REPLACE_LAST_HISTORY;
+				}
 			}
 
 			cha_revision_wo_enrich(a_new_rev, priv->enrichment_map);

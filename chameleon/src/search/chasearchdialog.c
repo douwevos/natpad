@@ -60,6 +60,7 @@ struct _ChaSearchDialogPrivate {
 	GtkWidget *w_cb_regexp;
 
 	GtkWidget *w_cb_backward;
+	GtkWidget *w_cb_wrap;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -142,6 +143,7 @@ ChaSearchDialog *cha_search_dialog_new(struct _ChaSearchService *search_service)
 	priv->w_cb_regexp = (GtkWidget *) gtk_builder_get_object(builder, "cb_regexp");
 
 	priv->w_cb_backward = (GtkWidget *) gtk_builder_get_object(builder, "cb_backward");
+	priv->w_cb_wrap = (GtkWidget *) gtk_builder_get_object(builder, "cb_wrap_search");
 
 
 	g_signal_connect(priv->w_txt_find, "changed", G_CALLBACK(l_find_text_changed), result);
@@ -192,8 +194,9 @@ static void l_on_find_clicked(GtkButton *button, gpointer user_data) {
 	cha_search_service_set_query(priv->search_service, query);
 
 	gboolean backward_search = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->w_cb_backward));
+	gboolean wrap_search = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->w_cb_wrap));
 
-	cha_search_service_find(priv->search_service, backward_search);
+	cha_search_service_find(priv->search_service, backward_search, wrap_search);
 }
 
 static void l_on_mark_lines_clicked(GtkButton *button, gpointer user_data) {

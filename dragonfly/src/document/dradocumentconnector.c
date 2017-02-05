@@ -61,8 +61,13 @@ static void dra_document_connector_init(DraDocumentConnector *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraDocumentConnector *instance = DRA_DOCUMENT_CONNECTOR(object);
-//	DraDocumentConnectorPrivate *priv = dra_document_connector_get_instance_private(instance);
+	DraDocumentConnector *instance = DRA_DOCUMENT_CONNECTOR(object);
+	DraDocumentConnectorPrivate *priv = dra_document_connector_get_instance_private(instance);
+	cat_unref_ptr(priv->a_slot_key);
+	cat_unref_ptr(priv->document);
+	cat_unref_ptr(priv->factory);
+	cat_unref_ptr(priv->spell_helper);
+	cat_unref_ptr(priv->wor_service);
 	G_OBJECT_CLASS(dra_document_connector_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

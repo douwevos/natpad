@@ -3,9 +3,9 @@ module {
 	name 'chameleon';
 	
 	dependencies {
+		module 'uchardet';
 		module 'gtk3';
 		module 'worm';
-		module 'guess';
 	}
 
 	clear {

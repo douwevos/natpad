@@ -60,9 +60,9 @@ ChaOccurrencesResultSet *cha_occurrences_result_set_new(ChaSearchQueryWo *query,
 
 void cha_occurences_result_set_set_revision(ChaOccurrencesResultSet *result_set, ChaRevisionWo *revision);
 
-ChaSearchOccurrence *cha_occurrences_result_set_find_backward(ChaOccurrencesResultSet *result_set, ChaCursorWo *cursor, int *opg_idx);
+ChaSearchOccurrence *cha_occurrences_result_set_find_backward(ChaOccurrencesResultSet *result_set, ChaCursorWo *cursor, ChaCursorWo *stop_cursor, int *opg_idx);
 
-ChaSearchOccurrence *cha_occurrences_result_set_find_forward(ChaOccurrencesResultSet *result_set, ChaCursorWo *cursor, int *opg_idx);
+ChaSearchOccurrence *cha_occurrences_result_set_find_forward(ChaOccurrencesResultSet *result_set, ChaCursorWo *cursor, ChaCursorWo *stop_cursor, int *opg_idx);
 
 ChaSearchPageOccurrences *cha_search_query_wo_run_for_page(ChaOccurrencesResultSet *result_set, ChaPageWo *page, int page_index);
 
