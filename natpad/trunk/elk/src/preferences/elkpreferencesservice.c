@@ -123,6 +123,11 @@ ElkPreferencesService *elk_preferences_service_new(VipCdProvider *vip_cd_provide
 	return result;
 }
 
+void elk_preferences_service_set_spell_helper(ElkPreferencesService *service, DraSpellHelper *spell_helper) {
+	ElkPreferencesServicePrivate *priv = elk_preferences_service_get_instance_private(service);
+	dra_preferences_panel_factory_set_spell_helper(priv->panel_factory2, spell_helper);
+}
+
 
 ElkPreferencesContainer *elk_preferences_service_get_container(ElkPreferencesService *service) {
 	ElkPreferencesServicePrivate *priv = elk_preferences_service_get_instance_private(service);

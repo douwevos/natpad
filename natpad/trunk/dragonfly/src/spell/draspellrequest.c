@@ -24,7 +24,6 @@
 #include "draspellchecker.h"
 #include "../drakeywordprinter.h"
 #include "../dralinetagwo.h"
-#include <aspell.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -36,6 +35,7 @@ struct _DraSpellRequestPrivate {
 	ChaRevisionWo *a_new_revision;
 	CatStringWo *slot_key;
 	int last_content_version;
+	DraSpellHelper *spell_helper;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -77,7 +77,7 @@ static void l_finalize(GObject *object) {
 }
 
 
-DraSpellRequest *dra_spell_request_new(ChaDocument *document, ChaRevisionWo *a_new_revision, CatStringWo *slot_key) {
+DraSpellRequest *dra_spell_request_new(DraSpellHelper *spell_helper, ChaDocument *document, ChaRevisionWo *a_new_revision, CatStringWo *slot_key) {
 	DraSpellRequest *result = g_object_new(DRA_TYPE_SPELL_REQUEST, NULL);
 	cat_ref_anounce(result);
 	DraSpellRequestPrivate *priv = dra_spell_request_get_instance_private(result);
@@ -85,6 +85,7 @@ DraSpellRequest *dra_spell_request_new(ChaDocument *document, ChaRevisionWo *a_n
 	priv->a_new_revision = cat_ref_ptr(a_new_revision);
 	priv->slot_key = cat_ref_ptr(slot_key);
 	priv->last_content_version = cha_revision_wo_get_page_list_version(a_new_revision);
+	priv->spell_helper = cat_ref_ptr(spell_helper);
 	wor_request_construct((WorRequest *) result);
 	wor_request_set_time_out((WorRequest *) result, cat_date_current_time()+120);
 	return result;
@@ -104,9 +105,6 @@ static void l_run_request(WorRequest *request) {
 		return;
 	}
 
-
-
-
 	int markup_slot_idx = cha_revision_wo_get_slot_index(priv->a_new_revision, (GObject *) priv->slot_key, -1);
 	cat_log_debug("Running:markup_slot_idx=%d", markup_slot_idx);
 	if (markup_slot_idx<0) {
@@ -114,73 +112,21 @@ static void l_run_request(WorRequest *request) {
 	}
 
 
-	DraKeywordPrinter *kw_printer = dra_keyword_printer_new(priv->a_new_revision, priv->slot_key, markup_slot_idx);
+	DraKeywordPrinter *line_tag_printer = dra_keyword_printer_new(priv->a_new_revision, priv->slot_key, markup_slot_idx);
 
 	ChaRevisionReader *revision_reader = cha_revision_reader_new(priv->a_new_revision, NULL, NULL);
 	cha_revision_reader_set_forced_line_end(revision_reader, CHA_LINE_END_LF);
 
-	CatIUtf8Scanner *utf8_scanner = (CatIUtf8Scanner *) revision_reader;
 
+	DraSpellChecker *spell_checker = dra_spell_checker_new(CAT_IUTF8_SCANNER(revision_reader));
 
+	dra_spell_helper_scan_all(priv->spell_helper, line_tag_printer, spell_checker);
 
+	dra_keyword_printer_flush_line_tags(line_tag_printer);
 
-
-	struct AspellConfig *aspell_config = new_aspell_config();
-
-	struct AspellCanHaveError *aspell_che = new_aspell_speller(aspell_config);
-
-	struct AspellSpeller *speller = to_aspell_speller(aspell_che);
-
-
-	DraSpellChecker *checker = dra_spell_checker_new(utf8_scanner);
-
-	while(TRUE) {
-		const DraSpellWord spell_word = dra_spell_checker_next_word(checker);
-		if (spell_word.word==NULL) {
-			break;
-		}
-		CatStringWo *buf = (CatStringWo *) spell_word.word;
-		int res = aspell_speller_check(speller, cat_string_wo_getchars(buf), cat_string_wo_length(buf));
-		cat_log_debug("checked:%O --- %d", buf, res);
-		if (res==0) {
-			DraLineTagWo *tag = dra_line_tag_wo_new(spell_word.row, DRA_TAG_TYPE_PARSER_ERROR);
-			dra_line_tag_wo_set_color(tag, 1, 1, 0);
-			dra_line_tag_wo_set_start_and_end_index(tag, spell_word.column_start, spell_word.column_end);
-			dra_keyword_printer_print_line_tag(kw_printer, tag);
-		}
-	}
-
-	dra_keyword_printer_flush_line_tags(kw_printer);
-
-
-//	CatStreamStatus stream_status = CAT_STREAM_OK;
-//
-//	CatStringWo *buf = cat_string_wo_new();
-//	gboolean buf_has_chars = FALSE;
-//	while(TRUE) {
-//		gunichar nch = cat_iutf8_scanner_next_char(utf8_scanner, &stream_status);
-//
-//		if (g_unichar_isalpha(nch)) {
-//			cat_string_wo_append_unichar(buf, nch);
-//			buf_has_chars = TRUE;
-//		} else if (buf_has_chars) {
-//			if (cat_string_wo_length(buf)>1) {
-//				int res = aspell_speller_check(speller, cat_string_wo_getchars(buf), cat_string_wo_length(buf));
-//				cat_log_debug("checked:%O --- %d", buf, res);
-//
-//			}
-//			cat_string_wo_clear(buf);
-//			buf_has_chars = FALSE;
-//		}
-//
-//		if (nch==0) {
-//
-//		}
-//		if (nch==-1) {
-//			break;
-//		}
-//	}
-
+	cat_unref_ptr(spell_checker);
+	cat_unref_ptr(revision_reader);
+	cat_unref_ptr(line_tag_printer);
 }
 
 

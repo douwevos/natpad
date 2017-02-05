@@ -20,12 +20,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-// TODO aspell objects are not cleaned
-
 #include "draspellhelper.h"
 #include "draspellchecker.h"
-#include <aspell.h>
+#include <hunspell.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -34,7 +31,7 @@
 
 struct _DraSpellHelperPrivate {
 	DraPreferencesWo *a_prefs;
-	struct AspellSpeller *speller;
+	Hunhandle *speller;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -61,6 +58,10 @@ static void l_dispose(GObject *object) {
 	DraSpellHelper *instance = DRA_SPELL_HELPER(object);
 	DraSpellHelperPrivate *priv = dra_spell_helper_get_instance_private(instance);
 	cat_unref_ptr(priv->a_prefs);
+	if (priv->speller) {
+		Hunspell_destroy(priv->speller);
+		priv->speller = NULL;
+	}
 	G_OBJECT_CLASS(dra_spell_helper_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -92,26 +93,16 @@ DraSpellHelper *dra_spell_helper_create(DraPreferencesWo *a_prefs) {
 		return result;
 	}
 
+	CatStringWo *aff = cat_string_wo_new();
+	cat_string_wo_format(aff, "/usr/share/hunspell/%O.aff", lang);
 
-	struct AspellConfig *aspell_config = new_aspell_config();
+	CatStringWo *dic = cat_string_wo_new();
+	cat_string_wo_format(dic, "/usr/share/hunspell/%O.dic", lang);
 
-	AspellDictInfoList *adil = get_aspell_dict_info_list(aspell_config);
-	AspellDictInfoEnumeration *adile = aspell_dict_info_list_elements(adil);
-	while(TRUE) {
-		AspellDictInfo *adi = aspell_dict_info_enumeration_next(adile);
-		if (adi==NULL) {
-			break;
-		}
-		cat_log_detail("nam=%s, jargo=%s, code=%s", adi->name, adi->jargon, adi->code);
-	}
-
-	if (lang) {
-		aspell_config_replace(aspell_config, "lang", cat_string_wo_getchars(lang));
-	}
-
-	struct AspellCanHaveError *aspell_che = new_aspell_speller(aspell_config);
-
-	priv->speller = to_aspell_speller(aspell_che);
+	Hunhandle *hun_handle = Hunspell_create(cat_string_wo_getchars(aff), cat_string_wo_getchars(dic));
+	cat_unref_ptr(aff);
+	cat_unref_ptr(dic);
+	priv->speller = hun_handle;
 
 	return result;
 }
@@ -137,7 +128,6 @@ void dra_spell_helper_scan(DraSpellHelper *spell_helper, DraKeywordPrinter *line
 	}
 	CatStringInputStream *csis = cat_string_input_stream_new(text);
 	CatUtf8InputStreamScanner *scanner = cat_utf8_input_stream_scanner_new((CatIInputStream *) csis);
-//	cat_unref_ptr(csis);
 	DraSpellChecker *checker = dra_spell_checker_new_at(scanner, column_start, row_start);
 
 	while(TRUE) {
@@ -146,7 +136,7 @@ void dra_spell_helper_scan(DraSpellHelper *spell_helper, DraKeywordPrinter *line
 			break;
 		}
 		CatStringWo *buf = (CatStringWo *) spell_word.word;
-		int res = aspell_speller_check(priv->speller, cat_string_wo_getchars(buf), cat_string_wo_length(buf));
+		int res = Hunspell_spell(priv->speller, cat_string_wo_getchars(buf));
 //		cat_log_debug("checked:%O --- %d", buf, res);
 		if (res==0) {
 			DraLineTagWo *tag = dra_line_tag_wo_new(spell_word.row, DRA_TAG_TYPE_SPELL_ERROR);
@@ -158,6 +148,37 @@ void dra_spell_helper_scan(DraSpellHelper *spell_helper, DraKeywordPrinter *line
 			dra_keyword_printer_print_line_tag(line_tag_printer, tag);
 		}
 	}
+	cat_unref_ptr(checker);
+	cat_unref_ptr(scanner);
+	cat_unref_ptr(csis);
+}
+
+
+
+void dra_spell_helper_scan_all(DraSpellHelper *spell_helper, DraKeywordPrinter *line_tag_printer, DraSpellChecker *checker) {
+	DraSpellHelperPrivate *priv = dra_spell_helper_get_instance_private(spell_helper);
+	if (priv->speller==NULL) {
+		return;
+	}
+	while(TRUE) {
+		const DraSpellWord spell_word = dra_spell_checker_next_word(checker);
+		if (spell_word.word==NULL) {
+			break;
+		}
+		CatStringWo *buf = (CatStringWo *) spell_word.word;
+		int res = Hunspell_spell(priv->speller, cat_string_wo_getchars(buf));
+//		cat_log_debug("checked:%O --- %d", buf, res);
+		if (res==0) {
+			DraLineTagWo *tag = dra_line_tag_wo_new(spell_word.row, DRA_TAG_TYPE_SPELL_ERROR);
+			dra_line_tag_wo_set_color(tag, 0.6, 0.6, 0.8);
+			dra_line_tag_wo_set_start_and_end_index(tag, spell_word.column_start, spell_word.column_end);
+			CatStringWo *word = cat_string_wo_clone(buf, CAT_CLONE_DEPTH_FULL);
+			dra_line_tag_wo_set_extra_data(tag, word);
+			cat_unref_ptr(word);
+			dra_keyword_printer_print_line_tag(line_tag_printer, tag);
+		}
+	}
+	cat_unref_ptr(checker);
 }
 
 
@@ -170,13 +191,15 @@ CatArrayWo *dra_spell_helper_enlist_corrections(DraSpellHelper *spell_helper, Ca
 			DraPrefsSpellingWo *prefs_spelling = dra_preferences_wo_get_spelling(priv->a_prefs);
 			max = dra_prefs_spelling_wo_get_max_suggestions(prefs_spelling);
 		}
-		const struct AspellWordList *suggestions = aspell_speller_suggest(priv->speller, cat_string_wo_getchars(word), cat_string_wo_length(word));
-		if (suggestions) {
 
+		char **slst = NULL;
+		int sug_count = Hunspell_suggest(priv->speller, &slst, cat_string_wo_getchars(word));
+		if (sug_count>0) {
 			result = cat_array_wo_new();
-			struct AspellStringEnumeration *asenum = aspell_word_list_elements(suggestions);
-			while(max>0) {
-				const char *sug_text = aspell_string_enumeration_next(asenum);
+			int idx=0;
+			while(max>0 && idx<sug_count) {
+				const char *sug_text = slst[idx];
+				idx++;
 
 				if (sug_text==NULL) {
 					break;
@@ -186,10 +209,59 @@ CatArrayWo *dra_spell_helper_enlist_corrections(DraSpellHelper *spell_helper, Ca
 				cat_unref_ptr(sg);
 				max--;
 			}
+			Hunspell_free_list(priv->speller, &slst, sug_count);
 		}
+//		const struct AspellWordList *suggestions = aspell_speller_suggest(priv->speller, cat_string_wo_getchars(word), cat_string_wo_length(word));
+//		if (suggestions) {
+//
+//			result = cat_array_wo_new();
+//			struct AspellStringEnumeration *asenum = aspell_word_list_elements(suggestions);
+//			while(max>0) {
+//				const char *sug_text = aspell_string_enumeration_next(asenum);
+//
+//				if (sug_text==NULL) {
+//					break;
+//				}
+//				CatStringWo *sg = cat_string_wo_new_with(sug_text);
+//				cat_array_wo_append(result, sg);
+//				cat_unref_ptr(sg);
+//				max--;
+//			}
+//		}
 	}
 	return result;
 }
+
+CatArrayWo *dra_spell_helper_enlist_languages(DraSpellHelper *spell_helper) {
+	DraSpellHelperPrivate *priv = dra_spell_helper_get_instance_private(spell_helper);
+
+	GFile *hunspell_base = g_file_new_for_path("/usr/share/hunspell/");
+	GError *error = NULL;
+	GFileEnumerator *file_enum = g_file_enumerate_children(hunspell_base, "standard::name,standard::size", G_FILE_QUERY_INFO_NONE, NULL, &error);
+
+	CatHashSet *names = cat_hash_set_new(cat_string_wo_hash, cat_string_wo_equal);
+
+	GFileInfo *info = g_file_enumerator_next_file(file_enum, NULL, &error);
+	while (info) {
+		const char *namechrs = g_file_info_get_name(info);
+		CatStringWo *name = cat_string_wo_new_with(namechrs);
+		if (cat_string_wo_endswith_chars_len(name, ".aff", 4) || cat_string_wo_endswith_chars_len(name, ".dicc", 4)) {
+			CatStringWo *spell_name = cat_string_wo_new_sub(name, 0, cat_string_wo_length(name)-4);
+			cat_hash_set_add(names, (GObject *) spell_name);
+			cat_unref_ptr(spell_name);
+		}
+		cat_unref_ptr(name);
+		info = g_file_enumerator_next_file(file_enum, NULL, &error);
+	}
+	g_object_unref(file_enum);
+
+
+	CatArrayWo *enlisted_names = cat_hash_set_enlist_all(names);
+
+
+	return enlisted_names;
+}
+
 
 
 /********************* start CatIStringable implementation *********************/

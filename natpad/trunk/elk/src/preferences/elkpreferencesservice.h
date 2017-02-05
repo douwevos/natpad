@@ -26,6 +26,7 @@
 #include "elkipreferencesmapper.h"
 #include <caterpillar.h>
 #include <viper.h>
+#include <dragonfly.h>
 
 G_BEGIN_DECLS
 
@@ -57,6 +58,8 @@ ElkPreferencesService *elk_preferences_service_new(VipCdProvider *vip_cd_provide
 
 ElkPreferencesWo *elk_preferences_service_load(ElkPreferencesService *service);
 void elk_preferences_service_save(ElkPreferencesService *service);
+
+void elk_preferences_service_set_spell_helper(ElkPreferencesService *service, DraSpellHelper *spell_helper);
 
 ElkPreferencesContainer *elk_preferences_service_get_container(ElkPreferencesService *service);
 

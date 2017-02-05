@@ -5,7 +5,7 @@ module {
 	dependencies {
 		module 'gtk3';
 		module 'gtk3-unix-print';
-		module 'aspell';
+		module 'hunspell';
 		module 'shoveler';
 		module 'worm';
 		module 'leafhopper';

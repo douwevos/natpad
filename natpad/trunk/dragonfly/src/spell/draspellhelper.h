@@ -25,6 +25,7 @@
 
 #include "../drakeywordprinter.h"
 #include "../preferences/drapreferenceswo.h"
+#include "draspellchecker.h"
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -59,7 +60,12 @@ DraSpellHelper *dra_spell_helper_reconfigure(DraSpellHelper *spell_helper, DraPr
 
 void dra_spell_helper_scan(DraSpellHelper *spell_helper, DraKeywordPrinter *line_tag_printer, CatStringWo *text, int column_start, long long row_start);
 
+void dra_spell_helper_scan_all(DraSpellHelper *spell_helper, DraKeywordPrinter *line_tag_printer, DraSpellChecker *checker);
+
 CatArrayWo *dra_spell_helper_enlist_corrections(DraSpellHelper *spell_helper, CatStringWo *word);
+
+CatArrayWo *dra_spell_helper_enlist_languages(DraSpellHelper *spell_helper);
+
 
 G_END_DECLS
 

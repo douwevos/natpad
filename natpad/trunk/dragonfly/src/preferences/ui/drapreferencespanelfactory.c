@@ -35,6 +35,7 @@
 
 struct _DraPreferencesPanelFactoryPrivate {
 	CowIEntryAccessor *entry_extractor;
+	DraSpellHelper *spell_helper;
 	CowPanelDescription *pd_editor;
 	CowPanelDescription *pd_behaviour;
 	CowPanelDescription *pd_colors;
@@ -68,6 +69,7 @@ static void l_dispose(GObject *object) {
 	DraPreferencesPanelFactory *instance = DRA_PREFERENCES_PANEL_FACTORY(object);
 	DraPreferencesPanelFactoryPrivate *priv = dra_preferences_panel_factory_get_instance_private(instance);
 	cat_unref_ptr(priv->entry_extractor);
+	cat_unref_ptr(priv->spell_helper);
 	cat_unref_ptr(priv->pd_editor);
 	cat_unref_ptr(priv->pd_behaviour);
 	cat_unref_ptr(priv->pd_colors);
@@ -89,6 +91,7 @@ DraPreferencesPanelFactory *dra_preferences_panel_factory_new(CowIEntryAccessor 
 	DraPreferencesPanelFactory *result = g_object_new(DRA_TYPE_PREFERENCES_PANEL_FACTORY, NULL);
 	cat_ref_anounce(result);
 	DraPreferencesPanelFactoryPrivate *priv = dra_preferences_panel_factory_get_instance_private(result);
+	priv->spell_helper = NULL;
 	priv->entry_extractor = cat_ref_ptr(entry_extractor);
 	priv->pd_editor = cow_panel_description_new(cat_string_wo_new_with("Editor"));
 	priv->pd_behaviour = cow_panel_description_new(cat_string_wo_new_with("Behaviour"));
@@ -98,6 +101,11 @@ DraPreferencesPanelFactory *dra_preferences_panel_factory_new(CowIEntryAccessor 
 	return result;
 }
 
+
+void dra_preferences_panel_factory_set_spell_helper(DraPreferencesPanelFactory *factory, DraSpellHelper *spell_helper) {
+	DraPreferencesPanelFactoryPrivate *priv = dra_preferences_panel_factory_get_instance_private(factory);
+	cat_ref_swap(priv->spell_helper, spell_helper);
+}
 
 
 /********************* start CatIStringable implementation *********************/
@@ -149,7 +157,7 @@ static CowPanel *l_factory_create(CowIPanelFactory *self, struct _CowDialog *cow
 	} else if (panel_descr==priv->pd_templates) {
 		result = (CowPanel *) dra_prefs_templates_panel_new(priv->entry_extractor);
 	} else if (panel_descr==priv->pd_spelling) {
-		result = (CowPanel *) dra_prefs_spelling_panel_new(priv->entry_extractor);
+		result = (CowPanel *) dra_prefs_spelling_panel_new(priv->entry_extractor, priv->spell_helper);
 	}
 	return result;
 }

@@ -115,16 +115,6 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 		if (a_line_tags) {
 			cairo_save(surface_cr);
 
-			gboolean is_printer_mode = cha_cairo_surface_wrapper_get(surface_wrapper)==NULL;
-			if (!is_printer_mode) {
-				/* draw red bugs on the marker line */
-
-				int font_height = update_ctx->sub_line_height;
-
-				cairo_set_source_rgb(surface_cr, 1.0f, 0.0f, 0.0f);
-				cairo_arc(surface_cr, update_ctx->line_nr_view_width+font_height/2, font_height/2, font_height*0.25, 0., 2 * 3.14159265359);
-				cairo_fill(surface_cr);
-			}
 
 			/* draw curlies for tagged text */
 			int text_left = update_ctx->line_nr_view_width + update_ctx->sub_line_height;
@@ -134,12 +124,18 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 			cairo_set_line_width(surface_cr, 1.5);
 			CatIIterator *iter = cat_array_wo_iterator(a_line_tags);
 			int start_idx, end_idx;
+			DraTagType best_type = 1000;
 			while(cat_iiterator_has_next(iter)) {
 				DraLineTagWo *line_tag_wo = (DraLineTagWo *) cat_iiterator_next(iter);
 				dra_line_tag_wo_get_start_and_end_index(line_tag_wo, &start_idx, &end_idx);
 				if ((start_idx>=pango_line->start_index+pango_line->length) ||
 						end_idx<=pango_line->start_index) {
 					continue;
+				}
+
+				DraTagType ltt = dra_line_tag_wo_get_tag_type(line_tag_wo);
+				if (ltt < best_type) {
+					best_type = ltt;
 				}
 
 				double red, green, blue;
@@ -165,6 +161,30 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 			}
 			cat_unref_ptr(iter);
 			cairo_restore(surface_cr);
+
+
+			gboolean is_printer_mode = cha_cairo_surface_wrapper_get(surface_wrapper)==NULL;
+			if (!is_printer_mode) {
+				cairo_save(surface_cr);
+				/* draw red bugs on the marker line */
+				int font_height = update_ctx->sub_line_height;
+
+				switch(best_type) {
+					case DRA_TAG_TYPE_SPELL_ERROR : {
+						cairo_set_source_rgb(surface_cr, 0.6f, 0.6f, 0.8f);
+					} break;
+					case DRA_TAG_TYPE_SCANNER_ERROR : {
+						cairo_set_source_rgb(surface_cr, 1.0f, 0.8f, 0.3f);
+					} break;
+					default : {
+						cairo_set_source_rgb(surface_cr, 1.0f, 0.0f, 0.0f);
+					}
+				}
+
+				cairo_arc(surface_cr, update_ctx->line_nr_view_width+font_height/2, font_height/2, font_height*0.25, 0., 2 * 3.14159265359);
+				cairo_fill(surface_cr);
+				cairo_restore(surface_cr);
+			}
 		}
 	}
 	return result;

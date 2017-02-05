@@ -25,7 +25,7 @@
 #include "chacharsetconverter.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "ChaCharsetConverterFactory"
 #include <logging/catlog.h>
 
@@ -34,6 +34,32 @@ struct _ChaCharsetConverterFactoryPrivate {
 	ChaUtf8Converter *default_converter;
 	CatArrayWo *converters;
 };
+
+typedef struct _CreatorInfo CreatorInfo;
+typedef ChaIConverter *(CreatorCB)(CreatorInfo *info);
+
+struct _CreatorInfo {
+	const char *name;
+	CreatorCB *creatorCB;
+};
+
+static ChaIConverter *l_creator_utf8(CreatorInfo *info) {
+	return (ChaIConverter *) cha_utf8_converter_new();
+}
+
+static ChaIConverter *l_create_basic(CreatorInfo *info) {
+	const char *name = info->name;
+	return (ChaIConverter *) cha_charset_converter_open(name, name);
+}
+
+static CreatorInfo charset_config[] = {
+		{"UTF8", l_creator_utf8},
+		{"KOI8-U", l_create_basic},
+		{"KOI8-R", l_create_basic},
+		{"ISO-8859-5", l_create_basic},
+		{NULL, NULL}
+};
+
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
@@ -99,6 +125,10 @@ ChaIConverter *cha_charset_converter_factory_get(ChaCharsetConverterFactory *fac
 	ChaIConverter *result = NULL;
 	cat_lock_lock(priv->lock);
 
+	if (charset==NULL) {
+		charset = "UTF8";
+	}
+
 	CatIIterator *iter = cat_array_wo_iterator(priv->converters);
 	while(cat_iiterator_has_next(iter)) {
 		ChaIConverter *converter = cat_iiterator_next(iter);
@@ -110,8 +140,23 @@ ChaIConverter *cha_charset_converter_factory_get(ChaCharsetConverterFactory *fac
 	cat_unref_ptr(iter);
 
 	if (result==NULL) {
-		result = cha_charset_converter_open(charset, charset);
+
+		int idx=0;
+		while(TRUE) {
+			CreatorInfo info = charset_config[idx];
+			if (info.name==NULL) {
+				break;
+			}
+			cat_log_debug("name = %s, charset = %s", info.name, charset);
+			if (strcmp(info.name, charset)==0) {
+				result = info.creatorCB(&info);
+				break;
+			}
+			idx++;
+		}
+
 		if (result!=NULL) {
+			cat_log_debug("adding converter:%O", result);
 			cat_array_wo_append(priv->converters, result);
 			cat_unref(result);
 		} else {
@@ -126,14 +171,18 @@ ChaIConverter *cha_charset_converter_factory_get(ChaCharsetConverterFactory *fac
 CatArrayWo *cha_charset_converter_factory_enlist_names(ChaCharsetConverterFactory *factory) {
 	ChaCharsetConverterFactoryPrivate *priv = cha_charset_converter_factory_get_instance_private(factory);
 	CatArrayWo *result = cat_array_wo_new();
-	CatIIterator *iter = cat_array_wo_iterator(priv->converters);
-	while(cat_iiterator_has_next(iter)) {
-		ChaIConverter *converter = cat_iiterator_next(iter);
-		CatStringWo *name = cha_iconverter_get_name(converter);
-		cat_array_wo_append(result, (GObject *)  name);
-	}
-	cat_unref_ptr(iter);
 
+	int idx=0;
+	while(TRUE) {
+		CreatorInfo info = charset_config[idx];
+		if (info.name==NULL) {
+			break;
+		}
+		CatStringWo *name = cat_string_wo_new_with(info.name);
+		cat_array_wo_append(result, name);
+		cat_unref_ptr(name);
+		idx++;
+	}
 
 	return result;
 }

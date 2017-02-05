@@ -124,7 +124,18 @@ static char let[] = { 13, 10, 13 };
 gboolean cha_page_wo_write_single_line(ChaPageWo *page, ChaWriteReq *write_req, const char *txt_data, int txt_len, ChaLineEnd line_end) {
 	int written;
 	GOutputStream *out_stream = write_req->out_stream;
-	if (!g_output_stream_write_all(out_stream, txt_data, txt_len, &written, NULL, (GError **) &(write_req->error))) {
+
+	ChaConvertRequest request;
+	request.text = txt_data;
+	request.text_length = txt_len;
+	request.output = NULL;
+	request.forward_conversion = FALSE;
+	cha_iconverter_convert(write_req->charset_converter, &request);
+
+	const char *con_txt = cat_string_wo_getchars(request.output);
+	int con_txt_len = cat_string_wo_length(request.output);
+
+	if (!g_output_stream_write_all(out_stream, con_txt, con_txt_len, &written, NULL, (GError **) &(write_req->error))) {
 		return FALSE;
 	}
 

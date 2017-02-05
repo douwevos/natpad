@@ -105,6 +105,7 @@ void mul_rust_plain_parser_run(MulRustPlainParser *parser) {
 	MulRustActions *rust_actions = mulrust_actions_new();
 
 	GroRunContext *context = grorun_context_new(priv->token_factory, priv->model, rust_actions);
+	cat_unref_ptr(rust_actions);
 	grorun_parser_do_parse(context, scanner);
 
 

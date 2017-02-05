@@ -30,6 +30,7 @@
 #include <logging/catlog.h>
 
 struct _DraSpellRequestFactoryPrivate {
+	DraSpellHelper *spell_helper;
 	CatStringWo *a_slot_key;
 };
 
@@ -56,8 +57,10 @@ static void dra_spell_request_factory_init(DraSpellRequestFactory *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraSpellRequestFactory *instance = DRA_SPELL_REQUEST_FACTORY(object);
-//	DraSpellRequestFactoryPrivate *priv = dra_spell_request_factory_get_instance_private(instance);
+	DraSpellRequestFactory *instance = DRA_SPELL_REQUEST_FACTORY(object);
+	DraSpellRequestFactoryPrivate *priv = dra_spell_request_factory_get_instance_private(instance);
+	cat_unref_ptr(priv->a_slot_key);
+	cat_unref_ptr(priv->spell_helper);
 	G_OBJECT_CLASS(dra_spell_request_factory_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -70,10 +73,11 @@ static void l_finalize(GObject *object) {
 }
 
 
-DraSpellRequestFactory *dra_spell_request_factory_new(CatStringWo *a_slot_key) {
+DraSpellRequestFactory *dra_spell_request_factory_new(DraSpellHelper *spell_helper, CatStringWo *a_slot_key) {
 	DraSpellRequestFactory *result = g_object_new(DRA_TYPE_SPELL_REQUEST_FACTORY, NULL);
 	cat_ref_anounce(result);
 	DraSpellRequestFactoryPrivate *priv = dra_spell_request_factory_get_instance_private(result);
+	priv->spell_helper = cat_ref_ptr(spell_helper);
 	priv->a_slot_key = cat_ref_ptr(a_slot_key);
 	return result;
 }
@@ -84,8 +88,7 @@ DraSpellRequestFactory *dra_spell_request_factory_new(CatStringWo *a_slot_key) {
 static WorRequest *l_factory_create_request(DraIConnectorRequestFactory *self, ChaDocument *document, ChaRevisionWo *a_new_revision) {
 	DraSpellRequestFactory *instance = DRA_SPELL_REQUEST_FACTORY(self);
 	DraSpellRequestFactoryPrivate *priv = dra_spell_request_factory_get_instance_private(instance);
-	cat_log_error("jojo");
-	return (WorRequest *) dra_spell_request_new(document, a_new_revision, priv->a_slot_key);
+	return (WorRequest *) dra_spell_request_new(priv->spell_helper, document, a_new_revision, priv->a_slot_key);
 }
 
 static CatStringWo *l_factory_get_slot_key(DraIConnectorRequestFactory *self) {

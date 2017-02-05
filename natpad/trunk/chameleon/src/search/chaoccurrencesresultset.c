@@ -96,7 +96,7 @@ ChaOccurrencesResultSet *cha_occurrences_result_set_new(ChaSearchQueryWo *query,
 		GRegexCompileFlags cflgs = G_REGEX_OPTIMIZE;
 
 		if (!match_case) {
-			cflgs |= G_REGEX_CASELESS;
+			cflgs |= G_REGEX_CASELESS|G_REGEX_UNGREEDY;
 		}
 
 		GError *error = NULL;
@@ -140,12 +140,15 @@ ChaSearchPageOccurrences *cha_occurences_result_set_get_page_occurrences(ChaOccu
 }
 
 
-ChaSearchOccurrence *cha_occurrences_result_set_find_backward(ChaOccurrencesResultSet *result_set, ChaCursorWo *cursor, int *opg_idx) {
+ChaSearchOccurrence *cha_occurrences_result_set_find_backward(ChaOccurrencesResultSet *result_set, ChaCursorWo *start_cursor, ChaCursorWo *stop_cursor, int *opg_idx) {
 	ChaSearchOccurrence *result = NULL;
-	ChaLineLocationWo *line_location = cha_cursor_wo_get_line_location(cursor);
+	ChaLineLocationWo *line_location = cha_cursor_wo_get_line_location(start_cursor);
 	int page_index = cha_line_location_wo_get_page_index(line_location);
 	int page_line_index = cha_line_location_wo_get_page_line_index(line_location);
-	int column = cha_cursor_wo_get_x_cursor_bytes(cursor);
+	int column = cha_cursor_wo_get_x_cursor_bytes(start_cursor);
+
+	int stop_column = -1;
+	int stop_page_line_index = -1;
 
 	cat_log_debug("page_index:%d, page_line_index=%d, column=%d", page_index, page_line_index, column);
 	while(result == NULL) {
@@ -154,17 +157,34 @@ ChaSearchOccurrence *cha_occurrences_result_set_find_backward(ChaOccurrencesResu
 		cat_log_debug("occ_count:%d", occ_count);
 		if (occ_count!=0) {
 
+			if (stop_cursor) {
+				ChaLineLocationWo *stop_line_location = cha_cursor_wo_get_line_location(stop_cursor);
+				int epi = cha_line_location_wo_get_page_index(stop_line_location);
+				if (page_index<epi) {
+					return NULL;
+				} else if (page_index==epi) {
+					stop_column = cha_cursor_wo_get_x_cursor_bytes(stop_cursor);
+					stop_page_line_index = cha_line_location_wo_get_page_line_index(stop_line_location);
+				}
+			}
+
 			int occ_line_idx;
 			if (page_line_index==-1) {
 				page_line_index = occ_count;
 			}
 			for(occ_line_idx=page_line_index; occ_line_idx>=0; occ_line_idx--) {
+				if (occ_line_idx<stop_page_line_index) {
+					return NULL;
+				}
 				CatArrayWo *a_occurrences = cha_search_page_occurrences_enlist_for_line(page_occurrences, occ_line_idx);
 				if (a_occurrences) {
 					int count = cat_array_wo_size(a_occurrences);
 					int occ_idx;
 					for(occ_idx=count-1; occ_idx>=0; occ_idx--) {
 						ChaSearchOccurrence *occurence = (ChaSearchOccurrence *) cat_array_wo_get(a_occurrences, occ_idx);
+						if (stop_page_line_index==occ_line_idx && cha_search_occurrence_is_before(occurence, stop_page_line_index, stop_column)) {
+							return NULL;
+						}
 						cat_log_debug("testing occurence:%o", occurence);
 						if (cha_search_occurrence_is_before(occurence, page_line_index, column)) {
 							cat_log_debug("found occurence:%o", occurence);
@@ -186,27 +206,49 @@ ChaSearchOccurrence *cha_occurrences_result_set_find_backward(ChaOccurrencesResu
 	return result;
 }
 
-ChaSearchOccurrence *cha_occurrences_result_set_find_forward(ChaOccurrencesResultSet *result_set, ChaCursorWo *cursor, int *opg_idx) {
+ChaSearchOccurrence *cha_occurrences_result_set_find_forward(ChaOccurrencesResultSet *result_set, ChaCursorWo *cursor, ChaCursorWo *stop_cursor, int *opg_idx) {
 	ChaOccurrencesResultSetPrivate *priv = cha_occurrences_result_set_get_instance_private(result_set);
 	ChaSearchOccurrence *result = NULL;
 	ChaLineLocationWo *line_location = cha_cursor_wo_get_line_location(cursor);
 	int page_index = cha_line_location_wo_get_page_index(line_location);
 	int page_line_index = cha_line_location_wo_get_page_line_index(line_location);
 	int column = cha_cursor_wo_get_x_cursor_bytes(cursor);
+
+	int stop_column = -1;
+	int stop_page_line_index = -1;
+
 	cat_log_debug("page_index:%d, page_line_index=%d, column=%d", page_index, page_line_index, column);
 	while(result == NULL) {
 		ChaSearchPageOccurrences *page_occurrences = l_get_page_occurrences(result_set, page_index);
 		int occ_count = cha_search_page_occurrences_count(page_occurrences);
 		cat_log_debug("page_occurrences=%p, occ_count:%d", page_occurrences, occ_count);
 		if (occ_count!=0) {
+
+			if (stop_cursor) {
+				ChaLineLocationWo *stop_line_location = cha_cursor_wo_get_line_location(stop_cursor);
+				int epi = cha_line_location_wo_get_page_index(stop_line_location);
+				if (page_index>epi) {
+					return NULL;
+				} else if (page_index==epi) {
+					stop_column = cha_cursor_wo_get_x_cursor_bytes(stop_cursor);
+					stop_page_line_index = cha_line_location_wo_get_page_line_index(stop_line_location);
+				}
+			}
+
 			int occ_line_idx;
 			for(occ_line_idx=page_line_index; occ_line_idx<occ_count; occ_line_idx++) {
+				if (stop_page_line_index!=-1 && occ_line_idx>stop_page_line_index) {
+					return NULL;
+				}
 				CatArrayWo *a_occurrences = cha_search_page_occurrences_enlist_for_line(page_occurrences, occ_line_idx);
 				if (a_occurrences) {
 					int count = cat_array_wo_size(a_occurrences);
 					int occ_idx;
 					for(occ_idx=0; occ_idx<count; occ_idx++) {
 						ChaSearchOccurrence *occurence = (ChaSearchOccurrence *) cat_array_wo_get(a_occurrences, occ_idx);
+						if (stop_page_line_index==occ_line_idx && cha_search_occurrence_is_after(occurence, stop_page_line_index, stop_column)) {
+							return NULL;
+						}
 						cat_log_debug("testing occurence:%o", occurence);
 						if (cha_search_occurrence_is_after(occurence, page_line_index, column)) {
 							cat_log_debug("found occurence:%o", occurence);
@@ -279,20 +321,13 @@ static ChaSearchPageOccurrences *l_search_regexp_on_page(ChaPageWo *page, int pa
 
 static ChaSearchPageOccurrences *l_search_on_page(ChaPageWo *page, int page_index, const CatStringWo *search_text, gboolean match_case, gboolean match_words) {
 
-//	ChaPageWoClass *p_cl = CHA_PAGE_WO_GET_CLASS(page);
-//	p_cl->search(page, e_result, search_text, match_case);
-
-
 	ChaSearchPageOccurrences *occurences = cha_search_page_occurrences_new(page, page_index);
 
 	int st_len = cat_string_wo_length(search_text);
 
-
-
 	char first_ch = cat_string_wo_char_at(search_text, 0);
 	char second_ch = 0;
 	char *search_cf = NULL;
-
 
 	if (!match_case) {
 		search_cf = g_utf8_casefold(cat_string_wo_getchars(search_text), st_len);
@@ -425,9 +460,7 @@ static ChaSearchPageOccurrences *l_search_on_page(ChaPageWo *page, int page_inde
 			col++;
 		}
 		cha_utf8_text_cleanup(&utf8_txt);
-
 	}
-
 	cat_free_ptr(search_cf);
 
 	cha_page_wo_release_lines(page);

@@ -24,6 +24,7 @@
 #define SPELL_DRASPELLREQUESTFACTORY_H_
 
 #include <caterpillar.h>
+#include "draspellhelper.h"
 
 G_BEGIN_DECLS
 
@@ -51,7 +52,7 @@ struct _DraSpellRequestFactoryClass {
 
 GType dra_spell_request_factory_get_type();
 
-DraSpellRequestFactory *dra_spell_request_factory_new();
+DraSpellRequestFactory *dra_spell_request_factory_new(DraSpellHelper *spell_helper, CatStringWo *a_slot_key);
 
 G_END_DECLS
 

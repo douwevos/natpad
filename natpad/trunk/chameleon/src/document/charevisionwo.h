@@ -82,6 +82,7 @@ void cha_revision_wo_remove_between_cursors(ChaRevisionWo *e_revision, ChaCursor
 
 void cha_revision_wo_line_multi_replace(ChaRevisionWo *e_revision, long long row, ChaPageWo *e_page, int page_line_index, ChaLineMultiReplace *line_multiple_replace, int *left_result, int *right_result);
 
+ChaCursorWo *cha_revision_wo_create_end_of_revision_cursor(ChaRevisionWo *revision);
 
 
 ChaCursorMWo *cha_revision_wo_to_cursorm(const ChaRevisionWo *revision, const ChaCursorWo *cursor);

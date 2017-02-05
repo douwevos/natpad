@@ -25,6 +25,7 @@
 
 #include <caterpillar.h>
 #include <cow.h>
+#include "../../spell/draspellhelper.h"
 
 G_BEGIN_DECLS
 
@@ -53,6 +54,7 @@ struct _DraPreferencesPanelFactoryClass {
 GType dra_preferences_panel_factory_get_type();
 
 DraPreferencesPanelFactory *dra_preferences_panel_factory_new(CowIEntryAccessor *entry_extractor);
+void dra_preferences_panel_factory_set_spell_helper(DraPreferencesPanelFactory *factory, DraSpellHelper *spell_helper);
 
 G_END_DECLS
 

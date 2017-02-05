@@ -63,7 +63,7 @@ void cha_search_service_set_editor(ChaSearchService *search_service, struct _Cha
 void cha_search_service_set_query(ChaSearchService *search_service, ChaSearchQueryWo *ca_query);
 ChaSearchQueryWo *cha_search_service_get_query(ChaSearchService *search_service);
 
-void cha_search_service_find(ChaSearchService *search_service, gboolean backward_search);
+void cha_search_service_find(ChaSearchService *search_service, gboolean backward_search, gboolean wrap_search);
 
 void cha_search_service_mark(ChaSearchService *search_service);
 

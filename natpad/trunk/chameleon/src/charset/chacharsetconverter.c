@@ -23,11 +23,10 @@
 #include "chacharsetconverter.h"
 #include "chaiconverter.h"
 #include "../document/chapagewo.h"
-#include "/usr/include/gconv.h"
 #include <gio/gio.h>
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "ChaCharsetConverter"
 #include <logging/catlog.h>
 
@@ -45,6 +44,7 @@ struct _ChaCharsetConverterPrivate {
 	gunichar *data;
 	const char *name;
 	CatStringWo *s_name;
+
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -204,6 +204,10 @@ ChaCharsetConverter *cha_charset_converter_open(const char *name, const char *fi
 
 		Req request;
 		request.data = g_malloc(sizeof(gunichar)*65536);
+		int idx = 0;
+		for(idx=0; idx<65546; idx++) {
+			request.data[idx] = -1;
+		}
 		request.max_offset = -1;
 		request.min_offset = -1;
 
@@ -262,17 +266,46 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 
 	CatStringWo *output = request->output;
 
-	while(text<text_end) {
-		unsigned char ch = (unsigned char) *text;
-		gunichar s = *(priv->data+ (0xff & ch));
-		cat_log_debug("converted:ch=%d to %d", (long long) ch, (long long) s);
-		if (s==-1) {
-			cat_string_wo_append_char(output, '.');
-			request->error_count++;
-		} else {
-			cat_string_wo_append_unichar(output, s);
+	if (request->forward_conversion) {
+
+		while(text<text_end) {
+			unsigned char ch = (unsigned char) *text;
+			gunichar s = *(priv->data+ (0xff & ch));
+			cat_log_debug("converted:ch=%d to %d", (long long) ch, (long long) s);
+			if (s==-1) {
+				cat_string_wo_append_char(output, '.');
+				request->error_count++;
+			} else {
+				cat_string_wo_append_unichar(output, s);
+			}
+			text++;
 		}
-		text++;
+	} else {
+		CatStringWo *in = cat_string_wo_new_data_len(text, request->text_length);
+		int index = 0;
+		while(TRUE) {
+			gunichar uch = cat_string_wo_unichar_at(in, &index);
+			if (uch==-1) {
+				break;
+			}
+			int idx=0;
+			int out_idx = -1;
+			for(idx=0; idx<65536; idx++) {
+				if (priv->data[idx]==uch) {
+					out_idx = idx;
+					break;
+				}
+			}
+			if (out_idx==-1) {
+				request->error_count++;
+				cat_string_wo_append_unichar(output, uch);
+			} else if (out_idx<256) {
+				cat_string_wo_append_char(output, out_idx);
+			} else {
+				cat_string_wo_append_char(output, out_idx>>8);
+				cat_string_wo_append_char(output, out_idx);
+			}
+		}
 	}
 
 }

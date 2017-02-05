@@ -176,6 +176,11 @@ DraConnectorMap *dra_panel_owner_get_connector_map(DraPanelOwner *panel_owner) {
 	return priv->connector_map;
 }
 
+DraSpellHelper *dra_panel_owner_get_spell_helper(DraPanelOwner *panel_owner) {
+	DraPanelOwnerPrivate *priv = dra_panel_owner_get_instance_private(panel_owner);
+	return dra_connector_map_get_spell_helper(priv->connector_map);
+}
+
 
 gboolean dra_panel_owner_close_editors(DraPanelOwner *panel_owner, CatArrayWo *editors_to_close, gboolean close_unsaved) {
 	DraPanelOwnerPrivate *priv = dra_panel_owner_get_instance_private(panel_owner);

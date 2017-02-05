@@ -127,7 +127,7 @@ void cha_search_service_set_query(ChaSearchService *search_service, ChaSearchQue
 	cat_unref_ptr(priv->occurrences_result_set);
 }
 
-void cha_search_service_find(ChaSearchService *search_service, gboolean backward_search) {
+void cha_search_service_find(ChaSearchService *search_service, gboolean backward_search, gboolean wrap_search) {
 	ChaSearchServicePrivate *priv = cha_search_service_get_instance_private(search_service);
 	ChaEditor *editor = (ChaEditor *) cat_weak_reference_get(priv->editor_ref);
 	cat_log_debug("editor=%o", editor);
@@ -171,9 +171,19 @@ void cha_search_service_find(ChaSearchService *search_service, gboolean backward
 				}
 				cat_log_debug("cursor=%o, sel_e=%o, sel_s=%o", cursor, sel_e, sel_s);
 			}
-			occurence = cha_occurrences_result_set_find_backward(priv->occurrences_result_set, cursor, &page_index);
+			occurence = cha_occurrences_result_set_find_backward(priv->occurrences_result_set, cursor, NULL, &page_index);
+			if (occurence==NULL && wrap_search) {
+				ChaCursorWo *end_of_rev_cursor = cha_revision_wo_create_end_of_revision_cursor(a_rev);
+				occurence = cha_occurrences_result_set_find_backward(priv->occurrences_result_set, end_of_rev_cursor, cursor, &page_index);
+				cat_unref_ptr(end_of_rev_cursor);
+			}
 		} else {
-			occurence = cha_occurrences_result_set_find_forward(priv->occurrences_result_set, cursor, &page_index);
+			occurence = cha_occurrences_result_set_find_forward(priv->occurrences_result_set, cursor, NULL, &page_index);
+			if (occurence==NULL && wrap_search) {
+				ChaCursorWo *begin_of_rev_cursor = cha_cursor_wo_new();
+				occurence = cha_occurrences_result_set_find_forward(priv->occurrences_result_set, begin_of_rev_cursor, cursor, &page_index);
+				cat_unref_ptr(begin_of_rev_cursor);
+			}
 		}
 
 		cat_log_debug("occurence=%o", occurence);

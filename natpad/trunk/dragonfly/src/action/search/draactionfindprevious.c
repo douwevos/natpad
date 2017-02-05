@@ -125,7 +125,7 @@ static void l_action_run(LeaAction *action) {
 		if (query) {
 			cha_search_service_set_editor(search_service, (ChaEditor *) editor);
 			cha_search_service_set_query(search_service, query);
-			cha_search_service_find(search_service,TRUE);
+			cha_search_service_find(search_service,TRUE, TRUE);
 		}
 	}
 }

@@ -8,17 +8,16 @@ workspace {
 	}
 
 	modulepath '[%basedir%]';
-	modulepath '[%basedir%]/natpad.ide/';
-	modulepath '[%basedir%]/gross.parser.generator/';
-	modulepath '[%basedir%]/gross.cc/';
+	modulepath '[%basedir%]/../natpad.cup/';
+	modulepath '[%basedir%]/../gross/';
 
 	export { 
 		key 'ccpath'; 
-		value '/usr/bin/x86_64-w64-mingw32-gcc'; 
+		value '/usr/bin/x86_64-w64-mingw32-g++'; 
 	}
 	export {
 		key 'clinkerpath';
-		value '/usr/bin/x86_64-w64-mingw32-gcc';
+		value '/usr/bin/x86_64-w64-mingw32-g++';
         }
 
 	export {
@@ -29,7 +28,6 @@ workspace {
 		key 'PkgConfigSysRoot';
 		value '[%workspace.workdir%]';
 	}
-
 
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; reproname 'mingw64-binutils-.*.noarch.rpm'; }
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; reproname 'mingw64-glib2-devel-.*.noarch.rpm'; }
@@ -44,6 +42,7 @@ workspace {
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; reproname 'mingw64-zlib-devel-.*.noarch.rpm'; }
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; reproname 'mingw64-libintl-devel-.*.noarch.rpm'; }
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; reproname 'mingw64-libatomic_ops-devel.*.noarch.rpm'; }
+	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; reproname 'mingw64-hunspell-devel.*.noarch.rpm'; }
 
 
 
@@ -180,54 +179,21 @@ workspace {
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; dir './runtime/'; reproname 'mingw64-zlib1-.*.noarch.rpm'; }
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; dir './runtime/'; reproname 'mingw64-gnome-icon-theme-.*.noarch.rpm'; }  
 	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; dir './runtime/'; reproname 'mingw64-libwinpthread1-.*.noarch.rpm'; }
+	autoinstall { extract 'true'; repro 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; dir './runtime/'; reproname 'mingw64-libhunspell-.*.noarch.rpm'; }
 
 
-	module {
-		name "glib";
-		type "PKG_CONFIG";
-		pkgName "glib-2.0";
+	module { type "PKG_CONFIG"; name "glib";             pkgName "glib-2.0"; }
+	module { type "PKG_CONFIG"; name "gobject";          pkgName "gobject-2.0"; }
+	module { type "PKG_CONFIG"; name "gio";              pkgName "gio-2.0"; }
+	module { type "PKG_CONFIG"; name "gtk3";             pkgName "gtk+-3.0"; }
+	module { type "PKG_CONFIG"; name "gtk3-unix-print";  pkgName "gtk+-unix-print-3.0"; }
+	module { type "PKG_CONFIG"; name "zlib";             pkgName "zlib"; }
+	module { type "PKG_CONFIG"; name "hunspell";         pkgName "hunspell"; }
+	module { type "IGNORE";     name "x11"; }
+
+	template {
+		id 'test';
 	}
-	module {
-		name "gobject";
-		type "PKG_CONFIG";
-		pkgName "gobject-2.0";
-	}
-
-	module {
-		name "gio";
-		type "PKG_CONFIG";
-		pkgName "gio-2.0";
-	}
-
-	module {
-		name "gtk3";
-		type "PKG_CONFIG";
-		pkgName "gtk+-3.0";
-	}
-
-	module {
-		name "gtk3-unix-print";
-                type "PKG_CONFIG";
-                pkgName "gtk+-unix-print-3.0";
-	}
-
-
-        module {
-                name "zlib";
-                type "PKG_CONFIG";
-                pkgName "zlib";
-        }
-
-       template {
-                id 'test';
-        }
-
-
-	module {
-		name "x11";
-        type "IGNORE";
-	}
-
-
 
 }
+
