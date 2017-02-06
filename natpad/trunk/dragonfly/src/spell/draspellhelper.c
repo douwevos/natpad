@@ -128,7 +128,7 @@ void dra_spell_helper_scan(DraSpellHelper *spell_helper, DraKeywordPrinter *line
 	}
 	CatStringInputStream *csis = cat_string_input_stream_new(text);
 	CatUtf8InputStreamScanner *scanner = cat_utf8_input_stream_scanner_new((CatIInputStream *) csis);
-	DraSpellChecker *checker = dra_spell_checker_new_at(scanner, column_start, row_start);
+	DraSpellChecker *checker = dra_spell_checker_new_at((CatIUtf8Scanner *) scanner, column_start, row_start);
 
 	while(TRUE) {
 		const DraSpellWord spell_word = dra_spell_checker_next_word(checker);
@@ -143,7 +143,7 @@ void dra_spell_helper_scan(DraSpellHelper *spell_helper, DraKeywordPrinter *line
 			dra_line_tag_wo_set_color(tag, 0.6, 0.6, 0.8);
 			dra_line_tag_wo_set_start_and_end_index(tag, spell_word.column_start, spell_word.column_end);
 			CatStringWo *word = cat_string_wo_clone(buf, CAT_CLONE_DEPTH_FULL);
-			dra_line_tag_wo_set_extra_data(tag, word);
+			dra_line_tag_wo_set_extra_data(tag,  (GObject *) word);
 			cat_unref_ptr(word);
 			dra_keyword_printer_print_line_tag(line_tag_printer, tag);
 		}
@@ -173,7 +173,7 @@ void dra_spell_helper_scan_all(DraSpellHelper *spell_helper, DraKeywordPrinter *
 			dra_line_tag_wo_set_color(tag, 0.6, 0.6, 0.8);
 			dra_line_tag_wo_set_start_and_end_index(tag, spell_word.column_start, spell_word.column_end);
 			CatStringWo *word = cat_string_wo_clone(buf, CAT_CLONE_DEPTH_FULL);
-			dra_line_tag_wo_set_extra_data(tag, word);
+			dra_line_tag_wo_set_extra_data(tag, (GObject *) word);
 			cat_unref_ptr(word);
 			dra_keyword_printer_print_line_tag(line_tag_printer, tag);
 		}
@@ -205,7 +205,7 @@ CatArrayWo *dra_spell_helper_enlist_corrections(DraSpellHelper *spell_helper, Ca
 					break;
 				}
 				CatStringWo *sg = cat_string_wo_new_with(sug_text);
-				cat_array_wo_append(result, sg);
+				cat_array_wo_append(result, (GObject *) sg);
 				cat_unref_ptr(sg);
 				max--;
 			}
@@ -239,7 +239,7 @@ CatArrayWo *dra_spell_helper_enlist_languages(DraSpellHelper *spell_helper) {
 	GError *error = NULL;
 	GFileEnumerator *file_enum = g_file_enumerate_children(hunspell_base, "standard::name,standard::size", G_FILE_QUERY_INFO_NONE, NULL, &error);
 
-	CatHashSet *names = cat_hash_set_new(cat_string_wo_hash, cat_string_wo_equal);
+	CatHashSet *names = cat_hash_set_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 
 	GFileInfo *info = g_file_enumerator_next_file(file_enum, NULL, &error);
 	while (info) {

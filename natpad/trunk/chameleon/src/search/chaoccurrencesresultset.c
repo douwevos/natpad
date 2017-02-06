@@ -432,7 +432,7 @@ static ChaSearchPageOccurrences *l_search_on_page(ChaPageWo *page, int page_inde
 			}
 			if (did_match) {
 				if (match_words) {
-					char *n = txt+(col+st_len);
+					const char *n = txt+(col+st_len);
 					gunichar fuch = g_utf8_get_char_validated(n, txt+txt_length-n);
 					if (g_unichar_isalpha(fuch) || g_unichar_isdigit(fuch) || fuch=='_') {
 						did_match = FALSE;

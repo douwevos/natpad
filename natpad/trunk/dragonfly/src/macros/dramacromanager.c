@@ -127,7 +127,7 @@ void dra_macro_manager_replay(DraMacroManager *macro_manager) {
 	CatIIterator *iter = cat_array_wo_iterator(priv->recorded);
 	while(cat_iiterator_has_next(iter)) {
 		ChaUow *uow = (ChaUow *) cat_iiterator_next(iter);
-		cha_editor_run(priv->editor, uow);
+		cha_editor_run((ChaEditor *) priv->editor, uow);
 	}
 	cat_unref_ptr(iter);
 }

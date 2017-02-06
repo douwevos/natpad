@@ -663,9 +663,27 @@ gboolean cha_document_view_layout_page(ChaDocumentView *document_view, ChaPageWo
 
 				cat_log_trace("do_fast_layout=%d", do_fast_layout);
 
-				if (allow_fast_track && utf8_text.only_ascii && (!utf8_text.has_tabs)) {
-					line_width = char_width * utf8_text.text_len;
-					sub_line_count = 1;
+				if (allow_fast_track && utf8_text.only_ascii) {
+					if (!utf8_text.has_tabs) {
+						line_width = char_width * utf8_text.text_len;
+						sub_line_count = 1;
+					} else {
+
+						int out = 0;
+						const gchar *the_text = utf8_text.text;
+						int in;
+						for(in=0; in<utf8_text.text_len; in++) {
+							gchar ch = the_text[in];
+							if (ch==0x9) {
+								out += view_ctx.tab_size;
+								out = out - (out % view_ctx.tab_size);
+							} else {
+								out += char_width;
+							}
+						}
+						line_width = out;
+						sub_line_count = 1;
+					}
 				} else {
 					pango_layout_set_text(pango_layout, utf8_text.text, utf8_text.text_len);
 					PangoRectangle inkt_rect;

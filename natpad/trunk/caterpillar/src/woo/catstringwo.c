@@ -506,7 +506,6 @@ static void l_ensure_capicity(CatStringWo *e_string_wo, int requested_size) {
 }
 
 void cat_string_wo_set_capacity(CatStringWo *e_string_wo, int min_capacity) {
-	CatStringWoPrivate *priv = cat_string_wo_get_instance_private((CatStringWo *) e_string_wo);
 	CHECK_IF_WRITABLE();
 	l_ensure_capicity(e_string_wo, min_capacity);
 }
@@ -643,7 +642,7 @@ int cat_string_wo_append_unichar(CatStringWo *e_string_wo, gunichar unichar) {
 		return out_length;
 	}
 
-	cat_string_wo_append_chars_len(e_string_wo, tmp, out_length);
+	cat_string_wo_append_chars_len(e_string_wo, (char *) tmp, out_length);
 	return out_length;
 }
 
