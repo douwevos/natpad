@@ -98,22 +98,9 @@ void cha_page_wo_construct(ChaPageWo *page, gboolean editable) {
 	priv->enriched_count = 0;
 	priv->enrichment_data = NULL;
 	priv->lock = cat_lock_new();
-//	priv->mark_list = cat_bit_array_wo_new();
-//	cat_bit_array_wo_insert(priv->mark_list, 0, 8192);
+	priv->mark_list = NULL;
 }
 
-//ChaPageWo *cha_page_wo_new() {
-//	ChaPageWo *result = g_object_new(CHA_TYPE_PAGE_WO, NULL);
-//	cat_ref_anounce(result);
-//	cha_page_wo_construct(result, -1);
-//	return result;
-//}
-
-
-//ChaPageWo *cha_page_wo_new_from(ChaPageWo *src_page, int version) {
-//	ChaPageWo *result = (ChaPageWo *) l_clone((CatWo *) src_page, CAT_CLONE_DEPTH_MAIN);
-//	return cha_page_wo_anchor(result, version);
-//}
 
 gboolean cha_page_wo_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) {
 	return CHA_PAGE_WO_GET_CLASS(page)->writeToStream(page, write_req);
@@ -122,7 +109,7 @@ gboolean cha_page_wo_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) {
 static char let[] = { 13, 10, 13 };
 
 gboolean cha_page_wo_write_single_line(ChaPageWo *page, ChaWriteReq *write_req, const char *txt_data, int txt_len, ChaLineEnd line_end) {
-	int written;
+	gsize written;
 	GOutputStream *out_stream = write_req->out_stream;
 
 	ChaConvertRequest request;
@@ -249,89 +236,6 @@ gboolean cha_page_wo_has_marked_lines(const ChaPageWo *page) {
 	const ChaPageWoPrivate *priv = cha_page_wo_get_instance_private((ChaPageWo *) page);
 	return priv->mark_list!=NULL;
 }
-
-//
-//CatArrayWo *cha_page_wo_create_line_list(ChaCharsetConverter *converter, const CatStringWo *text) {
-//	if (cat_string_wo_length(text)==0) {
-//		return NULL;
-//	}
-//	int len = cat_string_wo_length(text);
-//	CatArrayWo *result = cat_array_wo_new_size(len / 60);	// rough estimation of how much lines we expect.
-//
-//
-//	int idx = 0;
-//	int idx_13 = 0;
-//	int idx_10 = 0;
-//	idx_13 = cat_string_wo_index_of(text, (gchar) 0xd);
-//	idx_10 = cat_string_wo_index_of(text, (gchar) 0xa);
-//	while(TRUE) {
-//		cat_log_debug("idx_13=%d, idx_10=%d", idx_13, idx_10);
-//		if (idx_13<0) {
-//			if (idx_10<0) {
-//				int length = cat_string_wo_length(text)-idx;
-//				if (length>0) {
-//					CatStringWo *new_line = cha_charset_converter_convert(converter, text+idx, length, NULL, NULL)
-//					ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_NONE);
-//					cat_log_debug("last e_line=%o", e_line);
-//					cat_array_wo_append(result, (GObject *) e_line);
-//					cat_unref_ptr(e_line);
-//				}
-//				break;
-//			}
-//			int length = idx_10-idx;
-//			CatStringWo *new_line = cha_charset_converter_convert(converter, text+idx, length, NULL, NULL)
-//			ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_LF);
-//			cat_array_wo_append(result, (GObject *) e_line);
-//			cat_unref_ptr(e_line);
-//			idx = idx_10+1;
-//			idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-//		} else if (idx_10<0) {
-//			int length = idx_13-idx;
-//			CatStringWo *new_line = cha_charset_converter_convert(converter, text+idx, length, NULL, NULL)
-//			ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_CR);
-//			cat_array_wo_append(result, (GObject *) e_line);
-//			cat_unref_ptr(e_line);
-//			idx = idx_13+1;
-//			idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-//		} else {
-//			if (idx_10<idx_13) {
-//				int length = idx_10-idx;
-//				CatStringWo *new_line = cha_charset_converter_convert(converter, text+idx, length, NULL, NULL)
-//				ChaLineEnd line_end = CHA_LINE_END_LF;
-//				if (idx_10+1==idx_13) {
-//					line_end = CHA_LINE_END_LFCR;
-//					idx = idx_13+1;
-//					idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-//					idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-//				} else {
-//					idx = idx_10+1;
-//					idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-//				}
-//				ChaLineWo *e_line = cha_line_wo_new_with(new_line, line_end);
-//				cat_array_wo_append(result, (GObject *) e_line);
-//				cat_unref_ptr(e_line);
-//			} else {
-//				int length = idx_13-idx;
-//				CatStringWo *new_line = cha_charset_converter_convert(converter, text+idx, length, NULL, NULL)
-//				ChaLineEnd line_end = CHA_LINE_END_CR;
-//				if (idx_13+1==idx_10) {
-//					line_end = CHA_LINE_END_CRLF;
-//					idx = idx_10+1;
-//					idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-//					idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-//				} else {
-//					idx = idx_13+1;
-//					idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-//				}
-//				ChaLineWo *e_line = cha_line_wo_new_with(new_line, line_end);
-//				cat_array_wo_append(result, (GObject *) e_line);
-//				cat_unref_ptr(e_line);
-//			}
-//		}
-//	}
-//	return result;
-//}
-
 
 void cha_scan_lines(char *text, char *end, ChaScannedLine cha_scanned_line, void *data) {
 

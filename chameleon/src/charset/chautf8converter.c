@@ -22,6 +22,7 @@
 
 #include "chautf8converter.h"
 #include "chaiconverter.h"
+#include <string.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN

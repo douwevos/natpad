@@ -95,7 +95,7 @@ static CatStringWo *l_extract_filter_text_from_text(ChaRevisionWo *a_rev, ChaCur
 	ChaPageWo *a_page = cha_revision_wo_page_at(a_rev, cha_line_location_wo_get_page_index(ll));
 	const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(a_page, cha_line_location_wo_get_page_line_index(ll), FALSE);
 	int txt_len = utf8_text.text_len;
-	char *txt_data = utf8_text.text;
+	const char *txt_data = utf8_text.text;
 	int start_alpha = 0;
 	if (txt_len>0) {
 		const CatStringWo *line = cat_string_wo_new_data_len(txt_data, txt_len);

@@ -24,21 +24,12 @@
 #include "chaiconverter.h"
 #include "../document/chapagewo.h"
 #include <gio/gio.h>
+#include <string.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "ChaCharsetConverter"
 #include <logging/catlog.h>
-
-
-//static gunichar tab_cp1257[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
-//			,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
-//			,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95
-//			,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127
-//			,8364,-1,8218,-1,8222,8230,8224,8225,-1,8240,-1,8249,-1,168,711,184,-1,8216,8217,8220,8221,8226,8211,8212,-1,8482,-1,8250,-1,175,731,-1
-//			,160,-1,162,163,164,-1,166,167,216,169,342,171,172,173,174,198,176,177,178,179,180,181,182,183,248,185,343,187,188,189,190,230
-//			,260,302,256,262,196,197,280,274,268,201,377,278,290,310,298,315,352,323,325,211,332,213,214,215,370,321,346,362,220,379,381,223
-//			,261,303,257,263,228,229,281,275,269,233,378,279,291,311,299,316,353,324,326,243,333,245,246,247,371,322,347,363,252,380,382,729 };
 
 struct _ChaCharsetConverterPrivate {
 	gunichar *data;
@@ -70,8 +61,10 @@ static void cha_charset_converter_init(ChaCharsetConverter *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	ChaCharsetConverter *instance = CHA_CHARSET_CONVERTER(object);
-//	ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(instance);
+	ChaCharsetConverter *instance = CHA_CHARSET_CONVERTER(object);
+	ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(instance);
+	cat_free_ptr(priv->data);
+	cat_free_ptr(priv->s_name);
 	G_OBJECT_CLASS(cha_charset_converter_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -88,7 +81,6 @@ ChaCharsetConverter *cha_charset_converter_new() {
 	ChaCharsetConverter *result = g_object_new(CHA_TYPE_CHARSET_CONVERTER, NULL);
 	cat_ref_anounce(result);
 	ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(result);
-//	G_OBJECT_construct((GObject *) result);
 	return result;
 }
 
@@ -281,7 +273,7 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 			text++;
 		}
 	} else {
-		CatStringWo *in = cat_string_wo_new_data_len(text, request->text_length);
+		const CatStringWo *in = cat_string_wo_new_data_len(text, request->text_length);
 		int index = 0;
 		while(TRUE) {
 			gunichar uch = cat_string_wo_unichar_at(in, &index);
@@ -306,6 +298,7 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 				cat_string_wo_append_char(output, out_idx);
 			}
 		}
+		cat_unref_ptr(in);
 	}
 
 }
@@ -333,73 +326,3 @@ static void l_converter_iface_init(ChaIConverterInterface *iface) {
 
 /********************* end ChaIConverter implementation *********************/
 
-
-
-
-//.
-//./harness.c
-//./testbench
-//./testbench/hw
-//./testbench/hw/iso-8859-8.test
-//./testbench/hw/utf-8.test
-//./testbench/hw/cp1255.test
-//./testbench/hw/iso-8859-8.out
-//./testbench/hw/cp1255.out
-//./testbench/hw/utf-8.out
-//./testbench/tr
-//./testbench/tr/cp1254.out
-//./testbench/tr/utf-8.test
-//./testbench/tr/cp1254.test
-//./testbench/tr/iso-8859-9.out
-//./testbench/tr/utf-8.out
-//./testbench/tr/iso-8859-9.test
-//./testbench/pl
-//./testbench/pl/cp1250.out
-//./testbench/pl/utf-8.test
-//./testbench/pl/iso8859-2.test
-//./testbench/pl/iso8859-2.out
-//./testbench/pl/cp1250.test
-//./testbench/pl/utf-8.out
-//./testbench/gr
-//./testbench/gr/iso-8859-7.out
-//./testbench/gr/cp1253.out
-//./testbench/gr/utf-8.test
-//./testbench/gr/iso-8859-7.test
-//./testbench/gr/cp1253.test
-//./testbench/gr/utf-8.out
-//./testbench/jp
-//./testbench/jp/euc-jp.test
-//./testbench/jp/euc-jp.out
-//./testbench/jp/utf-8.test
-//./testbench/jp/sjis.out
-//./testbench/jp/sjis.test
-//./testbench/jp/utf-8.out
-//./testbench/bl
-//./testbench/bl/iso-8859-13.out
-//./testbench/bl/cp1257.out
-//./testbench/bl/iso-8859-13.test
-//./testbench/bl/utf-8.test
-//./testbench/bl/cp1257.test
-//./testbench/bl/utf-8.out
-//./testbench/ar
-//./testbench/ar/iso-8859-6.out
-//./testbench/ar/iso-8859-6.test
-//./testbench/ar/cp1256.out
-//./testbench/ar/utf-8.test
-//./testbench/ar/cp1256.test
-//./testbench/ar/utf-8.out
-//./testbench/ru
-//./testbench/ru/koi8-u.test
-//./testbench/ru/iso8859-5.test
-//./testbench/ru/utf-8.test
-//./testbench/ru/koi8-r.out
-//./testbench/ru/cp866.out
-//./testbench/ru/cp866.test
-//./testbench/ru/koi8-r.test
-//./testbench/ru/koi8-u.out
-//./testbench/ru/cp1251.test
-//./testbench/ru/cp1251.out
-//./testbench/ru/iso8859-5.out
-//./testbench/ru/utf-8.out
-//./testbench/Makefile
-//./Makefile

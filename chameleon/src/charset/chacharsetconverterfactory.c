@@ -23,6 +23,7 @@
 #include "chacharsetconverterfactory.h"
 #include "chautf8converter.h"
 #include "chacharsetconverter.h"
+#include <string.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -157,10 +158,10 @@ ChaIConverter *cha_charset_converter_factory_get(ChaCharsetConverterFactory *fac
 
 		if (result!=NULL) {
 			cat_log_debug("adding converter:%O", result);
-			cat_array_wo_append(priv->converters, result);
+			cat_array_wo_append(priv->converters, (GObject *) result);
 			cat_unref(result);
 		} else {
-			result = priv->default_converter;
+			result = (ChaIConverter *) priv->default_converter;
 		}
 	}
 
@@ -179,7 +180,7 @@ CatArrayWo *cha_charset_converter_factory_enlist_names(ChaCharsetConverterFactor
 			break;
 		}
 		CatStringWo *name = cat_string_wo_new_with(info.name);
-		cat_array_wo_append(result, name);
+		cat_array_wo_append(result, (GObject *) name);
 		cat_unref_ptr(name);
 		idx++;
 	}

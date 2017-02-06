@@ -231,7 +231,7 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 			clr->mmap_data = cat_ref_ptr(priv->map_data);
 			priv->unwritten_pages = cat_array_wo_new();
 			g_idle_add((GSourceFunc) l_idle_set_loaded_pages, clr);
-			priv->flush_after = 1000;
+			priv->flush_after = 200;
 		}
 
 	}
