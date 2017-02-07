@@ -404,6 +404,8 @@ void cha_utf8_text_cleanup(const ChaUtf8Text *text) {
 	ChaUtf8Text *textm = (ChaUtf8Text *) text;
 	if (text->text_needs_cleanup) {
 		textm->text_needs_cleanup = FALSE;
+
+
 		cat_free_ptr(textm->text);
 	}
 }

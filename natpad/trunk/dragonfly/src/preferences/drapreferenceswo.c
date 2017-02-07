@@ -173,7 +173,7 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 	DraPreferencesWoPrivate *priv = dra_preferences_wo_get_instance_private((DraPreferencesWo *) e_uninitialized);
 	if (wo_source) {
 		const DraPreferencesWoPrivate *priv_source = dra_preferences_wo_get_instance_private((DraPreferencesWo *) wo_source);
-		priv->spelling_wo = cat_wo_clone(priv_source->spelling_wo, CAT_CLONE_DEPTH_NONE);
+		priv->spelling_wo = dra_prefs_spelling_wo_clone(priv_source->spelling_wo, CAT_CLONE_DEPTH_NONE);
 	} else {
 		priv->spelling_wo = dra_prefs_spelling_wo_new();
 	}

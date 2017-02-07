@@ -191,7 +191,7 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 				cat_array_wo_append(e_enlist_to, (GObject *) factory);
 				cat_unref_ptr(factory);
 			} else 	if (a_mul_top == CAT_S(mul_s_type_rust)) {
-				MulPhpEditorFactory *factory = mul_rust_editor_factory_new((LeaIPanelOwner *) service->panel_owner, priv->rust_connector, document_io, file_to_open);
+				MulRustEditorFactory *factory = mul_rust_editor_factory_new((LeaIPanelOwner *) service->panel_owner, priv->rust_connector, document_io, file_to_open);
 				cat_array_wo_append(e_enlist_to, (GObject *) factory);
 				cat_unref_ptr(factory);
 			}
