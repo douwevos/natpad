@@ -16,6 +16,7 @@ workspace {
 	aptInstall { name "libguess-dev"; }
 	aptInstall { name "libaspell-dev"; }
 	aptInstall { name "libuchardet-dev"; }
+	aptInstall { name "libhunspell-dev"; }
 
 	module { type "PKG_CONFIG"; name "glib";             pkgName "glib-2.0"; }
 	module { type "PKG_CONFIG"; name "gio";              pkgName "gio-2.0"; }
@@ -25,7 +26,7 @@ workspace {
 	module { type "PKG_CONFIG"; name "x11";              pkgName "x11"; }
 	module { type "PKG_CONFIG"; name "guess";            pkgName "libguess"; }
 	module { type "PKG_CONFIG"; name "zlib";             pkgName "zlib"; }
-	module { type "PKG_CONFIG"; name "uchardet";         pkgName "uchardet"; }
+	module { type "PKG_CONFIG"; name "hunspell";         pkgName "hunspell"; }
 
 	module {
 		name "aspell";
