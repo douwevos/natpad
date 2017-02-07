@@ -100,36 +100,42 @@ static void l_uow_run(ChaUow *self, struct _ChaEditor *editor, ChaDocumentView *
 		ChaSelection *selection = cha_document_view_get_selection(document_view);
 		if (selection) {
 
-			ChaLineLocationWo *ll_nfirst = cha_line_location_wo_clone(ll_first, CAT_CLONE_DEPTH_MAIN);
-			cha_line_location_wo_set_page_line_index(ll_nfirst, cha_line_location_wo_get_page_line_index(ll_nfirst)+delta);
-			ChaLineLocationWo *ll_nlast = cha_line_location_wo_clone(ll_last, CAT_CLONE_DEPTH_MAIN);
-			cha_line_location_wo_set_page_line_index(ll_nlast, cha_line_location_wo_get_page_line_index(ll_nlast)+delta);
-			gboolean valid_bounds = cha_line_location_wo_bind_to_revision(ll_nfirst, e_revision)
-					&& cha_line_location_wo_bind_to_revision(ll_nlast, e_revision);
-			if (valid_bounds) {
-				ChaCursorWo *ca = cha_selection_get_start(selection);
-				ChaCursorWo *e_ca = cha_cursor_wo_create_editable(ca);
-				cha_cursor_wo_set_line_location(e_ca, ll_nfirst);
-				cha_selection_set_start(selection, e_ca);
-				cat_unref_ptr(e_ca);
 
-				ca = cha_selection_get_end(selection);
-				e_ca = cha_cursor_wo_create_editable(ca);
-				cha_cursor_wo_set_line_location(e_ca, ll_nlast);
-				cha_selection_set_end(selection, e_ca);
-				cat_unref_ptr(e_ca);
-			} else {
+			ChaCursorWo *cur_start = cha_selection_get_start(selection);
+			ChaCursorWo *e_start = cha_cursor_wo_create_editable(cur_start);
+			ChaLineLocationWo *ll_start = cha_cursor_wo_get_line_location(e_start);
+			ll_start = cha_line_location_wo_clone(ll_start, CAT_CLONE_DEPTH_MAIN);
+			cha_line_location_wo_set_page_line_index(ll_start, cha_line_location_wo_get_page_line_index(ll_start)+delta);
+			cha_cursor_wo_set_line_location(e_start, ll_start);
+			cha_selection_set_start(selection, e_start);
+			cat_unref_ptr(e_start);
+
+			ChaCursorWo *cur_end = cha_selection_get_end(selection);
+			ChaCursorWo *e_end = cha_cursor_wo_create_editable(cur_end);
+			ChaLineLocationWo *ll_end = cha_cursor_wo_get_line_location(e_end);
+			ll_end = cha_line_location_wo_clone(ll_end, CAT_CLONE_DEPTH_MAIN);
+			cha_line_location_wo_set_page_line_index(ll_end, cha_line_location_wo_get_page_line_index(ll_end)+delta);
+			cha_cursor_wo_set_line_location(e_end, ll_end);
+			cha_selection_set_end(selection, e_end);
+			cat_unref_ptr(e_end);
+			
+
+			gboolean valid_bounds = cha_line_location_wo_bind_to_revision(ll_start, e_revision)
+					&& cha_line_location_wo_bind_to_revision(ll_end, e_revision);
+			if (!valid_bounds) {
 				cha_document_view_clear_selection(document_view, NULL);
 			}
-			cat_unref_ptr(ll_nlast);
-			cat_unref_ptr(ll_nfirst);
+
+			cat_unref_ptr(ll_start);
+			cat_unref_ptr(ll_end);
 		}
-		cha_document_view_notify_selection_changed(document_view);
 
 		ChaCursorWo *e_cursor = cha_revision_wo_get_editable_cursor(e_revision);
 		ChaLineLocationWo *ll = cha_cursor_wo_get_editable_line_location(e_cursor);
 		cha_line_location_wo_set_page_line_index(ll, cha_line_location_wo_get_page_line_index(ll)+delta);
 		cha_line_location_wo_bind_to_revision(ll, e_revision);
+
+		cha_document_view_notify_selection_changed(document_view);
 	}
 
 	if (!is_editable) {

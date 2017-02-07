@@ -365,7 +365,7 @@ static void l_run_request(WorRequest *request) {
 	uchardet_data_end(udt);
 	const char *encoding = uchardet_get_charset(udt);
 
-	cat_log_error("encoding=%s", encoding);
+	cat_log_debug("encoding=%s", encoding);
 
 	ChaDocumentManager *document_manager = cha_document_get_document_manager(priv->document);
 	ChaIConverter *converter = cha_document_manager_get_converter(document_manager, encoding);
