@@ -1548,6 +1548,7 @@ void cha_document_view_move_view_to_focus(ChaDocumentView *document_view, gboole
 
 	if (do_center && (phy_y_cursor<viewY ||  phy_y_cursor+font_height>page_end)) {
 		viewY = phy_y_cursor - view_height/2;
+		page_end = viewY+view_height;
 	}
 
 	cat_log_debug("phy_y_cursor=%ld, font_height=%ld, viewY=%ld", phy_y_cursor, font_height, viewY);

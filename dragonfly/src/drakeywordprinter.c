@@ -303,7 +303,7 @@ void dra_keyword_printer_print_line_tag(DraKeywordPrinter *printer, DraLineTagWo
 				priv->e_errors_warnings = cat_array_wo_new();
 			}
 
-			cat_log_error("added :%O", c_line_tag_wo);
+			cat_log_detail("added :%O", c_line_tag_wo);
 			cat_array_wo_append(priv->e_errors_warnings, (GObject *) c_line_tag_wo);
 			cat_unref_ptr(c_line_tag_wo);
 			return;
