@@ -442,10 +442,7 @@ static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos
 
 	GtkMenuShell *menu = lea_menu_action_get_menu_shell(lma);
 	gtk_widget_show_all((GtkWidget *) menu);
-	GtkMenu *menuw = GTK_MENU(lea_menu_action_get_widget(lma));
-	gtk_menu_popup(menu, NULL, NULL, NULL, NULL, 3, gtk_get_current_event_time());
-
-
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 3, gtk_get_current_event_time());
 }
 
 static gboolean l_key_press_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer data) {

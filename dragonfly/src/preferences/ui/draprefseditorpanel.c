@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "draprefseditorpanel.h"
+#include "../drapreferenceswo.h"
 
 #include "dragladeprefseditor.h"
 
@@ -321,8 +322,8 @@ static void l_panel_reconfigure(CowPanel *self, GObject *config) {
 	if (e_prefs!=NULL) {
 
 		cat_log_debug("e_prefs=%O", e_prefs);
-		ChaPreferencesWo *ast_prefs = (ChaPreferencesWo *) cow_ientry_accessor_get(priv->entry_accessor, e_prefs);
-		ChaPreferencesWo *e_ast_prefs = NULL;
+		DraPreferencesWo *ast_prefs = (DraPreferencesWo *) cow_ientry_accessor_get(priv->entry_accessor, e_prefs);
+		DraPreferencesWo *e_ast_prefs = NULL;
 		if (ast_prefs == NULL) {
 			e_ast_prefs = dra_preferences_wo_new();
 		} else {
@@ -330,7 +331,7 @@ static void l_panel_reconfigure(CowPanel *self, GObject *config) {
 		}
 		cow_ientry_accessor_set(priv->entry_accessor, e_prefs, e_ast_prefs);
 		cat_log_debug("e_ast_prefs=%o", e_ast_prefs);
-		priv->e_ast_prefs = e_ast_prefs;
+		priv->e_ast_prefs = (ChaPreferencesWo *) e_ast_prefs;
 	}
 
 	l_refresh_form(instance);

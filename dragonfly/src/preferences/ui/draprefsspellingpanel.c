@@ -174,7 +174,7 @@ static gboolean l_enabled_toggled(GtkToggleButton *toggle_button, gpointer user_
 static void l_max_nr_props_changed(GtkSpinButton *spin_button, gpointer user_data) {
 	DraPrefsSpellingPanel *panel = DRA_PREFS_SPELLING_PANEL(user_data);
 	DraPrefsSpellingPanelPrivate *priv = dra_prefs_spelling_panel_get_instance_private(panel);
-	int val = gtk_spin_button_get_value_as_int(priv->w_spn_max_nr_props);
+	int val = gtk_spin_button_get_value_as_int((GtkSpinButton *) priv->w_spn_max_nr_props);
 	cat_log_error("valu = %d", val);
 	dra_prefs_spelling_wo_set_max_suggestions(priv->e_prefs_spelling, val);
 	l_notify_modification(panel);
@@ -276,7 +276,7 @@ static void l_refresh_form(DraPrefsSpellingPanel *panel) {
 		l_list_set_active_dictionary(panel, dra_prefs_spelling_wo_get_dictionary_name(priv->e_prefs_spelling));
 		cat_log_error("prefs.dict-name=%O", dra_prefs_spelling_wo_get_dictionary_name(priv->e_prefs_spelling));
 		gtk_widget_set_sensitive(priv->w_grid_spelling, is_spelling_enabled);
-		gtk_spin_button_set_value(priv->w_spn_max_nr_props, dra_prefs_spelling_wo_get_max_suggestions(priv->e_prefs_spelling));
+		gtk_spin_button_set_value((GtkSpinButton *) priv->w_spn_max_nr_props, dra_prefs_spelling_wo_get_max_suggestions(priv->e_prefs_spelling));
 	} else {
 		gtk_widget_set_sensitive(priv->w_grid_spelling, FALSE);
 	}

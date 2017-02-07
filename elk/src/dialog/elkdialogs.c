@@ -91,12 +91,12 @@ CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs, ElkSaveDialog *
 	gtk_file_chooser_set_do_overwrite_confirmation(file_chooser, FALSE);
 
 
-	GtkBox *w_encoding = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+	GtkBox *w_encoding = (GtkBox *) gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
 	GtkWidget *w_lab_encoding = gtk_label_new_with_mnemonic("_Encoding");
 	gtk_box_pack_start(w_encoding, w_lab_encoding, FALSE, FALSE, 0);
 
 	GtkListStore *model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_OBJECT);
-	GtkWidget *w_cmb_encoding = gtk_combo_box_new_with_model_and_entry(model);
+	GtkWidget *w_cmb_encoding = gtk_combo_box_new_with_model_and_entry((GtkTreeModel *) model);
 	gtk_combo_box_set_entry_text_column((GtkComboBox *) w_cmb_encoding, 0);
 	gtk_box_pack_start(w_encoding, w_cmb_encoding, FALSE, FALSE, 0);
 
@@ -114,7 +114,7 @@ CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs, ElkSaveDialog *
 	}
 	cat_unref_ptr(iter);
 
-	gtk_file_chooser_set_extra_widget(file_chooser, w_encoding);
+	gtk_file_chooser_set_extra_widget(file_chooser, (GtkWidget *) w_encoding);
 
 	gtk_file_chooser_set_show_hidden(file_chooser, FALSE);
 	gtk_widget_show_all(dialog);
@@ -132,10 +132,10 @@ CatStringWo *elk_dialogs_save_file_selector(ElkDialogs *dialogs, ElkSaveDialog *
 
 		GtkTreeIter titer;
 
-		if (gtk_combo_box_get_active_iter(w_cmb_encoding, &titer)) {
+		if (gtk_combo_box_get_active_iter((GtkComboBox *) w_cmb_encoding, &titer)) {
 			CatStringWo *selected_converter = NULL;
 			GValue val = {0};
-			gtk_tree_model_get_value(model, &titer, 1, &val);
+			gtk_tree_model_get_value((GtkTreeModel *) model, &titer, 1, &val);
 			CatStringWo *nm = g_value_get_object(&val);
 			cat_log_debug("nm=%O", nm);
 			save_dialog->selected_charset = cat_ref_ptr(nm);	// TODO unref

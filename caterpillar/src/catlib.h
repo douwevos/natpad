@@ -67,7 +67,7 @@ void cat_ref_ignore_intern(void *obj);
 
 #define cat_free_ptr(obj) \
 	if (obj) { \
-		g_free(obj); \
+		g_free((gpointer) obj); \
 		obj = NULL; \
 	}
 

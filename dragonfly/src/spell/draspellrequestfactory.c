@@ -85,10 +85,10 @@ DraSpellRequestFactory *dra_spell_request_factory_new(DraSpellHelper *spell_help
 
 /********************* start DraIConnectorRequestFactory implementation *********************/
 
-static WorRequest *l_factory_create_request(DraIConnectorRequestFactory *self, ChaDocument *document, ChaRevisionWo *a_new_revision) {
+static DraAugmentRequest *l_factory_create_request(DraIConnectorRequestFactory *self, ChaDocument *document, ChaRevisionWo *a_new_revision) {
 	DraSpellRequestFactory *instance = DRA_SPELL_REQUEST_FACTORY(self);
 	DraSpellRequestFactoryPrivate *priv = dra_spell_request_factory_get_instance_private(instance);
-	return (WorRequest *) dra_spell_request_new(priv->spell_helper, document, a_new_revision, priv->a_slot_key);
+	return (DraAugmentRequest *) dra_spell_request_new(priv->spell_helper, document, a_new_revision, priv->a_slot_key);
 }
 
 static CatStringWo *l_factory_get_slot_key(DraIConnectorRequestFactory *self) {
