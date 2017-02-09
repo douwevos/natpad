@@ -26,7 +26,7 @@
 #include "dragladeprefsspelling.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "DraPrefsSpellingPanel"
 #include <logging/catlog.h>
 
@@ -175,7 +175,7 @@ static void l_max_nr_props_changed(GtkSpinButton *spin_button, gpointer user_dat
 	DraPrefsSpellingPanel *panel = DRA_PREFS_SPELLING_PANEL(user_data);
 	DraPrefsSpellingPanelPrivate *priv = dra_prefs_spelling_panel_get_instance_private(panel);
 	int val = gtk_spin_button_get_value_as_int((GtkSpinButton *) priv->w_spn_max_nr_props);
-	cat_log_error("valu = %d", val);
+	cat_log_debug("valu = %d", val);
 	dra_prefs_spelling_wo_set_max_suggestions(priv->e_prefs_spelling, val);
 	l_notify_modification(panel);
 }
@@ -204,7 +204,7 @@ static void l_refresh_language_list(DraPrefsSpellingPanel *panel) {
 	CatIIterator *iterator = cat_array_wo_iterator(language_list);
 	while(cat_iiterator_has_next(iterator)) {
 		CatStringWo *item = (CatStringWo *) cat_iiterator_next(iterator);
-		cat_log_error("item=%O", item);
+		cat_log_debug("item=%O", item);
 		gtk_list_store_append(store, &iter);
 		gtk_list_store_set(store, &iter, 0, cat_string_wo_getchars(item), 1, item, -1);
 //		if (grammar_file_name!=NULL && g_string_equal(grammar_file_name, fname)) {
@@ -268,13 +268,13 @@ static void l_refresh_form(DraPrefsSpellingPanel *panel) {
 	gtk_widget_set_sensitive(priv->w_chk_enabled, has_prefs);
 	gtk_widget_set_sensitive(priv->w_spn_max_nr_props, has_prefs);
 
-	cat_log_error("has_prefs=%s", has_prefs ? "true" : "false");
+	cat_log_debug("has_prefs=%s", has_prefs ? "true" : "false");
 
 	if (has_prefs) {
 		gboolean is_spelling_enabled = dra_prefs_spelling_wo_is_enabled(priv->e_prefs_spelling);
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_chk_enabled), is_spelling_enabled);
 		l_list_set_active_dictionary(panel, dra_prefs_spelling_wo_get_dictionary_name(priv->e_prefs_spelling));
-		cat_log_error("prefs.dict-name=%O", dra_prefs_spelling_wo_get_dictionary_name(priv->e_prefs_spelling));
+		cat_log_debug("prefs.dict-name=%O", dra_prefs_spelling_wo_get_dictionary_name(priv->e_prefs_spelling));
 		gtk_widget_set_sensitive(priv->w_grid_spelling, is_spelling_enabled);
 		gtk_spin_button_set_value((GtkSpinButton *) priv->w_spn_max_nr_props, dra_prefs_spelling_wo_get_max_suggestions(priv->e_prefs_spelling));
 	} else {

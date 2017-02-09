@@ -161,7 +161,7 @@ static gboolean l_equal(const CatWo *wo_a, const CatWo *wo_b) {
 	if (result) {
 		result = CAT_WO_CLASS(dra_preferences_wo_parent_class)->equal(wo_a, wo_b);
 	}
-	cat_log_error("result=%d, spell_a=%O, spell_b=%O", result, priv_a->spelling_wo, priv_b->spelling_wo);
+	cat_log_debug("result=%d, spell_a=%O, spell_b=%O", result, priv_a->spelling_wo, priv_b->spelling_wo);
 	return result;
 }
 

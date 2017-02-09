@@ -337,13 +337,11 @@ static void l_print_token(JagPlainParser *parser, JagToken *token) {
 
 	if (token->sym == JAG_SYMBOL_TERM_FULL_COMMENT) {
 		CatStringWo *text = CAT_STRING_WO(token->value);
-		cat_log_error("text=%O", text);
+		cat_log_trace("text=%O", text);
 		if (text) {
 			dra_spell_helper_scan(priv->spell_helper, priv->line_tag_printer, text, token->left, token->left_row);
 		}
 	}
-
-
 }
 
 

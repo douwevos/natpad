@@ -189,6 +189,7 @@ workspace {
 		package 'mingw64-gnome-icon-theme-.*.noarch.rpm';  
 		package 'mingw64-libwinpthread1-.*.noarch.rpm';
 		package 'mingw64-libhunspell-.*.noarch.rpm';
+		package 'mingw64-libstdc\+\+6-.*.noarch.rpm';
 	}
 
 
