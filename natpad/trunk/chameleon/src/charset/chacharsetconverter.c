@@ -77,14 +77,6 @@ static void l_finalize(GObject *object) {
 }
 
 
-ChaCharsetConverter *cha_charset_converter_new() {
-	ChaCharsetConverter *result = g_object_new(CHA_TYPE_CHARSET_CONVERTER, NULL);
-	cat_ref_anounce(result);
-	ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(result);
-	return result;
-}
-
-
 struct _re {
 	gunichar *data;
 	int min_offset, max_offset;
@@ -179,13 +171,11 @@ ChaCharsetConverter *cha_charset_converter_open(const char *name, const char *fi
 
 	GFile *file = g_file_new_for_path(cat_string_wo_getchars(fn));
 
-
 	GFileInfo *info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_SIZE, G_FILE_QUERY_INFO_NONE, NULL, NULL);
 	cat_log_debug("info=%o", info);
 	if (info==NULL) {
 		return NULL;
 	}
-	goffset file_length = g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_STANDARD_SIZE);
 	cat_unref_ptr(info);
 
 	gsize contents_length = 0;
@@ -205,7 +195,6 @@ ChaCharsetConverter *cha_charset_converter_open(const char *name, const char *fi
 
 		cha_scan_lines(contents, contents+contents_length, l_scanned_line, &request);
 
-
 		ChaCharsetConverter *result = g_object_new(CHA_TYPE_CHARSET_CONVERTER, NULL);
 		cat_ref_anounce(result);
 		ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(result);
@@ -213,7 +202,6 @@ ChaCharsetConverter *cha_charset_converter_open(const char *name, const char *fi
 		priv->name = name;
 		priv->s_name = cat_string_wo_new_with(name);
 		return result;
-
 	}
 
 	return NULL;

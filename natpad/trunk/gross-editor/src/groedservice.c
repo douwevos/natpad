@@ -104,7 +104,6 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 			if (cat_string_wo_endswith(a_name, CAT_S(groed_s_ext_gro))) {
 				ElkService *elk_service = (ElkService *) priv->elk_service;
 				ElkDocumentIO *document_io = priv->elk_service->document_io;
-				ElkPreferencesService *prefs_service = elk_service_get_preferences_service(elk_service);
 				GroEdEditorFactory *factory = groed_editor_factory_new((LeaIPanelOwner *) elk_service->panel_owner, priv->connector, document_io, file_to_open);
 				cat_array_wo_append(e_enlist_to, (GObject *) factory);
 				cat_unref_ptr(factory);

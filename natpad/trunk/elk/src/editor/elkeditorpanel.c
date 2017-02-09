@@ -131,7 +131,6 @@ static const CatStringWo *l_get_name(const DraEditorPanel *editor_panel) {
 }
 
 static GtkResponseType l_do_save_request(DraEditorPanel *editor_panel) {
-	ElkEditorPanelPrivate *priv = elk_editor_panel_get_instance_private((ElkEditorPanel *) editor_panel);
 	ElkPanelOwner *panel_owner = (ElkPanelOwner *) lea_panel_get_panel_owner((LeaPanel *) editor_panel);
 	ElkDialogs *dialogs = elk_panel_owner_get_dialogs(panel_owner);
 	return elk_dialogs_save_before_close(dialogs);
@@ -223,10 +222,7 @@ static void l_reactivated(DraEditorPanel *editor_panel, gboolean focus_active_an
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	ElkEditorPanel *instance = ELK_EDITOR_PANEL(self);
-	ElkEditorPanelPrivate *priv = elk_editor_panel_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

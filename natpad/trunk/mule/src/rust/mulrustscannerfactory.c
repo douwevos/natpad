@@ -278,21 +278,15 @@ MulRustScannerFactory *mul_rust_scanner_factory_new(GroRunISymbolProvider *symbo
 	return result;
 }
 
-
-
 MulRustScanner *mul_rust_scanner_factory_create_scanner(MulRustScannerFactory *factory, CatIUtf8Scanner *scanner) {
 	MulRustScannerFactoryPrivate *priv = mul_rust_scanner_factory_get_instance_private(factory);
 	return mul_rust_scanner_new(priv->token_factory, scanner, priv->keyword_mapping, priv->connected_symbols);
 }
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MulRustScannerFactory *instance = MUL_RUST_SCANNER_FACTORY(self);
-	MulRustScannerFactoryPrivate *priv = mul_rust_scanner_factory_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

@@ -220,9 +220,6 @@ static void l_widget_realize(GtkWidget *widget) {
 	gint attributes_mask = GDK_WA_X | GDK_WA_Y;
 
 	GdkScreen *screen = gtk_widget_get_screen(widget);
-	GdkWindow *root_window = gdk_screen_get_root_window(screen);
-
-//	GdkWindow *root_window = gtk_widget_get_root_window(widget);
 	GdkWindow *parent_window = gtk_widget_get_parent_window(widget);
 	priv->window = gdk_window_new(parent_window, &attributes, attributes_mask);
 	gtk_widget_set_window(widget, parent_window);
@@ -235,7 +232,6 @@ static void l_widget_realize(GtkWidget *widget) {
 static void l_widget_unrealize(GtkWidget *widget) {
 	LeaDragLayerPrivate *priv = lea_drag_layer_get_instance_private(LEA_DRAG_LAYER(widget));
 	cat_log_debug("unrealize");
-//	gtk_widget_set_window(widget, NULL);
 
 	GdkWindow *actual_parent_window = gtk_widget_get_window(widget);
 	if (actual_parent_window) {
@@ -246,7 +242,6 @@ static void l_widget_unrealize(GtkWidget *widget) {
 	if (priv->window) {
 		cat_ref_ptr(priv->window);
 		gtk_widget_unregister_window (widget, priv->window);
-//		gdk_window_set_user_data(priv->window, NULL);
 		gdk_window_destroy(priv->window);
 		cat_unref(priv->window);
 		priv->window = NULL;

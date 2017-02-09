@@ -92,12 +92,19 @@ DraSpellHelper *dra_spell_helper_create(DraPreferencesWo *a_prefs) {
 		priv->speller = NULL;
 		return result;
 	}
+	if (lang == NULL) {
+		lang = cat_string_wo_new_data("en_US");
+	} else {
+		cat_ref_ptr(lang);
+	}
 
 	CatStringWo *aff = cat_string_wo_new();
 	cat_string_wo_format(aff, "/usr/share/hunspell/%O.aff", lang);
 
 	CatStringWo *dic = cat_string_wo_new();
 	cat_string_wo_format(dic, "/usr/share/hunspell/%O.dic", lang);
+
+	cat_unref_ptr(lang);
 
 	Hunhandle *hun_handle = Hunspell_create(cat_string_wo_getchars(aff), cat_string_wo_getchars(dic));
 	cat_unref_ptr(aff);
@@ -233,7 +240,7 @@ CatArrayWo *dra_spell_helper_enlist_corrections(DraSpellHelper *spell_helper, Ca
 }
 
 CatArrayWo *dra_spell_helper_enlist_languages(DraSpellHelper *spell_helper) {
-	DraSpellHelperPrivate *priv = dra_spell_helper_get_instance_private(spell_helper);
+//	DraSpellHelperPrivate *priv = dra_spell_helper_get_instance_private(spell_helper);
 
 	GFile *hunspell_base = g_file_new_for_path("/usr/share/hunspell/");
 	GError *error = NULL;

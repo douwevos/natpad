@@ -22,7 +22,7 @@ section
     StrCpy $StartMenuFolder "Natpad"
 
 	setOutPath "$WINDIR\Natpad\"
-	File /r "config"
+	File /r "usr"
 
 	setOutPath $INSTDIR
 

@@ -155,10 +155,7 @@ static void l_uow_iface_init(ChaIUowListenerInterface *iface) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	DraMacroManager *instance = DRA_MACRO_MANAGER(self);
-	DraMacroManagerPrivate *priv = dra_macro_manager_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

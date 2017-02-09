@@ -120,10 +120,7 @@ static void l_connector_request_factory_iface_init(DraIConnectorRequestFactoryIn
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MulRustEditorConnector *instance = MUL_RUST_EDITOR_CONNECTOR(self);
-	MulRustEditorConnectorPrivate *priv = mul_rust_editor_connector_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

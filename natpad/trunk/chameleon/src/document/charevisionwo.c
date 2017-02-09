@@ -1416,6 +1416,9 @@ static void l_form_apply_set_field_value(ChaRevisionWo *e_revision, int form_fie
 			int col_dif = cha_cursorm_wo_get_column(new_field_end) - cha_cursorm_wo_get_column(field_end);
 			cha_cursorm_wo_move(e_cursorm, row_dif, col_dif);
 		} break;
+		case CHA_CURSOR_ABOVE :
+		case CHA_CURSOR_LEFT :
+			break;
 	}
 
 	cat_log_debug("e_cursorm=%o", e_cursorm);

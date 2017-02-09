@@ -71,7 +71,6 @@ static void l_finalize(GObject *object) {
 MulRustScanner *mul_rust_scanner_new(GroRunITokenFactory *token_factory, CatIUtf8Scanner *scanner, CatHashMapWo *keyword_mapping, CatArrayWo *connected_symbols) {
 	MulRustScanner *result = g_object_new(MUL_TYPE_RUST_SCANNER, NULL);
 	cat_ref_anounce(result);
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(result);
 	grorun_scanner_base_construct((GroRunScannerBase *) result, token_factory, scanner, keyword_mapping, connected_symbols, 7);
 	return result;
 }
@@ -152,7 +151,6 @@ static GroRunIToken *l_scan_int_or_float(MulRustScanner *scanner);
 
 
 static GroRunIToken *l_next_token(MulRustScanner *scanner) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	GroRunIToken *result = NULL;
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
@@ -469,7 +467,6 @@ static GroRunIToken *l_next_token(MulRustScanner *scanner) {
 }
 
 static GroRunIToken *l_scan_lit_single_quoted(MulRustScanner *scanner, int sym_id, int initial_skip, int max_digits, gboolean digits_optional) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 
@@ -505,7 +502,6 @@ static GroRunIToken *l_scan_lit_single_quoted(MulRustScanner *scanner, int sym_i
 
 
 static GroRunIToken *l_scan_raw_string(MulRustScanner *scanner) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	base_class->advance((GroRunScannerBase *) scanner, 0);
@@ -556,7 +552,6 @@ static GroRunIToken *l_scan_raw_string(MulRustScanner *scanner) {
 }
 
 static GroRunIToken *l_scan_doc_comment(MulRustScanner *scanner, int sym_id) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	base_class->advance((GroRunScannerBase *) scanner, 0);
@@ -589,7 +584,6 @@ static GroRunIToken *l_scan_doc_comment(MulRustScanner *scanner, int sym_id) {
 }
 
 static GroRunIToken *l_scan_hex_int(MulRustScanner *scanner) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	// skip 0x
@@ -609,7 +603,6 @@ static GroRunIToken *l_scan_hex_int(MulRustScanner *scanner) {
 }
 
 static GroRunIToken *l_scan_oct_int(MulRustScanner *scanner) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	// skip 0x
@@ -630,7 +623,6 @@ static GroRunIToken *l_scan_oct_int(MulRustScanner *scanner) {
 
 
 static GroRunIToken *l_scan_bin_int(MulRustScanner *scanner) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	// skip 0x
@@ -650,7 +642,6 @@ static GroRunIToken *l_scan_bin_int(MulRustScanner *scanner) {
 }
 
 static gboolean l_scan_digits(MulRustScanner *scanner, gboolean first_underscore) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	gboolean result = FALSE;
@@ -668,7 +659,6 @@ static gboolean l_scan_digits(MulRustScanner *scanner, gboolean first_underscore
 }
 
 static GroRunIToken *l_scan_int_or_float(MulRustScanner *scanner) {
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(scanner);
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	l_scan_digits(scanner, FALSE);
@@ -757,10 +747,7 @@ static void l_scanner_iface_init(GroRunIScannerInterface *iface) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MulRustScanner *instance = MUL_RUST_SCANNER(self);
-	MulRustScannerPrivate *priv = mul_rust_scanner_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

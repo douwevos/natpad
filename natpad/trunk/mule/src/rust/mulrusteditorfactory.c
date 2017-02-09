@@ -86,15 +86,10 @@ MulRustEditorFactory *mul_rust_editor_factory_new(LeaIPanelOwner *panel_owner, M
 	return result;
 }
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MulRustEditorFactory *instance = MUL_RUST_EDITOR_FACTORY(self);
-	MulRustEditorFactoryPrivate *priv = mul_rust_editor_factory_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 
@@ -103,7 +98,6 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
 
 /********************* start ElkIResourceEditorFactory implementation *********************/
 

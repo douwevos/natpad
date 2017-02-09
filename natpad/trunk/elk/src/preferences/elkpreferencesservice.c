@@ -160,6 +160,9 @@ ElkPreferencesWo *elk_preferences_service_load(ElkPreferencesService *service) {
 			cat_log_debug("file=%s", g_file_get_path(file));
 			GFile *file_dot_natpad = g_file_get_child(file, ".natpad");
 			if (file_dot_natpad) {
+				if (!g_file_query_exists(file_dot_natpad, NULL)) {
+					g_file_make_directory(file_dot_natpad, NULL, NULL);
+				}
 				cat_log_debug("file=%p", file_dot_natpad);
 				cat_log_debug("file=%s", g_file_get_path(file_dot_natpad));
 				GFile *file_natpad_sht = g_file_get_child(file_dot_natpad, "natpad-config2.sht");

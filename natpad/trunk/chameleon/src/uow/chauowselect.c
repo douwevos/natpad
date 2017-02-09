@@ -123,8 +123,8 @@ static gboolean l_select_word(ChaDocumentView *document_view) {
 	const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(page, cha_line_location_wo_get_page_line_index(cur_line_loc), FALSE);
 
 	int length = utf8_text.text_len;
-	const unsigned char *text = utf8_text.text;
-	const 	unsigned char *text_end = text + length;
+	const char *text = utf8_text.text;
+	const char *text_end = text + length;
 
 	int start = cha_cursor_wo_get_x_cursor_bytes(cur_cursor);
 	int end = start;

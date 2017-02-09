@@ -132,7 +132,6 @@ ChaSearchDialog *cha_search_dialog_new(struct _ChaSearchService *search_service)
 
 	priv->w_grid2 = (GtkWidget *) gtk_builder_get_object(builder, "grid2");
 
-
 	priv->w_txt_find = (GtkWidget *) gtk_builder_get_object(builder, "txt_find");
 	priv->w_txt_replace = (GtkWidget *) gtk_builder_get_object(builder, "txt_replace");
 
@@ -154,7 +153,6 @@ ChaSearchDialog *cha_search_dialog_new(struct _ChaSearchService *search_service)
 	g_signal_connect(priv->w_rb_text, "toggled", G_CALLBACK(l_rb_text_toggled), result);
 
 	g_signal_connect(dialog, "delete-event", G_CALLBACK(l_delete_event), result);
-
 
 	return result;
 }
@@ -216,75 +214,11 @@ static void l_on_mark_lines_clicked(GtkButton *button, gpointer user_data) {
 	cha_search_service_mark(priv->search_service);
 }
 
-
-//static void l_on_mark_lines_clicked(GtkButton *button, gpointer user_data) {
-//	ChaSearchDialog *search_dialog = CHA_SEARCH_DIALOG(user_data);
-//	ChaSearchDialogPrivate *priv = cha_search_dialog_get_instance_private(search_dialog);
-//
-//	gboolean match_case = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->w_cb_match_case));
-//	cha_search_query_wo_set_match_case(priv->query, match_case);
-//	gboolean regexp = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->w_cb_regexp));
-//	cha_search_query_wo_set_regexp(priv->query, regexp);
-//
-//	ChaSearchQueryWo *a_query = cha_search_query_wo_anchor(priv->query, 0);
-//	if (!cha_search_query_wo_equal(a_query, priv->occurrences_query)) {
-//		cat_unref_ptr(priv->occurrences_list);
-//	}
-//	cat_ref_swap(priv->occurrences_query, a_query);
-//	priv->query = cha_search_query_wo_create_editable(a_query);
-//	cat_unref_ptr(a_query);
-//
-//	if (priv->occurrences_list==NULL) {
-//		priv->occurrences_list = cha_search_query_wo_run(priv->occurrences_query, priv->editor);
-//	}
-//
-//	ChaDocumentView *document_view = cha_editor_get_document_view(priv->editor);
-//	ChaDocument *document = cha_editor_get_document(priv->editor);
-//
-//	gboolean is_editable = cha_document_is_editable(document);
-//	ChaRevisionWo *e_rev = cha_document_get_editable_revision(document);
-//
-//
-//	CatIIterator *iter = cat_array_wo_iterator(priv->occurrences_list);
-//	while(cat_iiterator_has_next(iter)) {
-//		ChaSearchPageOccurrences *page_occurrences = (ChaSearchPageOccurrences *) cat_iiterator_next(iter);
-//
-//		int page_index = cha_search_page_occurrences_get_page_index(page_occurrences);
-//
-//		ChaPageWo *page = NULL;
-//		int occ_count = cha_search_page_occurrences_count(page_occurrences);
-//		if (occ_count>0) {
-//			page = cha_revision_wo_editable_page_at(e_rev, page_index);
-//			int occ_idx;
-//			for(occ_idx=0; occ_idx<occ_count; occ_idx++) {
-//				ChaSearchOccurrence *occurrence = cha_search_page_occurrences_get_at(page_occurrences, occ_idx);
-//				int first_pl_index, last_pl_index;
-//				cha_search_occurence_get_first_and_last_line_index(occurrence, &first_pl_index, &last_pl_index);
-//
-//				while(first_pl_index<=last_pl_index) {
-//					cha_page_wo_set_line_mark(page, first_pl_index);
-//					first_pl_index++;
-//				}
-//			}
-//		}
-//	}
-//	cat_unref_ptr(iter);
-//
-//	if (!is_editable) {
-//		cat_log_debug("anchoring");
-//		cha_document_anchor_document(document);
-//		cha_document_view_invalidate_lines(document_view);
-//	}
-//}
-
-
-
 static void l_on_close_clicked(GtkButton *button, gpointer user_data) {
 	ChaSearchDialog *search_dialog = CHA_SEARCH_DIALOG(user_data);
 	ChaSearchDialogPrivate *priv = cha_search_dialog_get_instance_private(search_dialog);
 	gtk_widget_hide(GTK_WIDGET(priv->dialog));
 }
-
 
 static gunichar l_utf8_get_last_unichar(const gchar *txt, int len) {
 	gunichar result = 0;
@@ -351,8 +285,6 @@ static void l_find_text_activate(GtkEntry *entry, gpointer user_data) {
 	ChaSearchDialogPrivate *priv = cha_search_dialog_get_instance_private(search_dialog);
 	l_on_find_clicked(NULL, user_data);
 }
-
-
 
 static const gchar *_TXT_HEX = "0123456789ABCDEF";
 

@@ -63,8 +63,12 @@ static void dra_spell_request_init(DraSpellRequest *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraSpellRequest *instance = DRA_SPELL_REQUEST(object);
-//	DraSpellRequestPrivate *priv = dra_spell_request_get_instance_private(instance);
+	DraSpellRequest *instance = DRA_SPELL_REQUEST(object);
+	DraSpellRequestPrivate *priv = dra_spell_request_get_instance_private(instance);
+	cat_unref_ptr(priv->a_new_revision);
+	cat_unref_ptr(priv->document);
+	cat_unref_ptr(priv->slot_key);
+	cat_unref_ptr(priv->spell_helper);
 	G_OBJECT_CLASS(dra_spell_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -111,12 +115,10 @@ static void l_run_request(WorRequest *request) {
 		return;
 	}
 
-
 	DraKeywordPrinter *line_tag_printer = dra_keyword_printer_new(priv->a_new_revision, priv->slot_key, markup_slot_idx);
 
 	ChaRevisionReader *revision_reader = cha_revision_reader_new(priv->a_new_revision, NULL, NULL);
 	cha_revision_reader_set_forced_line_end(revision_reader, CHA_LINE_END_LF);
-
 
 	DraSpellChecker *spell_checker = dra_spell_checker_new(CAT_IUTF8_SCANNER(revision_reader));
 
@@ -129,15 +131,10 @@ static void l_run_request(WorRequest *request) {
 	cat_unref_ptr(line_tag_printer);
 }
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	DraSpellRequest *instance = DRA_SPELL_REQUEST(self);
-	DraSpellRequestPrivate *priv = dra_spell_request_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 
