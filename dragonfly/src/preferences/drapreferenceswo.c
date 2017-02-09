@@ -83,7 +83,7 @@ DraPreferencesWo *dra_preferences_wo_new() {
 	cat_ref_anounce(result);
 	DraPreferencesWoPrivate *priv = dra_preferences_wo_get_instance_private(result);
 	cha_preferences_wo_construct((ChaPreferencesWo *) result);
-	priv->spelling_wo = NULL;
+	priv->spelling_wo = dra_prefs_spelling_wo_new();
 	return result;
 }
 

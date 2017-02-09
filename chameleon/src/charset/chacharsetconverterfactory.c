@@ -170,9 +170,7 @@ ChaIConverter *cha_charset_converter_factory_get(ChaCharsetConverterFactory *fac
 }
 
 CatArrayWo *cha_charset_converter_factory_enlist_names(ChaCharsetConverterFactory *factory) {
-	ChaCharsetConverterFactoryPrivate *priv = cha_charset_converter_factory_get_instance_private(factory);
 	CatArrayWo *result = cat_array_wo_new();
-
 	int idx=0;
 	while(TRUE) {
 		CreatorInfo info = charset_config[idx];
@@ -191,10 +189,7 @@ CatArrayWo *cha_charset_converter_factory_enlist_names(ChaCharsetConverterFactor
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	ChaCharsetConverterFactory *instance = CHA_CHARSET_CONVERTER_FACTORY(self);
-	ChaCharsetConverterFactoryPrivate *priv = cha_charset_converter_factory_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

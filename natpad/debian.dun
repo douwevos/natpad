@@ -2,7 +2,7 @@ module {
 
 	name 'natpad.debian';
 	
-	natpad.version '2.2';
+	natpad.version '2.3';
 	natpad.os.arch 'amd64';
 	
 	
@@ -39,6 +39,12 @@ module {
 			todir '[%archivePath%]/usr/share/pixmaps';
 		}
 
+		copy {
+			from {
+				path '[%distPath%]/data';
+			}
+			todir '[%archivePath%]/';
+		}
 
 		copy {
 			from {

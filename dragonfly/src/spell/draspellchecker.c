@@ -102,7 +102,6 @@ DraSpellChecker *dra_spell_checker_new(CatIUtf8Scanner *input) {
 
 
 static void l_scan_one_unichar(DraSpellCheckerPrivate *priv) {
-	int idx;
 	priv->lookahead[0] = priv->lookahead[1];
 	priv->lookahead[1] = cat_iutf8_scanner_next_char(priv->input, &(priv->input_status));
 }
@@ -185,18 +184,12 @@ const DraSpellWord dra_spell_checker_next_word(DraSpellChecker *checker) {
 		}
 	}
 	return priv->spell_word;
-
 }
-
-
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	DraSpellChecker *instance = DRA_SPELL_CHECKER(self);
-	DraSpellCheckerPrivate *priv = dra_spell_checker_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

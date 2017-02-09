@@ -104,14 +104,10 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 	return TRUE;
 }
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MulRustAugmentRequest *instance = MUL_RUST_AUGMENT_REQUEST(self);
-	MulRustAugmentRequestPrivate *priv = mul_rust_augment_request_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

@@ -51,12 +51,7 @@ struct _ChaCharsetConverterClass {
 
 GType cha_charset_converter_get_type();
 
-ChaCharsetConverter *cha_charset_converter_new();
-
-// dit is een test text. Als het goed is wordt dit juist herkent. Het gaat om een mooie tekst. Over vogeltjes en bijen. Waarom het daar over gaat is onbekend.
-
 ChaCharsetConverter *cha_charset_converter_open(const char *name, const char *filename);
-
 
 G_END_DECLS
 

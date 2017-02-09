@@ -1,4 +1,4 @@
-Summary: A simple IDE for Linux.
+Summary: Just another text editor.
 Name: natpad
 Version: [%natpad.version%]
 Release: 1
@@ -9,7 +9,7 @@ URL: http://www.natpad.net/
 BuildArch: [%natpad.os.arch%]
 
 %description
-A simple IDE for Linux.
+Just another text editor.
 
 %install
 
@@ -25,4 +25,5 @@ exit 0
 /usr/bin/natpad
 /usr/share/pixmaps/*
 /usr/share/applications/kde4/*
+/usr/share/natpad/*
 

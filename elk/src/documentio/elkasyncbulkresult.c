@@ -124,10 +124,7 @@ static void l_async_finished(ChaIOAsync *async, gboolean success, GError *error)
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	ElkAsyncBulkResult *instance = ELK_ASYNC_BULK_RESULT(self);
-	ElkAsyncBulkResultPrivate *priv = elk_async_bulk_result_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

@@ -22,9 +22,9 @@ module {
 		mkdir '[%assemblyPath%]/config';
 		copy {
 			from {
-				path '[%=module.directory%]/config';
+				path '[%distPath%]/data';
 			}
-			todir '[%assemblyPath%]/config';
+			todir '[%assemblyPath%]/';
 		}
 		
 		

@@ -307,27 +307,26 @@ void lea_surface_handler_reallocate(LeaSurfaceHandler *surface_handler) {
 
 }
 
-
-
-static void l_recursive_dump(CatStringWo *e_buf, int weight, LeaIRegion *region, int level) {
-	cat_string_wo_clear(e_buf);
-	int idx;
-	for(idx=0; idx<level; idx++) {
-		cat_string_wo_append_chars(e_buf, "  ");
-	}
-	cat_string_wo_format(e_buf, "%d : %o", weight, region);
-	cat_log_print("DUMP", "%s", cat_string_wo_getchars(e_buf));
-	if (LEA_IS_SURFACE_BOX(region)) {
-		LeaSurfaceBox *box = (LeaSurfaceBox *) region;
-		int entry_count = lea_surface_box_entry_count(box);
-		level++;
-		for(idx=0; idx<entry_count; idx++) {
-			LeaIRegion *child = lea_surface_box_get_region_at(box, idx);
-			int child_weight = lea_surface_box_get_weight_at(box, idx);
-			l_recursive_dump(e_buf, child_weight, child, level);
-		}
-	}
-}
+//
+//static void l_recursive_dump(CatStringWo *e_buf, int weight, LeaIRegion *region, int level) {
+//	cat_string_wo_clear(e_buf);
+//	int idx;
+//	for(idx=0; idx<level; idx++) {
+//		cat_string_wo_append_chars(e_buf, "  ");
+//	}
+//	cat_string_wo_format(e_buf, "%d : %o", weight, region);
+//	cat_log_print("DUMP", "%s", cat_string_wo_getchars(e_buf));
+//	if (LEA_IS_SURFACE_BOX(region)) {
+//		LeaSurfaceBox *box = (LeaSurfaceBox *) region;
+//		int entry_count = lea_surface_box_entry_count(box);
+//		level++;
+//		for(idx=0; idx<entry_count; idx++) {
+//			LeaIRegion *child = lea_surface_box_get_region_at(box, idx);
+//			int child_weight = lea_surface_box_get_weight_at(box, idx);
+//			l_recursive_dump(e_buf, child_weight, child, level);
+//		}
+//	}
+//}
 
 
 void lea_surface_handler_dump(LeaSurfaceHandler *surface_handler) {

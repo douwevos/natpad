@@ -97,7 +97,6 @@ gboolean mul_php_scanner_is_eof(MulPhpScanner *scanner, GroRunIToken *token) {
 static GroRunIToken *l_skip_inline(MulPhpScanner *scanner) {
 
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
-	GroRunIToken *result = NULL;
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 	base_class->markLocation((GroRunScannerBase *) scanner);
 
@@ -582,7 +581,6 @@ static GroRunIToken *l_scan_number(MulPhpScanner *scanner) {
 	gunichar *lookahead = base_class->getLookaheadBuffer((GroRunScannerBase *) scanner);
 
 	gboolean has_dot = FALSE;
-	int state = 0;
 	l_scan_digits(scanner, lookahead);
 	if (lookahead[0]=='.') {
 		has_dot = TRUE;
@@ -594,8 +592,6 @@ static GroRunIToken *l_scan_number(MulPhpScanner *scanner) {
 	int column = base_class->getColumn((GroRunScannerBase *) scanner);
 	return base_class->createToken((GroRunScannerBase *) scanner, has_dot ? MUL_PHP_SYM_T_DNUMBER : MUL_PHP_SYM_T_LNUMBER, row, column, NULL);
 }
-
-
 
 /********************* start GroRunIScanner implementation *********************/
 
@@ -613,15 +609,10 @@ static void l_scanner_iface_init(GroRunIScannerInterface *iface) {
 
 /********************* end GroRunIScanner implementation *********************/
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MulPhpScanner *instance = MUL_PHP_SCANNER(self);
-	MulPhpScannerPrivate *priv = mul_php_scanner_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 
@@ -630,4 +621,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

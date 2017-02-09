@@ -70,8 +70,6 @@ static void cha_plain_selection_init(ChaPlainSelection *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	ChaPlainSelection *instance = CHA_PLAIN_SELECTION(object);
-//	ChaPlainSelectionPrivate *priv = cha_plain_selection_get_instance_private(instance);
 	G_OBJECT_CLASS(cha_plain_selection_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -87,7 +85,6 @@ static void l_finalize(GObject *object) {
 ChaPlainSelection *cha_plain_selection_new(CatAtomicInteger *sequence, ChaCursorWo *cursor) {
 	ChaPlainSelection *result = g_object_new(CHA_TYPE_PLAIN_SELECTION, NULL);
 	cat_ref_anounce(result);
-//	ChaPlainSelectionPrivate *priv = cha_plain_selection_get_instance_private(result);
 	cha_selection_construct((ChaSelection *) result, sequence, cursor);
 	return result;
 }
@@ -205,6 +202,7 @@ static CatStringWo *l_selection_get_as_text(ChaSelection *selection, struct _Cha
 						cat_string_wo_append_char(buf, 0xA);
 						cat_string_wo_append_char(buf, 0xD);
 						break;
+					case CHA_LINE_END_MIXED :
 					case CHA_LINE_END_NONE :
 						break;
 				}
@@ -378,6 +376,7 @@ static CatHashMapWo *l_selection_get_for_clipboard(ChaSelection *selection, stru
 						cat_string_wo_append_char(plain_text_buf, 0xD);
 						break;
 					case CHA_LINE_END_NONE :
+					case CHA_LINE_END_MIXED :
 						break;
 				}
 				if (richt_text_buf && utf8_text.line_end!=CHA_LINE_END_NONE) {

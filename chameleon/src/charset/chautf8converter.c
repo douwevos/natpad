@@ -79,15 +79,10 @@ ChaUtf8Converter *cha_utf8_converter_new() {
 	return result;
 }
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	ChaUtf8Converter *instance = CHA_UTF8_CONVERTER(self);
-	ChaUtf8ConverterPrivate *priv = cha_utf8_converter_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 
@@ -96,7 +91,6 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
 
 /********************* start ChaIConverter implementation *********************/
 
@@ -121,8 +115,6 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 
 	int cp_len = 0;
 	while(text<text_end) {
-
-
 		int fb = 0xff & *text++;
 		if ((fb & 0x80)==0) {
 			cp_len = 0;
@@ -132,6 +124,7 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 			cp_len = 2;
 		} else if (fb >= 0xF0 && fb<=0xF4) {
 			cp_len = 3;
+			// TODO all unicodes
 //		} else if ((fb & 0xFC) == 0xF8) {
 //		} else if ((fb & 0xFC) == 0xF8) {
 //			cp_len = 4;
