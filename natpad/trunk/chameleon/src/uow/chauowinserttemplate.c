@@ -99,11 +99,7 @@ static void l_uow_run(ChaUow *self, struct _ChaEditor *editor, ChaDocumentView *
 	ChaDocument *document = cha_document_view_get_document(document_view);
 	gboolean is_editable = cha_document_is_editable(document);
 	ChaRevisionWo *e_revision = cha_document_get_editable_revision(document);
-
-//	CatStringWo *template_text = cat_string_wo_new_with("Testje12[%abc%]3\ndouwe is [%pre%]_[%post%] [%abc%] echt waar\n [%pre%] [%post%] [%post%]");
-
-
-
+	cha_document_view_remove_selection(document_view);
 
 	CatArrayWo *fields_list = cat_array_wo_new();
 	const CatStringWo *txt_form_start = cat_string_wo_new_with("[%");
@@ -231,7 +227,7 @@ static void l_uow_run(ChaUow *self, struct _ChaEditor *editor, ChaDocumentView *
 
 	ChaCursorWo *e_cursor = cha_revision_wo_get_editable_cursor(e_revision);
 
-	cha_revision_wo_apply_form_changes(e_revision);
+//	cha_revision_wo_apply_form_changes(e_revision);
 
 	cha_document_view_mark_layout_x_cursor(document_view,e_revision, e_cursor);
 

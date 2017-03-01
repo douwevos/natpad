@@ -115,7 +115,7 @@ static void l_uow_run(ChaUow *self, struct _ChaEditor *editor, ChaDocumentView *
 	cha_revision_wo_insert(e_revision, line_list_out);
 	ChaCursorWo *e_cursor = cha_revision_wo_get_editable_cursor(e_revision);
 
-	cha_revision_wo_apply_form_changes(e_revision);
+//	cha_revision_wo_apply_form_changes(e_revision);
 
 	cha_document_view_mark_layout_x_cursor(document_view,e_revision, e_cursor);
 

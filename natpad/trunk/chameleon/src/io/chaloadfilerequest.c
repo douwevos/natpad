@@ -356,11 +356,8 @@ static void l_run_request(WorRequest *request) {
 	priv->flush_after = 20;
 	priv->page_line_count = 0;
 
-
-
-
-	int buflen = priv->raw_data_length;
-	if (buflen>8192) {
+	int buflen = (int) priv->raw_data_length;
+	if (priv->raw_data_length>8192) {
 		buflen = 8192;
 	}
 

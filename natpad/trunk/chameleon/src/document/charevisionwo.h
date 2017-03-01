@@ -68,6 +68,9 @@ void cha_revision_wo_enrich(ChaRevisionWo *revision, ChaEnrichmentDataMapWo *a_m
 void cha_revision_wo_impoverish(ChaRevisionWo *revision);
 void cha_revision_wo_enrichment_remap(ChaRevisionWo *revision, ChaEnrichmentDataMapWo *a_old_map, ChaEnrichmentDataMapWo *a_new_map, int add_idx, int rem_idx);
 int cha_revision_wo_get_slot_index(ChaRevisionWo *revision, GObject *slot_key, int slot_key_idx);
+GObject *cha_revision_wo_get_slot_content_ref(ChaRevisionWo *revision, int slot_index, GObject *slot_key);
+void cha_revision_wo_set_slot_content(ChaRevisionWo *revision, int slot_index, GObject *slot_key, GObject *content);
+
 
 ChaLoadToken *cha_revision_wo_get_load_token(ChaRevisionWo *revision);
 void cha_revision_wo_set_load_token(ChaRevisionWo *e_revision, ChaLoadToken *load_token);

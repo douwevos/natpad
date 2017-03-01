@@ -183,7 +183,9 @@ static void l_on_add_template(GtkButton *button, gpointer user_data) {
 		int result = dra_prefs_template_dialog_run(template_dialog);
 		cat_log_debug("result=%d", result);
 		if (result == GTK_RESPONSE_OK) {
-			CatStringWo *new_template_name = cha_prefs_template_wo_get_name(e_template);
+			ChaPrefsTemplateWo *a_tmpl = cha_prefs_template_wo_anchor(e_template, 0);
+			e_template = NULL;
+			CatStringWo *new_template_name = cha_prefs_template_wo_get_name(a_tmpl);
 			cat_log_debug("new_template_name=%o", new_template_name);
 
 			gboolean name_exists = FALSE;
@@ -199,9 +201,10 @@ static void l_on_add_template(GtkButton *button, gpointer user_data) {
 				gtk_dialog_run (GTK_DIALOG (msg_dialog));
 				gtk_widget_destroy(msg_dialog);
 			} else {
-				cat_hash_map_wo_put(e_template_map, (GObject *) new_template_name, (GObject *) e_template);
+				cat_hash_map_wo_put(e_template_map, (GObject *) new_template_name, (GObject *) a_tmpl);
 				keep_open = FALSE;
 			}
+			cat_unref_ptr(a_tmpl);
 		} else {
 			keep_open = FALSE;
 		}
@@ -245,7 +248,9 @@ static void l_on_edit_template(GtkButton *button, gpointer user_data) {
 		int result = dra_prefs_template_dialog_run(template_dialog);
 		cat_log_debug("result=%d", result);
 		if (result == GTK_RESPONSE_OK) {
-			CatStringWo *new_template_name = cha_prefs_template_wo_get_name(e_template);
+			ChaPrefsTemplateWo *a_tmpl = cha_prefs_template_wo_anchor(e_template, 0);
+			e_template = NULL;
+			CatStringWo *new_template_name = cha_prefs_template_wo_get_name(a_tmpl);
 			cat_log_debug("new_template_name=%o", new_template_name);
 			if (!cat_string_wo_equal(new_template_name, cha_prefs_template_wo_get_name(template))) {
 				cat_log_debug("old name differs");
@@ -262,8 +267,9 @@ static void l_on_edit_template(GtkButton *button, gpointer user_data) {
 				cat_unref_ptr(old);
 			}
 			cat_log_debug("storing new:%o", new_template_name);
-			cat_hash_map_wo_put(e_template_map, (GObject *) new_template_name, (GObject *) e_template);
+			cat_hash_map_wo_put(e_template_map, (GObject *) new_template_name, (GObject *) a_tmpl);
 			keep_open = FALSE;
+			cat_unref_ptr(a_tmpl);
 		} else {
 			keep_open = FALSE;
 		}
@@ -326,12 +332,14 @@ static void l_refresh_form(DraPrefsTemplatesPanel *panel) {
 		while(cat_iiterator_has_next(key_iter)) {
 			CatStringWo *name = (CatStringWo *) cat_iiterator_next(key_iter);
 			ChaPrefsTemplateWo *template = (ChaPrefsTemplateWo *) cat_hash_map_wo_get(template_map, name);
+			cat_log_debug("name=%O, template=%O", name, template);
 			gtk_list_store_append(list, &iter);
 			gtk_list_store_set(list, &iter, 0, template, -1);
 		}
 
 		cat_unref_ptr(key_iter);
 	}
+	cat_log_debug("refresh done");
 }
 
 

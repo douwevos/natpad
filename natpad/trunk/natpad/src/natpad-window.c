@@ -32,6 +32,7 @@
 #include <tern.h>
 #include <mule.h>
 #include <jordanella.h>
+#include <xantus.h>
 #include <moose.h>
 #include <mooseexplorer.h>
 #include <worm.h>
@@ -56,6 +57,7 @@ struct _NatpadWindowPrivate {
 	TerService *ter_service;
 	MulService *mul_service;
 	JorService *jor_service;
+	XanService *xan_service;
 //	CusService *cus_service;
 	SpiService *spi_service;
 	WorService *wor_service;
@@ -106,6 +108,7 @@ static void l_dispose(GObject *object) {
 //	l_force_dispose(cus_service);
 	l_force_dispose(spi_service);
 	l_force_dispose(jor_service);
+	l_force_dispose(xan_service);
 	l_force_dispose(mul_service);
 	l_force_dispose(ter_service);
 	l_force_dispose(che_service);
@@ -207,6 +210,7 @@ NatpadWindow *natpad_window_new(GApplication *application, ElkPreferencesService
 	priv->mul_service = mul_service_new(wor_service, priv->elk_service);
 
 	priv->jor_service = jor_service_new(wor_service, priv->elk_service);
+	priv->xan_service = xan_service_new(wor_service, priv->elk_service);
 //	priv->cus_service = cus_service_new(wor_service, priv->elk_service);
 	priv->spi_service = spi_service_new(wor_service, priv->elk_service);
 	priv->groed_service = groed_service_new(wor_service, priv->elk_service);
@@ -214,6 +218,7 @@ NatpadWindow *natpad_window_new(GApplication *application, ElkPreferencesService
 
 	elk_service_add_resource_handler(priv->elk_service, ELK_IRESOURCE_HANDLER(priv->jag_service));
 	elk_service_add_resource_handler(priv->elk_service, ELK_IRESOURCE_HANDLER(priv->jor_service));
+	elk_service_add_resource_handler(priv->elk_service, ELK_IRESOURCE_HANDLER(priv->xan_service));
 	elk_service_add_resource_handler(priv->elk_service, ELK_IRESOURCE_HANDLER(priv->che_service));
 	elk_service_add_resource_handler(priv->elk_service, ELK_IRESOURCE_HANDLER(priv->ter_service));
 	elk_service_add_resource_handler(priv->elk_service, ELK_IRESOURCE_HANDLER(priv->mul_service));

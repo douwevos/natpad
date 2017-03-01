@@ -254,7 +254,8 @@ ChaLineWo *cha_line_wo_clone(const ChaLineWo *source, CatCloneDepth clone_depth)
 	ChaLineWo *result = (ChaLineWo *) cat_wo_clone((CatWo *) source, clone_depth);
 	ChaLineWoPrivate *priv = cha_line_wo_get_instance_private(result);
 	ChaLineWoPrivate *priv_src = cha_line_wo_get_instance_private((ChaLineWo *) source);
-	priv->enrichment_data = cat_ref_ptr(priv_src->enrichment_data);
+//	priv->enrichment_data = cat_ref_ptr(priv_src->enrichment_data);
+	priv->enrichment_data = NULL;
 	return result;
 }
 
@@ -314,7 +315,7 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 	if (wo_source) {
 		ChaLineWoPrivate *priv_src = cha_line_wo_get_instance_private(CHA_LINE_WO(wo_source));
 		priv->enriched_count = 0;
-		priv->text = cat_string_wo_create_editable(priv_src->text);
+		priv->text = cat_string_wo_clone(priv_src->text, CAT_CLONE_DEPTH_MAIN);
 		priv->line_end = priv_src->line_end;
 		priv->enrichment_data = NULL;
 	} else {

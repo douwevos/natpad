@@ -24,6 +24,7 @@
 #ifndef TURTLE_H_
 #define TURTLE_H_
 
-
+#include "turviewer.h"
+#include "model/turinode.h"
 
 #endif /* TURTLE_H_ */

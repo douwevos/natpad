@@ -21,6 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "turviewer.h"
+#include "model/turlayout.h"
+#include "view/turlayoutview.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -41,6 +43,9 @@ struct _TurViewerPrivate {
 	GtkAdjustment *vadjustment;
 	int hscroll_policy : 1;
 	int vscroll_policy : 1;
+	TurINode *root_node;
+	TurLayout *layout;
+	TurLayoutView *layout_view;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -48,6 +53,7 @@ static void l_stringable_iface_init(CatIStringableInterface *iface);
 G_DEFINE_TYPE_WITH_CODE(TurViewer, tur_viewer, GTK_TYPE_WIDGET,
 		G_ADD_PRIVATE(TurViewer)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
+		G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, NULL)
 );
 
 static void l_dispose(GObject *object);
@@ -58,6 +64,7 @@ static void l_set_property(GObject *object, guint prop_id, const GValue *value, 
 static void l_widget_realize(GtkWidget *widget);
 static void l_widget_unrealize(GtkWidget *widget);
 static void l_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation);
+static gboolean l_widget_draw(GtkWidget *widget, cairo_t *cr);
 static void l_set_vadjustment_values(TurViewer *viewer);
 static void l_set_hadjustment_values(TurViewer *viewer);
 
@@ -78,7 +85,7 @@ static void tur_viewer_class_init(TurViewerClass *clazz) {
 	widget_class->realize = l_widget_realize;
 	widget_class->unrealize = l_widget_unrealize;
 	widget_class->size_allocate = l_widget_size_allocate;
-//	widget_class->draw = l_widget_draw;
+	widget_class->draw = l_widget_draw;
 //	widget_class->focus = l_widget_focus;
 }
 
@@ -101,10 +108,13 @@ static void l_finalize(GObject *object) {
 }
 
 
-TurViewer *tur_viewer_new() {
+TurViewer *tur_viewer_new(TurINode *root_node) {
 	TurViewer *result = g_object_new(TUR_TYPE_VIEWER, NULL);
 	cat_ref_anounce(result);
 	TurViewerPrivate *priv = tur_viewer_get_instance_private(result);
+	priv->root_node = cat_ref_ptr(root_node);
+	priv->layout = tur_layout_new(root_node);
+	priv->layout_view = NULL;
 	return result;
 }
 
@@ -145,7 +155,9 @@ static void l_widget_realize(GtkWidget *widget) {
 
 
 //	priv->pango_context = gtk_widget_create_pango_context(widget);
-//	if (priv->document_view==NULL) {
+	if (priv->layout_view==NULL) {
+		PangoContext *pango_context = gtk_widget_get_pango_context(widget);
+		priv->layout_view = tur_layout_view_new(widget, pango_context, priv->layout);
 //		ChaEditorClass *editor_class = JOR_OUTLINE_VIEWER_GET_CLASS(widget);
 //		if (editor_class->initializeDocumentView) {
 //			priv->document_view = editor_class->initializeDocumentView((TurViewer *) widget, priv->document, priv->pango_context, widget);
@@ -156,7 +168,7 @@ static void l_widget_realize(GtkWidget *widget) {
 //			cha_document_view_set_preferences(priv->document_view, priv->a_preferences);
 //		}
 //		cha_document_view_set_adjustments(priv->document_view, priv->hadjustment, priv->vadjustment);
-//	}
+	}
 //
 //	gdk_window_set_cursor(gtk_widget_get_window(widget), gdk_cursor_new(GDK_XTERM));
 //	gtk_im_context_set_client_window(priv->im_context, window);
@@ -187,23 +199,19 @@ static void l_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 		gdk_window_move_resize(gtk_widget_get_window(widget), allocation->x, allocation->y, allocation->width, allocation->height);
 	}
 
-//	cha_document_view_set_view_size(priv->document_view, allocation->width, allocation->height);
+	tur_layout_view_set_view_size(priv->layout_view, allocation->width, allocation->height);
 
 	l_set_hadjustment_values((TurViewer *) widget);
 	l_set_vadjustment_values((TurViewer *) widget);
 
-//	cha_document_view_invalidate_lines(priv->document_view);
+	tur_layout_view_invalidate(priv->layout_view);
 }
 
 
 static gboolean l_widget_draw(GtkWidget *widget, cairo_t *cr) {
-	TurViewer *editor = JOR_OUTLINE_VIEWER(widget);
+	TurViewer *editor = TUR_VIEWER(widget);
 	TurViewerPrivate *priv = tur_viewer_get_instance_private(TUR_VIEWER(widget));
-
-
-
-
-//	cha_document_view_draw(priv->document_view, cr);
+	tur_layout_view_draw(priv->layout_view, cr);
 	cairo_set_source_rgb(cr,1,0,0);
 	cairo_move_to(cr, 50,30);
 	cairo_line_to(cr, 150,300);

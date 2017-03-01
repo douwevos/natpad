@@ -168,6 +168,49 @@ int cha_revision_wo_get_slot_index(ChaRevisionWo *revision, GObject *slot_key, i
 	return result;
 }
 
+
+
+GObject *cha_revision_wo_get_slot_content_ref(ChaRevisionWo *revision, int slot_index, GObject *slot_key) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(revision);
+	GObject *result = NULL;
+	ChaEnrichmentData *enrichment_data = priv->enrichment_data;
+	if (enrichment_data) {
+		result = cha_enrichment_data_get_slot_content_ref(enrichment_data, slot_index, slot_key);
+	}
+	return result;
+}
+
+void cha_revision_wo_set_slot_content(ChaRevisionWo *revision, int slot_index, GObject *slot_key, GObject *content) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(revision);
+	ChaEnrichmentData *enrichment_data = priv->enrichment_data;
+	cat_log_debug("enrichment_data=%p,  slot_index=%d, slot_key=%p, content=%o", enrichment_data, slot_index, slot_key, content);
+	if (enrichment_data) {
+		cha_enrichment_data_set_slot_content(enrichment_data, slot_index, slot_key, content);
+	}
+}
+
+
+static void l_dump(const ChaRevisionWo *revision) {
+	cat_log_on_trace({
+		ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(revision);
+		int page_count = cha_page_list_wo_page_count(priv->page_list);
+		int page_idx;
+		for(page_idx=0; page_idx<page_count; page_idx++) {
+			ChaPageWo *page = cha_page_list_wo_page_at(priv->page_list, page_idx);
+			int line_count = cha_page_wo_line_count(page);
+			cha_page_wo_hold_lines(page);
+			int line_idx;
+			cat_log_print("DUMP", "page[%d]=%O", page_idx, page);
+			for(line_idx=0; line_idx<line_count; line_idx++) {
+				ChaLineWo *line = cha_page_wo_line_at(page, line_idx);
+				cat_log_print("DUMP", "line[%d]=%O", line_idx, line);
+			}
+			cha_page_wo_release_lines(page);
+		}
+	})
+}
+
+
 int cha_revision_wo_get_page_list_version(const ChaRevisionWo *revision) {
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) revision);
 	return cat_wo_get_version((CatWo *) priv->page_list);
@@ -240,7 +283,7 @@ static void l_set_form_field_value(ChaRevisionWo *e_revision, int form_field_ind
 	ChaCursorMWo *field_end = cha_form_field_wo_get_end(form_field);
 
 	cat_log_debug("before remove: form_field=%o", form_field);
-//	cat_log_on_trace({ l_dump(snapshot); });
+	cat_log_on_trace({ l_dump(e_revision); });
 
 	cha_revision_wo_remove_between_cursors(e_revision, field_start, field_end, FALSE, NULL);
 
@@ -250,7 +293,7 @@ static void l_set_form_field_value(ChaRevisionWo *e_revision, int form_field_ind
 
 	cha_revision_wo_insert_lines(e_revision, new_field_end, e_field_value, FALSE);
 
-//	cat_log_on_trace({ l_dump(result_snapshot); });
+	cat_log_on_trace({ l_dump(e_revision); });
 
 
 	ChaCursorOrder ora = cha_cursorm_wo_order(field_end, new_field_end);
@@ -512,7 +555,6 @@ void cha_revision_wo_line_multi_replace(ChaRevisionWo *e_revision, long long row
 			*right_result = last_out;
 		}
 		if (last_offset<utf8_text.text_len) {
-			cat_log_debug("append rest:left=%d", source_line_length-last_offset);
 			cat_string_wo_append_chars_len(e_buf, utf8_text.text+last_offset, utf8_text.text_len-last_offset);
 
 
@@ -633,8 +675,14 @@ void cha_revision_wo_line_multi_replace(ChaRevisionWo *e_revision, long long row
 void cha_revision_wo_insert_lines(ChaRevisionWo *e_revision, ChaCursorMWo *e_insert_location, CatArrayWo *lines_to_insert, gboolean handle_form) {
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(e_revision);
 	CHECK_IF_WRITABLE();
+	cat_log_debug("e_insert_location=%O", e_insert_location);
 
 	cat_log_debug("lines_to_insert.size=%d", cat_array_wo_size(lines_to_insert));
+	if (cat_array_wo_size(lines_to_insert)==0) {
+		return;
+	}
+
+	cat_log_on_trace({ l_dump(e_revision); });
 
 	ChaCursorMWo *original = cha_cursorm_wo_clone(e_insert_location, CAT_CLONE_DEPTH_MAIN);
 
@@ -649,12 +697,16 @@ void cha_revision_wo_insert_lines(ChaRevisionWo *e_revision, ChaCursorMWo *e_ins
 	int x_cursor = cha_cursorm_wo_get_column(e_insert_location);
 	cat_unref_ptr(e_insert_ll);
 
+	cat_log_debug("e_insert_location=%O", e_insert_location);
 
 
 	int pi_cnt = cat_array_wo_size(lines_to_insert)-1;
+	cat_log_debug("pi_cnt=%d", pi_cnt);
 	int pidx;
 	cha_cursorm_wo_move(e_insert_location, pi_cnt, 0);
 
+
+	cat_log_debug("e_insert_location=%O", e_insert_location);
 	for(pidx=0; pidx<=pi_cnt; pidx++) {
 		ChaLineWo *in_line = (ChaLineWo *) cat_array_wo_get(lines_to_insert, pidx);
 
@@ -725,6 +777,7 @@ void cha_revision_wo_insert_lines(ChaRevisionWo *e_revision, ChaCursorMWo *e_ins
 		}
 	}
 
+	cat_log_debug("e_insert_location=%O", e_insert_location);
 
 	/* handle form manipulation */
 	if (handle_form && priv->form) {
@@ -751,6 +804,7 @@ void cha_revision_wo_insert_lines(ChaRevisionWo *e_revision, ChaCursorMWo *e_ins
 		cha_form_wo_insert(priv->form, original, e_insert_location);
 	}
 	cat_unref_ptr(original);
+	cat_log_debug("e_insert_location=%O", e_insert_location);
 }
 
 
@@ -1054,12 +1108,14 @@ CatArrayWo *cha_revision_wo_get_lines_between_cursors(ChaRevisionWo *revision, C
 
 	unsigned long long row = start_row;
 	ChaLineIterator *line_iterator = cha_line_iterator_new(revision, row);
-	cat_log_debug("new iter");
+	cat_log_debug("new iter:start_row=%ld, end_row=%ld", start_row, end_row);
 	while(cat_iiterator_has_next((CatIIterator *) line_iterator)) {
 		ChaLineLocationWo *line_location = (ChaLineLocationWo *) cat_iiterator_next((CatIIterator *) line_iterator);
 		cat_log_debug("next iter:%o", line_location);
 		ChaLineWo *e_raw_line = cha_revision_wo_line_at_location(revision, line_location);
 		e_raw_line = cha_line_wo_clone(e_raw_line, CAT_CLONE_DEPTH_FULL);
+
+		cat_log_debug("next iter:e_raw_line=%O, row=%d", e_raw_line, row);
 
 		if (row==end_row) {
 			int end_column = cha_cursorm_wo_get_column(end_cursor);
@@ -1374,17 +1430,17 @@ static void l_form_apply_set_field_value(ChaRevisionWo *e_revision, int form_fie
 	field_end = cha_cursorm_wo_clone(field_end, CAT_CLONE_DEPTH_AS_ANCHORED);
 
 	cat_log_debug("before remove: form_field=%o, field_end=%o", form_field, field_end);
-//	cat_log_on_trace({ l_dump(snapshot); });
+	cat_log_on_trace({ l_dump(e_revision); });
 
 	cha_revision_wo_remove_between_cursors(e_revision, field_start, field_end, FALSE, NULL);
 
-	cat_log_debug("before insert: form_field=%o", form_field);
 
 	ChaCursorMWo *new_field_end = cha_cursorm_wo_clone(field_start, CAT_CLONE_DEPTH_FULL);
+	cat_log_debug("before insert: form_field=%o, new_field_end=%o", form_field, new_field_end);
 
 	cha_revision_wo_insert_lines(e_revision, new_field_end, e_field_value, FALSE);
 
-//	cat_log_on_trace({ l_dump(result_snapshot); });
+	cat_log_on_trace({ l_dump(e_revision); });
 
 
 	ChaCursorOrder ora = cha_cursorm_wo_order(field_end, new_field_end);
@@ -1502,11 +1558,13 @@ void cha_revision_wo_apply_form_changes(ChaRevisionWo *e_revision) {
 			cha_cursor_wo_set_x_cursor_bytes(e_cursor, cha_cursorm_wo_get_column(e_cursorm));
 		}
 	}
+	cat_log_debug("end of cha_revision_wo_apply_form_changes");
 }
 
 
 
 static void l_anchor_children(CatWo *wo, int version) {
+	cat_log_debug("start:anchor_children");
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) wo);
 	if (priv->form) {
 		cha_revision_wo_apply_form_changes((ChaRevisionWo *) wo);
@@ -1515,6 +1573,9 @@ static void l_anchor_children(CatWo *wo, int version) {
 
 	priv->cursor = cha_cursor_wo_anchor(priv->cursor, version);
 	priv->page_list = cha_page_list_wo_anchor(priv->page_list, version);
+	cat_log_debug("end:anchor_children");
+	l_dump((ChaRevisionWo *) wo);
+
 }
 
 
@@ -1573,7 +1634,7 @@ static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append
 
 	cat_string_wo_format(append_to, "%s[%p(%d): %s enr-cnt=%d, enr-data=%o, cursor=%o, %o]\npage-list", iname, self, cat_wo_get_version((CatWo *) instance), cat_wo_is_anchored((CatWo *) instance) ? "anchored" : "editable", priv->enriched_count, priv->enrichment_data, priv->cursor, priv->page_list);
 
-//	cha_page_list_wo_dump(priv->page_list, append_to);
+	cha_page_list_wo_dump(priv->page_list, append_to);
 
 }
 

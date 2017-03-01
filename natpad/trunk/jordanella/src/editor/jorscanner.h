@@ -56,7 +56,6 @@ JorScanner *jor_scanner_new(CatIUtf8Scanner *scanner);
 
 JorToken *jor_scanner_next(JorScanner *scanner);
 
-
 G_END_DECLS
 
 #endif /* EDITOR_JORSCANNER_H_ */

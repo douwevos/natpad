@@ -1,0 +1,42 @@
+module {
+
+	name 'xantus';
+	
+	dependencies {
+		module 'chameleon';
+		module 'gross-runtime';
+		module 'elk';
+		module 'turtle';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc { 
+			natpad.cc.args {}
+			src { path './src/'; }  
+			destdir './compiled/'; 
+			depdir 'deps';
+		}
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libxantus.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'xantus';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

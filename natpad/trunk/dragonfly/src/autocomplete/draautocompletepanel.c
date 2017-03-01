@@ -352,12 +352,15 @@ static gboolean l_handle_key_event_cb(GtkWidget *gwidget, GdkEventKey *eev, gpoi
 
 		case GDK_KEY_KP_Enter :
 		case GDK_KEY_Return : {
-			GtkWidget *top = gtk_widget_get_toplevel(gwidget);
 			DraAcEntry *entry = dra_ac_context_get_at(priv->ac_context, priv->selected_entry_idx);
 			if (entry) {
 				dra_ac_entry_run(entry, priv->ac_context);
 			}
-			gtk_widget_destroy(top);
+			GtkWidget *top = gtk_widget_get_toplevel(gwidget);
+			cat_log_error("top=%O", top);
+			if (top!=NULL) {
+				gtk_widget_destroy(top);
+			}
 			return TRUE;
 		} break;
 	}
