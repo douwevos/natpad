@@ -349,7 +349,7 @@ void cha_document_anchor_document_full(ChaDocument *document, ChaDocumentAnchorM
 			cat_linked_list_append(priv->e_revision_history, (GObject *) a_new_rev);
 			priv->history_index++;
 			cat_log_debug("e_revision_history=%o, history_index=%d", priv->e_revision_history, priv->history_index);
-			if (cat_linked_list_size(priv->e_revision_history)>10) {
+			if (cat_linked_list_size(priv->e_revision_history)>300) {
 				cat_linked_list_remove_first(priv->e_revision_history, NULL);
 				priv->history_index--;
 			}

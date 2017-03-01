@@ -24,6 +24,7 @@
 #include "../document/chaformwo.h"
 #include "../document/chaformfieldwo.h"
 #include "chamarking.h"
+#include <math.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -165,6 +166,24 @@ void cha_sub_line_cache_set_surface_wrapper(ChaSubLineCache *sub_line_cache, Cha
 	cat_ref_swap(priv->surface, wrapper);
 	priv->surface_width = surface_width;
 	priv->surface_height = surface_height;
+}
+
+
+static void l_rounded_rect(cairo_t *cr, double x, double y, double width, double height) {
+	double aspect = 1.0,     /* aspect ratio */
+	       corner_radius = height / 10.0;   /* and corner curvature radius */
+
+	double radius = corner_radius / aspect;
+	double degrees = M_PI / 180.0;
+
+	cairo_new_sub_path (cr);
+	cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees);
+	cairo_arc (cr, x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees);
+	cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees);
+	cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
+	cairo_close_path (cr);
+
+	cairo_fill(cr);
 }
 
 static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate *update_ctx) {
@@ -420,14 +439,17 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 					continue;
 				}
 
+				gboolean is_top = pl_row==top;
+
 				gboolean left_open = FALSE;
-				if ((pl_row!=top) || (pl_left>left)) {
+				if ((!is_top) || (pl_left>left)) {
 					left = pl_left;
 					left_open=TRUE;
 				}
 
+				gboolean is_bottom = pl_row==bottom;
 				gboolean right_open = FALSE;
-				if ((pl_row!=bottom) || (pl_right<right)) {
+				if ((!is_bottom) || (pl_right<right)) {
 					right = pl_right;
 					right_open=TRUE;
 				}
@@ -453,36 +475,15 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 				left_vx = left_vx/PANGO_SCALE;
 				right_vx = right_vx/PANGO_SCALE;
 
-//				if (ast_snapshot_form_field_is_editable(form_field)) {
-//					cairo_set_source_rgb(painter->back_cairo, 0,0,0);
-//				} else {
-					cairo_set_source_rgb(cairo, 0.8, 0.3, 0);
-//				}
-				cairo_set_line_width(cairo, 0.5);
 				int font_height = update_ctx->sub_line_height;
 
 				/* form top */
-				cairo_move_to(cairo, left_vx, (double) 0.5);
-				cairo_line_to(cairo, right_vx, (double) 0.5);
-				cairo_stroke(cairo);
+				double gfx_top = (double) ((is_top ? 2 : 0));
+				double gfx_bottom = (double) (font_height - (is_bottom ? 2 : 0));
 
-				/* form bottom */
-				cairo_move_to(cairo, left_vx, (double) font_height-0.5);
-				cairo_line_to(cairo, right_vx, (double) font_height-0.5);
-				cairo_stroke(cairo);
 
-				if (!left_open) {
-					cairo_move_to(cairo, left_vx, (double) 0.5);
-					cairo_line_to(cairo, left_vx, (double) font_height-0.5);
-					cairo_stroke(cairo);
-				}
-
-				if (!right_open) {
-					cairo_move_to(cairo, right_vx, (double) 0.5);
-					cairo_line_to(cairo, right_vx, (double) font_height-0.5);
-					cairo_stroke(cairo);
-				}
-
+				cairo_set_source_rgba(cairo, 0.8, 0.4, 0.1, 0.25);
+				l_rounded_rect(cairo, left_vx,gfx_top, right_vx-left_vx, gfx_bottom-gfx_top);
 			}
 		}
 

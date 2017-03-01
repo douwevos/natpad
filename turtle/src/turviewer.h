@@ -23,6 +23,7 @@
 #ifndef TURVIEWER_H_
 #define TURVIEWER_H_
 
+#include "model/turinode.h"
 #include <gtk/gtk.h>
 #include <caterpillar.h>
 
@@ -51,7 +52,7 @@ struct _TurViewerClass {
 
 GType tur_viewer_get_type();
 
-TurViewer *tur_viewer_new();
+TurViewer *tur_viewer_new(TurINode *root_node);
 
 G_END_DECLS
 

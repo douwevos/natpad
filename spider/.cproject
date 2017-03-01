@@ -61,8 +61,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/leafhopper/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/cow/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/shoveler/src/c}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/worm/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/caterpillar/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/worm/src}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1031408863" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

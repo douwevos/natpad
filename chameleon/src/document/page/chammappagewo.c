@@ -252,8 +252,6 @@ static void l_page_hold_lines(ChaPageWo *page) {
 	}
 	priv->lines_hold_cnt++;
 
-
-
 	cat_lock_unlock(lock);
 }
 
@@ -610,8 +608,14 @@ static gboolean l_equal(const CatWo *wo_a, const CatWo *wo_b) {
 	if (priv_a->line_count!=priv_b->line_count) {
 		return FALSE;
 	}
+
+
 	if (priv_a->lines==priv_b->lines) {
 		return TRUE;
+	}
+
+	if (priv_a->lines==NULL || priv_b->lines==NULL) {
+		return FALSE;
 	}
 	return memcmp(priv_a->lines, priv_b->lines, priv_a->line_count*sizeof(struct _ChaLineDescr))==0;
 }

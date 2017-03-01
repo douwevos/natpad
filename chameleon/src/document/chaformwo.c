@@ -173,7 +173,7 @@ int cha_form_wo_get_index_of_next_field(const ChaFormWo *form, int current_index
 	while(idx!=current_index) {
 		field = (ChaFormFieldWo *) cat_array_wo_get(priv->fields, idx);
 		int field_order = cha_form_field_wo_get_field_index(field);
-		cat_log_error("idx=%d, current_index=%d, field_order=%d, next_field_order=%d, best_order=%d, best_index=%d", idx, current_index, field_order, next_field_order, best_order, best_index)
+		cat_log_debug("idx=%d, current_index=%d, field_order=%d, next_field_order=%d, best_order=%d, best_index=%d", idx, current_index, field_order, next_field_order, best_order, best_index)
 		if (field_order == next_field_order) {
 			return idx;
 		} else if (field_order > next_field_order && (field_order<best_order || best_order==-1)) {
