@@ -34,7 +34,11 @@ enum _XanScanMode {
 	XAN_MODE_TEXT,
 	XAN_MODE_OPENING,
 	XAN_MODE_TERMINATOR_START,
+	XAN_MODE_TERMINATOR_NAME,
+	XAN_MODE_TERMINATOR_NAME_COLON,
 	XAN_MODE_ELEMENT_START,
+	XAN_MODE_ELEMENT_NAME,
+	XAN_MODE_ELEMENT_NAME_COLON,
 	XAN_MODE_TERMINATOR,
 	XAN_MODE_ELEMENT
 };
@@ -106,6 +110,8 @@ GroRunIToken *xan_scanner_next(XanScanner *scanner) {
 static GroRunIToken *l_scan_mode_text(XanScanner *xan_scanner);
 static GroRunIToken *l_scan_mode_opening(XanScanner *xan_scanner);
 static GroRunIToken *l_scan_mode_start(XanScanner *xan_scanner);
+static GroRunIToken *l_scan_mode_open_name(XanScanner *xan_scanner);
+static GroRunIToken *l_scan_mode_open_name_colon(XanScanner *xan_scanner);
 static GroRunIToken *l_scan_mode_element(XanScanner *xan_scanner);
 
 static GroRunIToken *l_scanner_next(GroRunIScanner *self) {
@@ -129,6 +135,17 @@ static GroRunIToken *l_scanner_next(GroRunIScanner *self) {
 				result = l_scan_mode_start(scanner);
 				break;
 
+			case XAN_MODE_ELEMENT_NAME :
+			case XAN_MODE_TERMINATOR_NAME :
+				result = l_scan_mode_open_name(scanner);
+				break;
+
+			case XAN_MODE_ELEMENT_NAME_COLON :
+			case XAN_MODE_TERMINATOR_NAME_COLON :
+				result = l_scan_mode_open_name_colon(scanner);
+				break;
+
+
 			case XAN_MODE_TERMINATOR :
 			case XAN_MODE_ELEMENT :
 				result = l_scan_mode_element(scanner);
@@ -141,6 +158,9 @@ static GroRunIToken *l_scanner_next(GroRunIScanner *self) {
 
 		}
 	}
+
+
+	cat_log_info("result=%O", result);
 
 	return result;
 }
@@ -183,8 +203,8 @@ static GroRunIToken *l_scan_mode_text(XanScanner *xan_scanner) {
 	}
 
 	if (has_chars) {
-		int row = base_class->getRow(scanner);
-		int column = base_class->getColumn(scanner);
+		int row = base_class->getLeftRow(scanner);
+		int column = base_class->getLeftColumn(scanner);
 		result = base_class->createToken(scanner, XAN_SYM_TEXT, row, column, NULL);
 	}
 	return result;
@@ -243,7 +263,7 @@ static GroRunIToken *l_scan_mode_opening(XanScanner *xan_scanner) {
 
 	if (lookahead[1]=='/') {
 		priv->scan_mode = XAN_MODE_TERMINATOR_START;
-		return base_class->createTokenBasic(scanner, XAN_SYM_TAG_OPEN_TERMINATOR, 1);
+		return base_class->createTokenBasic(scanner, XAN_SYM_TAG_OPEN_TERMINATOR, 2);
 	}
 
 
@@ -256,7 +276,7 @@ static GroRunIToken *l_scan_mode_opening(XanScanner *xan_scanner) {
 }
 
 
-static GroRunIToken *l_scan_mode_start(XanScanner *xan_scanner) {
+static GroRunIToken *l_scan_mode_start_or_name_colon(XanScanner *xan_scanner, gboolean *has_chars_out) {
 	XanScannerPrivate *priv = xan_scanner_get_instance_private(xan_scanner);
 	GroRunScannerBase *scanner = (GroRunScannerBase *) xan_scanner;
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
@@ -308,12 +328,55 @@ static GroRunIToken *l_scan_mode_start(XanScanner *xan_scanner) {
 			keep_running = FALSE;
 		}
 	}
+	*has_chars_out = has_chars;
+	return result;
+}
+
+static GroRunIToken *l_scan_mode_start(XanScanner *xan_scanner) {
+	XanScannerPrivate *priv = xan_scanner_get_instance_private(xan_scanner);
+	GroRunScannerBase *scanner = (GroRunScannerBase *) xan_scanner;
+	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
+	gunichar *lookahead = base_class->getLookaheadBuffer(scanner);
+
+	gboolean has_chars = FALSE;
+	GroRunIToken *result = l_scan_mode_start_or_name_colon(xan_scanner, &has_chars);
+
+	if (has_chars && result == NULL) {
+		int row = base_class->getLeftRow(scanner);
+		int column = base_class->getLeftColumn(scanner);
+		result = base_class->createToken(scanner, XAN_SYM_NAME, row, column, NULL);
+		if (lookahead[0]==':') {
+			if (priv->scan_mode == XAN_MODE_TERMINATOR_START) {
+				priv->scan_mode = XAN_MODE_TERMINATOR_NAME;
+			} else {
+				priv->scan_mode = XAN_MODE_ELEMENT_NAME;
+			}
+		} else {
+			if (priv->scan_mode == XAN_MODE_TERMINATOR_START) {
+				priv->scan_mode = XAN_MODE_TERMINATOR;
+			} else {
+				priv->scan_mode = XAN_MODE_ELEMENT;
+			}
+		}
+	}
+	return result;
+}
+
+
+static GroRunIToken *l_scan_mode_open_name_colon(XanScanner *xan_scanner) {
+	XanScannerPrivate *priv = xan_scanner_get_instance_private(xan_scanner);
+	GroRunScannerBase *scanner = (GroRunScannerBase *) xan_scanner;
+	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
+	gunichar *lookahead = base_class->getLookaheadBuffer(scanner);
+
+	gboolean has_chars = FALSE;
+	GroRunIToken *result = l_scan_mode_start_or_name_colon(xan_scanner, &has_chars);
 
 	if (has_chars && result == NULL) {
 		int row = base_class->getRow(scanner);
 		int column = base_class->getColumn(scanner);
 		result = base_class->createToken(scanner, XAN_SYM_NAME, row, column, NULL);
-		if (priv->scan_mode == XAN_MODE_TERMINATOR_START) {
+		if (priv->scan_mode == XAN_MODE_TERMINATOR_NAME_COLON) {
 			priv->scan_mode = XAN_MODE_TERMINATOR;
 		} else {
 			priv->scan_mode = XAN_MODE_ELEMENT;
@@ -323,6 +386,19 @@ static GroRunIToken *l_scan_mode_start(XanScanner *xan_scanner) {
 }
 
 
+static GroRunIToken *l_scan_mode_open_name(XanScanner *xan_scanner) {
+	XanScannerPrivate *priv = xan_scanner_get_instance_private(xan_scanner);
+	GroRunScannerBase *scanner = (GroRunScannerBase *) xan_scanner;
+	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
+	base_class->markLocation(scanner);
+	if (priv->scan_mode==XAN_MODE_ELEMENT_NAME) {
+		priv->scan_mode = XAN_MODE_ELEMENT_NAME_COLON;
+	} else {
+		priv->scan_mode = XAN_MODE_TERMINATOR_NAME_COLON;
+	}
+	return base_class->createTokenBasic(scanner, XAN_SYM_COLON, NULL);
+}
+
 
 static GroRunIToken *l_scan_mode_element(XanScanner *xan_scanner) {
 	XanScannerPrivate *priv = xan_scanner_get_instance_private(xan_scanner);
@@ -331,6 +407,7 @@ static GroRunIToken *l_scan_mode_element(XanScanner *xan_scanner) {
 	GroRunIToken *result = NULL;
 	gunichar *lookahead = base_class->getLookaheadBuffer(scanner);
 	base_class->advance(scanner, GRORUN_ADVANCE_STRIP_LINE_BREAKS|GRORUN_ADVANCE_STRIP_WHITE_SPACES|GRORUN_ADVANCE_ALLOW_STAY);
+	base_class->markLocation(scanner);
 
 	while(result==NULL) {
 		gunichar ch = lookahead[0];
@@ -350,7 +427,7 @@ static GroRunIToken *l_scan_mode_element(XanScanner *xan_scanner) {
 				}
 				break;
 			case '>' :
-				result = base_class->createTokenBasic(scanner, XAN_SYM_TAG_CLOSE, 2);
+				result = base_class->createTokenBasic(scanner, XAN_SYM_TAG_CLOSE, 1);
 				priv->scan_mode = XAN_MODE_TEXT;
 				break;
 			case '\'' :

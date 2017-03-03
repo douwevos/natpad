@@ -51,6 +51,8 @@
 #define XAN_SYM_TAG_CLOSE				12
 // />
 #define XAN_SYM_TAG_TERMINATOR_CLOSE	13
+// :
+#define XAN_SYM_COLON					14
 
 G_BEGIN_DECLS
 

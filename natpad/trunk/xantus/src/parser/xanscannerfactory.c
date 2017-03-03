@@ -83,17 +83,18 @@ XanScannerFactory *xan_scanner_factory_new() {
 	l_create_symbol(priv->symbols, "EOT", XAN_SYM_END_OF_INPUT);
 	l_create_symbol(priv->symbols, "<", XAN_SYM_ELEMENT_OPEN);
 	l_create_symbol(priv->symbols, ">", XAN_SYM_ELEMENT_CLOSE);
-	l_create_symbol(priv->symbols, NULL, XAN_SYM_LITERAL);
+	l_create_symbol(priv->symbols, "literal", XAN_SYM_LITERAL);
 	l_create_symbol(priv->symbols, "=", XAN_SYM_IS);
-	l_create_symbol(priv->symbols, NULL, XAN_SYM_ID);
-	l_create_symbol(priv->symbols, NULL, XAN_SYM_TEXT);
-	l_create_symbol(priv->symbols, NULL, XAN_SYM_COMMENT);
+	l_create_symbol(priv->symbols, "id", XAN_SYM_ID);
+	l_create_symbol(priv->symbols, "text", XAN_SYM_TEXT);
+	l_create_symbol(priv->symbols, "comment", XAN_SYM_COMMENT);
 	l_create_symbol(priv->symbols, "</", XAN_SYM_TAG_OPEN_TERMINATOR);
 	l_create_symbol(priv->symbols, "<", XAN_SYM_TAG_OPEN);
 	l_create_symbol(priv->symbols, "..", XAN_SYM_TAG);
-	l_create_symbol(priv->symbols, NULL, XAN_SYM_NAME);
+	l_create_symbol(priv->symbols, "name", XAN_SYM_NAME);
 	l_create_symbol(priv->symbols, ">", XAN_SYM_TAG_CLOSE);
 	l_create_symbol(priv->symbols, "/>", XAN_SYM_TAG_TERMINATOR_CLOSE);
+	l_create_symbol(priv->symbols, ":", XAN_SYM_COLON);
 
 	priv->token_factory = (GroRunITokenFactory *) grorun_full_token_factory_new();
 	return result;
