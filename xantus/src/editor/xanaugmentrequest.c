@@ -122,20 +122,27 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 			case XAN_SYM_TAG_TERMINATOR_CLOSE :
 			case XAN_SYM_ELEMENT_OPEN :
 			case XAN_SYM_ELEMENT_CLOSE : {
-				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 5);
-			} break;
-
-			case XAN_SYM_NAME : {
 				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 7);
 			} break;
 
-			case XAN_SYM_ID : {
+			case XAN_SYM_NAME : {
 				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 9);
 			} break;
 
-			case XAN_SYM_LITERAL : {
-				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 10);
+			case XAN_SYM_TEXT : {
+				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 2);
 			} break;
+
+			case XAN_SYM_ID : {
+				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 6);
+			} break;
+
+			case XAN_SYM_LITERAL : {
+				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 11);
+			} break;
+			case XAN_SYM_COMMENT : {
+				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 15);
+			}
 		}
 	}
 

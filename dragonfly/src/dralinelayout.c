@@ -123,7 +123,9 @@ static void l_apply_extra_attributes(ChaLineLayout *line_layout, PangoAttrList *
 				DraIAttributeBuilderInterface *ab_iface = DRA_IATTRIBUTE_BUILDER_GET_INTERFACE(ab);
 				PangoAttribute *attr = ab_iface->build(ab, color_map);
 				if (attr->end_index<=attr->start_index) {
-					cat_log_fatal("start_index:%d, end_index:%d", attr->start_index, attr->end_index);
+					if (attr->end_index<attr->start_index) {
+						cat_log_fatal("start_index:%d, end_index:%d", attr->start_index, attr->end_index);
+					}
 					continue;
 				}
 				pango_attr_list_change(pango_attr_list, attr);
