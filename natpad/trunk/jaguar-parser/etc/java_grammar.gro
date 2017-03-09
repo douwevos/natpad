@@ -1,0 +1,1337 @@
+# 1.5
+terminal ABSTRACT, DO, IMPLEMENTS, PACKAGE, THROW, BOOLEAN, DOUBLE, IMPORT, PRIVATE, THROWS, BREAK, ELSE, PROTECTED, TRANSIENT;
+terminal BYTE, SHORT, INT, LONG, CHAR;
+terminal EXTENDS, INSTANCEOF, PUBLIC, TRY, CASE, FINAL, FINALLY, INTERFACE, RETURN, VOID, CATCH, FLOAT;
+terminal VOLATILE, FOR, NATIVE, STATIC, WHILE, CLASS, NEW, SUPER, CONST, NULL, SWITCH, CONTINUE;
+terminal GOTO, SYNCHRONIZED, DEFAULT, IF, THIS;
+
+terminal LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK;
+terminal IDENTIFIER, DOT, COMMA, COLON, SEMICOLON, STRING_LITERAL, BOOLEAN_LITERAL, QUESTION;
+
+terminal OP_MUL, OP_DIV, OP_SUB, OP_ADD, OP_AND, OP_OR, OP_XOR, OP_NOT, OP_NEG, OP_LAND, OP_INC, OP_DEC, OP_MOD, OP_LOR, OP_SHL, OP_SHR, OP_SHRR;
+terminal OP_EQ, OP_NE, OP_GE, OP_GT, OP_LE, OP_LT;
+terminal ASS_MUL, ASS_DIV, ASS_MOD, ASS_ADD, ASS_SUB, ASS_SHL, ASS_SHR, ASS_SHRR, ASS_AND, ASS_XOR, ASS_OR, ASS_IS;
+
+terminal AT, INTEGER_LITERAL, FLOATING_POINT_LITERAL, CHARACTER_LITERAL;
+
+terminal STRICTFP, ASSERT, ELLIPSIS, ENUM;
+
+# 19.2) The Syntactic Grammar
+goal		    ⟶ compilation_unit
+					;
+
+# 19.3) Lexical Structure.
+literal ⟶
+					  INTEGER_LITERAL
+					⟶ FLOATING_POINT_LITERAL
+					⟶ BOOLEAN_LITERAL
+					⟶ CHARACTER_LITERAL
+					⟶ STRING_LITERAL
+					⟶ NULL
+					;
+
+# 19.4) Types, Values, and Variables
+
+java_type           ⟶ primitive_type
+					⟶ reference_type
+					;
+
+primitive_type ⟶
+					  numeric_type
+					⟶ BOOLEAN
+					;
+
+numeric_type⟶
+					  integral_type
+					⟶ floating_point_type
+					;
+
+integral_type ⟶ 
+					  BYTE 
+					⟶ SHORT 
+					⟶ INT 
+					⟶ LONG 
+					⟶ CHAR 
+					;
+
+floating_point_type ⟶ 
+					  FLOAT 
+					⟶ DOUBLE
+					;
+
+reference_type ⟶
+					  class_or_interface_type:t 
+#/* note that the 'type_variable' production will come out of the grammar
+# * as a 'class_or_interface_type' with a 'simple_name'.  The semantic
+# * checker will have to resolve whether this is a class name or a type
+# * variable */
+					⟶ array_type
+					;
+type_variable ⟶
+					  IDENTIFIER
+					;
+	
+	
+class_or_interface ⟶
+					  name:nm 
+					⟶ class_or_interface:t OP_LT type_argument_list_1:g DOT name 
+					;
+class_or_interface_type ⟶
+					  class_or_interface:t 
+					⟶ class_or_interface:t OP_LT type_argument_list_1:g ;
+
+class_type ⟶	
+					  class_or_interface_type
+					;
+
+interface_type ⟶
+					  class_or_interface_type
+					;		
+
+array_type ⟶
+					  primitive_type dims
+	# we have class_or_interface_type here even though only unbounded
+	# wildcards are really allowed in the parameterization.
+	# we have to expand this to avoid lookahead problems.
+					⟶ name dims
+					⟶ class_or_interface OP_LT type_argument_list_1 DOT name dims
+					⟶ class_or_interface OP_LT type_argument_list_1 dims
+					;
+
+type_arguments_opt ⟶
+					  type_arguments
+					⟶
+					;
+
+type_arguments ⟶
+					  OP_LT type_argument_list_1
+					;
+
+wildcard ⟶
+					  QUESTION
+					⟶ QUESTION EXTENDS reference_type
+					⟶ QUESTION SUPER reference_type
+					;
+wildcard_1 ⟶
+					  QUESTION OP_GT
+					⟶ QUESTION EXTENDS reference_type_1
+					⟶ QUESTION SUPER reference_type_1
+					;
+wildcard_2 ⟶	
+					  QUESTION OP_SHR
+					⟶ QUESTION EXTENDS reference_type_2
+					⟶ QUESTION SUPER reference_type_2
+					;
+wildcard_3 ⟶	
+					  QUESTION OP_SHRR
+					⟶ QUESTION EXTENDS reference_type_3
+					⟶ QUESTION SUPER reference_type_3
+					;
+
+reference_type_1 ⟶
+					  reference_type:t OP_GT 
+					⟶ class_or_interface OP_LT type_argument_list_2
+					;
+
+reference_type_2 ⟶
+					  reference_type OP_SHR
+					⟶ class_or_interface OP_LT type_argument_list_3
+					;
+
+reference_type_3 ⟶
+					  reference_type OP_SHRR
+					;
+
+type_argument_list ⟶
+					  type_argument:t 
+					⟶ type_argument_list:l COMMA type_argument:t 
+					;
+
+type_argument_list_1 ⟶
+					  type_argument_1:t 
+					⟶ type_argument_list:l COMMA type_argument_1:t 
+					;
+
+type_argument_list_2 ⟶
+					  type_argument_2
+					⟶ type_argument_list COMMA type_argument_2
+					;
+
+type_argument_list_3 ⟶
+					  type_argument_3
+					⟶ type_argument_list COMMA type_argument_3
+					;
+
+type_argument ⟶
+					  reference_type
+					⟶ wildcard
+					;
+
+type_argument_1 ⟶
+					  reference_type_1:t 
+					⟶ wildcard_1
+					;
+type_argument_2 ⟶
+					  reference_type_2
+					⟶ wildcard_2
+					;
+type_argument_3 ⟶
+					  reference_type_3
+					⟶ wildcard_3
+					;
+
+# 19.5) Names
+name	⟶	
+					  simple_name:sn 
+					⟶ qualified_name:qn 
+					;
+
+simple_name ⟶	
+					  IDENTIFIER:id 
+					;
+
+qualified_name ⟶
+					  name:nm DOT IDENTIFIER:id 
+					;
+
+# 19.6) Packages
+compilation_unit ⟶ 
+					  simple_compilation_unit
+					⟶ importing_compilation_unit
+					⟶ package_compilation_unit
+					⟶ # empty file -- is this legal?
+					;
+
+simple_compilation_unit ⟶
+					  type_declarations
+					;
+
+importing_compilation_unit ⟶
+					  import_declarations type_declarations_opt
+					;
+
+package_compilation_unit ⟶
+					  package_declaration import_declarations_opt type_declarations_opt
+					;
+
+import_declarations_opt ⟶ 
+					  import_declarations
+					⟶
+					;
+
+type_declarations_opt   ⟶ 
+					  type_declarations
+					⟶
+					;
+
+import_declarations ⟶ 
+					  import_declaration
+					⟶ import_declarations import_declaration
+					;
+
+type_declarations ⟶ 
+					  type_declaration
+					⟶ type_declarations type_declaration
+					;
+
+package_declaration ⟶ 
+					  annotations_opt PACKAGE name SEMICOLON 
+					;
+
+import_declaration ⟶ 
+					  single_type_import_declaration
+					⟶ type_import_on_demand_declaration
+					⟶ static_single_type_import_declaration
+					⟶ static_type_import_on_demand_declaration
+					;
+single_type_import_declaration ⟶ 
+					  IMPORT name SEMICOLON
+					;
+static_single_type_import_declaration ⟶ 
+					  IMPORT STATIC name SEMICOLON
+					;
+type_import_on_demand_declaration ⟶
+					  IMPORT name DOT OP_MUL SEMICOLON
+					;
+static_type_import_on_demand_declaration ⟶
+					  IMPORT STATIC name DOT OP_MUL SEMICOLON
+					;
+type_declaration ⟶
+					  class_declaration
+					⟶ enum_declaration
+					⟶ interface_declaration
+					⟶ SEMICOLON
+					;
+
+# 19.7) Productions used only in the LALR(1) grammar
+modifiers_opt⟶
+ 								   
+					⟶ modifiers:m  
+					
+					;
+modifiers_at ⟶
+					  mixed_modifiers_at:mm 
+					⟶ annotations_at 
+					;
+modifiers ⟶
+					  mixed_modifiers:mm 
+					⟶ annotations 
+					;
+mixed_modifiers_at ⟶
+					  mixed_modifiers:mm AT 
+					;
+mixed_modifiers ⟶
+					  adhoc_modifier:a 
+					⟶ annotations adhoc_modifier:a 
+					⟶ mixed_modifiers:mm adhoc_modifier:a  
+					⟶ mixed_modifiers_at:mm annotation_body 
+					;
+adhoc_modifier ⟶
+					  PUBLIC 
+					⟶ PROTECTED 
+					⟶ PRIVATE 
+					⟶ STATIC 
+					⟶ ABSTRACT 
+					⟶ FINAL 
+					⟶ NATIVE 
+					⟶ SYNCHRONIZED 
+					⟶ TRANSIENT 
+					⟶ VOLATILE 
+					⟶ STRICTFP  
+	                 # context of the modifier allows strictfp.
+					;
+annotations_opt ⟶
+					⟶ annotations
+					;
+annotations ⟶ 
+					  AT annotation_body
+					⟶ annotations_at annotation_body
+					;
+
+annotations_at ⟶
+					  annotations AT
+					;
+annotation ⟶
+					  AT annotation_body
+					;
+annotation_body ⟶
+					  normal_annotation_body
+					⟶ marker_annotation_body 
+					⟶ single_element_annotation_body 
+					;
+
+normal_annotation_body ⟶
+					  IDENTIFIER LPAREN element_value_pairs_opt RPAREN
+					;
+
+marker_annotation_body ⟶
+					  IDENTIFIER
+					;
+
+single_element_annotation_body ⟶
+					  IDENTIFIER LPAREN element_value RPAREN
+					;
+
+element_value_pairs_opt ⟶
+  					⟶ element_value_pairs
+					;		
+
+element_value_pairs ⟶
+					  element_value_pair
+					⟶ element_value_pairs COMMA element_value_pair
+					;
+
+element_value_pair ⟶
+					  IDENTIFIER ASS_IS element_value
+					;
+
+element_value ⟶
+					  annotation 
+					⟶ element_value_array_initializer
+					⟶ conditional_expression
+					;
+
+element_value_array_initializer ⟶
+					  LBRACE element_values_opt RBRACE
+					;
+
+element_values_opt ⟶
+					⟶ element_values
+					;
+
+element_values ⟶
+					  element_value
+					⟶ element_values COMMA element_value
+					;
+# 19.8) Classes
+
+# 19.8.1) Class Declaration:
+
+class_declaration ⟶ 
+					   class_header class_body
+					;
+					
+class_header ⟶
+					  modifiers_opt CLASS IDENTIFIER type_parameters_opt super_opt interfaces_opt
+					;
+
+super_ext ⟶
+					  EXTENDS class_type
+					;
+
+super_opt ⟶	
+					⟶ super_ext
+					;
+
+interfaces ⟶
+					  IMPLEMENTS interface_type_list
+					;
+
+interfaces_opt⟶
+					⟶ interfaces 
+					;
+
+interface_type_list ⟶ 
+					  interface_type
+					⟶ interface_type_list COMMA interface_type
+					;
+
+class_body ⟶
+					  LBRACE class_body_declarations_opt RBRACE 
+					;
+
+class_body_opt ⟶
+					⟶ class_body
+					;
+
+class_body_declarations_opt ⟶ 
+					⟶ class_body_declarations
+					;
+
+class_body_declarations ⟶ 
+					  class_body_declaration
+					⟶ class_body_declarations class_body_declaration
+					;
+
+class_body_declaration ⟶
+					  class_member_declaration
+					⟶ static_initializer
+					⟶ constructor_declaration
+					⟶ block
+					;
+
+class_member_declaration ⟶
+					  field_declaration
+					⟶ method_declaration
+#					  /* repeat the prod for 'class_declaration' here: */
+					⟶ modifiers_opt CLASS IDENTIFIER type_parameters_opt super_opt interfaces_opt class_body
+					⟶ enum_declaration
+					⟶ interface_declaration
+					⟶ SEMICOLON
+					;
+
+# JSR-201) Enum Declaration
+enum_declaration ⟶
+					  modifiers_opt ENUM IDENTIFIER interfaces_opt enum_body
+					;
+
+enum_body ⟶
+					  LBRACE enum_constants_opt enum_body_declarations_opt RBRACE
+					;
+
+enum_constants_opt ⟶
+					⟶ enum_constants
+					⟶ enum_constants COMMA
+					;
+
+enum_constants ⟶
+					  enum_constant
+					⟶ enum_constants COMMA enum_constant
+					;
+
+enum_constant ⟶
+					  annotations_opt IDENTIFIER enum_arguments_opt
+					⟶ annotations_opt IDENTIFIER enum_arguments_opt class_body
+					;
+
+enum_arguments_opt ⟶
+					⟶ LPAREN argument_list_opt RPAREN
+					;
+
+enum_body_declarations_opt ⟶
+					⟶ SEMICOLON class_body_declarations_opt
+					;
+
+# 19.8.2) Field Declarations
+field_declaration ⟶ 
+					  modifiers_opt java_type variable_declarators SEMICOLON
+					;
+
+variable_declarators ⟶
+					  variable_declarator:vd 
+					⟶ variable_declarators:vds COMMA variable_declarator:vd  
+					;
+
+variable_declarator ⟶
+					  variable_declarator_id:vdi 
+					⟶ variable_declarator_id:vdi ASS_IS variable_initializer 
+					;
+
+variable_declarator_id ⟶
+					  IDENTIFIER:id 
+					⟶ variable_declarator_id:di LBRACK RBRACK  
+					;
+
+variable_initializer ⟶
+					  expression
+					⟶ array_initializer
+					;
+
+# 19.8.3) Method Declarations
+method_declaration ⟶
+					  method_header method_body
+					;
+
+method_header ⟶
+	# have to expand type_parameters_opt here so that we don't
+	# force an early decision of whether this is a field_declaration
+	# or a method_declaration (the type_parameters_opt would have to
+	# be reduced when we see the 'type' if this was a method declaration,
+	# but it might still turn out to be a field declaration).
+					  modifiers_opt java_type method_declarator throws_opt
+					⟶ modifiers_opt OP_LT type_parameter_list_1 java_type method_declarator throws_opt
+					⟶ modifiers_opt VOID method_declarator throws_opt
+					⟶ modifiers_opt OP_LT type_parameter_list_1 VOID method_declarator throws_opt
+					;
+
+method_declarator ⟶
+					  IDENTIFIER LPAREN formal_parameter_list_opt RPAREN
+					⟶ method_declarator LBRACK RBRACK # deprecated
+	# be careful; the above production also allows 'void foo() []'
+					;
+
+formal_parameter_list_opt ⟶
+					⟶ formal_parameter_list
+					;
+
+formal_parameter_list ⟶
+					  formal_parameter
+					⟶ formal_parameter_list COMMA formal_parameter
+					;
+
+formal_parameter ⟶
+					  formal_parameter_modifiers_opt java_type variable_declarator_id
+					  # careful, productions below allow varargs in non-final positions.
+					⟶ formal_parameter_modifiers_opt java_type ELLIPSIS IDENTIFIER
+					;
+
+formal_parameter_modifiers_opt ⟶
+					⟶ formal_parameter_modifiers
+					;
+
+formal_parameter_modifiers ⟶
+					  formal_parameter_modifier
+					⟶ formal_parameter_modifiers formal_parameter_modifier
+					;
+
+formal_parameter_modifier ⟶
+					  FINAL
+					⟶ annotation
+					;
+
+throws_opt ⟶	
+					⟶ throws
+					;
+
+throws ⟶
+					  THROWS class_type_list
+					;
+
+class_type_list ⟶
+					  class_type
+					⟶ class_type_list COMMA class_type
+					;
+
+method_body ⟶
+					  block
+					⟶ SEMICOLON
+					;
+
+# 19.8.4) Static Initializers
+static_initializer ⟶
+					  STATIC block
+					;
+
+# 19.8.5) Constructor Declarations
+constructor_declaration ⟶
+					  modifiers_opt                             constructor_declarator throws_opt constructor_body
+					⟶ modifiers_opt OP_LT type_parameter_list_1 constructor_declarator throws_opt constructor_body
+					;
+
+constructor_declarator ⟶
+					  simple_name LPAREN formal_parameter_list_opt RPAREN
+					;
+
+constructor_body ⟶
+					  LBRACE explicit_constructor_invocation block_statements RBRACE
+					⟶ LBRACE explicit_constructor_invocation RBRACE
+					⟶ LBRACE block_statements RBRACE
+					⟶ LBRACE RBRACE
+					;
+
+explicit_constructor_invocation ⟶
+					  THIS LPAREN argument_list_opt RPAREN SEMICOLON
+					⟶ type_arguments THIS LPAREN argument_list_opt RPAREN SEMICOLON
+					⟶ SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+					⟶ type_arguments SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+					⟶ primary DOT SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+					⟶ primary DOT type_arguments SUPER
+			LPAREN argument_list_opt RPAREN SEMICOLON
+					⟶ name DOT SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+					⟶ name DOT type_arguments SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+					;
+
+# 19.9) Interfaces
+
+# 19.9.1) Interface Declarations
+interface_declaration ⟶
+					  normal_interface_declaration
+					⟶ annotation_type_declaration
+					;
+
+normal_interface_declaration ⟶
+					  modifiers_opt INTERFACE IDENTIFIER type_parameters_opt extends_interfaces_opt interface_body
+					;
+annotation_type_declaration ⟶
+					  AT INTERFACE IDENTIFIER annotation_type_body
+					⟶ modifiers_at INTERFACE IDENTIFIER annotation_type_body
+					;
+annotation_type_body ⟶
+					  LBRACE annotation_type_element_declarations_opt RBRACE
+					;
+annotation_type_element_declarations_opt ⟶
+					  annotation_type_element_declarations
+					⟶
+					;
+annotation_type_element_declarations ⟶
+					  annotation_type_element_declaration
+					⟶ annotation_type_element_declarations annotation_type_element_declaration
+					;
+annotation_type_element_declaration ⟶
+					  constant_declaration
+					⟶ modifiers_opt java_type IDENTIFIER LPAREN RPAREN default_value_opt SEMICOLON
+					⟶ class_declaration 
+					⟶ enum_declaration 
+					⟶ interface_declaration 
+					⟶ SEMICOLON
+					;
+default_value_opt ⟶
+					⟶ default_value
+					;
+					
+default_value ⟶
+					  DEFAULT element_value
+					;
+
+extends_interfaces_opt ⟶
+					⟶ extends_interfaces
+					;
+
+extends_interfaces ⟶
+					  EXTENDS interface_type
+					⟶ extends_interfaces COMMA interface_type
+					;
+interface_body ⟶
+					  LBRACE interface_member_declarations_opt RBRACE
+					;
+
+interface_member_declarations_opt ⟶
+					⟶ interface_member_declarations
+					;
+
+interface_member_declarations ⟶
+					  interface_member_declaration
+					⟶ interface_member_declarations interface_member_declaration
+					;
+
+interface_member_declaration ⟶
+					  constant_declaration
+					⟶ abstract_method_declaration
+					⟶ class_declaration
+					⟶ enum_declaration
+					⟶ interface_declaration
+					⟶ SEMICOLON
+					;
+
+constant_declaration ⟶
+		field_declaration
+	# need to semantically check that modifiers of field declaration
+	# include only PUBLIC, STATIC, or FINAL.  Other modifiers are
+	# disallowed.
+					;
+abstract_method_declaration ⟶
+					  method_header SEMICOLON
+					;
+
+# 19.10) Arrays
+array_initializer ⟶
+					  LBRACE variable_initializers COMMA RBRACE
+					⟶ LBRACE variable_initializers RBRACE
+					⟶ LBRACE COMMA RBRACE
+					⟶ LBRACE RBRACE
+					;
+
+variable_initializers ⟶
+					  variable_initializer
+					⟶ variable_initializers COMMA variable_initializer
+					;
+
+# 19.11) Blocks and Statements
+block ⟶
+					   LBRACE block_statements_opt RBRACE
+					⟶  LBRACE ⊗ RBRACE
+					;
+
+block_statements_opt ⟶
+					⟶ block_statements
+					;
+
+block_statements ⟶
+					  block_statement
+					⟶ block_statements block_statement
+					⟶ block_statements ⊗
+					;
+block_statement ⟶
+					  local_variable_declaration_statement
+					⟶ statement
+					⟶ class_declaration
+					⟶ enum_declaration
+					⟶ interface_declaration
+					;
+
+local_variable_declaration_statement ⟶
+					  local_variable_declaration SEMICOLON
+					;
+
+#/* jikes expands 'type' in production for local_variable_declaration to
+# * avoid reduce-reduce conflict:  given 'name [' the grammar can't decide
+# * whether this is going to be a type (starting the local_variable_declaration)
+# * or an array access expression. */
+local_variable_declaration ⟶
+					  java_type variable_declarators
+#	        /* CAUTION:  only FINAL and annotations are legal modifiers here */
+					⟶ modifiers java_type variable_declarators
+					;
+
+statement ⟶
+					  statement_without_trailing_substatement
+					⟶ labeled_statement
+					⟶ if_then_statement
+					⟶ if_then_else_statement
+					⟶ while_statement
+					⟶ for_statement
+					⟶ foreach_statement
+					;
+
+statement_no_short_if ⟶
+					  statement_without_trailing_substatement
+					⟶ labeled_statement_no_short_if
+					⟶ if_then_else_statement_no_short_if
+					⟶ while_statement_no_short_if
+					⟶ for_statement_no_short_if
+					⟶ foreach_statement_no_short_if
+					;
+
+statement_without_trailing_substatement ⟶
+					  block
+					⟶ empty_statement
+					⟶ expression_statement
+					⟶ switch_statement
+					⟶ do_statement
+					⟶ break_statement
+					⟶ continue_statement
+					⟶ return_statement
+					⟶ synchronized_statement
+					⟶ throw_statement
+					⟶ try_statement
+					⟶ assert_statement
+					;
+
+empty_statement ⟶
+					  SEMICOLON
+					;
+
+labeled_statement ⟶
+					  IDENTIFIER COLON statement
+					;
+
+labeled_statement_no_short_if ⟶
+					  IDENTIFIER COLON statement_no_short_if
+					;
+
+expression_statement ⟶
+					  statement_expression SEMICOLON
+					;
+
+statement_expression ⟶
+					  assignment
+					⟶ preincrement_expression
+					⟶ predecrement_expression
+					⟶ postincrement_expression
+					⟶ postdecrement_expression
+					⟶ method_invocation
+					⟶ class_instance_creation_expression
+					;
+
+if_then_statement ⟶
+					  IF LPAREN expression RPAREN statement
+					;
+
+if_then_else_statement ⟶
+					  IF LPAREN expression RPAREN statement_no_short_if ELSE statement
+					;
+
+if_then_else_statement_no_short_if ⟶
+					  IF LPAREN expression RPAREN statement_no_short_if ELSE statement_no_short_if
+					;
+
+switch_statement ⟶
+					  SWITCH LPAREN expression RPAREN switch_block
+					;
+
+switch_block ⟶
+					  LBRACE switch_block_statement_groups switch_labels RBRACE
+					⟶ LBRACE switch_block_statement_groups RBRACE
+					⟶ LBRACE switch_labels RBRACE
+					⟶ LBRACE RBRACE
+					;
+
+switch_block_statement_groups ⟶
+					  switch_block_statement_group
+					⟶ switch_block_statement_groups switch_block_statement_group
+					;
+
+switch_block_statement_group ⟶
+					  switch_labels block_statements
+					;
+
+switch_labels ⟶
+					  switch_label
+					⟶ switch_labels switch_label
+					;
+switch_label ⟶
+					  CASE constant_expression COLON
+					⟶ DEFAULT COLON
+					;
+
+while_statement ⟶
+					  WHILE LPAREN expression RPAREN statement
+					;
+
+while_statement_no_short_if ⟶
+					  WHILE LPAREN expression RPAREN statement_no_short_if
+					;
+
+do_statement ⟶
+					  DO statement WHILE LPAREN expression RPAREN SEMICOLON
+					;
+
+foreach_statement ⟶
+					  FOR LPAREN java_type variable_declarator_id COLON expression RPAREN statement
+# must check that first IDENTIFIER is 'each' and second IDENTIFIER
+#  is 'in'
+					⟶ FOR IDENTIFIER LPAREN java_type variable_declarator_id IDENTIFIER expression RPAREN statement
+					;
+
+foreach_statement_no_short_if ⟶
+					  FOR LPAREN java_type variable_declarator_id COLON expression RPAREN statement_no_short_if
+# must check that first IDENTIFIER is 'each' and second IDENTIFIER
+#  is 'in'
+					⟶ FOR IDENTIFIER LPAREN java_type variable_declarator_id IDENTIFIER expression RPAREN statement_no_short_if
+					;
+
+for_statement ⟶
+					  FOR LPAREN for_init_opt SEMICOLON expression_opt SEMICOLON for_update_opt RPAREN statement
+					;
+
+for_statement_no_short_if ⟶
+					  FOR LPAREN for_init_opt SEMICOLON expression_opt SEMICOLON for_update_opt RPAREN statement_no_short_if
+					;
+
+for_init_opt ⟶
+					⟶ for_init
+					;
+
+for_init ⟶
+					  statement_expression_list
+					⟶ local_variable_declaration
+					;
+
+for_update_opt ⟶
+					⟶ for_update
+					;
+
+for_update ⟶
+					  statement_expression_list
+					;
+
+statement_expression_list ⟶
+					  statement_expression
+					⟶ statement_expression_list COMMA statement_expression
+					;
+
+identifier_opt ⟶ 
+					⟶ IDENTIFIER
+					;
+
+break_statement ⟶
+					  BREAK identifier_opt SEMICOLON
+					;
+
+
+continue_statement ⟶
+					  CONTINUE identifier_opt SEMICOLON
+					;
+
+return_statement ⟶
+					  RETURN expression_opt SEMICOLON
+					;
+
+throw_statement ⟶
+					  THROW expression SEMICOLON
+					;
+
+synchronized_statement ⟶
+					  SYNCHRONIZED LPAREN expression RPAREN block
+					;
+
+try_statement ⟶
+					  TRY block catches
+					⟶ TRY block catches_opt finally
+					;
+
+catches_opt ⟶
+					⟶ catches
+					;
+
+catches ⟶
+					  catch_clause
+					⟶ catches catch_clause
+					;
+
+catch_clause ⟶
+					  CATCH LPAREN formal_parameter RPAREN block
+					;
+
+finally ⟶
+					  FINALLY block
+					;
+
+assert_statement ⟶
+					  ASSERT expression SEMICOLON
+					⟶ ASSERT expression COLON expression SEMICOLON
+					;
+
+# 19.12) Expressions
+primary ⟶
+					  primary_no_new_array
+					⟶ array_creation_init
+					⟶ array_creation_uninit
+					;
+
+primary_no_new_array ⟶
+					  literal
+					⟶ THIS
+					⟶ LPAREN name RPAREN
+					⟶ LPAREN expression_nn RPAREN
+					⟶ class_instance_creation_expression
+					⟶ field_access
+					⟶ method_invocation
+					⟶ array_access
+					⟶ name DOT THIS
+					⟶ VOID DOT CLASS
+# "Type DOT CLASS", but expanded
+					⟶ primitive_type DOT CLASS
+					⟶ primitive_type dims DOT CLASS
+					⟶ name DOT CLASS
+					⟶ name dims DOT CLASS
+#	the following two productions are part of the expansion of
+#	'type DOT CLASS' but are not actually allowed, as they involve params.
+#	[see msg from Neal Gafter <3F219367.3070903@sun.com> 25-jul-2003]
+#	⟶	class_or_interface type_arguments DOT name dims DOT CLASS
+#	⟶	class_or_interface OP_LT type_argument_list_1 dims DOT CLASS
+					;
+# grammar distributed with prototype 2.2 is in error; the following is correct
+#  [ Neal Gafter, <3F2577E0.3090008@sun.com> ]
+class_instance_creation_expression ⟶
+					  NEW                class_or_interface_type                       LPAREN argument_list_opt RPAREN class_body_opt
+					⟶ NEW type_arguments class_or_interface_type                       LPAREN argument_list_opt RPAREN class_body_opt
+					⟶ primary DOT NEW type_arguments_opt IDENTIFIER type_arguments_opt LPAREN argument_list_opt RPAREN class_body_opt
+					⟶ name    DOT NEW type_arguments_opt IDENTIFIER type_arguments_opt LPAREN argument_list_opt RPAREN class_body_opt
+					;
+
+argument_list_opt ⟶
+					⟶ argument_list
+					;
+
+argument_list ⟶
+					  expression
+					⟶ argument_list COMMA expression
+					;
+
+array_creation_uninit ⟶
+					  NEW primitive_type dim_exprs dims_opt
+					⟶ NEW class_or_interface_type dim_exprs dims_opt
+					;
+
+array_creation_init ⟶
+					  NEW primitive_type dims array_initializer
+					⟶ NEW class_or_interface_type dims array_initializer
+					;
+
+dim_exprs ⟶
+					  dim_expr
+					⟶ dim_exprs dim_expr
+					;
+	
+dim_expr ⟶
+					  LBRACK expression RBRACK
+					;
+dims_opt ⟶
+					⟶ dims
+					;
+dims ⟶
+					  LBRACK RBRACK
+					⟶ dims LBRACK RBRACK
+					;
+field_access ⟶
+					  primary DOT IDENTIFIER
+					⟶ SUPER DOT IDENTIFIER
+					⟶ name DOT SUPER DOT IDENTIFIER
+					;
+method_invocation ⟶
+		name LPAREN argument_list_opt RPAREN
+# the following production appeared in the prototype 2.2 spec, but it
+# introduces ambiguities in the grammar (consider the expression
+#          A((B)<C,D>E());
+# which could be either an invocation on E or two boolean comparisons).
+# Neal Gafter has assured me that this production should be removed
+# from the grammar. <3F256C06.7000600@sun.com>
+#					⟶ type_arguments name LPAREN argument_list_opt RPAREN
+					⟶ primary DOT IDENTIFIER LPAREN argument_list_opt RPAREN
+					⟶ primary DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+					⟶ name DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+					⟶ SUPER DOT IDENTIFIER LPAREN argument_list_opt RPAREN
+					⟶ SUPER DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+					⟶ name DOT SUPER DOT IDENTIFIER LPAREN argument_list_opt RPAREN
+					⟶ name DOT SUPER DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+					;
+array_access ⟶
+		name LBRACK expression RBRACK
+					⟶ primary_no_new_array LBRACK expression RBRACK
+					⟶ array_creation_init LBRACK expression RBRACK
+					;
+postfix_expression ⟶
+		primary
+					⟶ name
+					⟶ postincrement_expression
+					⟶ postdecrement_expression
+					;
+postincrement_expression ⟶
+		postfix_expression OP_INC
+					;
+postdecrement_expression ⟶
+		postfix_expression OP_DEC
+					;
+unary_expression ⟶
+		preincrement_expression
+					⟶ predecrement_expression
+					⟶ OP_ADD unary_expression
+					⟶ OP_SUB unary_expression
+					⟶ unary_expression_not_plus_minus
+					;
+preincrement_expression ⟶
+		OP_INC unary_expression
+					;
+predecrement_expression ⟶
+		OP_DEC unary_expression
+					;
+unary_expression_not_plus_minus ⟶
+		postfix_expression
+					⟶ OP_NEG unary_expression
+					⟶ OP_NOT unary_expression
+					⟶ cast_expression
+					;
+# This parsing technique was discovered by Eric Blake <ebb9@email.byu.edu>
+# We solving grammar ambiguities with between parenthesized less-than
+# relational operations and type casts with a slightly-more-complicated
+# cast_expression production.
+# Illustrative example:  LPAREN name OP_LT name ...
+#  is this going to be a cast_expression or a relational_expression?
+# canonically, this production is:
+#     cast_expression ⟶ LPAREN java_type RPAREN unary_expression_not_plus_minus
+cast_expression ⟶
+		LPAREN primitive_type dims_opt RPAREN unary_expression
+					⟶ LPAREN name RPAREN unary_expression_not_plus_minus
+					⟶ LPAREN name dims RPAREN unary_expression_not_plus_minus
+					⟶ LPAREN name OP_LT type_argument_list_1 dims_opt RPAREN
+			unary_expression_not_plus_minus
+					⟶ LPAREN name OP_LT type_argument_list_1 DOT
+			class_or_interface_type dims_opt RPAREN
+			unary_expression_not_plus_minus
+					;
+multiplicative_expression ⟶
+		unary_expression
+					⟶ multiplicative_expression OP_MUL unary_expression
+					⟶ multiplicative_expression OP_DIV unary_expression
+					⟶ multiplicative_expression OP_MOD unary_expression
+					;
+additive_expression ⟶
+		multiplicative_expression
+					⟶ additive_expression OP_ADD multiplicative_expression
+					⟶ additive_expression OP_SUB multiplicative_expression
+					;
+shift_expression ⟶
+		additive_expression
+					⟶ shift_expression OP_SHL additive_expression
+					⟶ shift_expression OP_SHR additive_expression
+					⟶ shift_expression OP_SHRR additive_expression
+					;
+relational_expression ⟶
+		shift_expression
+					⟶ relational_expression OP_LT shift_expression
+					⟶ relational_expression OP_GT shift_expression
+					⟶ relational_expression OP_LE shift_expression
+					⟶ relational_expression OP_GE shift_expression
+					;
+# we lower the precendence of instanceof to resolve a grammar ambiguity.
+# semantics are unchanged, since relational expressions do not operate
+# on boolean.  Eric Blake had a different solution here, where he
+# used the production 'shift_expression OP_LT shift_expression' to solve
+# the same problem.
+instanceof_expression ⟶
+		relational_expression
+					⟶ instanceof_expression INSTANCEOF reference_type
+					;
+equality_expression ⟶
+		instanceof_expression
+					⟶ equality_expression OP_EQ instanceof_expression
+					⟶ equality_expression OP_NE instanceof_expression
+					;
+and_expression ⟶
+		equality_expression
+					⟶ and_expression OP_AND equality_expression
+					;
+exclusive_or_expression ⟶
+		and_expression
+					⟶ exclusive_or_expression OP_XOR and_expression
+					;
+inclusive_or_expression ⟶
+		exclusive_or_expression
+					⟶ inclusive_or_expression OP_OR exclusive_or_expression
+					;
+conditional_and_expression ⟶
+		inclusive_or_expression
+					⟶ conditional_and_expression OP_LAND inclusive_or_expression
+					;
+conditional_or_expression ⟶
+		conditional_and_expression
+					⟶ conditional_or_expression OP_LOR conditional_and_expression
+					;
+conditional_expression ⟶
+		conditional_or_expression
+					⟶ conditional_or_expression QUESTION expression 
+			COLON conditional_expression
+					;
+assignment_expression ⟶
+		conditional_expression
+					⟶ assignment
+					;
+# semantic check necessary here to ensure a valid left-hand side.
+# allowing a parenthesized variable here on the lhs was introduced in
+# JLS 2; thanks to Eric Blake for pointing this out.
+assignment ⟶	postfix_expression assignment_operator assignment_expression
+					;
+assignment_operator ⟶
+		ASS_IS
+					⟶ ASS_MUL
+					⟶ ASS_DIV
+					⟶ ASS_MOD
+					⟶ ASS_ADD
+					⟶ ASS_SUB
+					⟶ ASS_SHL
+					⟶ ASS_SHR
+					⟶ ASS_SHRR
+					⟶ ASS_AND
+					⟶ ASS_XOR
+					⟶ ASS_OR
+					;
+expression_opt ⟶
+					⟶ expression
+					;
+expression ⟶	assignment_expression
+					;
+# note that this constraint must be enforced during semantic checking
+# 'constant_expression' should include enumerated constants.
+constant_expression ⟶
+		expression
+					;
+
+# JLS-14 productions.
+type_parameters_opt ⟶ type_parameters ⟶ ;
+type_parameters ⟶
+		OP_LT type_parameter_list_1
+					;
+type_parameter_list ⟶
+		type_parameter_list COMMA type_parameter
+					⟶ type_parameter
+					;
+type_parameter_list_1 ⟶
+		type_parameter_1
+					⟶ type_parameter_list COMMA type_parameter_1
+					;
+type_parameter ⟶
+		type_variable type_bound_opt
+					;
+type_parameter_1 ⟶
+		type_variable OP_GT
+					⟶ type_variable type_bound_1
+					;
+type_bound_opt ⟶ type_bound ⟶ ;
+type_bound ⟶
+		EXTENDS reference_type additional_bound_list_opt
+					;
+type_bound_1 ⟶
+		EXTENDS reference_type_1
+					⟶ EXTENDS reference_type additional_bound_list_1
+					;
+additional_bound_list_opt ⟶ additional_bound_list ⟶ ;
+additional_bound_list ⟶
+		additional_bound additional_bound_list
+					⟶ additional_bound
+					;
+additional_bound_list_1 ⟶
+		additional_bound additional_bound_list_1
+					⟶ additional_bound_1
+					;
+additional_bound ⟶
+		OP_AND interface_type
+					;
+additional_bound_1 ⟶
+		OP_AND reference_type_1
+					;
+#######################
+# the following productions are copied from the standard ones, but
+# 'name' all alone is not allowed.  The '_nn' stands for 'not name'.
+# we also expand the productions so that they recursively depend on the
+# '_nn' forms of their left hand side, then adding a new production
+# with 'name' explicit on the left-hand side.
+# this allows us to postpone the decision whether '(x)' is an expression
+# or a type-cast until we can see enough right context to make the proper
+# choice.
+postfix_expression_nn ⟶
+		primary
+	# the 'name' production was removed here.
+					⟶ postincrement_expression
+					⟶ postdecrement_expression
+					;
+unary_expression_nn ⟶
+		preincrement_expression
+					⟶ predecrement_expression
+					⟶ OP_ADD unary_expression
+					⟶ OP_SUB unary_expression
+					⟶ unary_expression_not_plus_minus_nn
+					;
+unary_expression_not_plus_minus_nn ⟶
+		postfix_expression_nn
+					⟶ OP_NEG unary_expression
+					⟶ OP_NOT unary_expression
+					⟶ cast_expression
+					;
+multiplicative_expression_nn ⟶
+		unary_expression_nn
+					⟶ name                         OP_MUL unary_expression
+					⟶ multiplicative_expression_nn OP_MUL unary_expression
+					⟶ name                         OP_DIV unary_expression
+					⟶ multiplicative_expression_nn OP_DIV unary_expression
+					⟶ name                         OP_MOD unary_expression
+					⟶ multiplicative_expression_nn OP_MOD unary_expression
+					;
+additive_expression_nn ⟶
+		multiplicative_expression_nn
+					⟶ name                   OP_ADD multiplicative_expression
+					⟶ additive_expression_nn OP_ADD multiplicative_expression
+					⟶ name                   OP_SUB multiplicative_expression
+					⟶ additive_expression_nn OP_SUB multiplicative_expression
+					;
+shift_expression_nn ⟶
+		additive_expression_nn
+					⟶ name                OP_SHL additive_expression
+					⟶ shift_expression_nn OP_SHL additive_expression
+					⟶ name                OP_SHR additive_expression
+					⟶ shift_expression_nn OP_SHR additive_expression
+					⟶ name                OP_SHRR additive_expression
+					⟶ shift_expression_nn OP_SHRR additive_expression
+					;
+relational_expression_nn ⟶
+		shift_expression_nn
+	# note that we've tweaked the productions for OP_LT/OP_GT to disallow
+	#  a<b<c as a valid expression.  This avoids ambiguity with
+	#  parameterized types in casts.
+					⟶ name                OP_LT shift_expression
+					⟶ shift_expression_nn OP_LT shift_expression
+					⟶ name                OP_GT shift_expression
+					⟶ shift_expression_nn OP_GT shift_expression
+					⟶ name                     OP_LE shift_expression
+					⟶ relational_expression_nn OP_LE shift_expression
+					⟶ name                     OP_GE shift_expression
+					⟶ relational_expression_nn OP_GE shift_expression
+					;
+instanceof_expression_nn ⟶
+		relational_expression_nn
+					⟶ name                     INSTANCEOF reference_type
+					⟶ instanceof_expression_nn INSTANCEOF reference_type
+					;
+equality_expression_nn ⟶
+		instanceof_expression_nn
+					⟶ name                   OP_EQ instanceof_expression
+					⟶ equality_expression_nn OP_EQ instanceof_expression
+					⟶ name                   OP_NE instanceof_expression
+					⟶ equality_expression_nn OP_NE instanceof_expression
+					;
+and_expression_nn ⟶
+		equality_expression_nn
+					⟶ name              OP_AND equality_expression
+					⟶ and_expression_nn OP_AND equality_expression
+					;
+exclusive_or_expression_nn ⟶
+		and_expression_nn
+					⟶ name                       OP_XOR and_expression
+					⟶ exclusive_or_expression_nn OP_XOR and_expression
+					;
+inclusive_or_expression_nn ⟶
+		exclusive_or_expression_nn
+					⟶ name                       OP_OR exclusive_or_expression
+					⟶ inclusive_or_expression_nn OP_OR exclusive_or_expression
+					;
+conditional_and_expression_nn ⟶
+		inclusive_or_expression_nn
+					⟶ name                          OP_LAND inclusive_or_expression
+					⟶ conditional_and_expression_nn OP_LAND inclusive_or_expression
+					;
+conditional_or_expression_nn ⟶
+		conditional_and_expression_nn
+					⟶ name                         OP_LOR conditional_and_expression
+					⟶ conditional_or_expression_nn OP_LOR conditional_and_expression
+					;
+conditional_expression_nn ⟶
+		conditional_or_expression_nn
+					⟶ name QUESTION expression COLON conditional_expression
+					⟶ conditional_or_expression_nn QUESTION expression 
+			COLON conditional_expression
+					;
+assignment_expression_nn ⟶
+		conditional_expression_nn
+					⟶ assignment
+					;
+expression_nn ⟶	assignment_expression_nn ;

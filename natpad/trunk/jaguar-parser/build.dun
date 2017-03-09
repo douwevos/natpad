@@ -1,0 +1,64 @@
+module {
+
+	name 'jaguar-parser';
+	
+	dependencies {
+		module 'glib';	
+		module 'zlib';	
+		module 'natpad.cup';
+		module 'caterpillar';
+		module 'elk';
+		module 'gross-cc-dung';
+		module 'gross-runtime';
+	}
+
+	loader 'gross-java-runtime';
+	loader 'gross-cc';
+	loader 'gross-cc-dung';
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+	
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/java_grammar.gro';
+			ast './etc/java_grammar.grt';
+			
+			prefix 'JagP';
+			outputPath './src-generated/';
+			updateOnly 'true';
+#			arg '-v';
+#			arg '-v';
+#			arg '-v';
+		}
+	
+		
+		cc { 
+			src { path './src/'; }  
+			src { path './src-generated/'; }  
+			destdir './compiled/'; 
+			depdir 'deps';
+		}
+		
+	}
+
+	package {
+		ar { srcdir './compiled/'; destfile './libjaguarparser.a'; }
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'jaguarparser';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}
