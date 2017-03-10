@@ -262,7 +262,7 @@ static void *l_service_run(void *ptr_to_self) {
 
 		/* transfer requests form waiting-queue and default-queue to the transfer list */
 		cat_lock_lock(priv->consumer_lock);
-		uint64_t next_wait_time = 30000;
+		uint64_t next_wait_time = 300000;
 
 		if (cat_array_wo_size(priv->e_default_queue)>0) {
 			cat_log_debug("moving default-queue:cnt:%d", cat_array_wo_size(priv->e_default_queue));
@@ -405,7 +405,7 @@ static WorRequest *l_provider_next_request(WorIProvider *self, int64_t *runtime)
 		if (cat_array_wo_size(priv->e_dispatch_queue)>0) {
 			cat_array_wo_remove(priv->e_dispatch_queue, 0, (GObject **) (&result));
 		} else {
-			cat_lock_wait_timed(priv->dispatch_lock, 30000l);
+			cat_lock_wait_timed(priv->dispatch_lock, 300000l);
 		}
 		cat_lock_unlock(priv->dispatch_lock);
 	}

@@ -133,6 +133,7 @@ struct l_set_pages {
 
 static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 	struct l_set_pages *set_pages = (struct l_set_pages *) user_data;
+
 	ChaDocument *document = set_pages->document;
 	ChaRevisionWo *e_revision = cha_document_get_editable_revision(document);
 	if (cha_revision_wo_page_count(e_revision)==1) {
@@ -185,12 +186,15 @@ static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 	cat_unref_ptr(set_pages->mmap_data);
 	cat_unref_ptr(set_pages->disc_pages);
 	cat_free_ptr(set_pages);
+
 	return FALSE;
 }
 
 static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_line_end, ChaLineEnd line_end, void *data) {
 	ChaLoadFileRequest *load_file = (ChaLoadFileRequest *) data;
 	ChaLoadFileRequestPrivate *priv = cha_load_file_request_get_instance_private(load_file);
+
+
 
 	void *start_ptr = cha_mmap_get_data(priv->map_data);
 	char *end_ptr = (char*) (start_ptr + cha_mmap_get_length(priv->map_data));
@@ -218,6 +222,8 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 			priv->page_line_count++;
 		}
 
+
+
 		ChaPageWo *new_page = (ChaPageWo *) cha_mmap_page_wo_new(priv->map_data, pg_offset, length, priv->page_line_count);
 		cat_array_wo_append(priv->unwritten_pages, (GObject *) new_page);
 
@@ -225,15 +231,16 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 		priv->page_line_count = 0;
 
 		if (cat_array_wo_size(priv->unwritten_pages) > priv->flush_after || is_last_line) {
-			cat_log_info("pg_offset=%ld :: %ld", pg_offset, pg_offset / (1024 * 1024));
+			cat_log_error("pg_offset=%ld :: %ld", pg_offset, pg_offset / (1024 * 1024));
 			struct l_set_pages *clr = g_new(struct l_set_pages, 1);
 			clr->document = cat_ref_ptr(priv->document);
 			clr->disc_pages = priv->unwritten_pages;
 			clr->is_last = is_last_line;
 			clr->mmap_data = cat_ref_ptr(priv->map_data);
 			priv->unwritten_pages = cat_array_wo_new();
+
 			g_idle_add((GSourceFunc) l_idle_set_loaded_pages, clr);
-			priv->flush_after = 200;
+			priv->flush_after = 50;
 		}
 
 	}
@@ -349,6 +356,14 @@ static void l_run_request(WorRequest *request) {
 		priv->map_data = mmap_data;
 		priv->raw_data = ptr_in_data;
 		priv->page_start = ptr_in_data;
+
+
+		char *ddd = (char *) ptr_in_data;
+		int idx=0;
+		int tot = 0;
+		for(idx=0; idx<8192; idx++) {
+			tot += ddd[idx];
+		}
 	}
 
 	cat_log_info("loading finished");
@@ -366,12 +381,13 @@ static void l_run_request(WorRequest *request) {
 	uchardet_data_end(udt);
 	const char *encoding = uchardet_get_charset(udt);
 
-	cat_log_debug("encoding=%s", encoding);
+	cat_log_error("encoding=%s, buflen=%d", encoding, buflen);
 
 	ChaDocumentManager *document_manager = cha_document_get_document_manager(priv->document);
 	ChaIConverter *converter = cha_document_manager_get_converter(document_manager, encoding);
 
 	cha_document_set_input_converter(priv->document, converter);
+
 
 
 	if (priv->big_file_mode) {

@@ -135,6 +135,9 @@ G_BEGIN_DECLS
 #define JAGP_SYM_ELLIPSIS                                                                           105
 #define JAGP_SYM_ENUM                                                                               106
 
+#define JAGP_SYM_EOL_COMMENT                                                                        107
+#define JAGP_SYM_FULL_COMMENT                                                                       108
+
 #define JAGP_TYPE_SCANNER              (jagp_scanner_get_type())
 #define JAGP_SCANNER(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), jagp_scanner_get_type(), JagPScanner))
 #define JAGP_SCANNER_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), JAGP_TYPE_SCANNER, JagPScannerClass))
