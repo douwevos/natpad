@@ -61,6 +61,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/shoveler/src/c}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/worm/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jaguar-decompiler/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jaguar-parser/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jaguar-bytecode/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/caterpillar/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gross-runtime/src}&quot;"/>

@@ -8,6 +8,7 @@ module {
 		module 'natpad.cup';
 		module 'caterpillar';
 		module 'jaguar-bytecode';
+		module 'jaguar-parser';
 		module 'jaguar-decompiler';
 		module 'elk';
 		module 'gross-cc-dung';

@@ -24,12 +24,12 @@ module {
 	
 		grossCC {
 			exporter 'caterpillar';
-			grammar './etc/java_grammar.gro';
-			ast './etc/java_grammar.grt';
+			grammar './etc/java8.gro';
+			ast './etc/java8.grt';
 			
 			prefix 'JagP';
 			outputPath './src-generated/';
-			updateOnly 'true';
+#			updateOnly 'true';
 #			arg '-v';
 #			arg '-v';
 #			arg '-v';
