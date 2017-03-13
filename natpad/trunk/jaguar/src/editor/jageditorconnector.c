@@ -31,6 +31,9 @@
 
 struct _JagEditorConnectorPrivate {
 	CatStringWo *a_slot_key;
+	GroRunModel *model;
+	GroRunITokenFactory *token_factory;
+	JagPScannerFactory *scanner_factory;
 };
 
 static void l_connector_request_factory_iface_init(DraIConnectorRequestFactoryInterface *iface);
@@ -76,6 +79,9 @@ JagEditorConnector *jag_editor_connector_new() {
 	cat_ref_anounce(result);
 	JagEditorConnectorPrivate *priv = jag_editor_connector_get_instance_private(result);
 	priv->a_slot_key = (CatStringWo *) cat_string_wo_new_data("Jaguar");
+	priv->model = NULL;
+	priv->token_factory = (GroRunITokenFactory *) grorun_full_token_factory_new();
+	priv->scanner_factory = NULL;
 	return result;
 }
 
@@ -84,7 +90,11 @@ JagEditorConnector *jag_editor_connector_new() {
 static DraAugmentRequest *l_create_request(DraIConnectorRequestFactory *content_provider, ChaDocument *document, ChaRevisionWo *a_new_revision) {
 	JagEditorConnector *instance = JAG_EDITOR_CONNECTOR(content_provider);
 	JagEditorConnectorPrivate *priv = jag_editor_connector_get_instance_private(instance);
-	return (DraAugmentRequest *) jag_augment_request_new(document, a_new_revision, priv->a_slot_key);
+	if (priv->model == NULL) {
+		priv->model = grorun_model_new(jagp_parser_config_symbols, jagp_parser_config_nr_of_symbols, jagp_parser_config_states_text, jagp_parser_config_nr_of_states);
+		priv->scanner_factory = jagp_scanner_factory_new(GRORUN_ISYMBOL_PROVIDER(priv->model), priv->token_factory);
+	}
+	return (DraAugmentRequest *) jag_augment_request_new(document, a_new_revision, priv->a_slot_key, priv->model, priv->token_factory, priv->scanner_factory);
 }
 
 static CatStringWo *l_get_slot_key(DraIConnectorRequestFactory *content_provider) {

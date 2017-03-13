@@ -113,7 +113,7 @@ static GroRunIToken *l_next_token(JagPScanner *scanner) {
 				break;
 
 			case '"' :
-				result = base_class->scanForQuotedString(gro_scanner, JAGP_SYM_STRING_LITERAL);
+				result = base_class->scanForQuotedString(gro_scanner, JAGP_SYM_LITERAL);
 				break;
 
 			case '\'' :
@@ -122,15 +122,17 @@ static GroRunIToken *l_next_token(JagPScanner *scanner) {
 
 			case '<' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_LE, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LE, 2);
 				} else if (lookahead[1]=='<') {
 					if (lookahead[2]=='=') {
-						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_SHL, 3);
+						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SHL_IS, 3);
+//					} else {
+//						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SHL, 2);
 					} else {
-						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_SHL, 2);
+						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LT, 1);
 					}
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_LT, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LT, 1);
 				}
 			} break;
 
@@ -138,132 +140,136 @@ static GroRunIToken *l_next_token(JagPScanner *scanner) {
 
 			case '>' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_GE, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_GE, 2);
 				} else if (lookahead[1]=='>') {
 					if (lookahead[2]=='>') {
 						if (lookahead[3]=='=') {
-							result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_SHRR, 4);
+							result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SHRR_IS, 4);
+//						} else {
+//							result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SHRR, 3);
 						} else {
-							result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_SHRR, 3);
+							result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_GT, 1);
 						}
 					} else if (lookahead[2]=='=') {
-						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_SHR, 3);
+						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SHR_IS, 3);
+//					} else {
+//						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SHR, 2);
 					} else {
-						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_SHR, 2);
+						result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_GT, 1);
 					}
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_GT, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_GT, 1);
 				}
 			} break;
 
 
 			case '=' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_EQ, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_EQ, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_IS, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_IS, 1);
 				}
 			} break;
 
 			case '!' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_NE, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_NE, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_NOT, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_NOT, 1);
 				}
 			} break;
 
 			case '^' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_XOR, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_XOR_IS, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_XOR, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_XOR, 1);
 				}
 			} break;
 
 			case '%' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_MOD, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_MOD_IS, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_MOD, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_MOD, 1);
 				}
 			} break;
 
 
 			case '|' : {
 				if (lookahead[1]=='|') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_LOR, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LOR, 2);
 				} else if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_OR, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_OR_IS, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_OR, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_BAR, 1);
 				}
 			} break;
 
 			case '&' : {
 				if (lookahead[1]=='&') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_LAND, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LAND, 2);
 				} else if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_AND, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_AND_IS, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_AND, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_AND, 1);
 				}
 			} break;
 
 			case '+' : {
 				if (lookahead[1]=='+') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_INC, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_INC, 2);
 				} else if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_ADD, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_ADD_IS, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_ADD, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_ADD, 1);
 				}
 			} break;
 
 			case '-' : {
 				if (lookahead[1]=='-') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_DEC, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_DEC, 2);
 				} else if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_SUB, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SUB_IS, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_SUB, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SUB, 1);
 				}
 			} break;
 
 			case '*' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_MUL, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_MUL_IS, 2);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_MUL, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_MUL, 1);
 				}
 			} break;
 
 			case '/' : {
 				if (lookahead[1]=='=') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ASS_DIV, 2);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_DIV_IS, 2);
 				} else if (lookahead[1]=='/') {
 					result = base_class->scanForEndOfLine(gro_scanner, JAGP_SYM_EOL_COMMENT, TRUE);
 				} else if (lookahead[1]=='*') {
 					result = l_scan_full_comment(scanner);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_DIV, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_DIV, 1);
 				}
 			} break;
 
 
 
-			case '~': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_OP_NEG, 1); break;
-			case ';': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_SEMICOLON, 1); break;
-			case '(': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_LPAREN, 1); break;
-			case ')': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_RPAREN, 1); break;
-			case '?': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_QUESTION, 1); break;
-			case '{': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_LBRACE, 1); break;
-			case '}': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_RBRACE, 1); break;
-			case '[': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_LBRACK, 1); break;
-			case ']': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_RBRACK, 1); break;
-			case '@': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_AT, 1); break;
-			case ':': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_COLON, 1); break;
-			case ',': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_COMMA, 1); break;
+			case '~': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_NEG, 1); break;
+			case ';': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SEMI, 1); break;
+			case '(': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LPAREN, 1); break;
+			case ')': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_RPAREN, 1); break;
+			case '?': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_QUESTION_MARK, 1); break;
+			case '{': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LCUBRACE, 1); break;
+			case '}': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_RCUBRACE, 1); break;
+			case '[': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_LSQBRACE, 1); break;
+			case ']': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_RSQBRACE, 1); break;
+			case '@': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_AT, 1); break;
+			case ':': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_COLON, 1); break;
+			case ',': result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_COMMA, 1); break;
 			case '.': {
 				gboolean is_oke = TRUE;
 //				if (Character.isDigit(nchar))
@@ -275,9 +281,9 @@ static GroRunIToken *l_next_token(JagPScanner *scanner) {
 //				else
 //				{
 				if (lookahead[1]=='.' && lookahead[2]=='.') {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_ELLIPSIS, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_VARARGS, 1);
 				} else {
-					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_DOT, 1);
+					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_DOT, 1);
 				}
 			} break;
 
@@ -311,10 +317,10 @@ static gboolean l_scan_digits(JagPScanner *scanner, int *lastValid) {
 	return got_digit;
 }
 
-#define JAGP_SYM_DOUBLE_LITERAL JAGP_SYM_INTEGER_LITERAL
-#define JAGP_SYM_FLOAT_LITERAL JAGP_SYM_INTEGER_LITERAL
-#define JAGP_SYM_HEX JAGP_SYM_INTEGER_LITERAL
-#define JAGP_SYM_OCTAL JAGP_SYM_INTEGER_LITERAL
+#define JAGP_SYM_DOUBLE_LITERAL JAGP_SYM_LITERAL
+#define JAGP_SYM_FLOAT_LITERAL JAGP_SYM_LITERAL
+#define JAGP_SYM_HEX JAGP_SYM_LITERAL
+#define JAGP_SYM_OCTAL JAGP_SYM_LITERAL
 
 static GroRunIToken *l_scan_hex_octal(JagPScanner *scanner) {
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
@@ -333,7 +339,7 @@ static GroRunIToken *l_scan_hex_octal(JagPScanner *scanner) {
 		base_class->advance((GroRunScannerBase *) scanner, 0);
 	} else {
 		/* '0' */
-		return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_INTEGER_LITERAL, row, end, NULL);
+		return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_LITERAL, row, end, NULL);
 	}
 
 	while(TRUE) {
@@ -373,7 +379,7 @@ static GroRunIToken *l_scan_number(JagPScanner *scanner) {
 	int state = 0;
 	l_scan_digits(scanner, &end);
 	if (lookahead[0]==-1) {
-		return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_INTEGER_LITERAL, row, end, NULL);
+		return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_LITERAL, row, end, NULL);
 	}
 
 	switch(lookahead[0]) {
@@ -395,7 +401,7 @@ static GroRunIToken *l_scan_number(JagPScanner *scanner) {
 		case 'L' : {
 			end = base_class->getColumn((GroRunScannerBase *) scanner);
 			base_class->advance((GroRunScannerBase *) scanner, 0);
-			return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_INTEGER_LITERAL, row, end, NULL);
+			return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_LITERAL, row, end, NULL);
 		}
 		case 'd' :
 		case 'D' : {
@@ -410,7 +416,7 @@ static GroRunIToken *l_scan_number(JagPScanner *scanner) {
 			return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_FLOAT_LITERAL, row, end, NULL);
 		}
 		default : {
-			return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_INTEGER_LITERAL, row, end, NULL);
+			return base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_LITERAL, row, end, NULL);
 		}
 	}
 
@@ -541,7 +547,7 @@ static GroRunIToken *l_scan_read_char_literal(JagPScanner *scanner) {
 	row = base_class->getRow((GroRunScannerBase *) scanner);
 	end = base_class->getColumn((GroRunScannerBase *) scanner);
 	base_class->advance((GroRunScannerBase *) scanner, 0);
-	GroRunIToken *result = base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_CHARACTER_LITERAL, row, end, NULL);
+	GroRunIToken *result = base_class->createToken((GroRunScannerBase *) scanner, JAGP_SYM_LITERAL, row, end, NULL);
 	if (!ok) {
 		grorun_itoken_set_state(result, GRORUN_STATE_SCANNER_ERROR);
 	}

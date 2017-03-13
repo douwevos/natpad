@@ -27,6 +27,7 @@
 #include <worm.h>
 #include <chameleon.h>
 #include <dragonfly.h>
+#include <jaguarparser.h>
 
 G_BEGIN_DECLS
 
@@ -54,7 +55,8 @@ struct _JagAugmentRequestClass {
 
 GType jag_augment_request_get_type();
 
-JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *slot_key);
+JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *slot_key,
+		GroRunModel *model, GroRunITokenFactory *token_factory, JagPScannerFactory *scanner_factory);
 
 G_END_DECLS
 

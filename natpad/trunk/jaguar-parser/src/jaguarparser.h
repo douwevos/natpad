@@ -23,6 +23,8 @@
 #ifndef JAGUARPARSER_H_
 #define JAGUARPARSER_H_
 
-
+#include "jagpscannerfactory.h"
+#include "jagpparser.h"
+#include "../src-generated/jagpparserconfig.h"
 
 #endif /* JAGUARPARSER_H_ */
