@@ -1,0 +1,56 @@
+module {
+
+	name 'armadillo';
+	
+	dependencies {
+		module 'elk';
+		module 'gross-cc-dung';
+		module 'gross-runtime';
+	}
+
+	loader 'gross-java-runtime';
+	loader 'gross-cc';
+	loader 'gross-cc-dung';
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		grossCC {
+			exporter 'caterpillar';
+			grammar './etc/c.gro';
+#			ast './etc/c.grt';
+			prefix 'ArmP';
+			outputPath './src-generated/';
+			updateOnly 'true';
+		}
+
+		cc { 
+			src { path './src/'; }
+			src { path './src-generated/'; }
+			destdir './compiled/'; 
+			depdir './dep/';
+		}
+	}
+
+	package {
+		ar { 
+			srcdir './compiled/'; 
+			destfile './libarmadillo.a';
+		}
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'armadillo';
+		}
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}
