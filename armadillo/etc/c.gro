@@ -1,0 +1,375 @@
+# http://www.quut.com/c/ANSI-C-grammar-y.html
+
+terminal	IDENTIFIER, I_CONSTANT, F_CONSTANT, STRING_LITERAL, FUNC_NAME, SIZEOF;
+terminal	PTR_OP, INC_OP, DEC_OP, LEFT_OP, RIGHT_OP, LE_OP, GE_OP, EQ_OP, NE_OP;
+terminal	AND_OP, OR_OP, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN, ADD_ASSIGN;
+terminal	SUB_ASSIGN, LEFT_ASSIGN, RIGHT_ASSIGN, AND_ASSIGN;
+terminal	XOR_ASSIGN, OR_ASSIGN;
+terminal	TYPEDEF_NAME, ENUMERATION_CONSTANT;
+
+terminal	TYPEDEF, EXTERN, STATIC, AUTO, REGISTER, INLINE;
+terminal	CONST, RESTRICT, VOLATILE;
+terminal	BOOL, CHAR, SHORT, INT, LONG, SIGNED, UNSIGNED, FLOAT, DOUBLE, VOID;
+terminal	COMPLEX, IMAGINARY;
+terminal	STRUCT, UNION, ENUM, ELLIPSIS;
+
+terminal	CASE, DEFAULT, IF, ELSE, SWITCH, WHILE, DO, FOR, GOTO, CONTINUE, BREAK, RETURN;
+
+terminal	ALIGNAS, ALIGNOF, ATOMIC, GENERIC, NORETURN, STATIC_ASSERT, THREAD_LOCAL;
+
+terminal L_BAR, L_SEMI, L_COMMA, L_DOT, L_COLON, L_QUESTIONMARK, L_IS;
+terminal L_AND, L_MUL, L_PLUS, L_MINUS, L_LT, L_GT, L_NEG, L_NOT, L_DIV, L_MOD, L_XOR; # L_XOR='^'
+terminal L_LCUBRACE, L_RCUBRACE, L_LSQBRACE, L_RSQBRACE, L_LPAREN, L_RPAREN;
+
+translation_unit               ⟶ external_declaration
+                               ⟶ translation_unit external_declaration ;
+
+primary_expression             ⟶ IDENTIFIER
+                               ⟶ constant
+                               ⟶ string
+                               ⟶ L_LPAREN expression L_RPAREN
+                               ⟶ generic_selection ;
+
+constant                       ⟶ I_CONSTANT		# /* includes character_constant */
+                               ⟶ F_CONSTANT
+                               ⟶ ENUMERATION_CONSTANT ;	# /* after it has been defined as such */
+
+enumeration_constant           ⟶ IDENTIFIER	; #	/* before it has been defined as such */
+
+string                         ⟶ STRING_LITERAL
+                               ⟶ FUNC_NAME ;
+
+generic_selection              ⟶ GENERIC L_LPAREN assignment_expression L_COMMA generic_assoc_list L_RPAREN ;
+
+generic_assoc_list             ⟶ generic_association
+                               ⟶ generic_assoc_list L_COMMA generic_association ;
+
+generic_association            ⟶ type_name L_COLON assignment_expression
+                               ⟶ DEFAULT L_COLON assignment_expression ;
+
+postfix_expression             ⟶ primary_expression
+                               ⟶ postfix_expression L_LSQBRACE expression L_RSQBRACE
+                               ⟶ postfix_expression L_LPAREN L_RPAREN
+                               ⟶ postfix_expression L_LPAREN argument_expression_list L_RPAREN
+                               ⟶ postfix_expression L_DOT IDENTIFIER
+                               ⟶ postfix_expression PTR_OP IDENTIFIER
+                               ⟶ postfix_expression INC_OP
+                               ⟶ postfix_expression DEC_OP
+                               ⟶ L_LPAREN type_name L_RPAREN L_LCUBRACE initializer_list L_RCUBRACE
+                               ⟶ L_LPAREN type_name L_RPAREN L_LCUBRACE initializer_list L_COMMA L_RCUBRACE ;
+
+argument_expression_list       ⟶ assignment_expression
+                               ⟶ argument_expression_list L_COMMA assignment_expression ;
+
+unary_expression               ⟶ postfix_expression
+                               ⟶ INC_OP unary_expression
+                               ⟶ DEC_OP unary_expression
+                               ⟶ unary_operator cast_expression
+                               ⟶ SIZEOF unary_expression
+                               ⟶ SIZEOF L_LPAREN type_name L_RPAREN
+                               ⟶ ALIGNOF L_LPAREN type_name L_RPAREN ;
+
+unary_operator                 ⟶ L_AND
+                               ⟶ L_MUL
+                               ⟶ L_PLUS
+                               ⟶ L_MINUS
+                               ⟶ L_NEG # '~'
+                               ⟶ L_NOT ; # '!'
+
+cast_expression                ⟶ unary_expression
+                               ⟶ L_LPAREN type_name L_RPAREN cast_expression ;
+
+multiplicative_expression      ⟶ cast_expression
+                               ⟶ multiplicative_expression L_MUL cast_expression
+                               ⟶ multiplicative_expression L_DIV cast_expression
+                               ⟶ multiplicative_expression L_MOD cast_expression ;
+
+additive_expression            ⟶ multiplicative_expression
+                               ⟶ additive_expression L_PLUS multiplicative_expression
+                               ⟶ additive_expression L_MINUS multiplicative_expression ;
+
+shift_expression               ⟶ additive_expression
+                               ⟶ shift_expression LEFT_OP additive_expression
+                               ⟶ shift_expression RIGHT_OP additive_expression ;
+
+relational_expression          ⟶ shift_expression
+                               ⟶ relational_expression L_LT shift_expression
+                               ⟶ relational_expression L_GT shift_expression
+                               ⟶ relational_expression LE_OP shift_expression
+                               ⟶ relational_expression GE_OP shift_expression ;
+
+equality_expression            ⟶ relational_expression
+                               ⟶ equality_expression EQ_OP relational_expression
+                               ⟶ equality_expression NE_OP relational_expression ;
+
+and_expression                 ⟶ equality_expression
+                               ⟶ and_expression L_AND equality_expression ;
+
+exclusive_or_expression        ⟶ and_expression
+                               ⟶ exclusive_or_expression L_XOR  and_expression ;
+
+inclusive_or_expression        ⟶ exclusive_or_expression
+                               ⟶ inclusive_or_expression L_BAR exclusive_or_expression ;
+
+logical_and_expression         ⟶ inclusive_or_expression
+                               ⟶ logical_and_expression AND_OP inclusive_or_expression ;
+
+logical_or_expression          ⟶ logical_and_expression
+                               ⟶ logical_or_expression OR_OP logical_and_expression ;
+
+conditional_expression         ⟶ logical_or_expression
+                               ⟶ logical_or_expression L_QUESTIONMARK expression L_COLON conditional_expression ;
+
+assignment_expression          ⟶ conditional_expression
+                               ⟶ unary_expression assignment_operator assignment_expression ;
+
+assignment_operator            ⟶ L_IS
+                               ⟶ MUL_ASSIGN
+                               ⟶ DIV_ASSIGN
+                               ⟶ MOD_ASSIGN
+                               ⟶ ADD_ASSIGN
+                               ⟶ SUB_ASSIGN
+                               ⟶ LEFT_ASSIGN
+                               ⟶ RIGHT_ASSIGN
+                               ⟶ AND_ASSIGN
+                               ⟶ XOR_ASSIGN
+                               ⟶ OR_ASSIGN ;
+
+expression                     ⟶ assignment_expression
+                               ⟶ expression L_COMMA assignment_expression ;
+
+constant_expression            ⟶ conditional_expression	; # /* with constraints */
+
+declaration                    ⟶ declaration_specifiers L_SEMI
+                               ⟶ declaration_specifiers init_declarator_list L_SEMI
+                               ⟶ static_assert_declaration ;
+
+declaration_specifiers         ⟶ storage_class_specifier declaration_specifiers
+                               ⟶ storage_class_specifier
+                               ⟶ type_specifier declaration_specifiers
+                               ⟶ type_specifier
+                               ⟶ type_qualifier declaration_specifiers
+                               ⟶ type_qualifier
+                               ⟶ function_specifier declaration_specifiers
+                               ⟶ function_specifier
+                               ⟶ alignment_specifier declaration_specifiers
+                               ⟶ alignment_specifier ;
+
+init_declarator_list           ⟶ init_declarator
+                               ⟶ init_declarator_list L_COMMA init_declarator ;
+
+init_declarator                ⟶ declarator L_IS initializer
+                               ⟶ declarator ;
+
+storage_class_specifier        ⟶ TYPEDEF	# /* identifiers must be flagged as TYPEDEF_NAME */
+                               ⟶ EXTERN
+                               ⟶ STATIC
+                               ⟶ THREAD_LOCAL
+                               ⟶ AUTO
+                               ⟶ REGISTER ;
+
+type_specifier                 ⟶ VOID
+                               ⟶ CHAR
+                               ⟶ SHORT
+                               ⟶ INT
+                               ⟶ LONG
+                               ⟶ FLOAT
+                               ⟶ DOUBLE
+                               ⟶ SIGNED
+                               ⟶ UNSIGNED
+                               ⟶ BOOL
+                               ⟶ COMPLEX
+                               ⟶ IMAGINARY	#  	/* non-mandated extension */
+                               ⟶ atomic_type_specifier
+                               ⟶ struct_or_union_specifier
+                               ⟶ enum_specifier
+                               ⟶ TYPEDEF_NAME ;	#	/* after it has been defined as such */
+
+struct_or_union_specifier      ⟶ struct_or_union L_LCUBRACE struct_declaration_list L_RCUBRACE
+                               ⟶ struct_or_union IDENTIFIER L_LCUBRACE struct_declaration_list L_RCUBRACE
+                               ⟶ struct_or_union IDENTIFIER ;
+
+struct_or_union                ⟶ STRUCT
+                               ⟶ UNION ;
+
+struct_declaration_list        ⟶ struct_declaration
+                               ⟶ struct_declaration_list struct_declaration ;
+
+struct_declaration             ⟶ specifier_qualifier_list L_SEMI	# /* for anonymous struct/union */
+                               ⟶ specifier_qualifier_list struct_declarator_list L_SEMI
+                               ⟶ static_assert_declaration ;
+
+specifier_qualifier_list       ⟶ type_specifier specifier_qualifier_list
+                               ⟶ type_specifier
+                               ⟶ type_qualifier specifier_qualifier_list
+                               ⟶ type_qualifier ;
+
+struct_declarator_list         ⟶ struct_declarator
+                               ⟶ struct_declarator_list L_COMMA struct_declarator ;
+
+struct_declarator              ⟶ L_COLON constant_expression
+                               ⟶ declarator L_COLON constant_expression
+                               ⟶ declarator ;
+
+enum_specifier                 ⟶ ENUM L_LCUBRACE enumerator_list L_RCUBRACE
+                               ⟶ ENUM L_LCUBRACE enumerator_list L_COMMA L_RCUBRACE
+                               ⟶ ENUM IDENTIFIER L_LCUBRACE enumerator_list L_RCUBRACE
+                               ⟶ ENUM IDENTIFIER L_LCUBRACE enumerator_list L_COMMA L_RCUBRACE
+                               ⟶ ENUM IDENTIFIER ;
+
+enumerator_list                ⟶ enumerator
+                               ⟶ enumerator_list L_COMMA enumerator ;
+
+enumerator                     ⟶ enumeration_constant L_IS constant_expression 	# /* identifiers must be flagged as ENUMERATION_CONSTANT */
+                               ⟶ enumeration_constant ;
+
+atomic_type_specifier          ⟶ ATOMIC L_LPAREN type_name L_RPAREN ;
+
+type_qualifier                 ⟶ CONST
+                               ⟶ RESTRICT
+                               ⟶ VOLATILE
+                               ⟶ ATOMIC ;
+
+function_specifier             ⟶ INLINE
+                               ⟶ NORETURN ;
+
+alignment_specifier            ⟶ ALIGNAS L_LPAREN type_name L_RPAREN
+                               ⟶ ALIGNAS L_LPAREN constant_expression L_RPAREN ;
+
+declarator                     ⟶ pointer direct_declarator
+                               ⟶ direct_declarator ;
+
+direct_declarator              ⟶ IDENTIFIER
+                               ⟶ L_LPAREN declarator L_RPAREN
+                               ⟶ direct_declarator L_LSQBRACE L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE L_MUL L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE STATIC type_qualifier_list assignment_expression L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE STATIC assignment_expression L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE type_qualifier_list L_MUL L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE type_qualifier_list STATIC assignment_expression L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE type_qualifier_list assignment_expression L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE type_qualifier_list L_RSQBRACE
+                               ⟶ direct_declarator L_LSQBRACE assignment_expression L_RSQBRACE
+                               ⟶ direct_declarator L_LPAREN parameter_type_list L_RPAREN
+                               ⟶ direct_declarator L_LPAREN L_RPAREN
+                               ⟶ direct_declarator L_LPAREN identifier_list L_RPAREN ;
+
+pointer                        ⟶ L_MUL type_qualifier_list pointer
+                               ⟶ L_MUL type_qualifier_list
+                               ⟶ L_MUL pointer
+                               ⟶ L_MUL ;
+
+type_qualifier_list            ⟶ type_qualifier
+                               ⟶ type_qualifier_list type_qualifier ;
+
+parameter_type_list            ⟶ parameter_list L_COMMA ELLIPSIS
+                               ⟶ parameter_list ;
+
+parameter_list                 ⟶ parameter_declaration
+                               ⟶ parameter_list L_COMMA parameter_declaration ;
+
+parameter_declaration          ⟶ declaration_specifiers declarator
+                               ⟶ declaration_specifiers abstract_declarator
+                               ⟶ declaration_specifiers ;
+
+identifier_list                ⟶ IDENTIFIER
+                               ⟶ identifier_list L_COMMA IDENTIFIER ;
+
+type_name                      ⟶ specifier_qualifier_list abstract_declarator
+                               ⟶ specifier_qualifier_list ;
+
+abstract_declarator            ⟶ pointer direct_abstract_declarator
+                               ⟶ pointer
+                               ⟶ direct_abstract_declarator ;
+
+direct_abstract_declarator     ⟶ L_LPAREN abstract_declarator L_RPAREN
+                               ⟶ L_LSQBRACE L_RSQBRACE
+                               ⟶ L_LSQBRACE L_MUL L_RSQBRACE
+                               ⟶ L_LSQBRACE STATIC type_qualifier_list assignment_expression L_RSQBRACE
+                               ⟶ L_LSQBRACE STATIC assignment_expression L_RSQBRACE
+                               ⟶ L_LSQBRACE type_qualifier_list STATIC assignment_expression L_RSQBRACE
+                               ⟶ L_LSQBRACE type_qualifier_list assignment_expression L_RSQBRACE
+                               ⟶ L_LSQBRACE type_qualifier_list L_RSQBRACE
+                               ⟶ L_LSQBRACE assignment_expression L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE L_MUL L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE STATIC type_qualifier_list assignment_expression L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE STATIC assignment_expression L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE type_qualifier_list assignment_expression L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE type_qualifier_list STATIC assignment_expression L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE type_qualifier_list L_RSQBRACE
+                               ⟶ direct_abstract_declarator L_LSQBRACE assignment_expression L_RSQBRACE
+                               ⟶ L_LPAREN L_RPAREN
+                               ⟶ L_LPAREN parameter_type_list L_RPAREN
+                               ⟶ direct_abstract_declarator L_LPAREN L_RPAREN
+                               ⟶ direct_abstract_declarator L_LPAREN parameter_type_list L_RPAREN ;
+
+initializer                    ⟶ L_LCUBRACE initializer_list L_RCUBRACE
+                               ⟶ L_LCUBRACE initializer_list L_COMMA L_RCUBRACE
+                               ⟶ assignment_expression ;
+
+initializer_list               ⟶ designation initializer
+                               ⟶ initializer
+                               ⟶ initializer_list L_COMMA designation initializer
+                               ⟶ initializer_list L_COMMA initializer ;
+
+designation                    ⟶ designator_list L_IS ;
+
+designator_list                ⟶ designator
+                               ⟶ designator_list designator ;
+
+designator                     ⟶ L_LSQBRACE constant_expression L_RSQBRACE
+                               ⟶ L_DOT IDENTIFIER ;
+
+static_assert_declaration      ⟶ STATIC_ASSERT L_LPAREN constant_expression L_COMMA STRING_LITERAL L_RPAREN L_SEMI ;
+
+statement                      ⟶ labeled_statement
+                               ⟶ compound_statement
+                               ⟶ expression_statement
+                               ⟶ selection_statement
+                               ⟶ iteration_statement
+                               ⟶ jump_statement ;
+
+labeled_statement              ⟶ IDENTIFIER L_COLON statement
+                               ⟶ CASE constant_expression L_COLON statement
+                               ⟶ DEFAULT L_COLON statement ;
+
+compound_statement             ⟶ L_LCUBRACE L_RCUBRACE
+                               ⟶ L_LCUBRACE  block_item_list L_RCUBRACE ;
+
+block_item_list                ⟶ block_item
+                               ⟶ block_item_list block_item ;
+
+block_item                     ⟶ declaration
+                               ⟶ statement ;
+
+expression_statement           ⟶ L_SEMI
+                               ⟶ expression L_SEMI ;
+
+selection_statement            ⟶ IF L_LPAREN expression L_RPAREN statement ELSE statement
+                               ⟶ IF L_LPAREN expression L_RPAREN statement
+                               ⟶ SWITCH L_LPAREN expression L_RPAREN statement ;
+
+iteration_statement            ⟶ WHILE L_LPAREN expression L_RPAREN statement
+                               ⟶ DO statement WHILE L_LPAREN expression L_RPAREN L_SEMI
+                               ⟶ FOR L_LPAREN expression_statement expression_statement L_RPAREN statement
+                               ⟶ FOR L_LPAREN expression_statement expression_statement expression L_RPAREN statement
+                               ⟶ FOR L_LPAREN declaration expression_statement L_RPAREN statement
+                               ⟶ FOR L_LPAREN declaration expression_statement expression L_RPAREN statement ;
+
+jump_statement                 ⟶ GOTO IDENTIFIER L_SEMI
+                               ⟶ CONTINUE L_SEMI
+                               ⟶ BREAK L_SEMI
+                               ⟶ RETURN L_SEMI
+                               ⟶ RETURN expression L_SEMI ;
+
+external_declaration           ⟶ function_definition
+                               ⟶ declaration ;
+
+function_definition            ⟶ declaration_specifiers declarator declaration_list compound_statement
+                               ⟶ declaration_specifiers declarator compound_statement ;
+
+declaration_list               ⟶ declaration
+                               ⟶ declaration_list declaration ;
+
+
