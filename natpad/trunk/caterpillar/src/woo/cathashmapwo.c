@@ -31,6 +31,21 @@
 #define CAT_LOG_CLAZZ "CatHashMapWo"
 #include "../logging/catlog.h"
 
+typedef struct _CatHashMapWoIter	      CatHashMapWoIter;
+typedef struct _CatHashMapWoIterClass	  CatHashMapWoIterClass;
+
+struct _CatHashMapWoIter {
+	GObject parent;
+	CatHashMapWo *hash_map;
+	CatHashMapWoPrivate *hash_map_priv;
+	int bucket_idx;
+	CatArrayWo *current_bucket;
+	int current_bucket_index;
+};
+
+GType cat_hash_map_wo_iter_get_type(void);
+#define CAT_TYPE_HASH_MAP_WO_ITER            (cat_hash_map_wo_iter_get_type())
+
 
 #define LOAD_FACTOR           0.75
 #define LOAD_FACTOR_INCREASE  13
@@ -50,6 +65,7 @@ static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatHashMapWo, cat_hash_map_wo, CAT_TYPE_WO,
 		G_ADD_PRIVATE(CatHashMapWo)
+		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
@@ -627,7 +643,15 @@ CatArrayWo *cat_hash_map_wo_enlist_values(CatHashMapWo *map, CatArrayWo *e_into)
 	return e_into;
 }
 
-
+CatIMapIterator *cat_hash_map_wo_iterator(CatHashMapWo *instance) {
+	CatHashMapWoIter *result = g_object_new(CAT_TYPE_HASH_MAP_WO_ITER, NULL);
+	cat_ref_anounce(result);
+	result->bucket_idx = -1;
+	result->current_bucket = NULL;
+	result->hash_map_priv = cat_hash_map_wo_get_instance_private(instance);
+	result->hash_map = cat_ref_ptr(instance);
+	return (CatIMapIterator *) result;
+}
 
 CatHashMapWo *cat_hash_map_wo_create_editable(CatHashMapWo *instance) {
 	return (CatHashMapWo *) cat_wo_create_editable((CatWo *) instance);
@@ -823,3 +847,76 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
+
+
+
+
+
+
+#define CAT_HASH_MAP_WO_ITER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), cat_hash_map_wo_iter_get_type(), CatHashMapWoIter))
+#define CAT_HASH_MAP_WO_ITER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), CAT_TYPE_HASH_MAP_WO_ITER, CatHashMapWoIterClass))
+#define CAT_IS_HASH_MAP_WO_ITER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_HASH_MAP_WO_ITER))
+#define CAT_IS_HASH_MAP_WO_ITER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_HASH_MAP_WO_ITER))
+#define CAT_HASH_MAP_WO_ITER_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_HASH_MAP_WO_ITER, CatHashMapWoIterClass))
+
+
+struct _CatHashMapWoIterClass {
+	GObjectClass parent_class;
+};
+
+
+static gboolean l_iter_next(CatIIterator *self, gpointer **okey, gpointer **ovalue) {
+	CatHashMapWoIter *this = (CatHashMapWoIter *) self;
+	if (this->current_bucket==NULL) {
+		if (this->bucket_idx>=this->hash_map_priv->bucket_count) {
+			*ovalue = NULL;
+			*okey = NULL;
+			return FALSE;
+		}
+		while(this->current_bucket == NULL || cat_array_wo_size(this->current_bucket)==0) {
+			this->bucket_idx++;
+			if (this->bucket_idx>=this->hash_map_priv->bucket_count) {
+				*ovalue = NULL;
+				*okey = NULL;
+				return FALSE;
+			}
+			this->current_bucket = this->hash_map_priv->buckets[this->bucket_idx];
+		}
+		this->current_bucket_index = 0;
+	}
+	GObject *key = cat_array_wo_get(this->current_bucket, this->current_bucket_index++);
+	GObject *value = cat_array_wo_get(this->current_bucket, this->current_bucket_index++);
+	if (this->current_bucket_index>=cat_array_wo_size(this->current_bucket)) {
+		this->current_bucket = NULL;
+	}
+	*okey = key;
+	*ovalue = value;
+	return TRUE;
+}
+
+
+static void l_map_iterator_interface_init(CatIMapIteratorInterface *iface) {
+	iface->next = l_iter_next;
+}
+
+G_DEFINE_TYPE_WITH_CODE(CatHashMapWoIter, cat_hash_map_wo_iter, G_TYPE_OBJECT,
+		G_IMPLEMENT_INTERFACE(CAT_TYPE_IMAP_ITERATOR, l_map_iterator_interface_init)
+);
+
+static void l_dispose_iter(GObject *object);
+
+
+static void cat_hash_map_wo_iter_class_init(CatHashMapWoIterClass *clazz) {
+	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
+	object_class->dispose = l_dispose_iter;
+}
+
+static void cat_hash_map_wo_iter_init(CatHashMapWoIter *array_iter) {
+}
+
+static void l_dispose_iter(GObject *object) {
+	CatHashMapWoIter *map_iter = CAT_HASH_MAP_WO_ITER(object);
+	cat_unref_ptr(map_iter->hash_map);
+	G_OBJECT_CLASS(cat_hash_map_wo_iter_parent_class)->dispose(object);
+
+}

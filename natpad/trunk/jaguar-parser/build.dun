@@ -29,7 +29,7 @@ module {
 			
 			prefix 'JagP';
 			outputPath './src-generated/';
-#			updateOnly 'true';
+			updateOnly 'true';
 #			arg '-v';
 #			arg '-v';
 #			arg '-v';
