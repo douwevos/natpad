@@ -25,6 +25,7 @@
 
 #include "catwo.h"
 #include "catarraywo.h"
+#include "../catimapiterator.h"
 
 G_BEGIN_DECLS
 
@@ -81,11 +82,13 @@ CatArrayWo *cat_hash_map_wo_enlist_keys(CatHashMapWo *map, CatArrayWo *e_into);
  */
 CatArrayWo *cat_hash_map_wo_enlist_values(CatHashMapWo *map, CatArrayWo *e_into);
 
+CatIMapIterator *cat_hash_map_wo_iterator(CatHashMapWo *instance);
 
 CatHashMapWo *cat_hash_map_wo_create_editable(CatHashMapWo *instance) __attribute_warn_unused_result__;
 CatHashMapWo *cat_hash_map_wo_anchor(CatHashMapWo *instance, int version) __attribute_warn_unused_result__;
 CatHashMapWo *cat_hash_map_wo_get_original(CatHashMapWo *instance);
 gboolean cat_hash_map_wo_is_anchored(const CatHashMapWo *instance);
+
 
 G_END_DECLS
 

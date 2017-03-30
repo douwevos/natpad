@@ -22,6 +22,7 @@
 #include "catlinkedlist.h"
 
 #include "catistringable.h"
+#include "catimapiterator.h"
 
 #include "utf8/catutf8.h"
 

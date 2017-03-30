@@ -40,9 +40,11 @@ struct _GroEdParserPrivate {
 
 static void l_scanner_iface_init(GroRunIScannerInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
+static void l_message_iface_init(GroIMessageHandlerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(GroEdParser, groed_parser, G_TYPE_OBJECT,
 		G_ADD_PRIVATE(GroEdParser)
+		G_IMPLEMENT_INTERFACE(GRO_TYPE_IMESSAGE_HANDLER, l_message_iface_init)
 		G_IMPLEMENT_INTERFACE(GRORUN_TYPE_ISCANNER, l_scanner_iface_init)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
@@ -226,6 +228,9 @@ static void l_symbol_marker(GroEdParser *parser, GroRunIToken *tk_part);
 static void l_analyze_spec(GroEdParser *parser, GroAstSpec *spec) {
 	GroEdParserPrivate *priv = groed_parser_get_instance_private(parser);
 
+	GroPModelBuilder *builder = grop_model_builder_new(spec, (GroIMessageHandler *) parser);
+	grop_model_builder_do_build(builder);
+
 
 	/* analyze for unique terminal names, mark double declared names */
 
@@ -253,12 +258,12 @@ static void l_analyze_spec(GroEdParser *parser, GroAstSpec *spec) {
 					cat_log_detail("term_name=%O", term_name);
 					GroRunIToken *tk_first_decl = (GroRunIToken *) cat_hash_map_wo_get(priv->term_names, term_name);
 					if (tk_first_decl!=NULL) {
-						GroRunLocation *location = grorun_full_token_get_location((GroRunFullToken *) tk_term_name);
-						CatStringWo *msg_text = cat_string_wo_new_with("Symbol already defined");
-						GroRunMessage *message = grorun_message_new(NULL, msg_text, location);
-						cat_log_debug("message=%O", message);
-						cat_array_wo_append(priv->messages, (GObject *) message);
-						cat_unref_ptr(message);
+//						GroRunLocation *location = grorun_full_token_get_location((GroRunFullToken *) tk_term_name);
+//						CatStringWo *msg_text = cat_string_wo_new_with("Symbol already defined");
+//						GroRunMessage *message = grorun_message_new(NULL, msg_text, location);
+//						cat_log_debug("message=%O", message);
+//						cat_array_wo_append(priv->messages, (GObject *) message);
+//						cat_unref_ptr(message);
 					} else {
 						cat_hash_map_wo_put(priv->term_names, (GObject *) term_name, (GObject *) tk_term_name);
 					}
@@ -286,11 +291,11 @@ static void l_analyze_spec(GroEdParser *parser, GroAstSpec *spec) {
 			GroRunIToken *tk_ent_decl = (GroRunIToken *) cat_hash_map_wo_get(priv->non_term_names, lhs);
 			GroRunIToken *tk_et_decl = (GroRunIToken *) cat_hash_map_wo_get(priv->term_names, lhs);
 			if (tk_ent_decl!=NULL || tk_et_decl!=NULL) {
-				GroRunLocation *location = grorun_full_token_get_location((GroRunFullToken *) tk_lhs);
-				GroRunMessage *message = grorun_message_new(NULL, cat_string_wo_new_with("Symbol already defined"), location);
-				cat_array_wo_append(priv->messages, (GObject *) message);
-				cat_log_debug("message=%O", message);
-				cat_unref_ptr(message);
+//				GroRunLocation *location = grorun_full_token_get_location((GroRunFullToken *) tk_lhs);
+//				GroRunMessage *message = grorun_message_new(NULL, cat_string_wo_new_with("Symbol already defined"), location);
+//				cat_array_wo_append(priv->messages, (GObject *) message);
+//				cat_log_debug("message=%O", message);
+//				cat_unref_ptr(message);
 			} else {
 				cat_hash_map_wo_put(priv->non_term_names, (GObject *) lhs, (GObject *) tk_lhs);
 			}
@@ -458,3 +463,17 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
+
+static void l_message(GroIMessageHandler *self, CatStringWo *msg_text, GroRunLocation *location) {
+	GroEdParser *parser = GROED_PARSER(self);
+	GroEdParserPrivate *priv = groed_parser_get_instance_private(parser);
+	GroRunMessage *run_message = grorun_message_new(NULL, msg_text, location);
+	cat_log_error("run_message=%O", run_message);
+	cat_array_wo_append(priv->messages, (GObject *) run_message);
+	cat_unref_ptr(run_message);
+}
+
+
+static void l_message_iface_init(GroIMessageHandlerInterface *iface) {
+	iface->message = l_message;
+}

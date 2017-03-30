@@ -155,6 +155,15 @@ int cat_log_indent_level;
 #define cat_log_on_detail(code)
 #endif
 
+#if CAT_LOG_LEVEL<=CAT_LOG_VERBOSE
+#define cat_log_verbose(format, args...) \
+	cat_log_print("TRAC", format, ##args)
+#define cat_log_on_verbose(code) code
+#else
+#define cat_log_verbose(format, args...)
+#define cat_log_on_verbose(code)
+#endif
+
 
 #if CAT_LOG_LEVEL<=CAT_LOG_TRACE
 #define cat_log_trace(format, args...) \
