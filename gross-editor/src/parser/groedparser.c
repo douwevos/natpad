@@ -229,7 +229,14 @@ static void l_analyze_spec(GroEdParser *parser, GroAstSpec *spec) {
 	GroEdParserPrivate *priv = groed_parser_get_instance_private(parser);
 
 	GroPModelBuilder *builder = grop_model_builder_new(spec, (GroIMessageHandler *) parser);
-	grop_model_builder_do_build(builder);
+	GroPModel *model = grop_model_builder_do_build(builder);
+	if (model) {
+		GroPMachine *machine = grop_machine_new((GroIMessageHandler *) parser, model);
+		grop_machine_build(machine);
+	}
+
+
+
 
 
 	/* analyze for unique terminal names, mark double declared names */
