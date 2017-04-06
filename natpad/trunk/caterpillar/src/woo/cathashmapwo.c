@@ -869,15 +869,23 @@ static gboolean l_iter_next(CatIIterator *self, gpointer **okey, gpointer **oval
 	CatHashMapWoIter *this = (CatHashMapWoIter *) self;
 	if (this->current_bucket==NULL) {
 		if (this->bucket_idx>=this->hash_map_priv->bucket_count) {
-			*ovalue = NULL;
-			*okey = NULL;
+			if (ovalue) {
+				*ovalue = NULL;
+			}
+			if (okey) {
+				*okey = NULL;
+			}
 			return FALSE;
 		}
 		while(this->current_bucket == NULL || cat_array_wo_size(this->current_bucket)==0) {
 			this->bucket_idx++;
 			if (this->bucket_idx>=this->hash_map_priv->bucket_count) {
-				*ovalue = NULL;
-				*okey = NULL;
+				if (ovalue) {
+					*ovalue = NULL;
+				}
+				if (okey) {
+					*okey = NULL;
+				}
 				return FALSE;
 			}
 			this->current_bucket = this->hash_map_priv->buckets[this->bucket_idx];
@@ -889,8 +897,12 @@ static gboolean l_iter_next(CatIIterator *self, gpointer **okey, gpointer **oval
 	if (this->current_bucket_index>=cat_array_wo_size(this->current_bucket)) {
 		this->current_bucket = NULL;
 	}
-	*okey = key;
-	*ovalue = value;
+	if (ovalue) {
+		*ovalue = value;
+	}
+	if (okey) {
+		*okey = key;
+	}
 	return TRUE;
 }
 
