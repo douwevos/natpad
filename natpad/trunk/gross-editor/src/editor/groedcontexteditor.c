@@ -29,13 +29,15 @@
 #include <logging/catlog.h>
 
 struct _GroEdContextEditorPrivate {
-	void *dummy;
+	GroEdEditorConnector *connector;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
+static void l_ac_content_provider_iface_init(DraIAcContentProviderInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(GroEdContextEditor, groed_context_editor, DRA_TYPE_CONTEXT_EDITOR,
 		G_ADD_PRIVATE(GroEdContextEditor)
+		G_IMPLEMENT_INTERFACE(DRA_TYPE_IAC_CONTENT_PROVIDER, l_ac_content_provider_iface_init)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
@@ -57,8 +59,9 @@ static void groed_context_editor_init(GroEdContextEditor *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	GroEdContextEditor *instance = GROED_CONTEXT_EDITOR(object);
-//	GroEdContextEditorPrivate *priv = groed_context_editor_get_instance_private(instance);
+	GroEdContextEditor *instance = GROED_CONTEXT_EDITOR(object);
+	GroEdContextEditorPrivate *priv = groed_context_editor_get_instance_private(instance);
+	cat_unref_ptr(priv->connector);
 	G_OBJECT_CLASS(groed_context_editor_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -71,9 +74,11 @@ static void l_finalize(GObject *object) {
 }
 
 
-GroEdContextEditor *groed_context_editor_new(struct _DraEditorPanel *editor_panel) {
+GroEdContextEditor *groed_context_editor_new(struct _DraEditorPanel *editor_panel, GroEdEditorConnector *connector) {
 	GroEdContextEditor *result = g_object_new(GROED_TYPE_CONTEXT_EDITOR, NULL);
 	cat_ref_anounce(result);
+	GroEdContextEditorPrivate *priv = groed_context_editor_get_instance_private(result);
+	priv->connector = cat_ref_ptr(connector);
 	dra_context_editor_construct((DraContextEditor *) result, editor_panel);
 	return result;
 }
@@ -291,6 +296,52 @@ static void l_format(DraContextEditor *context_editor) {
 }
 
 
+/********************* start DraIAcContentProvider implementation *********************/
+
+static void l_enlist_content(DraIAcContentProvider *content_provider, DraAcContext *ac_context) {
+	DraEditorPanel *panel = dra_context_editor_get_panel((DraContextEditor *) content_provider);
+	DraEditor *editor = dra_editor_panel_get_editor(panel);
+	ChaDocument *document = cha_editor_get_document((ChaEditor *) editor);
+	ChaRevisionWo *rev_ref = cha_document_get_current_revision_ref(document);
+
+	GroEdContextEditor *instance = GROED_CONTEXT_EDITOR(content_provider);
+	GroEdContextEditorPrivate *priv = groed_context_editor_get_instance_private(instance);
+
+
+	GroEdParser *ed_parser = groed_editor_connector_create_parser(priv->connector, rev_ref);
+	groed_parser_run(ed_parser);
+
+	CatHashMapWo *nt_map = groed_parser_get_non_terminal_map(ed_parser);
+	CatIMapIterator *miter = cat_hash_map_wo_iterator(nt_map);
+	CatStringWo *sym_name = NULL;
+	while(cat_imap_iterator_next(miter, &sym_name, NULL)) {
+		DraAcReplaceEntry *rep_entry = dra_ac_replace_entry_new(sym_name, sym_name);
+		dra_ac_add_entry(ac_context, rep_entry);
+		cat_unref_ptr(rep_entry);
+	}
+	cat_unref_ptr(miter);
+
+
+	CatHashMapWo *t_map = groed_parser_get_terminal_map(ed_parser);
+	miter = cat_hash_map_wo_iterator(t_map);
+	while(cat_imap_iterator_next(miter, &sym_name, NULL)) {
+		DraAcReplaceEntry *rep_entry = dra_ac_replace_entry_new(sym_name, sym_name);
+		dra_ac_add_entry(ac_context, rep_entry);
+		cat_unref_ptr(rep_entry);
+	}
+	cat_unref_ptr(miter);
+
+	cat_unref_ptr(ed_parser)
+
+	cat_unref_ptr(rev_ref);
+}
+
+
+static void l_ac_content_provider_iface_init(DraIAcContentProviderInterface *iface) {
+	iface->enlistContent = l_enlist_content;
+}
+
+/********************* end DraIAcContentProvider implementation *********************/
 
 
 /********************* start CatIStringable implementation *********************/

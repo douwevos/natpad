@@ -64,6 +64,7 @@ GroAstSpec *groed_parser_run(GroEdParser *parser);
 CatArrayWo *groed_parser_get_token_cash(GroEdParser *parser);
 
 CatHashMapWo *groed_parser_get_non_terminal_map(GroEdParser *parser);
+CatHashMapWo *groed_parser_get_terminal_map(GroEdParser *parser);
 
 CatArrayWo *groed_parser_get_messages(GroEdParser *parser);
 

@@ -111,6 +111,12 @@ CatHashMapWo *groed_parser_get_non_terminal_map(GroEdParser *parser) {
 	return priv->non_term_names;
 }
 
+CatHashMapWo *groed_parser_get_terminal_map(GroEdParser *parser) {
+	GroEdParserPrivate *priv = groed_parser_get_instance_private(parser);
+	return priv->term_names;
+}
+
+
 CatArrayWo *groed_parser_get_messages(GroEdParser *parser) {
 	GroEdParserPrivate *priv = groed_parser_get_instance_private(parser);
 	return priv->messages;
@@ -231,8 +237,8 @@ static void l_analyze_spec(GroEdParser *parser, GroAstSpec *spec) {
 	GroPModelBuilder *builder = grop_model_builder_new(spec, (GroIMessageHandler *) parser);
 	GroPModel *model = grop_model_builder_do_build(builder);
 	if (model) {
-		GroPMachine *machine = grop_machine_new((GroIMessageHandler *) parser, model);
-		grop_machine_build(machine);
+//		GroPMachine *machine = grop_machine_new((GroIMessageHandler *) parser, model);
+//		grop_machine_build(machine);
 	}
 
 

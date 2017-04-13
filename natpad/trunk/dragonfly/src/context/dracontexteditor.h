@@ -47,6 +47,7 @@ struct _DraContextEditor {
 struct _DraContextEditorClass {
 	GObjectClass parent_class;
 	void (*format)(DraContextEditor *context_editor);
+	void (*openDeclaration)(DraContextEditor *context_editor);
 };
 
 

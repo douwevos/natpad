@@ -29,7 +29,7 @@
 #include <logging/catlog.h>
 
 struct _GroEdEditorPanelPrivate {
-	void *dummy;
+	GroEdEditorConnector *connector;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -57,6 +57,8 @@ static void groed_editor_panel_init(GroEdEditorPanel *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
+	GroEdEditorPanelPrivate *priv = groed_editor_panel_get_instance_private((GroEdEditorPanel *) object);
+	cat_unref_ptr(priv->connector);
 	G_OBJECT_CLASS(groed_editor_panel_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -72,13 +74,16 @@ static void l_finalize(GObject *object) {
 GroEdEditorPanel *groed_editor_panel_new(LeaIPanelOwner *panel_owner, ElkDocumentBin *document_bin, GroEdEditorConnector *connector) {
 	GroEdEditorPanel *result = g_object_new(GROED_TYPE_EDITOR_PANEL, NULL);
 	cat_ref_anounce(result);
+	GroEdEditorPanelPrivate *priv = groed_editor_panel_get_instance_private(result);
+	priv->connector = cat_ref_ptr(connector);
 	elk_editor_panel_construct((ElkEditorPanel *) result, panel_owner, document_bin, (DraIConnectorRequestFactory *) connector);
 	return result;
 }
 
 
 static DraContextEditor *l_create_context_editor(DraEditorPanel *editor_panel) {
-	return (DraContextEditor *) groed_context_editor_new(editor_panel);
+	GroEdEditorPanelPrivate *priv = groed_editor_panel_get_instance_private((GroEdEditorPanel *) editor_panel);
+	return (DraContextEditor *) groed_context_editor_new(editor_panel, priv->connector);
 }
 
 

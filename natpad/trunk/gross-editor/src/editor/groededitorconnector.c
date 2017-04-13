@@ -22,6 +22,7 @@
 
 #include "groededitorconnector.h"
 #include "groedaugmentrequest.h"
+#include "../parser/groedparser.h"
 #include <grossparser.h>
 #include <grossruntime.h>
 #include <dragonfly.h>
@@ -88,6 +89,27 @@ GroEdEditorConnector *groed_editor_connector_new() {
 	priv->token_factory = (GroRunITokenFactory *) grorun_full_token_factory_new();
 	priv->scanner_factory = NULL;
 	return result;
+}
+
+
+GroEdParser *groed_editor_connector_create_parser(GroEdEditorConnector *connector, ChaRevisionWo *revision) {
+	GroEdEditorConnectorPrivate *priv = groed_editor_connector_get_instance_private(connector);
+	if (priv->model == NULL) {
+		priv->model = grorun_model_new(gro_parser_config_symbols, gro_parser_config_nr_of_symbols, gro_parser_config_states_text, gro_parser_config_nr_of_states);
+		priv->scanner_factory = gro_scanner_factory_new(GRORUN_ISYMBOL_PROVIDER(priv->model), priv->token_factory);
+	}
+
+	ChaRevisionReader *revision_reader = cha_revision_reader_new(revision, NULL, NULL);
+	cha_revision_reader_set_forced_line_end(revision_reader, CHA_LINE_END_LF);
+	CatIUtf8Scanner *utf8_scanner = CAT_IUTF8_SCANNER(revision_reader);
+
+	GroScanner *scanner = gro_scanner_factory_create_scanner(priv->scanner_factory, utf8_scanner);
+
+	GroEdParser *parser = groed_parser_new(scanner, priv->token_factory, priv->model);
+	cat_unref_ptr(scanner);
+	cat_unref_ptr(utf8_scanner);
+
+	return parser;
 }
 
 

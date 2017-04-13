@@ -112,7 +112,8 @@ static gboolean l_idle_cb(DraAugmentRequest *request) {
 
 
 static void l_run_request(WorRequest *request) {
-	DraAugmentRequestPrivate *priv = dra_augment_request_get_instance_private(DRA_AUGMENT_REQUEST(request));
+	DraAugmentRequest *augment_request = DRA_AUGMENT_REQUEST(request);
+	DraAugmentRequestPrivate *priv = dra_augment_request_get_instance_private(augment_request);
 	ChaRevisionWo *cur_revision = cha_document_get_current_revision_ref(priv->document);
 	int cur_pl_version = cha_revision_wo_get_page_list_version(cur_revision);
 	cat_unref_ptr(cur_revision);
@@ -125,6 +126,8 @@ static void l_run_request(WorRequest *request) {
 		return;
 	}
 
+
+	augment_request->slot_index = slot_key_index;
 	DraKeywordPrinter *keyword_printer = dra_keyword_printer_new(priv->a_revision, priv->slot_key, slot_key_index);
 	DraKeywordPrinter *line_tag_printer = dra_keyword_printer_new(priv->a_revision, priv->slot_key, slot_key_index);
 

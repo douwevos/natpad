@@ -109,6 +109,7 @@ JagPScannerFactory *jagp_scanner_factory_new(GroRunISymbolProvider *symbol_provi
 	l_connect_symbol(connected_syms, JAGP_SYM_ERROR, symbol_provider, "⊗");
 	l_connect_symbol(connected_syms, JAGP_SYM_L_LSQBRACE, symbol_provider, "L_LSQBRACE");
 	l_connect_symbol(connected_syms, JAGP_SYM_L_RSQBRACE, symbol_provider, "L_RSQBRACE");
+	l_connect_symbol(connected_syms, JAGP_SYM_L_ARROW, symbol_provider, "L_ARROW");
 	l_connect_symbol(connected_syms, JAGP_SYM_L_AND, symbol_provider, "L_AND");
 	l_connect_symbol(connected_syms, JAGP_SYM_L_LT, symbol_provider, "L_LT");
 	l_connect_symbol(connected_syms, JAGP_SYM_L_GT, symbol_provider, "L_GT");
@@ -202,6 +203,7 @@ JagPScannerFactory *jagp_scanner_factory_new(GroRunISymbolProvider *symbol_provi
 	l_connect_symbol(connected_syms, JAGP_SYM_K_FINALLY, symbol_provider, "K_FINALLY");
 	l_connect_symbol(connected_syms, JAGP_SYM_K_CONTINUE, symbol_provider, "K_CONTINUE");
 	l_connect_symbol(connected_syms, JAGP_SYM_K_THROW, symbol_provider, "K_THROW");
+	l_connect_symbol(connected_syms, JAGP_SYM_L_LPARREN2, symbol_provider, "L_LPARREN2");
 	l_connect_symbol(connected_syms, JAGP_SYM_K_RETURN, symbol_provider, "K_RETURN");
 
 
