@@ -89,6 +89,9 @@ CheAugmentRequest *che_augment_request_new(ChaDocument *document, ChaRevisionWo 
 ///* Returns an error or warning code. */
 static int che_get_error_code(Token token) {
     int errwarn = Token_getErrwarn(token);
+	if (errwarn==GVLCP_WARN_NOT_ANSI) {
+		return 0;
+	}
     int result = 0;
     if (errwarn > 0) {
         /* TODO: not nice to use 0xFFFF here... This must be changed. */

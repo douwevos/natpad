@@ -441,20 +441,14 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 
 				gboolean is_top = pl_row==top;
 
-				gboolean left_open = FALSE;
 				if ((!is_top) || (pl_left>left)) {
 					left = pl_left;
-					left_open=TRUE;
 				}
 
 				gboolean is_bottom = pl_row==bottom;
-				gboolean right_open = FALSE;
 				if ((!is_bottom) || (pl_right<right)) {
 					right = pl_right;
-					right_open=TRUE;
 				}
-
-
 
 				int cursor_sub_line_idx;
 				int left_vx = 0;
@@ -470,7 +464,6 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 				} else {
 					pango_layout_index_to_line_x(priv->pango_layout, pl_right, FALSE, &cursor_sub_line_idx, &right_vx);
 				}
-
 
 				left_vx = left_vx/PANGO_SCALE;
 				right_vx = right_vx/PANGO_SCALE;

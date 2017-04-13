@@ -238,11 +238,9 @@ gboolean cha_page_wo_has_marked_lines(const ChaPageWo *page) {
 }
 
 void cha_scan_lines(char *text, char *end, ChaScannedLine cha_scanned_line, void *data) {
-
 	char *off_last = text;
 	gboolean keep_running = TRUE;
 	
-	char last_ch = 0;
 	char *off = text;
 	while(keep_running && off<end) {
 		char ch = *off;
@@ -283,57 +281,6 @@ void cha_scan_lines(char *text, char *end, ChaScannedLine cha_scanned_line, void
 		cha_scanned_line(off_last, end, CHA_LINE_END_NONE, data);
 	}
 }
-
-//void cha_scan_lines(char *text, char *end, ChaScannedLine cha_scanned_line, void *data) {
-//
-//	char *off_13 = (char *) memchr(text, 0xd, end-text);
-//	char *off_10 = (char *) memchr(text, 0xa, end-text);
-//
-//	char *off_last = text;
-//	gboolean keep_running = TRUE;
-//	while(keep_running) {
-//		if (off_13==NULL) {
-//			if (off_10==NULL) {
-//				if (off_last<end) {
-//					cha_scanned_line(off_last, end, CHA_LINE_END_NONE, data);
-//				}
-//				break;
-//			}
-//
-//			keep_running = cha_scanned_line(off_last, off_10, CHA_LINE_END_LF, data);
-//			off_last = off_10+1;
-//			off_10 = (char *) memchr(off_last, 0xa, end-off_last);
-//		} else if (off_10==NULL) {
-//			keep_running = cha_scanned_line(off_last, off_13, CHA_LINE_END_CR, data);
-//			off_last = off_13+1;
-//			off_13 = (char *) memchr(off_last, 0xd, end-off_last);
-//		} else {
-//			if (off_10<off_13) {
-//				if (off_10+1==off_13) {
-//					keep_running = cha_scanned_line(off_last, off_10, CHA_LINE_END_LFCR, data);
-//					off_last = off_13+1;
-//					off_10 = (char *) memchr(off_last, 0xa, end-off_last);
-//					off_13 = (char *) memchr(off_last, 0xd, end-off_last);
-//				} else {
-//					keep_running = cha_scanned_line(off_last, off_10, CHA_LINE_END_LF, data);
-//					off_last = off_10+1;
-//					off_10 = (char *) memchr(off_last, 0xa, end-off_last);
-//				}
-//			} else {
-//				if (off_13+1==off_10) {
-//					keep_running = cha_scanned_line(off_last, off_13, CHA_LINE_END_CRLF, data);
-//					off_last = off_10+1;
-//					off_10 = (char *) memchr(off_last, 0xa, end-off_last);
-//					off_13 = (char *) memchr(off_last, 0xd, end-off_last);
-//				} else {
-//					keep_running = cha_scanned_line(off_last, off_13, CHA_LINE_END_CR, data);
-//					off_last = off_13+1;
-//					off_13 = (char *) memchr(off_last, 0xd, end-off_last);
-//				}
-//			}
-//		}
-//	}
-//}
 
 int cha_page_wo_get_enrichment_count(ChaPageWo *page) {
 	ChaPageWoPrivate *priv = cha_page_wo_get_instance_private(page);
@@ -451,9 +398,10 @@ void cha_utf8_text_cleanup(const ChaUtf8Text *text) {
 	ChaUtf8Text *textm = (ChaUtf8Text *) text;
 	if (text->text_needs_cleanup) {
 		textm->text_needs_cleanup = FALSE;
-
-
-		cat_free_ptr(textm->text);
+		if (textm->text) {
+			g_free((void *) textm->text);
+			textm->text = NULL;
+		}
 	}
 }
 

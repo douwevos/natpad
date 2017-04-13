@@ -4,6 +4,7 @@ module {
 	
 	dependencies {
 		module 'codeparsing';
+		module 'armadillo';
 		module 'elk';
 	}
 

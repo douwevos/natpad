@@ -253,8 +253,6 @@ ChaLineWo *cha_line_wo_clone(const ChaLineWo *source, CatCloneDepth clone_depth)
 	}
 	ChaLineWo *result = (ChaLineWo *) cat_wo_clone((CatWo *) source, clone_depth);
 	ChaLineWoPrivate *priv = cha_line_wo_get_instance_private(result);
-	ChaLineWoPrivate *priv_src = cha_line_wo_get_instance_private((ChaLineWo *) source);
-//	priv->enrichment_data = cat_ref_ptr(priv_src->enrichment_data);
 	priv->enrichment_data = NULL;
 	return result;
 }
