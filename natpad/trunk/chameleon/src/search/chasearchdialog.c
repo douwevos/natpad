@@ -281,8 +281,6 @@ static gboolean l_find_text_changed(GtkEntry *entry, gpointer user_data) {
 }
 
 static void l_find_text_activate(GtkEntry *entry, gpointer user_data) {
-	ChaSearchDialog *search_dialog = CHA_SEARCH_DIALOG(user_data);
-	ChaSearchDialogPrivate *priv = cha_search_dialog_get_instance_private(search_dialog);
 	l_on_find_clicked(NULL, user_data);
 }
 

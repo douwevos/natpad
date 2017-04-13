@@ -30,6 +30,7 @@
 #include <elk.h>
 #include <viper.h>
 #include <moose.h>
+#include <armadillo.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -42,6 +43,7 @@ struct _CheServicePrivate {
 	ElkService *elk_service;
 
 	CheEditorConnector *connector;
+	ArmEditorConnector *arm_connector;
 };
 
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface);
@@ -98,6 +100,7 @@ CheService *che_service_new(WorService *wor_service, ElkService *elk_service) {
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->elk_service = cat_ref_ptr(elk_service);
 	priv->connector = che_editor_connector_new();
+	priv->arm_connector = arm_editor_connector_new();
 	return result;
 }
 
@@ -122,26 +125,31 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 			CatStringWo *a_name = vip_iresource_get_name((VipIResource *) file_to_open);
 			cat_log_debug("name:%p", a_name);
 			gboolean is_a_c_file = (cat_string_wo_endswith(a_name, CAT_S(che_s_dot_c))) ||
-					(cat_string_wo_endswith(a_name, CAT_S(che_s_dot_h))) ||
-					(cat_string_wo_endswith(a_name, CAT_S(che_s_dot_cpp))) ||
-					(cat_string_wo_endswith(a_name, CAT_S(che_s_dot_hpp)));
+					(cat_string_wo_endswith(a_name, CAT_S(che_s_dot_h)));
 
-//			if (is_a_c_file) {
-//				ElkDocumentIO *document_io = priv->elk_service->document_io;
-//				CheEditorFactory *editor_factory = che_editor_factory_new((ElkIService *) priv->elk_service, priv->connector_map, document_io/*, priv->indexer */, file_to_open);
-//				cat_array_wo_append(e_enlist_to, (GObject *) editor_factory);
-//				cat_unref(editor_factory);
-//			}
-			if (is_a_c_file) {
+/*			if (is_a_c_file) {
 				ElkDocumentIO *document_io = priv->elk_service->document_io;
 				ElkService *elk_service = (ElkService *) priv->elk_service;
 				LeaIPanelOwner *panel_owner = (LeaIPanelOwner *) elk_service->panel_owner;
 
+				ArmEditorFactory *editor_factory = arm_editor_factory_new(panel_owner, priv->arm_connector, document_io, file_to_open);
+				cat_array_wo_append(e_enlist_to, (GObject *) editor_factory);
+				cat_unref(editor_factory);
+			} */
+
+			gboolean is_a_cpp_file = ((cat_string_wo_endswith(a_name, CAT_S(che_s_dot_cpp))) ||
+					(cat_string_wo_endswith(a_name, CAT_S(che_s_dot_hpp))));
+			if (is_a_cpp_file || is_a_c_file) {
+				ElkDocumentIO *document_io = priv->elk_service->document_io;
+				ElkService *elk_service = (ElkService *) priv->elk_service;
+				LeaIPanelOwner *panel_owner = (LeaIPanelOwner *) elk_service->panel_owner;
 
 				CheChameleonEditorFactory *editor_factory = che_chameleon_editor_factory_new(panel_owner, (DraIConnectorRequestFactory *) priv->connector, document_io, file_to_open);
 				cat_array_wo_append(e_enlist_to, (GObject *) editor_factory);
 				cat_unref(editor_factory);
 			}
+
+
 		}
 	}
 }

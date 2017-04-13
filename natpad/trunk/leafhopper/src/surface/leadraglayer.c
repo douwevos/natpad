@@ -219,7 +219,6 @@ static void l_widget_realize(GtkWidget *widget) {
 
 	gint attributes_mask = GDK_WA_X | GDK_WA_Y;
 
-	GdkScreen *screen = gtk_widget_get_screen(widget);
 	GdkWindow *parent_window = gtk_widget_get_parent_window(widget);
 	priv->window = gdk_window_new(parent_window, &attributes, attributes_mask);
 	gtk_widget_set_window(widget, parent_window);

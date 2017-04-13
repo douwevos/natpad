@@ -213,8 +213,7 @@ static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append
 	ChaCharsetConverter *instance = CHA_CHARSET_CONVERTER(self);
 	ChaCharsetConverterPrivate *priv = cha_charset_converter_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
+	cat_string_wo_format(append_to, "%s[%p name=%s]", iname, self, priv->name);
 }
 
 static void l_stringable_iface_init(CatIStringableInterface *iface) {
