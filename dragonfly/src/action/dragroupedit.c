@@ -62,9 +62,10 @@ struct _DraGroupEditPrivate {
 
 	DraActionToLowerCase *action_to_lower_case;
 	DraActionToUpperCase *action_to_upper_case;
+	DraActionFormat *action_format;
 
 	DraActionGotoLine *action_goto_line;
-	DraActionFormat *action_format;
+	DraActionGotoLine *action_open_declaration;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -94,6 +95,7 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->action_cut);
 	cat_unref_ptr(priv->action_delete);
 	cat_unref_ptr(priv->action_goto_line);
+	cat_unref_ptr(priv->action_open_declaration);
 	cat_unref_ptr(priv->action_paste);
 	cat_unref_ptr(priv->action_redo);
 	cat_unref_ptr(priv->action_select_all);
@@ -223,6 +225,11 @@ DraGroupEdit *dra_group_edit_new(LeaKeyContext *key_context, gpointer clipboard_
 	lea_action_set_order((LeaAction *) priv->action_goto_line, 200);
 	lea_action_group_add((LeaActionGroup *) result, (LeaAction *) priv->action_goto_line);
 
+	priv->action_open_declaration = dra_action_open_declaration_new();
+	lea_action_set_key_context((LeaAction *) priv->action_open_declaration, key_context);
+	lea_action_set_order((LeaAction *) priv->action_open_declaration, 201);
+	lea_action_group_add((LeaActionGroup *) result, (LeaAction *) priv->action_open_declaration);
+
 	return result;
 }
 
@@ -262,10 +269,9 @@ void dra_group_edit_set_editor_panel(DraGroupEdit *group_edit, DraEditorPanel *e
 	dra_action_to_lower_case_set_editor_panel(priv->action_to_lower_case, editor_panel);
 	dra_action_to_upper_case_set_editor_panel(priv->action_to_upper_case, editor_panel);
 
-
 	dra_action_goto_line_set_editor_panel(priv->action_goto_line, editor_panel);
+	dra_action_open_declaration_set_editor_panel(priv->action_open_declaration, editor_panel);
 	dra_action_format_set_editor_panel(priv->action_format, editor_panel);
-
 }
 
 

@@ -23,6 +23,7 @@
 #ifndef EDITOR_GROEDCONTEXTEDITOR_H_
 #define EDITOR_GROEDCONTEXTEDITOR_H_
 
+#include "groededitorconnector.h"
 #include <caterpillar.h>
 #include <dragonfly.h>
 
@@ -53,7 +54,7 @@ struct _DraEditorPanel;
 
 GType groed_context_editor_get_type();
 
-GroEdContextEditor *groed_context_editor_new(struct _DraEditorPanel *editor_panel);
+GroEdContextEditor *groed_context_editor_new(struct _DraEditorPanel *editor_panel, GroEdEditorConnector *connector);
 
 G_END_DECLS
 

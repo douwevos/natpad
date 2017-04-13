@@ -171,6 +171,12 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 	cat_unref_ptr(utf8_scanner);
 	cat_unref_ptr(symantic_parser);
 	cat_unref_ptr(scanner);
+
+	DraAugmentRequest *aug_req = (DraAugmentRequest *) request;
+	CatStringWo *slot_key = dra_augment_request_get_slot_key(aug_req);
+	int slot_index = aug_req->slot_index;
+	cha_revision_wo_set_slot_content(a_revision, slot_index, slot_key, symantic_parser);
+
 	return TRUE;
 }
 

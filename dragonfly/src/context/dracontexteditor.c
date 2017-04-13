@@ -48,6 +48,7 @@ static void dra_context_editor_class_init(DraContextEditorClass *clazz) {
 	object_class->finalize = l_finalize;
 
 	clazz->format = NULL;
+	clazz->openDeclaration = NULL;
 }
 
 static void dra_context_editor_init(DraContextEditor *instance) {

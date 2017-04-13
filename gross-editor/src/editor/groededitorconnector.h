@@ -23,6 +23,8 @@
 #ifndef EDITOR_GROEDEDITORCONNECTOR_H_
 #define EDITOR_GROEDEDITORCONNECTOR_H_
 
+#include "../parser/groedparser.h"
+#include <chameleon.h>
 #include <caterpillar.h>
 #include <grossruntime.h>
 
@@ -53,6 +55,9 @@ struct _GroEdEditorConnectorClass {
 GType groed_editor_connector_get_type();
 
 GroEdEditorConnector *groed_editor_connector_new();
+
+
+GroEdParser *groed_editor_connector_create_parser(GroEdEditorConnector *connector, ChaRevisionWo *revision);
 
 G_END_DECLS
 

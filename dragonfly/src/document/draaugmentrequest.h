@@ -46,6 +46,7 @@ typedef struct _DraAugmentRequestClass          DraAugmentRequestClass;
 
 struct _DraAugmentRequest {
 	WorRequest parent;
+	int slot_index;
 };
 
 struct _DraAugmentRequestClass {
