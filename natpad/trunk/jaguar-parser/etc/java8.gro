@@ -83,7 +83,7 @@ TypeDeclarationMultiOpt                        ⟶ TypeDeclarationMultiOpt TypeD
                                                ⟶ ;
 
 TypeDeclaration                                ⟶ ClassDeclaration
-#                                               ⟶ InterfaceDeclaration
+#                                              ⟶ InterfaceDeclaration
                                                ⟶ L_SEMI ;
 
 ClassDeclaration                               ⟶ NormalClassDeclaration
@@ -124,23 +124,23 @@ ClassBodyDeclaration                           ⟶ ClassMemberDeclaration
 ;
 
 ClassMemberDeclaration                         ⟶ FieldDeclaration
-#                                               ⟶ MethodDeclaration
+                                               ⟶ MethodDeclaration
                                                ⟶ ClassDeclaration
 #                                               ⟶ InterfaceDeclaration
                                                ⟶ L_SEMI ;
 
-TypeParametersOpt                              ⟶ TypeParameters
-                                               ⟶ ;
+#TypeParametersOpt                              ⟶ TypeParameters
+#                                               ⟶ ;
 
-TypeParameters                                 ⟶ L_LT TypeParameterList L_GT ;
+#TypeParameters                                 ⟶ L_LT TypeParameterList L_GT ;
 
-TypeParameterList                              ⟶ TypeParameterList L_COMMA TypeParameter
-                                               ⟶ TypeParameter ;
+#TypeParameterList                              ⟶ TypeParameterList L_COMMA TypeParameter
+#                                               ⟶ TypeParameter ;
 
-TypeParameter                                  ⟶ TypeParameterModifierMultiOpt IDENTIFIER TypeBoundOpt ;
+#TypeParameter                                  ⟶ TypeParameterModifierMultiOpt IDENTIFIER TypeBoundOpt ;
 
-TypeBoundOpt                                   ⟶ TypeBound
-                                               ⟶ ;
+#TypeBoundOpt                                   ⟶ TypeBound
+#                                               ⟶ ;
 
 TypeParameterModifierMultiOpt                  ⟶ TypeParameterModifierMultiOpt TypeParameterModifier
                                                ⟶ ;
@@ -148,7 +148,7 @@ TypeParameterModifierMultiOpt                  ⟶ TypeParameterModifierMultiOpt
 TypeParameterModifier                          ⟶ Annotation ;
 
 TypeBound                                      ⟶ K_EXTENDS TypeVariable
-                                               ⟶ K_EXTENDS ClassType  AdditionalBoundMultiOpt ;
+                                               ⟶ K_EXTENDS ClassType AdditionalBoundMultiOpt ;
 
 AdditionalBoundMultiOpt                        ⟶ AdditionalBoundMultiOpt AdditionalBound
                                                ⟶ ;
@@ -160,25 +160,22 @@ ConstructorDeclaration                         ⟶ ClassModifierMultiOpt Constru
 ConstructorHeader                              ⟶ ConstructorDeclarator ThrowsOpt ;
 
 ConstructorDeclarator                          ⟶ # TypeParametersOpt 
-							                 SimpleName L_LPAREN FormalParameterListOpt L_RPAREN ;
+							                      SimpleName L_LPAREN FormalParameterListOpt L_RPAREN ;
 
-ConstructorBody    #                            ⟶ L_LCUBRACE ExplicitConstructorInvocation BlockStatements L_RCUBRACE                                
+ConstructorBody    #                            ⟶ L_LCUBRACE ExplicitConstructorInvocation BlockStatements L_RCUBRACE
                                                ⟶ L_LCUBRACE BlockStatements L_RCUBRACE
 #                                               ⟶ L_LCUBRACE ExplicitConstructorInvocation L_RCUBRACE
                                                ⟶ L_LCUBRACE L_RCUBRACE ;
 
 MethodDeclaration                              ⟶ ClassModifierMultiOpt MethodHeader MethodBody ;
 
-MethodHeader                                   ⟶ Result MethodDeclarator ThrowsOpt
+MethodHeader                                   ⟶ UnannTypeDims MethodDeclarator ThrowsOpt
+                                               ⟶ K_VOID MethodDeclarator ThrowsOpt
 #                                               ⟶ TypeParameters AnnotationsMultiOpt2 Result MethodDeclarator ThrowsOpt 
 ;
 
-MethodDeclarator                               ⟶ IDENTIFIER L_LPAREN FormalParameterListOpt L_RPAREN Annotations Dimensions 
-                                               ⟶ IDENTIFIER L_LPAREN FormalParameterListOpt L_RPAREN Dimensions
+MethodDeclarator                               ⟶ IDENTIFIER L_LPAREN FormalParameterListOpt L_RPAREN AnnotatedDims
                                                ⟶ IDENTIFIER L_LPAREN FormalParameterListOpt L_RPAREN ;
-
-Result                                         ⟶ UnannTypeDims
-                                               ⟶ K_VOID ;
 
 ThrowsOpt                                      ⟶ Throws
                                                ⟶ ;
@@ -200,8 +197,7 @@ VariableDeclaratorList                         ⟶ VariableDeclaratorList L_COMM
 VariableDeclarator                             ⟶ VariableDeclaratorId
                                                ⟶ VariableDeclaratorId  L_IS  VariableInitializer  ;
 
-VariableDeclaratorId                           ⟶ IDENTIFIER Annotations Dimensions
-                                               ⟶ IDENTIFIER Dimensions
+VariableDeclaratorId                           ⟶ IDENTIFIER AnnotatedDims
                                                ⟶ IDENTIFIER;
 
 VariableInitializer                            ⟶ Expression
@@ -214,18 +210,31 @@ Block                                          ⟶ L_LCUBRACE  BlockStatements  
 BlockStatements                                ⟶ BlockStatements BlockStatement
                                                ⟶ BlockStatement ;
 
-BlockStatement                  #               ⟶ LocalVariableDeclarationStatement
-                                                ⟶ ClassDeclaration
+BlockStatement                                 ⟶ LocalVariableDeclarationStatement
+                                               ⟶ ClassDeclaration
                                                ⟶ Statement 
 ;
 
+LocalVariableDeclarationStatement              ⟶ LocalVariableDeclaration L_SEMI ;
+
+LocalVariableDeclaration                       ⟶ ClassModifierMultiOpt UnannTypeDims  VariableDeclaratorList ;
+
+
 Statement                                      ⟶ StatementWithoutTrailingSubstatement
 #                                               ⟶ LabeledStatement
-#                                               ⟶ IfThenStatement
-#                                               ⟶ IfThenElseStatement
+                                               ⟶ IfThenStatement
+                                               ⟶ IfThenElseStatement
 #                                               ⟶ WhileStatement
-#                                               ⟶ ForStatement 
+                                               ⟶ ForStatement 
 ;
+
+StatementNoShortIf                             ⟶ StatementWithoutTrailingSubstatement
+#                                               ⟶ LabeledStatementNoShortIf
+                                               ⟶ IfThenElseStatementNoShortIf
+#                                               ⟶ WhileStatementNoShortIf
+#                                               ⟶ ForStatementNoShortIf 
+;
+
 
 StatementWithoutTrailingSubstatement           ⟶ Block
 #                                               ⟶ EmptyStatement
@@ -233,26 +242,109 @@ StatementWithoutTrailingSubstatement           ⟶ Block
 #                                               ⟶ AssertStatement
 #                                               ⟶ SwitchStatement
 #                                               ⟶ DoStatement
-#                                               ⟶ BreakStatement
-#                                               ⟶ ContinueStatement
-#                                               ⟶ ReturnStatement
-#                                               ⟶ SynchronizedStatement
-#                                               ⟶ ThrowStatement
-#                                               ⟶ TryStatement 
+                                               ⟶ BreakStatement
+                                               ⟶ ContinueStatement
+                                               ⟶ ReturnStatement
+                                               ⟶ SynchronizedStatement
+                                               ⟶ ThrowStatement
+                                               ⟶ TryStatement 
 ;
 
-ExpressionStatement                            ⟶ StatementExpression L_SEMI ;
+ExpressionStatement                            ⟶ StatementExpression L_SEMI;
 
-StatementExpression                            ⟶ Assignment
-                                               ⟶ UnaryExpression
-                                               ⟶ MethodInvocation
-                                               ⟶ ClassInstanceCreationExpression ;
+BreakStatement                                 ⟶ K_BREAK IDENTIFIER L_SEMI 
+                                               ⟶ K_BREAK L_SEMI;
+
+ContinueStatement                              ⟶ K_CONTINUE IDENTIFIER L_SEMI
+                                               ⟶ K_CONTINUE            L_SEMI ;
+
+ReturnStatement                                ⟶ K_RETURN ExpressionOpt L_SEMI ;
+
+SynchronizedStatement                          ⟶ K_SYNCHRONIZED L_LPAREN Expression L_RPAREN  Block ;
+
+ThrowStatement                                 ⟶ K_THROW Expression L_SEMI ;
+
+TryStatement                                   ⟶ K_TRY Block Catches
+                                               ⟶ K_TRY Block Catches Finally
+                                               ⟶ K_TRY Block         Finally
+#                                               ⟶ K_TRY ResourceSpecification  Block  CatchesOpt Finally
+#                                               ⟶ K_TRY ResourceSpecification  Block  CatchesOpt 
+;
+
+CatchesOpt                                     ⟶ Catches
+                                               ⟶ ;
+
+Catches                                        ⟶ Catches CatchClause
+                                               ⟶ CatchClause ;
+
+CatchClause                                    ⟶ K_CATCH L_LPAREN CatchFormalParameter L_RPAREN  Block ;
+
+CatchFormalParameter                           ⟶ ClassModifierMultiOpt CatchType  VariableDeclaratorId;
+
+CatchType                                      ⟶ UnannClassTypeDimsNoAt BarClassTypeMultiOpt;
+
+BarClassTypeMultiOpt                           ⟶ BarClassTypeMultiOpt L_BAR  ClassType
+                                               ⟶ ;
+
+Finally                                        ⟶ K_FINALLY Block ;
 
 
-FullNameDot                                    ⟶ SimpleName L_DOT
-                                               ⟶ FullNameDot SimpleName L_DOT;
+StatementExpression                            ⟶ Assignment 
+                                               ⟶ ExpressionIncDec 
+                                               ⟶ IncDecExpression 
+                                               ⟶ MethodInvocation 
+# in UnaryExpression                                              ⟶ ClassInstanceCreationExpression 
+;
+
+
+IfThenStatement                                ⟶ K_IF L_LPAREN  Expression L_RPAREN  Statement ;
+
+IfThenElseStatement                            ⟶ K_IF L_LPAREN  Expression L_RPAREN  StatementNoShortIf K_ELSE  Statement ;
+
+IfThenElseStatementNoShortIf                   ⟶ K_IF L_LPAREN  Expression L_RPAREN  StatementNoShortIf K_ELSE  StatementNoShortIf ;
+
+ForStatement                                   ⟶ BasicForStatement
+                                               ⟶ EnhancedForStatement ;
+
+ForStatementNoShortIf                          ⟶ BasicForStatementNoShortIf
+                                               ⟶ EnhancedForStatementNoShortIf ;
+
+BasicForStatement                              ⟶ K_FOR L_LPAREN  ForInitOpt  L_SEMI  ExpressionOpt  L_SEMI  ForUpdateOpt  L_RPAREN  Statement ;
+
+BasicForStatementNoShortIf                     ⟶ K_FOR L_LPAREN  ForInitOpt  L_SEMI  ExpressionOpt  L_SEMI  ForUpdateOpt  L_RPAREN  StatementNoShortIf ;
+
+ForUpdateOpt                                   ⟶ ForUpdate
+                                               ⟶ ;
+
+ExpressionOpt                                  ⟶ Expression
+                                               ⟶ ;
+
+ForInitOpt                                     ⟶ ForInit
+                                               ⟶ ;
+
+ForInit                                        ⟶ StatementExpressionList
+                                               ⟶ LocalVariableDeclaration ;
+
+ForUpdate                                      ⟶ StatementExpressionList ;
+
+StatementExpressionList                        ⟶ StatementExpressionList L_COMMA  StatementExpression
+                                               ⟶ StatementExpression ;
+
+EnhancedForStatement                           ⟶ K_FOR L_LPAREN ClassModifierMultiOpt UnannTypeDims  VariableDeclaratorId L_COLON  Expression L_RPAREN  Statement ;
+
+EnhancedForStatementNoShortIf                  ⟶ K_FOR L_LPAREN ClassModifierMultiOpt UnannTypeDims  VariableDeclaratorId L_COLON  Expression L_RPAREN  StatementNoShortIf ;
+
+
+FullNameDot                                    ⟶ SimpleNameDot
+                                               ⟶ FullNameDot SimpleNameDot;
+
 
 SimpleName                                     ⟶ IDENTIFIER ;
+
+SimpleNameDot                                  ⟶ SimpleName L_DOT ;
+
+SimpleNameDimenstions                          ⟶ SimpleName DimensionsMulti;
+
 
 AnnotationsMultiOpt                            ⟶ Annotations
                                                ⟶ ;
@@ -262,8 +354,9 @@ Annotations                                    ⟶ Annotation
 
 Annotation                                     ⟶ L_AT AnnotationBody;
 
-Fqn                                            ⟶ FullNameDot SimpleName
+Fqn                                            ⟶ Fqn L_DOT SimpleName
                                                ⟶ SimpleName ;
+
 
 AnnotationBody                                 ⟶ Fqn
                                                ⟶ Fqn L_LPAREN ElementValue L_RPAREN
@@ -300,64 +393,97 @@ ReferenceType                                  ⟶ ClassType
                                                ⟶ ArrayType ;
 
 ArrayType                                      ⟶ AnnotationsMultiOpt UnannPrimitiveTypeDims
-                                               ⟶ ClassType Annotations Dimensions 
-                                               ⟶ ClassType Dimensions ;
+                                               ⟶ ClassType AnnotatedDims
+;
 
 CommaOpt                                       ⟶ L_COMMA
                                                ⟶ ;
 
 
-SimpleUnannType                                ⟶ UnannPrimitiveType
-                                               ⟶ UnannClassType ;
 
 
-#UnannTypeAt       ⟶ SimpleUnannType Annotations 
-#                  ⟶ SimpleUnannType ;
-
-
-UnannPrimitiveTypeDims ⟶ UnannPrimitiveType Annotations Dimensions
-                       ⟶ UnannPrimitiveType Dimensions
-                       ⟶ UnannPrimitiveType
-                       ;
-
-
-UnannTypeDims ⟶ UnannTypeDims Annotations DimensionsSimple
-              ⟶ UnannTypeDims DimensionsSimple
-              ⟶ SimpleUnannType;
-
-Dimensions    ⟶ DimensionsSimple
-              ⟶ Dimensions Annotations DimensionsSimple
-              ⟶ Dimensions DimensionsSimple
-		;
-
-
-UnannTypeDimsAt
-                ⟶ SimpleUnannType
-                ⟶ UnannTypeDimsAt DimensionsSimple
-                ⟶ UnannTypeDimsAt Annotation
-;
-
-DimensionsSimple ⟶ L_LSQBRACE L_RSQBRACE 
-		 ;
-
-
-
-#UnannType                                      ⟶ SimpleUnannType
-#                                               ⟶ UnannClassType
-#                                               ⟶ UnannClassType Dims
-#                                               ⟶ UnannPrimitiveTypeDims ;
+#UnannClassType                                 ⟶ TypeName
+#                                               ⟶ TypeNameDot AnnotatedTypeName
+#                                               ⟶ TypeNameDot AnnotatedTypeNames AnnotatedTypeName
+#;
 
 UnannPrimitiveType                             ⟶ NumericType
                                                ⟶ K_BOOLEAN ;
 
-UnannClassType                                 ⟶ SimpleName TypeArgumentsOpt
-                                               ⟶ UnannClassType L_DOT  TypeVariable TypeArgumentsOpt ;
+
+UnannPrimitiveTypeDimsNoAt                     ⟶ UnannPrimitiveTypeDimsNoAt DimensionsSimple
+                                               ⟶ UnannPrimitiveType
+;
+
+UnannClassTypeDimsNoAt                         ⟶ UnannClassTypeBase DimensionsSimple
+                                               ⟶ SimpleName DimensionsSimple
+                                               ⟶ UnannClassTypeBase
+                                               ⟶ SimpleName
+;
+
+UnannClassTypeBase
+                                               ⟶ SimpleName TypeArguments
+                                               ⟶ TypeNameDot AnnotatedTypeName
+                                               ⟶ TypeNameDot AnnotatedTypeNames AnnotatedTypeName
+;
+
+
+UnannTypeDims                                  ⟶ UnannTypeDims AnnotatedDims2
+#                                              ⟶ UnannTypeDims DimensionsSimple
+                                               ⟶ UnannPrimitiveTypeDimsNoAt
+                                               ⟶ UnannClassTypeDimsNoAt
+;
+
+
+UnannPrimitiveTypeDims                         ⟶ UnannPrimitiveTypeDims AnnotatedDims
+                                               ⟶ UnannPrimitiveType
+;
+
+
+AnnotatedDims2                                 ⟶ Annotations DimensionsSimple
+                                               ⟶ AnnotatedDims2 DimensionsSimple
+;
+
+
+AnnotatedDims                                  ⟶ Annotations DimensionsSimple
+                                               ⟶ DimensionsSimple
+;
+
+AnnotatedVarargs                               ⟶ Annotations L_VARARGS
+                                               ⟶ L_VARARGS
+;
+
+DimensionsMulti                                ⟶ DimensionsMulti DimensionsSimple
+                                               ⟶ DimensionsSimple
+;
+
+
+DimensionsSimple                               ⟶ L_LSQBRACE L_RSQBRACE ;
+
+
+
+TypeNameDot ⟶ SimpleName TypeArguments L_DOT 
+            ⟶ SimpleNameDot ;
+
+
+AnnotatedTypeName ⟶ AnnotationsMultiOpt TypeName  ;
+
+AnnotatedTypeNameDot ⟶ AnnotationsMultiOpt TypeNameDot  ;
+
+
+AnnotatedTypeNames   ⟶ AnnotatedTypeNameDot
+                     ⟶ AnnotatedTypeNames AnnotatedTypeNameDot
+;
+
+TypeName ⟶ SimpleName TypeArguments
+         ⟶ SimpleName
+;
+
 
 ExceptionType                                  ⟶ ClassType;
 
-ClassType                                      ⟶ TypeVariable TypeArgumentsOpt
-                                               ⟶ ClassType L_DOT TypeVariable TypeArgumentsOpt 
-
+ClassType                                      ⟶ AnnotatedTypeName
+                                               ⟶ AnnotatedTypeNames AnnotatedTypeName
 ;
 
 TypeVariable                                   ⟶ AnnotationsMultiOpt SimpleName ;
@@ -387,19 +513,17 @@ PrimaryNoNewArray                              ⟶ LITERAL
                                                ⟶ L_LPAREN Expression L_RPAREN
                                                ⟶ ClassInstanceCreationExpression
 #                                               ⟶ FieldAccess
-#                                               ⟶ ArrayAccess
+                                               ⟶ ArrayAccess
                                                ⟶ MethodInvocation
 #                                               ⟶ MethodReference 
 ;
 
-ClassLiteral                                   ⟶ SimpleName DimMarkerMultiOpt  L_DOT K_CLASS
-                                               ⟶ FullNameDot SimpleName DimMarkerMultiOpt  L_DOT K_CLASS
-                                               ⟶ UnannPrimitiveType  DimMarkerMultiOpt  L_DOT K_CLASS
+ClassLiteral                                   ⟶ SimpleNameDimenstions L_DOT K_CLASS
+                                               ⟶ FullNameDot SimpleNameDimenstions L_DOT K_CLASS
+                                               ⟶ FullNameDot K_CLASS
+                                               ⟶ UnannPrimitiveTypeDimsNoAt L_DOT K_CLASS
 #                                               ⟶ K_BOOLEAN  DimMarkerMultiOpt  L_DOT K_CLASS
                                                ⟶ K_VOID L_DOT K_CLASS ;
-
-DimMarkerMultiOpt                              ⟶ DimMarkerMultiOpt L_LSQBRACE L_RSQBRACE
-                                               ⟶ ;
 
 ClassInstanceCreationExpression                ⟶ UnqualifiedClassInstanceCreationExpression
 #                                               ⟶ ExpressionName L_DOT  UnqualifiedClassInstanceCreationExpression
@@ -421,6 +545,11 @@ AnnotatedIdentifierList                        ⟶ AnnotatedIdentifierList L_DOT
 
 TypeArgumentsOrDiamond                         ⟶ TypeArguments
                                                ⟶ L_LT L_GT ;
+
+ArrayAccess                                    ⟶ SimpleName L_LSQBRACE Expression L_RSQBRACE
+                                               ⟶ FullNameDot SimpleName L_LSQBRACE Expression L_RSQBRACE
+                                               ⟶ PrimaryNoNewArray L_LSQBRACE Expression L_RSQBRACE;
+
 
 MethodInvocation                               ⟶ SimpleName                              L_LPAREN  ArgumentListOpt  L_RPAREN
                                                ⟶ FullNameDot TypeArgumentsOpt SimpleName L_LPAREN  ArgumentListOpt  L_RPAREN
@@ -453,23 +582,16 @@ FormalParameters                               ⟶ FormalParameters L_COMMA  For
 FormalParameter                                ⟶ ClassModifierMultiOpt UnannTypeDims VariableDeclaratorId ;
 
 # only FINAL modifier and annotations
-LastFormalParameter                            ⟶ ClassModifierMultiOpt UnannTypeDims Annotations L_VARARGS  VariableDeclaratorId
-                                               ⟶ ClassModifierMultiOpt UnannTypeDims L_VARARGS VariableDeclaratorId
+LastFormalParameter                            ⟶ ClassModifierMultiOpt UnannTypeDims AnnotatedVarargs  VariableDeclaratorId
+#                                               ⟶ ClassModifierMultiOpt UnannTypeDims L_VARARGS VariableDeclaratorId
                                                ⟶ FormalParameter ;
 
 # only annotations
 ReceiverParameter                              ⟶ ClassModifierMultiOpt UnannTypeDims K_THIS
                                                ⟶ ClassModifierMultiOpt UnannTypeDims IDENTIFIER L_DOT K_THIS ;
 
-#DimsOpt                                        ⟶ Dims
-#                                               ⟶ ;
-
-#Dims                                           ⟶ Dims AnnotationsMultiOpt L_LSQBRACE L_RSQBRACE
-#                                               ⟶ Annotations L_LSQBRACE L_RSQBRACE
-#                                               ⟶ L_LSQBRACE L_RSQBRACE;
-
-InferredFormalParameterList                    ⟶ InferredFormalParameterList L_COMMA SimpleName
-                                               ⟶ SimpleName ;
+InferredFormalParameterList                    ⟶ InferredFormalParameterList L_COMMA IDENTIFIER
+                                               ⟶ IDENTIFIER ;
 
 LambdaBody                                     ⟶ Expression
 #                                               ⟶ Block 
@@ -480,10 +602,10 @@ AssignmentExpression                           ⟶ ConditionalExpression
 
 Assignment                                     ⟶ LeftHandSide  AssignmentOperator  Expression ;
 
-LeftHandSide                                   ⟶ FullNameDot SimpleName
-                                               ⟶ SimpleName
+LeftHandSide                                   ⟶ SimpleName
+                                               ⟶ FullNameDot SimpleName
  #                                              ⟶ FieldAccess
-#                                               ⟶ ArrayAccess 
+                                               ⟶ ArrayAccess 
 ;
 
 AssignmentOperator                             ⟶ L_IS
@@ -500,8 +622,8 @@ AssignmentOperator                             ⟶ L_IS
                                                ⟶ L_OR_IS ;
 
 ConditionalExpression                          ⟶ ConditionalOrExpression
-#                                               ⟶ ConditionalOrExpression L_QUESTION_MARK  Expression L_COLON  ConditionalExpression
-#                                               ⟶ ConditionalOrExpression L_QUESTION_MARK  Expression L_COLON  LambdaExpression 
+                                               ⟶ ConditionalOrExpression L_QUESTION_MARK  Expression L_COLON  ConditionalExpression
+                                               ⟶ ConditionalOrExpression L_QUESTION_MARK  Expression L_COLON  LambdaExpression 
 ;
 
 ConditionalOrExpression                        ⟶ ConditionalAndExpression
@@ -549,7 +671,7 @@ MultiplicativeExpression                       ⟶ UnaryExpression
                                                ⟶ MultiplicativeExpression L_DIV  UnaryExpression
                                                ⟶ MultiplicativeExpression L_MOD  UnaryExpression ;
 
-UnaryExpression                                ⟶ IncOrDec UnaryExpression
+UnaryExpression                                ⟶ IncDecExpression
                                                ⟶ L_ADD UnaryExpression
                                                ⟶ L_SUB UnaryExpression
                                                ⟶ UnaryExpressionNotPlusMinus ;
@@ -560,16 +682,35 @@ UnaryExpressionNotPlusMinus                    ⟶ PostfixExpression
                                                ⟶ CastExpression  
 ;
 
-PostfixExpression                              ⟶ Primary
+
+IncDecExpression                               ⟶ IncOrDec UnaryExpression ;
+
+BasicExpression                                ⟶ Primary
                                                ⟶ FullNameDot SimpleName
                                                ⟶ SimpleName
+;
+
+
+PostfixExpression                              ⟶ BasicExpression
                                                ⟶ PostfixExpression IncOrDec ;
+
+
+ExpressionIncDec                               ⟶ BasicExpression IncOrDec ;
 
 IncOrDec                                       ⟶  L_INC
                                                ⟶  L_DEC ;
 
-CastExpression                                 ⟶ L_LPAREN  AnnotationsMultiOpt UnannPrimitiveType L_RPAREN  UnaryExpression
-#                                               ⟶ L_LPAREN  ReferenceType  AdditionalBoundMultiOpt  L_RPAREN  UnaryExpressionNotPlusMinus
-#                                               ⟶ L_LPAREN  ReferenceType  AdditionalBoundMultiOpt  L_RPAREN  LambdaExpression
+CastExpression                                 ⟶ L_LPAREN UnannPrimitiveType L_RPAREN  UnaryExpression
+                                               ⟶ L_LPAREN Annotations UnannPrimitiveType L_RPAREN  UnaryExpression
+                                               ⟶ L_LPAREN ReferenceType AdditionalBoundMultiOpt  L_RPAREN UnaryExpressionNotPlusMinus
+                                               ⟶ L_LPAREN ReferenceType AdditionalBoundMultiOpt  L_RPAREN LambdaExpression
 ;
+
+
+#ReferenceType                                  ⟶ ClassType
+ #                                              ⟶ ArrayType ;
+
+
+#UnannPrimitiveType                             ⟶ NumericType
+#                                               ⟶ K_BOOLEAN ;
 
