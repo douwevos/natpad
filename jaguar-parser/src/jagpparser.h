@@ -24,10 +24,22 @@
 #define JAGPPARSER_H_
 
 #include "jagpscanner.h"
+#include "jagpilexer.h"
 #include <caterpillar.h>
 #include <grossruntime.h>
 
 G_BEGIN_DECLS
+
+typedef enum _JagPParensResult JagPParensResult;
+
+enum _JagPParensResult {
+	JAGP_PAR_CAST,
+	JAGP_PAR_EXPLICIT_LAMBDA,
+	JAGP_PAR_IMPLICIT_LAMBDA,
+	JAGP_PAR_PARENS
+};
+
+
 
 #define JAGP_TYPE_PARSER              (jagp_parser_get_type())
 #define JAGP_PARSER(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), jagp_parser_get_type(), JagPParser))
@@ -53,7 +65,7 @@ struct _JagPParserClass {
 
 GType jagp_parser_get_type();
 
-JagPParser *jagp_parser_new(JagPScanner *scanner, GroRunITokenFactory *token_factory, GroRunModel *model);
+JagPParser *jagp_parser_new(JagPScanner *scanner, JagPILexer *lexer, GroRunITokenFactory *token_factory, GroRunModel *model);
 
 /*GroAstSpec * */void jagp_parser_run(JagPParser *parser);
 

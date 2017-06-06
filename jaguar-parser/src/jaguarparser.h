@@ -25,6 +25,8 @@
 
 #include "jagpscannerfactory.h"
 #include "jagpparser.h"
+#include "jagplexerimpl.h"
 #include "../src-generated/jagpparserconfig.h"
+#include "tree/jagpjccompilationunit.h"
 
 #endif /* JAGUARPARSER_H_ */

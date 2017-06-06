@@ -27,7 +27,7 @@
 
 G_BEGIN_DECLS
 
-#define CAT_TYPE_IMAP_ITERATOR                 (cat_imatcher_get_type())
+#define CAT_TYPE_IMAP_ITERATOR                 (cat_imap_iterator_get_type())
 #define CAT_IMAP_ITERATOR(obj)                 (G_TYPE_CHECK_INSTANCE_CAST((obj), CAT_TYPE_IMAP_ITERATOR, CatIMapIterator))
 #define CAT_IS_IMAP_ITERATOR(obj)              (G_TYPE_CHECK_INSTANCE_TYPE((obj), CAT_TYPE_IMAP_ITERATOR))
 #define CAT_IMAP_ITERATOR_GET_INTERFACE(inst)  (G_TYPE_INSTANCE_GET_INTERFACE((inst), CAT_TYPE_IMAP_ITERATOR, CatIMapIteratorInterface))
@@ -41,7 +41,7 @@ struct _CatIMapIteratorInterface {
 	gboolean (*next) (CatIMapIterator *self, gpointer **key, gpointer **value);
 };
 
-GType cat_imatcher_get_type(void);
+GType cat_imap_iterator_get_type(void);
 
 gboolean cat_imap_iterator_next(CatIMapIterator *self, gpointer **key, gpointer **value);
 

@@ -39,6 +39,7 @@ module {
 		cc { 
 			src { path './src/'; }  
 			src { path './src-generated/'; }  
+			natpad.cc.args {}
 			destdir './compiled/'; 
 			depdir 'deps';
 		}

@@ -72,12 +72,7 @@ JagToken *jag_token_new_symbol_state(int sym_num, int state);
 void jag_token_dump(JagToken *token);
 
 const char*jag_token_symbol_as_text(JagToken *token);
- 
-
-
-
 
 G_END_DECLS
-
 
 #endif /* JAGTOKEN_H_ */

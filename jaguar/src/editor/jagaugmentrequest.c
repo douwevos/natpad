@@ -238,12 +238,9 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 	CatIUtf8Scanner *utf8_scanner = CAT_IUTF8_SCANNER(revision_reader);
 
 	JagPScanner *scanner = jagp_scanner_factory_create_scanner(priv->scanner_factory, utf8_scanner);
-	JagPParser *parser = jagp_parser_new(scanner, priv->token_factory, priv->model);
+	JagPLexerImpl *lexer_impl = jagp_lexer_impl_new(scanner);
+	JagPParser *parser = jagp_parser_new(scanner, (JagPILexer *) lexer_impl, priv->token_factory, priv->model);
 	jagp_parser_run(parser);
-
-
-
-
 
 	/* tag lines */
 	CatArrayWo *message_list = jagp_parser_get_messages(parser);
