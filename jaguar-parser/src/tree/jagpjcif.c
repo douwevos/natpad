@@ -70,13 +70,11 @@ static void l_finalize(GObject *object) {
 JagPJCIf *jagp_jcif_new(JagPJCExpression *cond, JagPJCStatement *thenpart, JagPJCStatement *elsepart) {
 	JagPJCIf *result = g_object_new(JAGP_TYPE_JCIF, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->cond = cat_ref_ptr(cond);
 	result->thenpart = cat_ref_ptr(thenpart);
 	result->elsepart = cat_ref_ptr(elsepart);
 	return result;
 }
-
 
 
 /********************* start CatIStringable implementation *********************/

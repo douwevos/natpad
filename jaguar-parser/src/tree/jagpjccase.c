@@ -65,7 +65,6 @@ static void l_finalize(GObject *object) {
 JagPJCCase *jagp_jccase_new(JagPJCExpression *pat, CatArrayWo /*<JagPJCStatement>*/ *stats) {
 	JagPJCCase *result = g_object_new(JAGP_TYPE_JCCASE, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->pat = cat_ref_ptr(pat);
 	result->stats = cat_ref_ptr(stats);
 	return result;

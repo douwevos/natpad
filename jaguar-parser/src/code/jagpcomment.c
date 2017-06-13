@@ -69,7 +69,6 @@ static void l_finalize(GObject *object) {
 JagPComment *jagp_comment_new() {
 	JagPComment *result = g_object_new(JAGP_TYPE_COMMENT, NULL);
 	cat_ref_anounce(result);
-	JagPCommentPrivate *priv = jagp_comment_get_instance_private(result);
 //	G_OBJECT_construct((GObject *) result);
 	return result;
 }
@@ -95,10 +94,7 @@ gboolean jagp_comment_is_deprecated(JagPComment *comment) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPComment *instance = JAGP_COMMENT(self);
-	JagPCommentPrivate *priv = jagp_comment_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

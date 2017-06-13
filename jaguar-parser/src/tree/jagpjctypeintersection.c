@@ -68,7 +68,6 @@ static void l_finalize(GObject *object) {
 JagPJCTypeIntersection *jagp_jctype_intersection_new(CatArrayWo *bounds) {
 	JagPJCTypeIntersection *result = g_object_new(JAGP_TYPE_JCTYPE_INTERSECTION, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->bounds = cat_ref_ptr(bounds);
 	return result;
 }

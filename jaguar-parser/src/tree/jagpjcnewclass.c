@@ -69,7 +69,6 @@ JagPJCNewClass *jagp_jcnew_class_new(JagPJCExpression *encl, CatArrayWo /*<JCExp
         CatArrayWo /*<JCExpression>*/ *args, JagPJCClassDecl *def) {
 	JagPJCNewClass *result = g_object_new(JAGP_TYPE_JCNEW_CLASS, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCPOLY_EXPRESSION_construct((JagPJCPolyExpression *) result);
 	result->encl = cat_ref_ptr(encl);
 	result->typeargs = cat_ref_ptr(typeargs);
 	result->clazz = cat_ref_ptr(clazz);

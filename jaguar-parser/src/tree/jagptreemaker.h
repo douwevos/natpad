@@ -28,9 +28,11 @@
 #include "jagpjcarraytypetree.h"
 #include "jagpjcarrayaccess.h"
 #include "jagpjcassign.h"
+#include "jagpjcassignop.h"
 #include "jagpjcassert.h"
 #include "jagpjcblock.h"
 #include "jagpjcbreak.h"
+#include "jagpjcbinary.h"
 #include "jagpjccase.h"
 #include "jagpjccatch.h"
 #include "jagpjcclassdecl.h"
@@ -183,11 +185,13 @@ JagPJCAnnotation *jagp_tree_maker_annotation(JagPTreeMaker *tree_maker, JagPJCTr
 JagPJCAnnotation *jagp_tree_maker_type_annotation(JagPTreeMaker *tree_maker, JagPJCTree *annotation_type, CatArrayWo *args);
 
 JagPJCAssign *jagp_tree_maker_assign(JagPTreeMaker *tree_maker, JagPJCExpression *lhs, JagPJCExpression *rhs);
+JagPJCAssignOp *jagp_tree_maker_assignop(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCTree *lhs, JagPJCTree *rhs);
 
 JagPJCConditional *jagp_tree_maker_conditional(JagPTreeMaker *tree_maker, JagPJCExpression *cond,
 		JagPJCExpression *thenpart, JagPJCExpression *elsepart);
 
 JagPJCUnary *jagp_tree_maker_unary(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *arg);
+JagPJCBinary *jagp_tree_maker_binary(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs);
 
 JagPJCTypeCast *jagp_tree_maker_type_cast(JagPTreeMaker *tree_maker, JagPJCTree *clazz, JagPJCExpression *expre);
 JagPJCTypeApply *jagp_tree_maker_type_apply(JagPTreeMaker *tree_maker, JagPJCTree *clazz, CatArrayWo *arguments);

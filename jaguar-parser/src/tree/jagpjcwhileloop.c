@@ -64,7 +64,6 @@ static void l_finalize(GObject *object) {
 JagPJCWhileLoop *jagp_jcwhile_loop_new(JagPJCExpression *cond, JagPJCStatement *body) {
 	JagPJCWhileLoop *result = g_object_new(JAGP_TYPE_JCWHILE_LOOP, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->cond = cat_ref_ptr(cond);
 	result->body = cat_ref_ptr(body);
 	return result;

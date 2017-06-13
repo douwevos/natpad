@@ -64,7 +64,6 @@ static void l_finalize(GObject *object) {
 JagPJCCompilationUnit *jagp_jccompilation_unit_new(CatArrayWo /*<JagPJCTree>*/ *defs) {
 	JagPJCCompilationUnit *result = g_object_new(JAGP_TYPE_JCCOMPILATION_UNIT, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCTREE_construct((JagPJCTree *) result);
 	result->defs = cat_ref_ptr(defs);
 	return result;
 }

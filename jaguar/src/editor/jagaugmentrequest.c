@@ -63,6 +63,9 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAugmentRequest *instance = JAG_AUGMENT_REQUEST(object);
 	JagAugmentRequestPrivate *priv = jag_augment_request_get_instance_private(instance);
+	cat_unref_ptr(priv->model);
+	cat_unref_ptr(priv->scanner_factory);
+	cat_unref_ptr(priv->token_factory);
 	G_OBJECT_CLASS(jag_augment_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -239,8 +242,9 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 
 	JagPScanner *scanner = jagp_scanner_factory_create_scanner(priv->scanner_factory, utf8_scanner);
 	JagPLexerImpl *lexer_impl = jagp_lexer_impl_new(scanner);
-	JagPParser *parser = jagp_parser_new(scanner, (JagPILexer *) lexer_impl, priv->token_factory, priv->model);
+	JagPParser *parser = jagp_parser_new((JagPILexer *) lexer_impl, priv->token_factory);
 	jagp_parser_run(parser);
+	cat_unref_ptr(lexer_impl);
 
 	/* tag lines */
 	CatArrayWo *message_list = jagp_parser_get_messages(parser);
@@ -315,6 +319,7 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 //	cat_unref_ptr(utf8_scanner);
 //	cat_unref_ptr(plain_parser);
 //	cat_unref_ptr(scanner);
+	cat_unref_ptr(parser);
 	return TRUE;
 }
 

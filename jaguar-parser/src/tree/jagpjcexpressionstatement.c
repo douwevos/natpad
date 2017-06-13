@@ -64,7 +64,6 @@ static void l_finalize(GObject *object) {
 JagPJCExpressionStatement *jagp_jcexpression_statement_new(JagPJCExpression *expr) {
 	JagPJCExpressionStatement *result = g_object_new(JAGP_TYPE_JCEXPRESSION_STATEMENT, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->expr = cat_ref_ptr(expr);
 	return result;
 }

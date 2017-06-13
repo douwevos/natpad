@@ -47,7 +47,8 @@ static void jagp_jcliteral_init(JagPJCLiteral *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPJCLiteral *instance = JAGP_JCLITERAL(object);
+	JagPJCLiteral *instance = JAGP_JCLITERAL(object);
+	cat_unref_ptr(instance->value);
 	G_OBJECT_CLASS(jagp_jcliteral_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -63,8 +64,8 @@ static void l_finalize(GObject *object) {
 JagPJCLiteral *jagp_jcliteral_new(JagPTpTag type_tag, GObject *value) {
 	JagPJCLiteral *result = g_object_new(JAGP_TYPE_JCLITERAL, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->type_tag = type_tag;
 	result->value = cat_ref_ptr(value);
 	return result;
 }
+

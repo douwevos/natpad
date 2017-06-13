@@ -66,7 +66,6 @@ static void l_finalize(GObject *object) {
 JagPJCPackageDecl *jagp_jcpackage_decl_new(CatArrayWo /*<JagPJCAnnotation>*/ *annotations, JagPJCExpression *pid) {
 	JagPJCPackageDecl *result = g_object_new(JAGP_TYPE_JCPACKAGE_DECL, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCTREE_construct((JagPJCTree *) result);
 	result->annotations = cat_ref_ptr(annotations);
 	result->pid = cat_ref_ptr(pid);
 	return result;

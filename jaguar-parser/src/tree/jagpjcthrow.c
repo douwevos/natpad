@@ -64,7 +64,7 @@ static void l_finalize(GObject *object) {
 JagPJCThrow *jagp_jcthrow_new(JagPJCExpression *expr) {
 	JagPJCThrow *result = g_object_new(JAGP_TYPE_JCTHROW, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->expr = cat_ref_ptr(expr);
 	return result;
 }
+

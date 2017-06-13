@@ -70,7 +70,6 @@ static void l_finalize(GObject *object) {
 JagPTreeMaker *jagp_tree_maker_new() {
 	JagPTreeMaker *result = g_object_new(JAGP_TYPE_TREE_MAKER, NULL);
 	cat_ref_anounce(result);
-	JagPTreeMakerPrivate *priv = jagp_tree_maker_get_instance_private(result);
 //	G_OBJECT_construct((GObject *) result);
 	return result;
 }
@@ -214,6 +213,169 @@ JagPJCSynchronized *jagp_tree_maker_synchronized(JagPTreeMaker *tree_maker, JagP
 
 
 
+JagPJCTry *jagp_tree_maker_try(JagPTreeMaker *tree_maker, CatArrayWo /*<JagPJCTree>*/ *resources, JagPJCBlock *body,
+		CatArrayWo /*<JCCatch>*/ *catchers, JagPJCBlock *finalizer) {
+	JagPJCTry *tree = jagp_jctry_new(resources, body, catchers, finalizer);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+
+JagPJCCatch *jagp_tree_maker_catch(JagPTreeMaker *tree_maker, JagPJCVariableDecl *param, JagPJCBlock *body) {
+	JagPJCCatch *tree = jagp_jccatch_new(param, body);
+	tree->parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCConditional *jagp_tree_maker_conditional(JagPTreeMaker *tree_maker, JagPJCExpression *cond,
+		JagPJCExpression *thenpart, JagPJCExpression *elsepart) {
+	JagPJCConditional *tree = jagp_jcconditional_new(cond, thenpart, elsepart);
+	tree->parent.parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCIf *jagp_tree_maker_if(JagPTreeMaker *tree_maker, JagPJCExpression *cond, JagPJCStatement *thenpart, JagPJCStatement *elsepart) {
+	JagPJCIf *tree = jagp_jcif_new(cond, thenpart, elsepart);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCExpressionStatement *jagp_tree_maker_exec(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
+	JagPJCExpressionStatement *tree = jagp_jcexpression_statement_new(expr);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCBreak *jagp_tree_maker_break(JagPTreeMaker *tree_maker, JagPName *label) {
+	JagPJCBreak *tree = jagp_jcbreak_new(label);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCContinue *jagp_tree_maker_continue(JagPTreeMaker *tree_maker, JagPName *label) {
+	JagPJCContinue *tree = jagp_jccontinue_new(label);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCReturn *jagp_tree_maker_return(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
+	JagPJCReturn *tree = jagp_jcreturn_new(expr);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCThrow *jagp_tree_maker_throw(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
+	JagPJCThrow *tree = jagp_jcthrow_new(expr);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCAssert *jagp_tree_maker_assert(JagPTreeMaker *tree_maker, JagPJCExpression *cond, JagPJCExpression *detail) {
+	JagPJCAssert *tree = jagp_jcassert_new(cond, detail);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCMethodInvocation *jagp_tree_maker_apply(JagPTreeMaker *tree_maker, CatArrayWo /*<JCExpression>*/ *typeargs, JagPJCExpression *fn, CatArrayWo /*<JCExpression>*/ *args) {
+	JagPJCMethodInvocation *tree = jagp_jcmethod_invocation_new(typeargs, fn, args);
+	tree->parent.parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCNewClass *jagp_tree_maker_new_class(JagPTreeMaker *tree_maker, JagPJCExpression *encl, CatArrayWo /*<JagPJCExpression>*/ *typeargs,
+			JagPJCExpression *clazz, CatArrayWo /*<JCExpression>*/ *args, JagPJCClassDecl *def) {
+	JagPJCNewClass *tree = jagp_jcnew_class_new(encl, typeargs, clazz, args, def);
+	tree->parent.parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCNewArray *jagp_tree_maker_new_array(JagPTreeMaker *tree_maker, JagPJCExpression *elemtype, CatArrayWo /*<JCExpression>*/ *dims,
+							 CatArrayWo /*<JCExpression>*/ *elems) {
+	JagPJCNewArray *tree = jagp_jcnew_array_new(elemtype, dims, elems);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCLambda *jagp_tree_maker_lambda(JagPTreeMaker *tree_maker, CatArrayWo /*JagPJCVariableDecl*/*params, JagPJCTree *body) {
+	JagPJCLambda *tree = jagp_jclambda_new(params, body);
+	tree->parent.parent.parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCParens *jagp_tree_maker_parens(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
+	JagPJCParens *tree = jagp_jcparens_new(expr);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCAssign *jagp_tree_maker_assign(JagPTreeMaker *tree_maker, JagPJCExpression *lhs, JagPJCExpression *rhs) {
+	JagPJCAssign *tree = jagp_jcassign_new(lhs, rhs);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCAssignOp *jagp_tree_maker_assignop(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCTree *lhs, JagPJCTree *rhs) {
+	JagPJCAssignOp *tree = jagp_jcassignop_new(opcode, lhs, rhs);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCUnary *jagp_tree_maker_unary(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *arg) {
+	JagPJCUnary *tree = jagp_jcunary_new(opcode, arg);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCBinary *jagp_tree_maker_binary(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs) {
+	JagPJCUnary *tree = jagp_jcbinary_new(opcode, lhs, rhs);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+JagPJCTypeCast *jagp_tree_maker_type_cast(JagPTreeMaker *tree_maker, JagPJCTree *clazz, JagPJCExpression *expr) {
+	JagPJCTypeCast *tree = jagp_jctype_cast_new(clazz, expr);
+	tree->parent.parent.pos = tree_maker->pos;
+	return tree;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -234,12 +396,6 @@ JagPJCTypeParameter *jagp_tree_maker_type_parameter(JagPTreeMaker *tree_maker, J
 	return tree;
 }
 
-
-JagPJCMethodInvocation *jagp_tree_maker_apply(JagPTreeMaker *tree_maker, CatArrayWo /*<JCExpression>*/ *typeargs, JagPJCExpression *fn, CatArrayWo /*<JCExpression>*/ *args) {
-	JagPJCMethodInvocation *tree = jagp_jcmethod_invocation_new(typeargs, fn, args);
-	tree->parent.parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
 
 JagPTypeBoundKind *jagp_tree_maker_type_bound_kind(JagPTreeMaker *tree_maker, JagPBoundKind kind) {
@@ -262,28 +418,17 @@ JagPJCErroneous *jagp_tree_maker_erroneous(JagPTreeMaker *tree_maker, CatArrayWo
 }
 
 
-JagPJCNewClass *jagp_tree_maker_new_class(JagPTreeMaker *tree_maker, JagPJCExpression *encl, CatArrayWo /*<JagPJCExpression>*/ *typeargs,
-			JagPJCExpression *clazz, CatArrayWo /*<JCExpression>*/ *args, JagPJCClassDecl *def) {
-	JagPJCNewClass *tree = jagp_jcnew_class_new(encl, typeargs, clazz, args, def);
-	tree->parent.parent.parent.pos = tree_maker->pos;
-	return tree;
-}
-
-
-JagPJCNewArray *jagp_tree_maker_new_array(JagPTreeMaker *tree_maker, JagPJCExpression *elemtype, CatArrayWo /*<JCExpression>*/ *dims,
-							 CatArrayWo /*<JCExpression>*/ *elems) {
-	JagPJCNewArray *tree = jagp_jcnew_array_new(elemtype, dims, elems);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
 
 
 JagPJCModifiers *jagp_tree_maker_modifiers(JagPTreeMaker *tree_maker, long long flags, CatArrayWo *annotations) {
-    JagPJCModifiers *tree = jagp_jcmodifiers_new(flags, annotations);
-    gboolean noFlags = (flags & (JAGP_FLAG_ModifierFlags | JAGP_FLAG_ANNOTATION)) == 0;
-    tree->parent.pos = (noFlags && cat_array_wo_size(annotations)==0) ? -1 : tree_maker->pos;
-    return tree;
+	if (annotations==NULL) {
+		annotations = cat_array_wo_new();
+	}
+	JagPJCModifiers *tree = jagp_jcmodifiers_new(flags, annotations);
+	gboolean noFlags = (flags & (JAGP_FLAG_ModifierFlags | JAGP_FLAG_ANNOTATION)) == 0;
+	tree->parent.pos = (noFlags && cat_array_wo_size(annotations)==0) ? -1 : tree_maker->pos;
+	return tree;
 }
 
 JagPJCIdent *jagp_tree_maker_ident(JagPTreeMaker *tree_maker, JagPName *name) {
@@ -331,33 +476,13 @@ JagPJCAnnotation *jagp_tree_maker_type_annotation(JagPTreeMaker *tree_maker, Jag
 	return tree;
 }
 
-JagPJCAssign *jagp_tree_maker_assign(JagPTreeMaker *tree_maker, JagPJCExpression *lhs, JagPJCExpression *rhs) {
-	JagPJCAssign *tree = jagp_jcassign_new(lhs, rhs);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-JagPJCConditional *jagp_tree_maker_conditional(JagPTreeMaker *tree_maker, JagPJCExpression *cond,
-		JagPJCExpression *thenpart, JagPJCExpression *elsepart) {
-	JagPJCConditional *tree = jagp_jcconditional_new(cond, thenpart, elsepart);
-	tree->parent.parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-JagPJCUnary *jagp_tree_maker_unary(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *arg) {
-	JagPJCUnary *tree = jagp_jcunary_new(opcode, arg);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-JagPJCTypeCast *jagp_tree_maker_type_cast(JagPTreeMaker *tree_maker, JagPJCTree *clazz, JagPJCExpression *expr) {
-	JagPJCTypeCast *tree = jagp_jctype_cast_new(clazz, expr);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
+
 
 JagPJCTypeApply *jagp_tree_maker_type_apply(JagPTreeMaker *tree_maker, JagPJCTree *clazz, CatArrayWo *arguments) {
-	JagPJCTypeApply *tree = jagp_jctype_apply_new(clazz, arguments);
+	JagPJCTypeApply *tree = jagp_jctype_apply_new((JagPJCExpression *) clazz, arguments);
 	tree->parent.parent.pos = tree_maker->pos;
 	return tree;
 }
@@ -368,14 +493,9 @@ JagPJCTypeIntersection *jagp_tree_maker_type_intersection(JagPTreeMaker *tree_ma
 	return tree;
 }
 
-JagPJCParens *jagp_tree_maker_parens(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
-	JagPJCParens *tree = jagp_jcparens_new(expr);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
 JagPJCAnnotatedType *jagp_tree_maker_annotated_type(JagPTreeMaker *tree_maker, CatArrayWo *annotations, JagPJCExpression *underlying_type) {
-	JagPJCTypeIntersection *tree = jagp_jcannotated_type_new(annotations, underlying_type);
+	JagPJCAnnotatedType *tree = jagp_jcannotated_type_new(annotations, underlying_type);
 	tree->parent.parent.pos = tree_maker->pos;
 	return tree;
 }
@@ -392,18 +512,7 @@ JagPJCArrayAccess *jagp_tree_maker_indexed(JagPTreeMaker *tree_maker, JagPJCExpr
 	return tree;
 }
 
-JagPJCLambda *jagp_tree_maker_lambda(JagPTreeMaker *tree_maker, CatArrayWo /*JagPJCVariableDecl*/*params, JagPJCTree *body) {
-	JagPJCLambda *tree = jagp_jclambda_new(params, body);
-	tree->parent.parent.parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-
-JagPJCIf *jagp_tree_maker_if(JagPTreeMaker *tree_maker, JagPJCExpression *cond, JagPJCStatement *thenpart, JagPJCStatement *elsepart) {
-	JagPJCIf *tree = jagp_jcif_new(cond, thenpart, elsepart);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
 
 
@@ -414,49 +523,12 @@ JagPJCClassDecl *jagp_tree_maker_anonymous_class_def(JagPTreeMaker *tree_maker, 
 }
 
 
-JagPJCExpressionStatement *jagp_tree_maker_exec(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
-	JagPJCExpressionStatement *tree = jagp_jcexpression_statement_new(expr);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
 
-JagPJCTry *jagp_tree_maker_try(JagPTreeMaker *tree_maker, CatArrayWo /*<JagPJCTree>*/ *resources, JagPJCBlock *body,
-		CatArrayWo /*<JCCatch>*/ *catchers, JagPJCBlock *finalizer) {
-	JagPJCTry *tree = jagp_jctry_new(resources, body, catchers, finalizer);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-JagPJCReturn *jagp_tree_maker_return(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
-	JagPJCReturn *tree = jagp_jcreturn_new(expr);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-JagPJCThrow *jagp_tree_maker_throw(JagPTreeMaker *tree_maker, JagPJCExpression *expr) {
-	JagPJCThrow *tree = jagp_jcthrow_new(expr);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-JagPJCBreak *jagp_tree_maker_break(JagPTreeMaker *tree_maker, JagPName *label) {
-	JagPJCBreak *tree = jagp_jcbreak_new(label);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
-JagPJCContinue *jagp_tree_maker_continue(JagPTreeMaker *tree_maker, JagPName *label) {
-	JagPJCContinue *tree = jagp_jccontinue_new(label);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
-
-JagPJCAssert *jagp_tree_maker_assert(JagPTreeMaker *tree_maker, JagPJCExpression *cond, JagPJCExpression *detail) {
-	JagPJCAssert *tree = jagp_jcassert_new(cond, detail);
-	tree->parent.parent.pos = tree_maker->pos;
-	return tree;
-}
 
 JagPJCTypeUnion *jagp_tree_maker_type_union(JagPTreeMaker *tree_maker, CatArrayWo /*<JagPJCExpression>*/ *alternatives) {
 	JagPJCTypeUnion *tree = jagp_jctype_union_new(alternatives);
@@ -464,20 +536,11 @@ JagPJCTypeUnion *jagp_tree_maker_type_union(JagPTreeMaker *tree_maker, CatArrayW
 	return tree;
 }
 
-JagPJCCatch *jagp_tree_maker_catch(JagPTreeMaker *tree_maker, JagPJCVariableDecl *param, JagPJCBlock *body) {
-	JagPJCCatch *tree = jagp_jccatch_new(param, body);
-	tree->parent.pos = tree_maker->pos;
-	return tree;
-}
-
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPTreeMaker *instance = JAGP_TREE_MAKER(self);
-	JagPTreeMakerPrivate *priv = jagp_tree_maker_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

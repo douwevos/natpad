@@ -64,7 +64,6 @@ static void l_finalize(GObject *object) {
 JagPJCTypeUnion *jagp_jctype_union_new(CatArrayWo /*<JagPJCExpression>*/ *alternatives) {
 	JagPJCTypeUnion *result = g_object_new(JAGP_TYPE_JCTYPE_UNION, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->alternatives = cat_ref_ptr(alternatives);
 	return result;
 }

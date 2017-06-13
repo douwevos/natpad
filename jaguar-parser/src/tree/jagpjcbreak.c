@@ -64,7 +64,6 @@ static void l_finalize(GObject *object) {
 JagPJCBreak *jagp_jcbreak_new(JagPName *label) {
 	JagPJCBreak *result = g_object_new(JAGP_TYPE_JCBREAK, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->label = cat_ref_ptr(label);
 	return result;
 }

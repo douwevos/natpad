@@ -65,7 +65,6 @@ static void l_finalize(GObject *object) {
 JagPJCSwitch *jagp_jcswitch_new(JagPJCExpression *selector, CatArrayWo /*<JagPJCCase>*/ *cases) {
 	JagPJCSwitch *result = g_object_new(JAGP_TYPE_JCSWITCH, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->selector = cat_ref_ptr(selector);
 	result->cases = cat_ref_ptr(cases);
 	return result;

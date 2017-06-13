@@ -68,7 +68,6 @@ JagPJCForLoop *jagp_jcfor_loop_new(CatArrayWo /*<JCStatement>*/ *init, JagPJCExp
 		CatArrayWo /*<JagPJCExpressionStatement>*/ *step, JagPJCStatement *body) {
 	JagPJCForLoop *result = g_object_new(JAGP_TYPE_JCFOR_LOOP, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->init = cat_ref_ptr(init);
 	result->cond = cat_ref_ptr(cond);
 	result->step = cat_ref_ptr(step);

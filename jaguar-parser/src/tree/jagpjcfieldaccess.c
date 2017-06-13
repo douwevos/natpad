@@ -69,7 +69,6 @@ static void l_finalize(GObject *object) {
 JagPJCFieldAccess *jagp_jcfield_access_new(JagPJCExpression *selected, JagPName *name, /*JagPSymbol*/ GObject *sym) {
 	JagPJCFieldAccess *result = g_object_new(JAGP_TYPE_JCFIELD_ACCESS, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->selected = cat_ref_ptr(selected);
 	result->name = cat_ref_ptr(name);
 	result->sym = cat_ref_ptr(sym);

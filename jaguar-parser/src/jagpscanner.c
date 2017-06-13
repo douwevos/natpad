@@ -231,7 +231,7 @@ static GroRunIToken *l_next_token(JagPScanner *scanner) {
 					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_DEC, 2);
 				} else if (lookahead[1]=='=') {
 					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SUB_IS, 2);
-				} else if (lookahead[1]=='=') {
+				} else if (lookahead[1]=='>') {
 					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_ARROW, 2);
 				} else {
 					result = base_class->createTokenBasic(gro_scanner, JAGP_SYM_L_SUB, 1);

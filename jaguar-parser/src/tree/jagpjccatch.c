@@ -65,7 +65,6 @@ static void l_finalize(GObject *object) {
 JagPJCCatch *jagp_jccatch_new(JagPJCVariableDecl *param, JagPJCBlock *body) {
 	JagPJCCatch *result = g_object_new(JAGP_TYPE_JCCATCH, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCTREE_construct((JagPJCTree *) result);
 	result->param = cat_ref_ptr(param);
 	result->body = cat_ref_ptr(body);
 	return result;

@@ -57,8 +57,10 @@ static void jagp_lexer_impl_init(JagPLexerImpl *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPLexerImpl *instance = JAGP_LEXER_IMPL(object);
-//	JagPLexerImplPrivate *priv = jagp_lexer_impl_get_instance_private(instance);
+	JagPLexerImpl *instance = JAGP_LEXER_IMPL(object);
+	JagPLexerImplPrivate *priv = jagp_lexer_impl_get_instance_private(instance);
+	cat_unref_ptr(priv->scanner);
+	cat_unref_ptr(priv->tokens);
 	G_OBJECT_CLASS(jagp_lexer_impl_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -92,6 +94,19 @@ static JagPToken *l_scan_real_token(JagPLexerImpl *lexer) {
 	token->source = full_token;
 	int sym_index = grorun_full_token_get_user_index(full_token);
 	switch(sym_index) {
+
+		// 0
+		case JAGP_SYM_END_OF_INPUT : token->kind = JAGP_KIND_EOF;  break;
+//		case JAGP_SYM_ERROR : token->kind = JAGP_KIND_; break;
+		case JAGP_SYM_L_LSQBRACE : token->kind = JAGP_KIND_LBRACKET; break;
+		case JAGP_SYM_L_RSQBRACE : token->kind = JAGP_KIND_RBRACKET; break;
+		case JAGP_SYM_L_ARROW : token->kind = JAGP_KIND_ARROW; break;
+		case JAGP_SYM_L_AND : token->kind = JAGP_KIND_AMP; break;
+		case JAGP_SYM_L_LT : token->kind = JAGP_KIND_LT; break;
+		case JAGP_SYM_L_GT : token->kind = JAGP_KIND_GT; break;
+		case JAGP_SYM_L_LE : token->kind = JAGP_KIND_LTEQ; break;
+		case JAGP_SYM_L_GE : token->kind = JAGP_KIND_GTEQ; break;
+
 
 		// 10
 		case JAGP_SYM_L_EQ : token->kind = JAGP_KIND_EQEQ; break;
@@ -208,15 +223,10 @@ static JagPToken *l_scan_real_token(JagPLexerImpl *lexer) {
 
 
 
-		case JAGP_SYM_L_LT : token->kind = JAGP_KIND_LT; break;
-		case JAGP_SYM_L_GT : token->kind = JAGP_KIND_GT; break;
 
 
 
-		case JAGP_SYM_L_LSQBRACE : token->kind = JAGP_KIND_LBRACKET; break;
-		case JAGP_SYM_L_RSQBRACE : token->kind = JAGP_KIND_RBRACKET; break;
 
-		case JAGP_SYM_END_OF_INPUT : token->kind = JAGP_KIND_EOF;  break;
 
 		case JAGP_SYM_EOL_COMMENT :
 		case JAGP_SYM_FULL_COMMENT : {
@@ -268,11 +278,17 @@ static JagPToken *l_token_ahead(JagPILexer *lexer, int lookahead) {
 	return (JagPToken *) cat_array_wo_get(priv->tokens, offset);
 }
 
+static JagPToken *l_prev_token(JagPILexer *lexer) {
+	JagPLexerImplPrivate *priv = jagp_lexer_impl_get_instance_private((JagPLexerImpl *) lexer);
+	return (JagPToken *) cat_array_wo_get(priv->tokens, priv->tokens_index-1);
+}
+
 
 static void l_lexer_iface_init(JagPILexerInterface *iface) {
 	iface->nextToken = l_next_token;
 	iface->token = l_token;
 	iface->tokenAhead = l_token_ahead;
+	iface->prevToken = l_prev_token;
 }
 
 

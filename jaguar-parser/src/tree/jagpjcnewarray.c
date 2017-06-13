@@ -74,7 +74,6 @@ JagPJCNewArray *jagp_jcnew_array_new(JagPJCExpression *elemtype, CatArrayWo /*<J
 	result->annotations = cat_array_wo_new();
 	result->dimAnnotations = cat_array_wo_new();
 	result->elems = cat_ref_ptr(elems);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	return result;
 }
 
