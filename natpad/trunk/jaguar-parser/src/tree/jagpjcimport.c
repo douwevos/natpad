@@ -68,7 +68,6 @@ static void l_finalize(GObject *object) {
 JagPJCImport *jagp_jcimport_new(JagPJCTree *qualid, gboolean import_static) {
 	JagPJCImport *result = g_object_new(JAGP_TYPE_JCIMPORT, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCTREE_construct((JagPJCTree *) result);
 	result->import_static = import_static;
 	result->qualid = cat_ref_ptr(qualid);
 	return result;
@@ -79,9 +78,7 @@ JagPJCImport *jagp_jcimport_new(JagPJCTree *qualid, gboolean import_static) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCImport *instance = JAGP_JCIMPORT(self);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

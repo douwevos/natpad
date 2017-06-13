@@ -51,7 +51,13 @@ static void jagp_jcclass_decl_init(JagPJCClassDecl *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPJCClassDecl *instance = JAGP_JCCLASS_DECL(object);
+	JagPJCClassDecl *instance = JAGP_JCCLASS_DECL(object);
+	cat_unref_ptr(instance->modifiers);
+	cat_unref_ptr(instance->name);
+	cat_unref_ptr(instance->typarams);
+	cat_unref_ptr(instance->extending);
+	cat_unref_ptr(instance->implementing);
+	cat_unref_ptr(instance->defs);
 	G_OBJECT_CLASS(jagp_jcclass_decl_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -67,7 +73,6 @@ static void l_finalize(GObject *object) {
 JagPJCClassDecl *jagp_jcclass_decl_new(JagPJCModifiers *modifiers, JagPName *name, CatArrayWo *typarams, JagPJCExpression *extending, CatArrayWo *implementing, CatArrayWo *defs /*, ClassSymbol*/) {
 	JagPJCClassDecl *result = g_object_new(JAGP_TYPE_JCCLASS_DECL, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->modifiers = cat_ref_ptr(modifiers);
 	result->name = cat_ref_ptr(name);
 	result->typarams = cat_ref_ptr(typarams);
@@ -76,7 +81,6 @@ JagPJCClassDecl *jagp_jcclass_decl_new(JagPJCModifiers *modifiers, JagPName *nam
 	result->defs = cat_ref_ptr(defs);
 	return result;
 }
-
 
 
 /********************* start CatIStringable implementation *********************/

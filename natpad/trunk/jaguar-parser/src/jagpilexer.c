@@ -44,5 +44,7 @@ JagPToken *jagp_ilexer_token_lah(JagPILexer *lexer, int lookahead) {
 	return JAGP_ILEXER_GET_INTERFACE(lexer)->tokenAhead(lexer, lookahead);
 }
 
-
+JagPToken *jagp_ilexer_prev_token(JagPILexer *lexer) {
+	return JAGP_ILEXER_GET_INTERFACE(lexer)->prevToken(lexer);
+}
 

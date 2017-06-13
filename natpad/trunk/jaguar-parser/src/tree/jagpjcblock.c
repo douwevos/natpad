@@ -68,13 +68,11 @@ static void l_finalize(GObject *object) {
 JagPJCBlock *jagp_jcblock_new(long long flags, CatArrayWo *stats) {
 	JagPJCBlock *result = g_object_new(JAGP_TYPE_JCBLOCK, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->flags = flags;
 	result->stats = cat_ref_ptr(stats);
 	result->endpos = -1;
 	return result;
 }
-
 
 
 /********************* start CatIStringable implementation *********************/

@@ -49,6 +49,7 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagPJCWildcard *instance = JAGP_JCWILDCARD(object);
 	cat_unref_ptr(instance->inner);
+	cat_unref_ptr(instance->kind);
 	G_OBJECT_CLASS(jagp_jcwildcard_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -63,8 +64,7 @@ static void l_finalize(GObject *object) {
 JagPJCWildcard *jagp_jcwildcard_new(JagPTypeBoundKind *kind, JagPJCTree *inner) {
 	JagPJCWildcard *result = g_object_new(JAGP_TYPE_JCWILDCARD, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
-	result->kind = kind;
+	result->kind = cat_ref_ptr(kind);
 	result->inner = cat_ref_ptr(inner);
 	return result;
 }

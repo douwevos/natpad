@@ -51,7 +51,9 @@ static void jagp_jctype_cast_init(JagPJCTypeCast *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPJCTypeCast *instance = JAGP_JCTYPE_CAST(object);
+	JagPJCTypeCast *instance = JAGP_JCTYPE_CAST(object);
+	cat_unref_ptr(instance->clazz);
+	cat_unref_ptr(instance->expr);
 	G_OBJECT_CLASS(jagp_jctype_cast_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -67,12 +69,10 @@ static void l_finalize(GObject *object) {
 JagPJCTypeCast *jagp_jctype_cast_new(JagPJCTree *clazz, JagPJCExpression *expr) {
 	JagPJCTypeCast *result = g_object_new(JAGP_TYPE_JCTYPE_CAST, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->clazz = cat_ref_ptr(clazz);
 	result->expr = cat_ref_ptr(expr);
 	return result;
 }
-
 
 
 /********************* start CatIStringable implementation *********************/

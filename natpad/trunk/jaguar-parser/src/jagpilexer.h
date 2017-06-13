@@ -97,6 +97,9 @@ JagPToken *jagp_ilexer_split(JagPILexer *lexer);
 
 JagPToken *jagp_ilexer_token_lah(JagPILexer *lexer, int lookahead);
 
+JagPToken *jagp_ilexer_prev_token(JagPILexer *lexer);
+
+
 G_END_DECLS
 
 #endif /* JAGPILEXER_H_ */

@@ -63,7 +63,6 @@ static void l_finalize(GObject *object) {
 JagPJCMemberReference *jagp_jcmember_reference_new(JagPReferenceMode mode, JagPName *name, JagPJCExpression *expr, CatArrayWo /*<JCExpression>*/ *typeargs) {
 	JagPJCMemberReference *result = g_object_new(JAGP_TYPE_JCMEMBER_REFERENCE, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCFUNCTIONAL_EXPRESSION_construct((JagPJCFunctionalExpression *) result);
 	result->mode = mode;
 	result->name = cat_ref_ptr(name);
 	result->expr = cat_ref_ptr(expr);

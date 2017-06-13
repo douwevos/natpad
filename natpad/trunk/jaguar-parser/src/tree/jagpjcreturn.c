@@ -64,7 +64,7 @@ static void l_finalize(GObject *object) {
 JagPJCReturn *jagp_jcreturn_new(JagPJCExpression *expr) {
 	JagPJCReturn *result = g_object_new(JAGP_TYPE_JCRETURN, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->expr = cat_ref_ptr(expr);
 	return result;
 }
+

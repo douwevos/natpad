@@ -52,8 +52,6 @@ static void jagp_name_init(JagPName *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPName *instance = JAGP_NAME(object);
-//	JagPNamePrivate *priv = jagp_name_get_instance_private(instance);
 	G_OBJECT_CLASS(jagp_name_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -69,20 +67,14 @@ static void l_finalize(GObject *object) {
 JagPName *jagp_name_new() {
 	JagPName *result = g_object_new(JAGP_TYPE_NAME, NULL);
 	cat_ref_anounce(result);
-	JagPNamePrivate *priv = jagp_name_get_instance_private(result);
 //	G_OBJECT_construct((GObject *) result);
 	return result;
 }
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPName *instance = JAGP_NAME(self);
-	JagPNamePrivate *priv = jagp_name_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

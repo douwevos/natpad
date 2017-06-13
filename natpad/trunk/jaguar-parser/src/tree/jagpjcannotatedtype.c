@@ -69,13 +69,10 @@ static void l_finalize(GObject *object) {
 JagPJCAnnotatedType *jagp_jcannotated_type_new(CatArrayWo *annotations, JagPJCExpression *underlying_type) {
 	JagPJCAnnotatedType *result = g_object_new(JAGP_TYPE_JCANNOTATED_TYPE, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->annotations = cat_ref_ptr(annotations);
 	result->underlying_type = cat_ref_ptr(underlying_type);
 	return result;
 }
-
-
 
 /********************* start CatIStringable implementation *********************/
 

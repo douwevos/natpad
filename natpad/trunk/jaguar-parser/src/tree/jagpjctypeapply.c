@@ -69,12 +69,10 @@ static void l_finalize(GObject *object) {
 JagPJCTypeApply *jagp_jctype_apply_new(JagPJCExpression *clazz, CatArrayWo *arguments) {
 	JagPJCTypeApply *result = g_object_new(JAGP_TYPE_JCTYPE_APPLY, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->clazz = cat_ref_ptr(clazz);
 	result->arguments = cat_ref_ptr(arguments);
 	return result;
 }
-
 
 
 /********************* start CatIStringable implementation *********************/

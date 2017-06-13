@@ -62,6 +62,9 @@ static void l_dispose(GObject *object) {
 	JagEditorConnector *instance = JAG_EDITOR_CONNECTOR(object);
 	JagEditorConnectorPrivate *priv = jag_editor_connector_get_instance_private(instance);
 	cat_unref_ptr(priv->a_slot_key);
+	cat_unref_ptr(priv->model);
+	cat_unref_ptr(priv->scanner_factory);
+	cat_unref_ptr(priv->token_factory);
 	G_OBJECT_CLASS(jag_editor_connector_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

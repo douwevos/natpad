@@ -68,11 +68,9 @@ static void l_finalize(GObject *object) {
 JagPJCParens *jagp_jcparens_new(JagPJCExpression *expr) {
 	JagPJCParens *result = g_object_new(JAGP_TYPE_JCPARENS, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->expr = cat_ref_ptr(expr);
 	return result;
 }
-
 
 
 /********************* start CatIStringable implementation *********************/

@@ -69,12 +69,10 @@ static void l_finalize(GObject *object) {
 JagPJCLambda *jagp_jclambda_new(CatArrayWo /*JagPJCVariableDecl*/*params, JagPJCTree *body) {
 	JagPJCLambda *result = g_object_new(JAGP_TYPE_JCLAMBDA, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCFUNCTIONAL_EXPRESSION_construct((JagPJCFunctionalExpression *) result);
 	result->params = cat_ref_ptr(params);
 	result->body = cat_ref_ptr(body);
 	return result;
 }
-
 
 
 /********************* start CatIStringable implementation *********************/

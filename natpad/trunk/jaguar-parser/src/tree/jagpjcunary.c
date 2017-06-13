@@ -55,7 +55,8 @@ static void jagp_jcunary_init(JagPJCUnary *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPJCUnary *instance = JAGP_JCUNARY(object);
+	JagPJCUnary *instance = JAGP_JCUNARY(object);
+	cat_unref_ptr(instance->arg);
 	G_OBJECT_CLASS(jagp_jcunary_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -70,7 +71,6 @@ static void l_finalize(GObject *object) {
 JagPJCUnary *jagp_jcunary_new(JagPTag opcode, JagPJCExpression *arg) {
 	JagPJCUnary *result = g_object_new(JAGP_TYPE_JCUNARY, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->opcode = opcode;
 	result->arg = cat_ref_ptr(arg);
 	return result;

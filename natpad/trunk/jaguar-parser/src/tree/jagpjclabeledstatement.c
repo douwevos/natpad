@@ -49,7 +49,8 @@ static void jagp_jclabeled_statement_init(JagPJCLabeledStatement *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagPJCLabeledStatement *instance = JAGP_JCLABELED_STATEMENT(object);
-	cat_unref_ptr(instance);
+	cat_unref_ptr(instance->label);
+	cat_unref_ptr(instance->body);
 	G_OBJECT_CLASS(jagp_jclabeled_statement_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -65,7 +66,6 @@ static void l_finalize(GObject *object) {
 JagPJCLabeledStatement *jagp_jclabeled_statement_new(JagPName *label, JagPJCStatement *body) {
 	JagPJCLabeledStatement *result = g_object_new(JAGP_TYPE_JCLABELED_STATEMENT, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->label = cat_ref_ptr(label);
 	result->body = cat_ref_ptr(body);
 	return result;

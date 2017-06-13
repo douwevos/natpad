@@ -69,7 +69,6 @@ static void l_finalize(GObject *object) {
 JagPJCStatement *jagp_jcstatement_new() {
 	JagPJCStatement *result = g_object_new(JAGP_TYPE_JCSTATEMENT, NULL);
 	cat_ref_anounce(result);
-	JagPJCStatementPrivate *priv = jagp_jcstatement_get_instance_private(result);
 //	JAGP_JCTREE_construct((JagPJCTree *) result);
 	return result;
 }
@@ -79,10 +78,7 @@ JagPJCStatement *jagp_jcstatement_new() {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCStatement *instance = JAGP_JCSTATEMENT(self);
-	JagPJCStatementPrivate *priv = jagp_jcstatement_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

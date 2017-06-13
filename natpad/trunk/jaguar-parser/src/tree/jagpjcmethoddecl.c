@@ -47,7 +47,16 @@ static void jagp_jcmethod_decl_init(JagPJCMethodDecl *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPJCMethodDecl *instance = JAGP_JCMETHOD_DECL(object);
+	JagPJCMethodDecl *instance = JAGP_JCMETHOD_DECL(object);
+	cat_unref_ptr(instance->mods);
+	cat_unref_ptr(instance->name);
+	cat_unref_ptr(instance->restype);
+	cat_unref_ptr(instance->typarams);
+	cat_unref_ptr(instance->recvparam);
+	cat_unref_ptr(instance->params);
+	cat_unref_ptr(instance->thrown);
+	cat_unref_ptr(instance->body);
+	cat_unref_ptr(instance->defaultValue);
 	G_OBJECT_CLASS(jagp_jcmethod_decl_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -64,7 +73,15 @@ JagPJCMethodDecl *jagp_jcmethod_decl_new(JagPJCModifiers *mods, JagPName *name, 
 		CatArrayWo /*<JagPJCExpression>*/ *thrown, JagPJCBlock *body, JagPJCExpression *defaultValue/*,JagPMethodSymbol sym*/) {
 	JagPJCMethodDecl *result = g_object_new(JAGP_TYPE_JCMETHOD_DECL, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCTREE_construct((JagPJCTree *) result);
+	result->mods = cat_ref_ptr(mods);
+	result->name = cat_ref_ptr(name);
+	result->restype = cat_ref_ptr(restype);
+	result->typarams = cat_ref_ptr(typarams);
+	result->recvparam = cat_ref_ptr(recvparam);
+	result->params = cat_ref_ptr(params);
+	result->thrown = cat_ref_ptr(thrown);
+	result->body = cat_ref_ptr(body);
+	result->defaultValue = cat_ref_ptr(defaultValue);
 	return result;
 }
 

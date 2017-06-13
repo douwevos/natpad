@@ -65,9 +65,9 @@ static void l_finalize(GObject *object) {
 JagPJCMethodInvocation *jagp_jcmethod_invocation_new(CatArrayWo /*<JCExpression>*/ *typeargs, JagPJCExpression *meth, CatArrayWo /*<JCExpression>*/ *args) {
 	JagPJCMethodInvocation *result = g_object_new(JAGP_TYPE_JCMETHOD_INVOCATION, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCPOLY_EXPRESSION_construct((JagPJCPolyExpression *) result);
 	result->typeargs = cat_ref_ptr(typeargs);
 	result->meth = cat_ref_ptr(meth);
 	result->args = cat_ref_ptr(args);
 	return result;
 }
+

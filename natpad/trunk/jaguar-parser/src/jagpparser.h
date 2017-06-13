@@ -65,7 +65,7 @@ struct _JagPParserClass {
 
 GType jagp_parser_get_type();
 
-JagPParser *jagp_parser_new(JagPScanner *scanner, JagPILexer *lexer, GroRunITokenFactory *token_factory, GroRunModel *model);
+JagPParser *jagp_parser_new(JagPILexer *lexer, GroRunITokenFactory *token_factory);
 
 /*GroAstSpec * */void jagp_parser_run(JagPParser *parser);
 

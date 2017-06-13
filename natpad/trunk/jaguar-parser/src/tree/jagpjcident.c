@@ -69,7 +69,6 @@ static void l_finalize(GObject *object) {
 JagPJCIdent *jagp_jcident_new(JagPName *name) {
 	JagPJCIdent *result = g_object_new(JAGP_TYPE_JCIDENT, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->name = cat_ref_ptr(name);
 	return result;
 }
@@ -78,7 +77,6 @@ JagPJCIdent *jagp_jcident_new(JagPName *name) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCIdent *instance = JAGP_JCIDENT(self);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }

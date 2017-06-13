@@ -65,7 +65,6 @@ static void l_finalize(GObject *object) {
 JagPJCEnhancedForLoop *jagp_jcenhanced_for_loop_new(JagPJCVariableDecl *var, JagPJCExpression *expr, JagPJCStatement *body) {
 	JagPJCEnhancedForLoop *result = g_object_new(JAGP_TYPE_JCENHANCED_FOR_LOOP, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->var = cat_ref_ptr(var);
 	result->expr = cat_ref_ptr(expr);
 	result->body = cat_ref_ptr(body);

@@ -68,7 +68,6 @@ static void l_finalize(GObject *object) {
 JagPJCVariableDecl *jagp_jcvariable_decl_new(JagPJCModifiers *mods, JagPName *name, JagPJCExpression *nameexpr, JagPJCExpression *vartype, JagPJCExpression *init/*, VarSymbol sym*/) {
 	JagPJCVariableDecl *result = g_object_new(JAGP_TYPE_JCVARIABLE_DECL, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->mods = cat_ref_ptr(mods);
 	result->name = cat_ref_ptr(name);
 	result->nameexpr = cat_ref_ptr(nameexpr);
@@ -76,3 +75,4 @@ JagPJCVariableDecl *jagp_jcvariable_decl_new(JagPJCModifiers *mods, JagPName *na
 	result->init = cat_ref_ptr(init);
 	return result;
 }
+

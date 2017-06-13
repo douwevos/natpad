@@ -64,7 +64,6 @@ static void l_finalize(GObject *object) {
 JagPJCSynchronized *jagp_jcsynchronized_new(JagPJCExpression *lock, JagPJCBlock *body) {
 	JagPJCSynchronized *result = g_object_new(JAGP_TYPE_JCSYNCHRONIZED, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->lock = cat_ref_ptr(lock);
 	result->body = cat_ref_ptr(body);
 	return result;

@@ -75,7 +75,6 @@ JagPJCExpression *jagp_jcexpression_new() {
 	JagPJCExpression *result = g_object_new(JAGP_TYPE_JCEXPRESSION, NULL);
 	cat_ref_anounce(result);
 	JagPJCExpressionPrivate *priv = jagp_jcexpression_get_instance_private(result);
-//	JAGP_JCTREE_construct((JagPJCTree *) result);
 	return result;
 }
 

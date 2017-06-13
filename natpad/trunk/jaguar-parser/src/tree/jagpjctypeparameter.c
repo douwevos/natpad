@@ -65,7 +65,6 @@ static void l_finalize(GObject *object) {
 JagPJCTypeParameter *jagp_jctype_parameter_new(JagPName *name, CatArrayWo /*<JCExpression>*/ *bounds, CatArrayWo /*<JCAnnotation>*/ *annotations) {
 	JagPJCTypeParameter *result = g_object_new(JAGP_TYPE_JCTYPE_PARAMETER, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCTREE_construct((JagPJCTree *) result);
 	result->name = cat_ref_ptr(name);
 	result->bounds = cat_ref_ptr(bounds);
 	result->annotations = cat_ref_ptr(annotations);

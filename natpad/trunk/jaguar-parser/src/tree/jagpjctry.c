@@ -67,7 +67,6 @@ static void l_finalize(GObject *object) {
 JagPJCTry *jagp_jctry_new(CatArrayWo /*<JagPJCTree>*/ *resources, JagPJCBlock *body, CatArrayWo /*<JCCatch>*/ *catchers, JagPJCBlock *finalizer) {
 	JagPJCTry *result = g_object_new(JAGP_TYPE_JCTRY, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	result->resources = cat_ref_ptr(resources);
 	result->body = cat_ref_ptr(body);
 	result->catchers = cat_ref_ptr(catchers);
