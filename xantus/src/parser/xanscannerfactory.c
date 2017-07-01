@@ -53,8 +53,10 @@ static void xan_scanner_factory_init(XanScannerFactory *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	XanScannerFactory *instance = XAN_SCANNER_FACTORY(object);
-//	XanScannerFactoryPrivate *priv = xan_scanner_factory_get_instance_private(instance);
+	XanScannerFactory *instance = XAN_SCANNER_FACTORY(object);
+	XanScannerFactoryPrivate *priv = xan_scanner_factory_get_instance_private(instance);
+	cat_unref_ptr(priv->symbols);
+	cat_unref_ptr(priv->token_factory);
 	G_OBJECT_CLASS(xan_scanner_factory_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

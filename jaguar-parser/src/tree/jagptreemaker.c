@@ -314,7 +314,7 @@ JagPJCAssign *jagp_tree_maker_assign(JagPTreeMaker *tree_maker, JagPJCExpression
 	return tree;
 }
 
-JagPJCAssignOp *jagp_tree_maker_assignop(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCTree *lhs, JagPJCTree *rhs) {
+JagPJCAssignOp *jagp_tree_maker_assignop(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs) {
 	JagPJCAssignOp *tree = jagp_jcassignop_new(opcode, lhs, rhs);
 	tree->parent.parent.pos = tree_maker->pos;
 	return tree;
@@ -327,7 +327,7 @@ JagPJCUnary *jagp_tree_maker_unary(JagPTreeMaker *tree_maker, JagPTag opcode, Ja
 }
 
 JagPJCBinary *jagp_tree_maker_binary(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs) {
-	JagPJCUnary *tree = jagp_jcbinary_new(opcode, lhs, rhs);
+	JagPJCBinary *tree = jagp_jcbinary_new(opcode, lhs, rhs);
 	tree->parent.parent.pos = tree_maker->pos;
 	return tree;
 }

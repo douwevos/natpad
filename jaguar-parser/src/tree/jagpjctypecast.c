@@ -27,11 +27,7 @@
 #define CAT_LOG_CLAZZ "JagPJCTypeCast"
 #include <logging/catlog.h>
 
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCTypeCast, jagp_jctype_cast, JAGP_TYPE_JCEXPRESSION,
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCTypeCast, jagp_jctype_cast, JAGP_TYPE_JCEXPRESSION);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -73,20 +69,4 @@ JagPJCTypeCast *jagp_jctype_cast_new(JagPJCTree *clazz, JagPJCExpression *expr) 
 	result->expr = cat_ref_ptr(expr);
 	return result;
 }
-
-
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCTypeCast *instance = JAGP_JCTYPE_CAST(self);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/
 

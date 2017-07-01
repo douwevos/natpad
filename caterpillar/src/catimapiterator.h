@@ -38,12 +38,12 @@ typedef struct _CatIMapIteratorInterface      CatIMapIteratorInterface;
 struct _CatIMapIteratorInterface {
 	GTypeInterface parent_iface;
 
-	gboolean (*next) (CatIMapIterator *self, gpointer **key, gpointer **value);
+	gboolean (*next) (CatIMapIterator *self, gpointer *key, gpointer *value);
 };
 
 GType cat_imap_iterator_get_type(void);
 
-gboolean cat_imap_iterator_next(CatIMapIterator *self, gpointer **key, gpointer **value);
+gboolean cat_imap_iterator_next(CatIMapIterator *self, gpointer *key, gpointer *value);
 
 G_END_DECLS
 

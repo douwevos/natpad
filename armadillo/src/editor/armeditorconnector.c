@@ -63,6 +63,9 @@ static void l_dispose(GObject *object) {
 	ArmEditorConnector *instance = ARM_EDITOR_CONNECTOR(object);
 	ArmEditorConnectorPrivate *priv = arm_editor_connector_get_instance_private(instance);
 	cat_unref_ptr(priv->a_slot_key);
+	cat_unref_ptr(priv->model);
+	cat_unref_ptr(priv->token_factory);
+	cat_unref_ptr(priv->scanner_factory);
 	G_OBJECT_CLASS(arm_editor_connector_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

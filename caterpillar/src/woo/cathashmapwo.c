@@ -865,7 +865,7 @@ struct _CatHashMapWoIterClass {
 };
 
 
-static gboolean l_iter_next(CatIMapIterator *self, gpointer **okey, gpointer **ovalue) {
+static gboolean l_iter_next(CatIMapIterator *self, gpointer *okey, gpointer *ovalue) {
 	CatHashMapWoIter *this = (CatHashMapWoIter *) self;
 	if (this->current_bucket==NULL) {
 		if (this->bucket_idx>=this->hash_map_priv->bucket_count) {

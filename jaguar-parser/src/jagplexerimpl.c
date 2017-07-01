@@ -93,6 +93,10 @@ static JagPToken *l_scan_real_token(JagPLexerImpl *lexer) {
 	JagPToken *token = jagp_token_new();
 	token->source = full_token;
 	int sym_index = grorun_full_token_get_user_index(full_token);
+	GroRunLocation *location = grorun_full_token_get_location(full_token);
+	
+
+
 	switch(sym_index) {
 
 		// 0
@@ -211,25 +215,17 @@ static JagPToken *l_scan_real_token(JagPLexerImpl *lexer) {
 		case JAGP_SYM_K_INSTANCEOF : token->kind = JAGP_KIND_INSTANCEOF; break;
 		case JAGP_SYM_K_TRY : token->kind = JAGP_KIND_TRY; break;
 		case JAGP_SYM_K_CATCH : token->kind = JAGP_KIND_CATCH; break;
-
-
+		case JAGP_SYM_K_FINALLY : token->kind = JAGP_KIND_FINALLY; break;
+		case JAGP_SYM_K_CONTINUE: token->kind = JAGP_KIND_CONTINUE; break;
+		case JAGP_SYM_K_THROW : token->kind = JAGP_KIND_THROW; break;
 
 		case JAGP_SYM_K_RETURN: token->kind = JAGP_KIND_RETURN; break;
 
 
 
-		case JAGP_SYM_K_CONTINUE: token->kind = JAGP_KIND_CONTINUE; break;
-
-
-
-
-
-
-
-
-
 		case JAGP_SYM_EOL_COMMENT :
 		case JAGP_SYM_FULL_COMMENT : {
+			cat_unref(token);
 			return l_scan_real_token(lexer);
 		}
 
@@ -238,7 +234,16 @@ static JagPToken *l_scan_real_token(JagPLexerImpl *lexer) {
 			token->kind = JAGP_KIND_EOF;
 		}
 	}
+
+	int column;
+	long row;
+	grorun_location_get_begin(location, &column, &row);
+	token->cur_start = jagp_cursor_new(row, column);
+	grorun_location_get_end(location, &column, &row);
+	token->cur_end = jagp_cursor_new(row, column);
+
 	cat_array_wo_append(priv->tokens, (GObject *) token);
+	cat_unref(token);
 	return token;
 }
 

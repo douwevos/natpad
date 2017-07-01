@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 
 
 typedef struct _JagPJCSkip               JagPJCSkip;
-typedef struct _JagPJCSkipPrivate        JagPJCSkipPrivate;
 typedef struct _JagPJCSkipClass          JagPJCSkipClass;
 
 

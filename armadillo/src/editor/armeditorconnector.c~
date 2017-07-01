@@ -22,6 +22,7 @@
 
 #include "armeditorconnector.h"
 #include "armaugmentrequest.h"
+#include "../../src-generated/armpparserconfig.h"
 #include <dragonfly.h>
 
 #include <logging/catlogdefs.h>

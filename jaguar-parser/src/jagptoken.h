@@ -23,6 +23,7 @@
 #ifndef JAGPTOKEN_H_
 #define JAGPTOKEN_H_
 
+#include "jagpcursor.h"
 #include "code/jagpname.h"
 #include "code/jagpcomment.h"
 #include <caterpillar.h>
@@ -163,12 +164,16 @@ enum _JagPTokenKind {
 typedef struct _JagPToken               JagPToken;
 typedef struct _JagPTokenClass          JagPTokenClass;
 
-
 struct _JagPToken {
 	GObject parent;
 	JagPTokenKind kind;
 	int pos;
 	int endPos;
+
+	JagPCursor *cur_start;
+	JagPCursor *cur_end;
+	
+	
 	GObject *value;
 	GroRunFullToken *source;
 

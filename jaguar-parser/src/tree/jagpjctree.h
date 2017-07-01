@@ -23,6 +23,7 @@
 #ifndef TREE_JAGPJCTREE_H_
 #define TREE_JAGPJCTREE_H_
 
+#include "../jagpcursor.h"
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -323,6 +324,7 @@ typedef struct _JagPJCTreeClass          JagPJCTreeClass;
 struct _JagPJCTree {
 	GObject parent;
 	int pos;
+	JagPCursor *cursor;
 };
 
 struct _JagPJCTreeClass {
@@ -333,7 +335,7 @@ struct _JagPJCTreeClass {
 
 GType jagp_jctree_get_type();
 
-JagPJCTree *jagp_jctree_new();
+void jagp_jctree_construct(JagPJCTree *tree);
 
 JagPTag jagp_jctree_get_tag(JagPJCTree *tree);
 gboolean jagp_jctree_has_tag(JagPJCTree *tree, JagPTag tag);

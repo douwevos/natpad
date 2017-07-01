@@ -27,14 +27,9 @@
 #define CAT_LOG_CLAZZ "JagPNumericToken"
 #include <logging/catlog.h>
 
-struct _JagPNumericTokenPrivate {
-	void *dummy;
-};
-
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagPNumericToken, jagp_numeric_token, JAGP_TYPE_TOKEN,
-		G_ADD_PRIVATE(JagPNumericToken)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
@@ -53,7 +48,6 @@ static void jagp_numeric_token_init(JagPNumericToken *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 //	JagPNumericToken *instance = JAGP_NUMERIC_TOKEN(object);
-//	JagPNumericTokenPrivate *priv = jagp_numeric_token_get_instance_private(instance);
 	G_OBJECT_CLASS(jagp_numeric_token_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -69,7 +63,6 @@ static void l_finalize(GObject *object) {
 JagPNumericToken *jagp_numeric_token_new() {
 	JagPNumericToken *result = g_object_new(JAGP_TYPE_NUMERIC_TOKEN, NULL);
 	cat_ref_anounce(result);
-	JagPNumericTokenPrivate *priv = jagp_numeric_token_get_instance_private(result);
 //	JAGP_TOKEN_construct((JagPToken *) result);
 	return result;
 }
@@ -82,10 +75,7 @@ int jagp_numeric_token_radix(JagPNumericToken *token) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPNumericToken *instance = JAGP_NUMERIC_TOKEN(self);
-	JagPNumericTokenPrivate *priv = jagp_numeric_token_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

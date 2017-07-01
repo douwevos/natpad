@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 
 
 typedef struct _JagPNumericToken               JagPNumericToken;
-typedef struct _JagPNumericTokenPrivate        JagPNumericTokenPrivate;
 typedef struct _JagPNumericTokenClass          JagPNumericTokenClass;
 
 

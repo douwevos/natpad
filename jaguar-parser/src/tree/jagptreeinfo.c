@@ -25,7 +25,10 @@
 #include "jagpjcpackagedecl.h"
 #include "jagpjcmethodinvocation.h"
 
+#include "jagpjcassignop.h"
+#include "jagpjcbinary.h"
 #include "jagpjcconditional.h"
+//#include "jagpjcinstanceof.h"
 #include "jagpjcexpressionstatement.h"
 #include "jagpjcarrayaccess.h"
 #include "jagpjcfieldaccess.h"
@@ -54,8 +57,9 @@ JagPJCExpression *jagp_tree_info_type_in(JagPJCExpression *tree) {
 		case JAGP_TAG_TYPEAPPLY: /* parameterized types */
 		case JAGP_TAG_ERRONEOUS: /* error tree TODO: needed for BadCast JSR308 test case. Better way? */
 			return tree;
-//		default:
+		default :
 //			cat_log_fatal("Unexpected type tree: %O", tree);
+			break;
     }
     return NULL;
 }
@@ -82,104 +86,127 @@ gboolean jagp_tree_info_is_expression_statement(JagPJCExpression *tree) {
 }
 
 int jagp_tree_info_get_end_pos(JagPJCTree *tree) {
-    if (tree == NULL) {
-        return -1;
-    }
+	if (tree == NULL) {
+		return -1;
+	}
 
-    JagPTag tag = jagp_jctree_get_tag(tree);
-    switch(tag) {
-        case JAGP_TAG_PACKAGEDEF: {
-            JagPJCPackageDecl *pd = (JagPJCPackageDecl *) tree;
-            if (cat_array_wo_size(pd->annotations)==0) {
-            	return pd->parent.pos;
-            }
-            JagPJCTree *ft = (JagPJCTree *) cat_array_wo_get_first(pd->annotations);
-            return ft->pos;
-        }
-        case JAGP_TAG_APPLY:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCMethodInvocation*) tree)->meth);
-        case JAGP_TAG_ASSIGN:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCAssign *) tree)->lhs);
-        case JAGP_TAG_BITOR_ASG: case JAGP_TAG_BITXOR_ASG: case JAGP_TAG_BITAND_ASG:
-        case JAGP_TAG_SL_ASG: case JAGP_TAG_SR_ASG: case JAGP_TAG_USR_ASG:
-        case JAGP_TAG_PLUS_ASG: case JAGP_TAG_MINUS_ASG: case JAGP_TAG_MUL_ASG:
-//        case JAGP_TAG_DIV_ASG: case JAGP_TAG_MOD_ASG:
-//            return jagp_tree_info_get_end_pos(((JagPJCAssignOp *) tree).lhs);
-        case JAGP_TAG_OR: case JAGP_TAG_AND: case JAGP_TAG_BITOR:
-        case JAGP_TAG_BITXOR: case JAGP_TAG_BITAND: case JAGP_TAG_EQ:
-        case JAGP_TAG_NE: case JAGP_TAG_LT: case JAGP_TAG_GT:
-        case JAGP_TAG_LE: case JAGP_TAG_GE: case JAGP_TAG_SL:
-        case JAGP_TAG_SR: case JAGP_TAG_USR: case JAGP_TAG_PLUS:
-        case JAGP_TAG_MINUS: case JAGP_TAG_MUL: case JAGP_TAG_DIV:
-//        case JAGP_TAG_MOD:
-//            return jagp_tree_info_get_end_pos(((JagPJCBinary *) tree).lhs);
-        case JAGP_TAG_CLASSDEF: {
-            JagPJCClassDecl *node = (JagPJCClassDecl *)tree;
-            if (node->modifiers->parent.pos != -1)
-                return node->modifiers->parent.pos;
-            break;
-        }
-//        case JAGP_TAG_CONDEXPR:
-//            return jagp_tree_info_get_end_pos(((JagPJCConditional *) tree)->cond);
-        case JAGP_TAG_EXEC:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCExpressionStatement *) tree)->expr);
-        case JAGP_TAG_INDEXED:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCArrayAccess *) tree)->indexed);
-        case JAGP_TAG_METHODDEF: {
-            JagPJCMethodDecl *node = (JagPJCMethodDecl *) tree;
-            if (node->mods->parent.pos != -1)
-                return node->mods->parent.pos;
-            if (cat_array_wo_size(node->typarams)>0) // List.nil() used for no typarams
-                return jagp_tree_info_get_end_pos((JagPJCTree *) cat_array_wo_get_first(node->typarams));
-            return node->restype == NULL ? node->parent.pos : jagp_tree_info_get_end_pos((JagPJCTree *) node->restype);
-        }
-        case JAGP_TAG_SELECT:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCFieldAccess *) tree)->selected);
-        case JAGP_TAG_TYPEAPPLY:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCTypeApply *) tree)->clazz);
-        case JAGP_TAG_TYPEARRAY:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCArrayTypeTree *) tree)->elemtype);
-//        case JAGP_TAG_TYPETEST:
-//            return jagp_tree_info_get_end_pos(((JagPJCInstanceOf *) tree).expr);
-        case JAGP_TAG_POSTINC:
-        case JAGP_TAG_POSTDEC:
-            return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCUnary *) tree)->arg);
-        case JAGP_TAG_ANNOTATED_TYPE: {
-            JagPJCAnnotatedType *node = (JagPJCAnnotatedType *) tree;
-            if (cat_array_wo_size(node->annotations)>0) {
-                if (jagp_jctree_has_tag((JagPJCTree *) node->underlying_type, JAGP_TAG_TYPEARRAY) ||
-                		jagp_jctree_has_tag((JagPJCTree *) node->underlying_type, JAGP_TAG_SELECT)) {
-                    return jagp_tree_info_get_end_pos((JagPJCTree *) node->underlying_type);
-                } else {
-                    return jagp_tree_info_get_end_pos((JagPJCTree *) cat_array_wo_get_first(node->annotations));
-                }
-            } else {
-                return jagp_tree_info_get_end_pos((JagPJCTree *) node->underlying_type);
-            }
-        }
-        case JAGP_TAG_NEWCLASS: {
-            JagPJCNewClass *node = (JagPJCNewClass *) tree;
-            if (node->encl != NULL)
-                return jagp_tree_info_get_end_pos((JagPJCTree *) node->encl);
-            break;
-        }
-        case JAGP_TAG_VARDEF: {
-            JagPJCVariableDecl *node = (JagPJCVariableDecl *) tree;
-            if (node->mods->parent.pos != -1) {
-                return node->mods->parent.pos;
-            } else if (node->vartype == NULL) {
-                //if there's no type (partially typed lambda parameter)
-                //simply return node position
-                return node->parent.parent.pos;
-            } else {
-                return jagp_tree_info_get_end_pos((JagPJCTree *) node->vartype);
-            }
-        }
-        case JAGP_TAG_ERRONEOUS: {
-            JagPJCErroneous *node = (JagPJCErroneous *) tree;
-            if (node->errs != NULL && cat_array_wo_size(node->errs)>0)
-                return jagp_tree_info_get_end_pos((JagPJCTree *) cat_array_wo_get_first(node->errs));
-        }
+	JagPTag tag = jagp_jctree_get_tag(tree);
+	switch(tag) {
+		case JAGP_TAG_PACKAGEDEF: {
+			JagPJCPackageDecl *pd = (JagPJCPackageDecl *) tree;
+			if (cat_array_wo_size(pd->annotations)==0) {
+				return pd->parent.pos;
+			}
+			JagPJCTree *ft = (JagPJCTree *) cat_array_wo_get_first(pd->annotations);
+			return ft->pos;
+		}
+
+		case JAGP_TAG_APPLY:
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCMethodInvocation*) tree)->meth);
+
+		case JAGP_TAG_ASSIGN:
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCAssign *) tree)->lhs);
+
+		case JAGP_TAG_BITOR_ASG: case JAGP_TAG_BITXOR_ASG: case JAGP_TAG_BITAND_ASG:
+		case JAGP_TAG_SL_ASG: case JAGP_TAG_SR_ASG: case JAGP_TAG_USR_ASG:
+		case JAGP_TAG_PLUS_ASG: case JAGP_TAG_MINUS_ASG: case JAGP_TAG_MUL_ASG:
+		case JAGP_TAG_DIV_ASG: case JAGP_TAG_MOD_ASG:
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCAssignOp *) tree)->lhs);
+
+		case JAGP_TAG_OR: case JAGP_TAG_AND: case JAGP_TAG_BITOR:
+		case JAGP_TAG_BITXOR: case JAGP_TAG_BITAND: case JAGP_TAG_EQ:
+		case JAGP_TAG_NE: case JAGP_TAG_LT: case JAGP_TAG_GT:
+		case JAGP_TAG_LE: case JAGP_TAG_GE: case JAGP_TAG_SL:
+		case JAGP_TAG_SR: case JAGP_TAG_USR: case JAGP_TAG_PLUS:
+		case JAGP_TAG_MINUS: case JAGP_TAG_MUL: case JAGP_TAG_DIV:
+		case JAGP_TAG_MOD:
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCBinary *) tree)->lhs);
+
+		case JAGP_TAG_CLASSDEF : {
+			JagPJCClassDecl *node = (JagPJCClassDecl *)tree;
+			if (node->modifiers->parent.pos != -1) {
+				return node->modifiers->parent.pos;
+			}
+		} break;
+
+		case JAGP_TAG_CONDEXPR :
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCConditional *) tree)->cond);
+
+		case JAGP_TAG_EXEC :
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCExpressionStatement *) tree)->expr);
+
+		case JAGP_TAG_INDEXED :
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCArrayAccess *) tree)->indexed);
+
+		case JAGP_TAG_METHODDEF : {
+			JagPJCMethodDecl *node = (JagPJCMethodDecl *) tree;
+			if (node->mods->parent.pos != -1) {
+				return node->mods->parent.pos;
+			}
+			if (cat_array_wo_size(node->typarams)>0) { /* List.nil() used for no typarams */
+				return jagp_tree_info_get_end_pos((JagPJCTree *) cat_array_wo_get_first(node->typarams));
+			}
+			return node->restype == NULL ? node->parent.pos : jagp_tree_info_get_end_pos((JagPJCTree *) node->restype);
+		}
+
+		case JAGP_TAG_SELECT :
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCFieldAccess *) tree)->selected);
+
+		case JAGP_TAG_TYPEAPPLY :
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCTypeApply *) tree)->clazz);
+
+		case JAGP_TAG_TYPEARRAY :
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCArrayTypeTree *) tree)->elemtype);
+
+//		case JAGP_TAG_TYPETEST:
+//			return jagp_tree_info_get_end_pos(((JagPJCInstanceOf *) tree).expr);
+
+		case JAGP_TAG_POSTINC :
+		case JAGP_TAG_POSTDEC :
+			return jagp_tree_info_get_end_pos((JagPJCTree *) ((JagPJCUnary *) tree)->arg);
+
+		case JAGP_TAG_ANNOTATED_TYPE : {
+			JagPJCAnnotatedType *node = (JagPJCAnnotatedType *) tree;
+			if (cat_array_wo_size(node->annotations)>0) {
+				if (jagp_jctree_has_tag((JagPJCTree *) node->underlying_type, JAGP_TAG_TYPEARRAY) ||
+						jagp_jctree_has_tag((JagPJCTree *) node->underlying_type, JAGP_TAG_SELECT)) {
+					return jagp_tree_info_get_end_pos((JagPJCTree *) node->underlying_type);
+				} else {
+					return jagp_tree_info_get_end_pos((JagPJCTree *) cat_array_wo_get_first(node->annotations));
+				}
+			} else {
+				return jagp_tree_info_get_end_pos((JagPJCTree *) node->underlying_type);
+			}
+		}
+
+		case JAGP_TAG_NEWCLASS : {
+			JagPJCNewClass *node = (JagPJCNewClass *) tree;
+			if (node->encl != NULL) {
+				return jagp_tree_info_get_end_pos((JagPJCTree *) node->encl);
+			}
+		} break;
+
+		case JAGP_TAG_VARDEF: {
+			JagPJCVariableDecl *node = (JagPJCVariableDecl *) tree;
+			if (node->mods->parent.pos != -1) {
+				return node->mods->parent.pos;
+			} else if (node->vartype == NULL) {
+				/* if there's no type (partially typed lambda parameter)
+				   simply return node position */
+				return node->parent.parent.pos;
+			} else {
+				return jagp_tree_info_get_end_pos((JagPJCTree *) node->vartype);
+			}
+		}
+		case JAGP_TAG_ERRONEOUS: {
+			JagPJCErroneous *node = (JagPJCErroneous *) tree;
+			if (node->errs != NULL && cat_array_wo_size(node->errs)>0) {
+			return jagp_tree_info_get_end_pos((JagPJCTree *) cat_array_wo_get_first(node->errs));
+			}
+		} break;
+	
+		default :
+			break;
     }
     return tree->pos;
 }
@@ -230,6 +257,7 @@ int jagp_tree_info_op_prec(JagPTag op) {
 		case JAGP_TAG_DIV:
 		case JAGP_TAG_MOD: return jagp_tree_info_mulPrec;
 		case JAGP_TAG_TYPETEST: return jagp_tree_info_ordPrec;
+		default : break;
 	}
 	return -1;
 }

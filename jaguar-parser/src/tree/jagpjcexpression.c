@@ -27,14 +27,9 @@
 #define CAT_LOG_CLAZZ "JagPJCExpression"
 #include <logging/catlog.h>
 
-struct _JagPJCExpressionPrivate {
-	void *dummy;
-};
-
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagPJCExpression, jagp_jcexpression, JAGP_TYPE_JCTREE,
-		G_ADD_PRIVATE(JagPJCExpression)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
@@ -58,7 +53,6 @@ static void jagp_jcexpression_init(JagPJCExpression *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 //	JagPJCExpression *instance = JAGP_JCEXPRESSION(object);
-//	JagPJCExpressionPrivate *priv = jagp_jcexpression_get_instance_private(instance);
 	G_OBJECT_CLASS(jagp_jcexpression_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -74,7 +68,6 @@ static void l_finalize(GObject *object) {
 JagPJCExpression *jagp_jcexpression_new() {
 	JagPJCExpression *result = g_object_new(JAGP_TYPE_JCEXPRESSION, NULL);
 	cat_ref_anounce(result);
-	JagPJCExpressionPrivate *priv = jagp_jcexpression_get_instance_private(result);
 	return result;
 }
 
@@ -92,10 +85,7 @@ gboolean jagp_jcexpression_is_standalone(JagPJCExpression *expression) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCExpression *instance = JAGP_JCEXPRESSION(self);
-	JagPJCExpressionPrivate *priv = jagp_jcexpression_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

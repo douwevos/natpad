@@ -53,6 +53,7 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagPJCArrayTypeTree *instance = JAGP_JCARRAY_TYPE_TREE(object);
 	cat_unref_ptr(instance->elemtype);
+	cat_stacktrace_print();
 	G_OBJECT_CLASS(jagp_jcarray_type_tree_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

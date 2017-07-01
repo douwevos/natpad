@@ -27,11 +27,7 @@
 #define CAT_LOG_CLAZZ "JagPJCClassDecl"
 #include <logging/catlog.h>
 
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCClassDecl, jagp_jcclass_decl, JAGP_TYPE_JCSTATEMENT,
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCClassDecl, jagp_jcclass_decl, JAGP_TYPE_JCSTATEMENT);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -83,17 +79,3 @@ JagPJCClassDecl *jagp_jcclass_decl_new(JagPJCModifiers *modifiers, JagPName *nam
 }
 
 
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCClassDecl *instance = JAGP_JCCLASS_DECL(self);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/

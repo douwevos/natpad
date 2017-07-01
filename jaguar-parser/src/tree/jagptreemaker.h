@@ -185,7 +185,7 @@ JagPJCAnnotation *jagp_tree_maker_annotation(JagPTreeMaker *tree_maker, JagPJCTr
 JagPJCAnnotation *jagp_tree_maker_type_annotation(JagPTreeMaker *tree_maker, JagPJCTree *annotation_type, CatArrayWo *args);
 
 JagPJCAssign *jagp_tree_maker_assign(JagPTreeMaker *tree_maker, JagPJCExpression *lhs, JagPJCExpression *rhs);
-JagPJCAssignOp *jagp_tree_maker_assignop(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCTree *lhs, JagPJCTree *rhs);
+JagPJCAssignOp *jagp_tree_maker_assignop(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs);
 
 JagPJCConditional *jagp_tree_maker_conditional(JagPTreeMaker *tree_maker, JagPJCExpression *cond,
 		JagPJCExpression *thenpart, JagPJCExpression *elsepart);
