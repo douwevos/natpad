@@ -79,6 +79,7 @@ static void _dispose(GObject *object) {
 	cat_unref_ptr(priv->elk_service);
 	cat_unref_ptr(priv->wor_service);
 	cat_unref_ptr(priv->connector);
+	cat_unref_ptr(priv->arm_connector);
 	G_OBJECT_CLASS(parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

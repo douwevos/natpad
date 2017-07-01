@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 
 
 typedef struct _JagPJCExpression               JagPJCExpression;
-typedef struct _JagPJCExpressionPrivate        JagPJCExpressionPrivate;
 typedef struct _JagPJCExpressionClass          JagPJCExpressionClass;
 
 

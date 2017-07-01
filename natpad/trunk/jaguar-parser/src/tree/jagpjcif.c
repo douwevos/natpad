@@ -27,11 +27,7 @@
 #define CAT_LOG_CLAZZ "JagPJCIf"
 #include <logging/catlog.h>
 
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCIf, jagp_jcif, JAGP_TYPE_JCSTATEMENT,
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCIf, jagp_jcif, JAGP_TYPE_JCSTATEMENT);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -76,17 +72,3 @@ JagPJCIf *jagp_jcif_new(JagPJCExpression *cond, JagPJCStatement *thenpart, JagPJ
 	return result;
 }
 
-
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCIf *instance = JAGP_JCIF(self);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/

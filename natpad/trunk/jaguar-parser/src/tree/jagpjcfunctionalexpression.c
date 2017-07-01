@@ -28,11 +28,7 @@
 #include <logging/catlog.h>
 
 
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCFunctionalExpression, jagp_jcfunctional_expression, JAGP_TYPE_JCPOLY_EXPRESSION,
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCFunctionalExpression, jagp_jcfunctional_expression, JAGP_TYPE_JCPOLY_EXPRESSION);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -68,19 +64,4 @@ JagPJCFunctionalExpression *jagp_jcfunctional_expression_new() {
 	return result;
 }
 
-
-
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCFunctionalExpression *instance = JAGP_JCFUNCTIONAL_EXPRESSION(self);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/
 

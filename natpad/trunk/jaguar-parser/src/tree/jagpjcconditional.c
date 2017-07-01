@@ -27,11 +27,7 @@
 #define CAT_LOG_CLAZZ "JagPJCConditional"
 #include <logging/catlog.h>
 
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCConditional, jagp_jcconditional, JAGP_TYPE_JCPOLY_EXPRESSION,
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCConditional, jagp_jcconditional, JAGP_TYPE_JCPOLY_EXPRESSION);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -51,7 +47,10 @@ static void jagp_jcconditional_init(JagPJCConditional *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPJCConditional *instance = JAGP_JCCONDITIONAL(object);
+	JagPJCConditional *instance = JAGP_JCCONDITIONAL(object);
+	cat_unref_ptr(instance->cond);
+	cat_unref_ptr(instance->truepart);
+	cat_unref_ptr(instance->falsepart);
 	G_OBJECT_CLASS(jagp_jcconditional_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -64,24 +63,14 @@ static void l_finalize(GObject *object) {
 }
 
 
-JagPJCConditional *jagp_jcconditional_new() {
+JagPJCConditional *jagp_jcconditional_new(JagPJCExpression *cond, JagPJCExpression *truepart, JagPJCExpression *falsepart) {
 	JagPJCConditional *result = g_object_new(JAGP_TYPE_JCCONDITIONAL, NULL);
 	cat_ref_anounce(result);
 //	JAGP_JCPOLY_EXPRESSION_construct((JagPJCPolyExpression *) result);
+	result->cond = cat_ref_ptr(cond);
+	result->truepart = cat_ref_ptr(truepart);
+	result->falsepart = cat_ref_ptr(falsepart);
 	return result;
 }
 
 
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCConditional *instance = JAGP_JCCONDITIONAL(self);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/

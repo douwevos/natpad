@@ -28,6 +28,6 @@ static void cat_imap_iterator_default_init (CatIMapIteratorInterface *iface) {
 	iface->next = NULL;
 }
 
-gboolean cat_imap_iterator_next(CatIMapIterator *self, gpointer **key, gpointer **value) {
+gboolean cat_imap_iterator_next(CatIMapIterator *self, gpointer *key, gpointer *value) {
 	return CAT_IMAP_ITERATOR_GET_INTERFACE(self)->next(self, key, value);
 }

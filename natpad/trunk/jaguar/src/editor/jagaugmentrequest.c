@@ -316,9 +316,9 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 //    JagPlainParser *plain_parser = jag_plain_parser_new(JAG_ISCANNER(scanner), keyword_printer, line_tag_printer);
 //    jag_plain_parser_run(plain_parser);
 //
-//	cat_unref_ptr(utf8_scanner);
+	cat_unref_ptr(utf8_scanner);
 //	cat_unref_ptr(plain_parser);
-//	cat_unref_ptr(scanner);
+	cat_unref_ptr(scanner);
 	cat_unref_ptr(parser);
 	return TRUE;
 }

@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagpjctree.h"
+#include "jagptreeinfo.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_ALL
@@ -66,10 +67,9 @@ static void l_finalize(GObject *object) {
 }
 
 
-JagPJCTree *jagp_jctree_new() {
-	JagPJCTree *result = g_object_new(JAGP_TYPE_JCTREE, NULL);
-	cat_ref_anounce(result);
+void jagp_jctree_construct(JagPJCTree *tree) {
 //	G_OBJECT_construct((GObject *) result);
+	tree->cursor = NULL;
 	return result;
 }
 

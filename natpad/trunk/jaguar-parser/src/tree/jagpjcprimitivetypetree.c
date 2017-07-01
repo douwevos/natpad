@@ -27,11 +27,7 @@
 #define CAT_LOG_CLAZZ "JagPJCPrimitiveTypeTree"
 #include <logging/catlog.h>
 
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCPrimitiveTypeTree, jagp_jcprimitive_type_tree, JAGP_TYPE_JCEXPRESSION,
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCPrimitiveTypeTree, jagp_jcprimitive_type_tree, JAGP_TYPE_JCEXPRESSION);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -73,17 +69,3 @@ JagPJCPrimitiveTypeTree *jagp_jcprimitive_type_tree_new(JagPTypeTag type_tag) {
 }
 
 
-
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCPrimitiveTypeTree *instance = JAGP_JCPRIMITIVE_TYPE_TREE(self);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/

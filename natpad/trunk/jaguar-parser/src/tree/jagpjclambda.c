@@ -27,11 +27,7 @@
 #define CAT_LOG_CLAZZ "JagPJCLambda"
 #include <logging/catlog.h>
 
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCLambda, jagp_jclambda, JAGP_TYPE_JCFUNCTIONAL_EXPRESSION,
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCLambda, jagp_jclambda, JAGP_TYPE_JCFUNCTIONAL_EXPRESSION);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -73,19 +69,4 @@ JagPJCLambda *jagp_jclambda_new(CatArrayWo /*JagPJCVariableDecl*/*params, JagPJC
 	result->body = cat_ref_ptr(body);
 	return result;
 }
-
-
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCLambda *instance = JAGP_JCLAMBDA(self);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/
 

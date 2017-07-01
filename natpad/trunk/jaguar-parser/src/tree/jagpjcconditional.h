@@ -42,6 +42,10 @@ typedef struct _JagPJCConditionalClass          JagPJCConditionalClass;
 
 struct _JagPJCConditional {
 	JagPJCPolyExpression parent;
+	JagPJCExpression *cond;
+	JagPJCExpression *truepart;
+	JagPJCExpression *falsepart;
+
 };
 
 struct _JagPJCConditionalClass {
@@ -51,7 +55,7 @@ struct _JagPJCConditionalClass {
 
 GType jagp_jcconditional_get_type();
 
-JagPJCConditional *jagp_jcconditional_new();
+JagPJCConditional *jagp_jcconditional_new(JagPJCExpression *cond, JagPJCExpression *truepart, JagPJCExpression *falsepart);
 
 G_END_DECLS
 

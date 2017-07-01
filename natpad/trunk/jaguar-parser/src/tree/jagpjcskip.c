@@ -27,16 +27,7 @@
 #define CAT_LOG_CLAZZ "JagPJCSkip"
 #include <logging/catlog.h>
 
-struct _JagPJCSkipPrivate {
-	void *dummy;
-};
-
-static void l_stringable_iface_init(CatIStringableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE(JagPJCSkip, jagp_jcskip, JAGP_TYPE_JCSTATEMENT,
-		G_ADD_PRIVATE(JagPJCSkip)
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-);
+G_DEFINE_TYPE(JagPJCSkip, jagp_jcskip, JAGP_TYPE_JCSTATEMENT);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -57,7 +48,6 @@ static void jagp_jcskip_init(JagPJCSkip *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 //	JagPJCSkip *instance = JAGP_JCSKIP(object);
-//	JagPJCSkipPrivate *priv = jagp_jcskip_get_instance_private(instance);
 	G_OBJECT_CLASS(jagp_jcskip_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -73,23 +63,7 @@ static void l_finalize(GObject *object) {
 JagPJCSkip *jagp_jcskip_new() {
 	JagPJCSkip *result = g_object_new(JAGP_TYPE_JCSKIP, NULL);
 	cat_ref_anounce(result);
-	JagPJCSkipPrivate *priv = jagp_jcskip_get_instance_private(result);
 //	JAGP_JCSTATEMENT_construct((JagPJCStatement *) result);
 	return result;
 }
 
-/********************* start CatIStringable implementation *********************/
-
-static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagPJCSkip *instance = JAGP_JCSKIP(self);
-	JagPJCSkipPrivate *priv = jagp_jcskip_get_instance_private(instance);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
-}
-
-static void l_stringable_iface_init(CatIStringableInterface *iface) {
-	iface->print = l_stringable_print;
-}
-
-/********************* end CatIStringable implementation *********************/
