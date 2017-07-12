@@ -23,7 +23,7 @@
 #include "jagpjcbinary.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPJCBinary"
 #include <logging/catlog.h>
 
@@ -67,6 +67,7 @@ static void l_finalize(GObject *object) {
 JagPJCBinary *jagp_jcbinary_new(JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs) {
 	JagPJCBinary *result = g_object_new(JAGP_TYPE_JCBINARY, NULL);
 	cat_ref_anounce(result);
+	jagp_jcexpression_construct((JagPJCExpression *) result);
 	result->opcode = opcode;
 	result->lhs = cat_ref_ptr(lhs);
 	result->rhs = cat_ref_ptr(rhs);

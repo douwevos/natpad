@@ -1,8 +1,8 @@
 /*
-   File:    jagpjctree.c
+   File:    jagpsimplediagnosticposition.c
    Project: jaguar-parser
    Author:  Douwe Vos
-   Date:    May 1, 2017
+   Date:    Jul 3, 2017
    e-mail:  dmvos2000(at)yahoo.com
 
    Copyright (C) 2017 Douwe Vos.
@@ -20,24 +20,23 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "jagpjctree.h"
-#include "jagptreeinfo.h"
-#include "../jagpidiagnosticposition.h"
+#include "jagpsimplediagnosticposition.h"
+#include "jagpidiagnosticposition.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_WARN
-#define CAT_LOG_CLAZZ "JagPJCTree"
+#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_CLAZZ "JagPSimpleDiagnosticPosition"
 #include <logging/catlog.h>
 
-struct _JagPJCTreePrivate {
-	void *dummy;
+struct _JagPSimpleDiagnosticPositionPrivate {
+	JagPCursor *at;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 static void l_diagnostic_position_iface_init(JagPIDiagnosticPositionInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagPJCTree, jagp_jctree, G_TYPE_OBJECT,
-		G_ADD_PRIVATE(JagPJCTree)
+G_DEFINE_TYPE_WITH_CODE(JagPSimpleDiagnosticPosition, jagp_simple_diagnostic_position, G_TYPE_OBJECT,
+		G_ADD_PRIVATE(JagPSimpleDiagnosticPosition)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 		G_IMPLEMENT_INTERFACE(JAGP_TYPE_IDIAGNOSTIC_POSITION, l_diagnostic_position_iface_init);
 );
@@ -45,65 +44,49 @@ G_DEFINE_TYPE_WITH_CODE(JagPJCTree, jagp_jctree, G_TYPE_OBJECT,
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
-static void jagp_jctree_class_init(JagPJCTreeClass *clazz) {
+static void jagp_simple_diagnostic_position_class_init(JagPSimpleDiagnosticPositionClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
-static void jagp_jctree_init(JagPJCTree *instance) {
+static void jagp_simple_diagnostic_position_init(JagPSimpleDiagnosticPosition *instance) {
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	JagPJCTree *instance = JAGP_JCTREE(object);
-	JagPJCTreePrivate *priv = jagp_jctree_get_instance_private(instance);
-	cat_unref_ptr(instance->cursor);
-	cat_unref_ptr(instance->cursor_end);
-	G_OBJECT_CLASS(jagp_jctree_parent_class)->dispose(object);
+	JagPSimpleDiagnosticPosition *instance = JAGP_SIMPLE_DIAGNOSTIC_POSITION(object);
+	JagPSimpleDiagnosticPositionPrivate *priv = jagp_simple_diagnostic_position_get_instance_private(instance);
+	cat_unref_ptr(priv->at);
+	G_OBJECT_CLASS(jagp_simple_diagnostic_position_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(jagp_jctree_parent_class)->finalize(object);
+	G_OBJECT_CLASS(jagp_simple_diagnostic_position_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 
-void jagp_jctree_construct(JagPJCTree *tree) {
-//	G_OBJECT_construct((GObject *) result);
-	tree->cursor = NULL;
-	tree->cursor_end = NULL;
+JagPSimpleDiagnosticPosition *jagp_simple_diagnostic_position_new(JagPCursor *at) {
+	JagPSimpleDiagnosticPosition *result = g_object_new(JAGP_TYPE_SIMPLE_DIAGNOSTIC_POSITION, NULL);
+	cat_ref_anounce(result);
+	JagPSimpleDiagnosticPositionPrivate *priv = jagp_simple_diagnostic_position_get_instance_private(result);
+	priv->at = cat_ref_ptr(at);
+	return result;
 }
 
-JagPTag jagp_jctree_get_tag(JagPJCTree *tree) {
-	JagPJCTreeClass *clazz = JAGP_JCTREE_GET_CLASS(tree);
-	if (clazz->getTag == NULL) {
-		cat_log_error("class does not implement jctree.getTag : %O", tree);
-	}
-	return clazz->getTag(tree);
-}
-
-gboolean jagp_jctree_has_tag(JagPJCTree *tree, JagPTag tag) {
-	JagPJCTreeClass *clazz = JAGP_JCTREE_GET_CLASS(tree);
-	if (clazz->getTag == NULL) {
-		cat_log_error("class does not implement jctree.getTag : %O", tree);
-	}
-	return clazz->getTag(tree)==tag;
-}
-
-
-JagPCursor *jagp_jctree_get_start_cursor(JagPJCTree *tree) {
-	return jagp_tree_info_get_start_cursor(tree);
-}
 
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
+	JagPSimpleDiagnosticPosition *instance = JAGP_SIMPLE_DIAGNOSTIC_POSITION(self);
+	JagPSimpleDiagnosticPositionPrivate *priv = jagp_simple_diagnostic_position_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
+
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 
@@ -116,23 +99,22 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 /********************* start JagPIDiagnosticPosition implementation *********************/
 
 static JagPCursor *l_diagnostic_position_get_start_cursor(JagPIDiagnosticPosition *position) {
-	JagPJCTree *tree = JAGP_JCTREE(position);
-	return jagp_tree_info_get_start_cursor(tree);
+	JagPSimpleDiagnosticPositionPrivate *priv = jagp_simple_diagnostic_position_get_instance_private((JagPSimpleDiagnosticPosition *) position);
+	return priv->at;
 }
 
 static JagPCursor *l_diagnostic_position_get_end_cursor(JagPIDiagnosticPosition *position) {
-	JagPJCTree *tree = JAGP_JCTREE(position);
-	return jagp_tree_info_get_end_cursor(tree);
+	JagPSimpleDiagnosticPositionPrivate *priv = jagp_simple_diagnostic_position_get_instance_private((JagPSimpleDiagnosticPosition *) position);
+	return priv->at;
 }
 
 static JagPCursor *l_diagnostic_position_get_preferred_cursor(JagPIDiagnosticPosition *position) {
-	JagPJCTree *tree = JAGP_JCTREE(position);
-	return tree->cursor;
+	JagPSimpleDiagnosticPositionPrivate *priv = jagp_simple_diagnostic_position_get_instance_private((JagPSimpleDiagnosticPosition *) position);
+	return priv->at;
 }
 
 static struct _JagPJCTree *l_diagnostic_position_get_tree(JagPIDiagnosticPosition *position) {
-	JagPJCTree *tree = JAGP_JCTREE(position);
-	return tree;
+	return NULL;
 }
 
 static void l_diagnostic_position_iface_init(JagPIDiagnosticPositionInterface *iface) {

@@ -138,6 +138,7 @@ void cat_string_wo_set_capacity(CatStringWo *e_string_wo, int min_capacity);
 void cat_string_wo_append_decimal(CatStringWo *e_string_wo, long long val);
 void cat_string_wo_append_hexadecimal(CatStringWo *e_string_wo, unsigned long long val, int digits);
 void cat_string_wo_format(CatStringWo *e_string_wo, const char *text, ...);
+void cat_string_wo_vformat(CatStringWo *e_string_wo, const char *text, va_list args);
 
 void cat_string_wo_to_uppercase(CatStringWo *e_string_wo);
 void cat_string_wo_to_lowercase(CatStringWo *e_string_wo);

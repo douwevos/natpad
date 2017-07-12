@@ -4,17 +4,17 @@ module {
 	
 	dependencies {
 		module 'glib';	
-		module 'zlib';	
-		module 'natpad.cup';
+#		module 'zlib';	
+#		module 'natpad.cup';
 		module 'caterpillar';
-		module 'elk';
-		module 'gross-cc-dung';
+#		module 'elk';
+#		module 'gross-cc-dung';
 		module 'gross-runtime';
 	}
 
-	loader 'gross-java-runtime';
-	loader 'gross-cc';
-	loader 'gross-cc-dung';
+#	loader 'gross-java-runtime';
+#	loader 'gross-cc';
+#	loader 'gross-cc-dung';
 
 	clear {
 		remove '[%=module.builddir%]';
@@ -22,18 +22,18 @@ module {
 
 	compile {
 	
-		grossCC {
-			exporter 'caterpillar';
-			grammar './etc/java8.gro';
-			ast './etc/java8.grt';
+#		grossCC {
+#			exporter 'caterpillar';
+#			grammar './etc/java8.gro';
+#			ast './etc/java8.grt';
 			
-			prefix 'JagP';
-			outputPath './src-generated/';
-			updateOnly 'true';
+#			prefix 'JagP';
+#			outputPath './src-generated/';
+#			updateOnly 'true';
 #			arg '-v';
 #			arg '-v';
 #			arg '-v';
-		}
+#		}
 	
 		
 		cc { 

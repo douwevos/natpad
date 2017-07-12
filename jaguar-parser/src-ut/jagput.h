@@ -1,8 +1,8 @@
 /*
-   File:    jaguarparser.h
+   File:    jagput.h
    Project: jaguar-parser
    Author:  Douwe Vos
-   Date:    Mar 9, 2017
+   Date:    Jul 4, 2017
    e-mail:  dmvos2000(at)yahoo.com
 
    Copyright (C) 2017 Douwe Vos.
@@ -20,14 +20,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef JAGUARPARSER_H_
-#define JAGUARPARSER_H_
+#ifndef SRC_UT_JAGPUT_H_
+#define SRC_UT_JAGPUT_H_
 
-#include "jagpscannerfactory.h"
-#include "jagpparser.h"
-#include "jagptokenizer.h"
-#include "jagplexerimpl.h"
-#include "../src-generated/jagpparserconfig.h"
-#include "tree/jagpjccompilationunit.h"
 
-#endif /* JAGUARPARSER_H_ */
+
+int main(int argc, char **argv);
+
+
+#endif /* SRC_UT_JAGPUT_H_ */

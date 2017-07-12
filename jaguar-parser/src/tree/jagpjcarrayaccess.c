@@ -23,7 +23,7 @@
 #include "jagpjcarrayaccess.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPJCArrayAccess"
 #include <logging/catlog.h>
 
@@ -66,7 +66,7 @@ static void l_finalize(GObject *object) {
 JagPJCArrayAccess *jagp_jcarray_access_new(JagPJCExpression *indexed, JagPJCExpression *index) {
 	JagPJCArrayAccess *result = g_object_new(JAGP_TYPE_JCARRAY_ACCESS, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
+	jagp_jcexpression_construct((JagPJCExpression *) result);
 	result->indexed = cat_ref_ptr(indexed);
 	result->index = cat_ref_ptr(index);
 	return result;

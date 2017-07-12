@@ -48,6 +48,7 @@
 #include "jagpjcforloop.h"
 #include "jagpjcident.h"
 #include "jagpjcif.h"
+#include "jagpjcinstanceof.h"
 #include "jagpjcimport.h"
 #include "jagpjclabeledstatement.h"
 #include "jagpjclambda.h"
@@ -76,6 +77,7 @@
 #include "jagpjcvariabledecl.h"
 #include "jagpjcwhileloop.h"
 #include "jagpjcwildcard.h"
+#include "../jagpcursor.h"
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -95,7 +97,7 @@ typedef struct _JagPTreeMakerClass          JagPTreeMakerClass;
 
 struct _JagPTreeMaker {
 	GObject parent;
-	int pos;
+	JagPCursor *cursor;
 };
 
 struct _JagPTreeMakerClass {
@@ -108,7 +110,7 @@ GType jagp_tree_maker_get_type();
 JagPTreeMaker *jagp_tree_maker_new();
 
 
-void jagp_tree_maker_at(JagPTreeMaker *tree_maker, int pos);
+void jagp_tree_maker_at(JagPTreeMaker *tree_maker, JagPCursor *cursor);
 
 JagPJCCompilationUnit *jagp_tree_maker_top_level(JagPTreeMaker *tree_maker, CatArrayWo /*<JagPJCTree>*/ *defs);
 JagPJCPackageDecl *jagp_tree_maker_package_decl(JagPTreeMaker *tree_maker, CatArrayWo /*<JagPJCAnnotation>*/ *annotations, JagPJCExpression *pid);
@@ -194,6 +196,7 @@ JagPJCUnary *jagp_tree_maker_unary(JagPTreeMaker *tree_maker, JagPTag opcode, Ja
 JagPJCBinary *jagp_tree_maker_binary(JagPTreeMaker *tree_maker, JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs);
 
 JagPJCTypeCast *jagp_tree_maker_type_cast(JagPTreeMaker *tree_maker, JagPJCTree *clazz, JagPJCExpression *expre);
+JagPJCInstanceOf *jagp_tree_maker_type_test(JagPTreeMaker *tree_maker, JagPJCExpression *expr, JagPJCTree *clazz);
 JagPJCTypeApply *jagp_tree_maker_type_apply(JagPTreeMaker *tree_maker, JagPJCTree *clazz, CatArrayWo *arguments);
 JagPJCPrimitiveTypeTree *jagp_tree_maker_type_ident(JagPTreeMaker *tree_maker, JagPTypeTag typetag);
 

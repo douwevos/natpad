@@ -55,6 +55,9 @@ GType jagp_jcexpression_get_type();
 
 JagPJCExpression *jagp_jcexpression_new();
 
+void jagp_jcexpression_construct(JagPJCExpression *expression);
+
+
 gboolean jagp_jcexpression_is_poly(JagPJCExpression *expression);
 gboolean jagp_jcexpression_is_standalone(JagPJCExpression *expression);
 

@@ -24,6 +24,7 @@
 #define JAGPILEXER_H_
 
 #include "jagptoken.h"
+#include "jagpcursor.h"
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -70,12 +71,12 @@ struct _JagPILexerInterface {
     /**
      * Return the position where a lexical error occurred;
      */
-    int (*errPos)(JagPILexer *lexer);
+    JagPCursor *(*errPos)(JagPILexer *lexer);
 
     /**
      * Set the position where a lexical error occurred;
      */
-    void (*errPosSet)(JagPILexer *lexer, int pos);
+    void (*errPosSet)(JagPILexer *lexer, JagPCursor *pos);
 
 //    /**
 //     * Build a map for translating between line numbers and
@@ -99,6 +100,9 @@ JagPToken *jagp_ilexer_token_lah(JagPILexer *lexer, int lookahead);
 
 JagPToken *jagp_ilexer_prev_token(JagPILexer *lexer);
 
+JagPCursor *jagp_ilexer_err_pos(JagPILexer *lexer);
+
+void jagp_ilexer_set_err_pos(JagPILexer *lexer, JagPCursor *cursor);
 
 G_END_DECLS
 

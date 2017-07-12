@@ -1,5 +1,5 @@
 workspace {
-	name 'natpad-testing';
+	name 'natpad-coverage';
 
 	ask {
 		property 'basedir';
@@ -44,15 +44,11 @@ workspace {
 
 	template {
 		id 'natpad.cc.args';
-		arg '-DLEA_X11_SUPPORT';
-		arg '-DNATPAD_TESTING';
-		arg '-DCAT_REF_MONITORING';
-		arg '-DMONITOR_CLAZZ="CatArrayWgo"';
+#		arg '-DNATPAD_TESTING';
 		arg '-DCAT_ENABLE_STACK_TRACING';
-		arg '-O0';
-		arg '-ggdb';
+		arg '--coverage';
+		arg '-g';
 		arg '-Wall';
-		arg '-fmessage-length=0';
 		arg '-pthread';
 		content 'natpad.cc.args';
 	}
