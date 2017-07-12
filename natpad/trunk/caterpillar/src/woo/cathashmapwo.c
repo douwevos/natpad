@@ -66,7 +66,6 @@ static void l_stringable_iface_init(CatIStringableInterface *iface);
 G_DEFINE_TYPE_WITH_CODE(CatHashMapWo, cat_hash_map_wo, CAT_TYPE_WO,
 		G_ADD_PRIVATE(CatHashMapWo)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
 static void l_dispose(GObject *object);

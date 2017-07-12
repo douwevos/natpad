@@ -1,0 +1,49 @@
+module {
+
+	name 'jaguar-parser.test';	
+	
+	
+	dependencies {
+		module 'jaguar-parser';
+	}
+
+	compile {
+		cc { 
+			src { path './src-ut/'; }
+			natpad.cc.args {}
+		
+			arg '-lm';
+			destdir './compiled-ut/'; 
+			depdir 'deps-ut';
+		}
+	}
+
+	package {
+		clink {
+			src { 
+				path './compiled-ut/';
+			}
+			output './jaguar-parser-ut';
+			natpad.cc.args {}
+			test {
+				arg '-lm';
+			}
+		}
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'jaguarparser';
+			libname 'm';
+			libname 'bfd';
+		}
+	
+		headers {
+			dir './src/';
+		}
+	}
+
+
+}

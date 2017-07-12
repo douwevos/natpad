@@ -23,7 +23,7 @@
 #include "jagpjcannotation.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPJCAnnotation"
 #include <logging/catlog.h>
 
@@ -64,6 +64,7 @@ static void l_finalize(GObject *object) {
 JagPJCAnnotation *jagp_jcannotation_new(gboolean is_type_annotation, JagPJCTree *annotation_type, CatArrayWo *args) {
 	JagPJCAnnotation *result = g_object_new(JAGP_TYPE_JCANNOTATION, NULL);
 	cat_ref_anounce(result);
+	jagp_jcexpression_construct((JagPJCExpression *) result);
 	result->is_type_annotation = is_type_annotation;
 	result->annotation_type = cat_ref_ptr(annotation_type);
 	result->args = cat_ref_ptr(args);

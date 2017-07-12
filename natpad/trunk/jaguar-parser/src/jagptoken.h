@@ -148,6 +148,8 @@ enum _JagPTokenKind {
 	JAGP_KIND_GTGTEQ,
 	JAGP_KIND_GTGTGTEQ,
 	JAGP_KIND_MONKEYS_AT,
+	JAGP_KIND_COMMENT_FULL,
+	JAGP_KIND_COMMENT_EOL,
 	JAGP_KIND_CUSTOM
 
 };
@@ -167,8 +169,6 @@ typedef struct _JagPTokenClass          JagPTokenClass;
 struct _JagPToken {
 	GObject parent;
 	JagPTokenKind kind;
-	int pos;
-	int endPos;
 
 	JagPCursor *cur_start;
 	JagPCursor *cur_end;
@@ -181,7 +181,6 @@ struct _JagPToken {
 
 struct _JagPTokenClass {
 	GObjectClass parent_class;
-	JagPName *(*name)(JagPToken *token);
 };
 
 
@@ -189,8 +188,7 @@ GType jagp_token_get_type();
 
 JagPToken *jagp_token_new();
 
-JagPName *jagp_token_name(JagPToken *token);
-
+GObject *jagp_token_get_value(JagPToken *token);
 
 JagPComment *jagp_token_comment(JagPToken *token, JagPCommentStyle comment_style);
 

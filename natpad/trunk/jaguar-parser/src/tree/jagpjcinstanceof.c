@@ -1,8 +1,8 @@
 /*
-   File:    jagpjcparens.c
+   File:    jagpjcinstanceof.c
    Project: jaguar-parser
    Author:  Douwe Vos
-   Date:    May 6, 2017
+   Date:    Jul 3, 2017
    e-mail:  dmvos2000(at)yahoo.com
 
    Copyright (C) 2017 Douwe Vos.
@@ -20,20 +20,24 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "jagpjcparens.h"
+#include "jagpjcinstanceof.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
-#define CAT_LOG_CLAZZ "JagPJCParens"
+#define CAT_LOG_CLAZZ "JagPJCInstanceOf"
 #include <logging/catlog.h>
 
-G_DEFINE_TYPE(JagPJCParens, jagp_jcparens, JAGP_TYPE_JCEXPRESSION);
+static void l_stringable_iface_init(CatIStringableInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagPJCInstanceOf, jagp_jcinstance_of, JAGP_TYPE_JCEXPRESSION,
+		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
+);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
-static JagPTag l_tree_get_tag(JagPJCTree *tree) { return JAGP_TAG_PARENS; }
+static JagPTag l_tree_get_tag(JagPJCTree *tree) { return JAGP_TAG_TYPETEST; }
 
-static void jagp_jcparens_class_init(JagPJCParensClass *clazz) {
+static void jagp_jcinstance_of_class_init(JagPJCInstanceOfClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -42,29 +46,46 @@ static void jagp_jcparens_class_init(JagPJCParensClass *clazz) {
 	tree_class->getTag = l_tree_get_tag;
 }
 
-static void jagp_jcparens_init(JagPJCParens *instance) {
+static void jagp_jcinstance_of_init(JagPJCInstanceOf *instance) {
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	JagPJCParens *instance = JAGP_JCPARENS(object);
+	JagPJCInstanceOf *instance = JAGP_JCINSTANCE_OF(object);
+	cat_unref_ptr(instance->clazz);
 	cat_unref_ptr(instance->expr);
-	G_OBJECT_CLASS(jagp_jcparens_parent_class)->dispose(object);
+	G_OBJECT_CLASS(jagp_jcinstance_of_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(jagp_jcparens_parent_class)->finalize(object);
+	G_OBJECT_CLASS(jagp_jcinstance_of_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 
-JagPJCParens *jagp_jcparens_new(JagPJCExpression *expr) {
-	JagPJCParens *result = g_object_new(JAGP_TYPE_JCPARENS, NULL);
+JagPJCInstanceOf *jagp_jcinstance_of_new(JagPJCExpression *expr, JagPJCTree *clazz) {
+	JagPJCInstanceOf *result = g_object_new(JAGP_TYPE_JCINSTANCE_OF, NULL);
 	cat_ref_anounce(result);
+//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
 	result->expr = cat_ref_ptr(expr);
+	result->clazz = cat_ref_ptr(clazz);
 	return result;
 }
 
+
+
+/********************* start CatIStringable implementation *********************/
+
+static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
+	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
+	cat_string_wo_format(append_to, "%s[%p]", iname, self);
+}
+
+static void l_stringable_iface_init(CatIStringableInterface *iface) {
+	iface->print = l_stringable_print;
+}
+
+/********************* end CatIStringable implementation *********************/

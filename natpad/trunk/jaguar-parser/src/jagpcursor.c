@@ -55,6 +55,7 @@ static void jagp_cursor_init(JagPCursor *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagPCursor *instance = JAGP_CURSOR(object);
+	cat_stacktrace_print();
 	G_OBJECT_CLASS(jagp_cursor_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -76,6 +77,49 @@ JagPCursor *jagp_cursor_new(long long row, int column) {
 	return result;
 }
 
+gboolean jagp_cursor_left_or_above(const JagPCursor *cur_a, const JagPCursor *cur_b, gboolean eq_value) {
+	if (cur_a==NULL && cur_b==NULL) {
+		return FALSE;
+	} else if (cur_a==NULL) {
+		return TRUE;
+	} else if (cur_b==NULL) {
+		return FALSE;
+	}
+	JagPCursorPrivate *priv_a = jagp_cursor_get_instance_private((JagPCursor *) cur_a);
+	JagPCursorPrivate *priv_b = jagp_cursor_get_instance_private((JagPCursor *) cur_b);
+	if (priv_a->row < priv_b->row) {
+		return TRUE;
+	} else if (priv_a->row > priv_b->row) {
+		return FALSE;
+	} else if (priv_a->column < priv_b->column) {
+		return TRUE;
+	} else if (priv_a->column > priv_b->column) {
+		return FALSE;
+	}
+	return eq_value;
+}
+
+gboolean jagp_cursor_equal(const JagPCursor *cur_a, const JagPCursor *cur_b) {
+	if (cur_a==cur_b) {
+		return TRUE;
+	} else if ((cur_a==NULL) || (cur_b==NULL)) {
+		return FALSE;
+	}
+	JagPCursorPrivate *priv_a = jagp_cursor_get_instance_private((JagPCursor *) cur_a);
+	JagPCursorPrivate *priv_b = jagp_cursor_get_instance_private((JagPCursor *) cur_b);
+	return (priv_a->row==priv_b->row) && (priv_a->column==priv_b->column);
+}
+
+void jagp_cursor_values(const JagPCursor *cursor, long long *row, int *column) {
+	JagPCursorPrivate *priv = jagp_cursor_get_instance_private((JagPCursor *) cursor);
+	if (row) {
+		*row = priv->row;
+	}
+
+	if (column) {
+		*column = priv->column;
+	}
+}
 
 
 /********************* start CatIStringable implementation *********************/
@@ -83,8 +127,7 @@ JagPCursor *jagp_cursor_new(long long row, int column) {
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
 	JagPCursor *instance = JAGP_CURSOR(self);
 	JagPCursorPrivate *priv = jagp_cursor_get_instance_private(instance);
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p, row=%d, col=%d]", iname, self, priv->row, priv->column);
+	cat_string_wo_format(append_to, "Cursor[r/c:%d,%d]", priv->row, priv->column);
 }
 
 static void l_stringable_iface_init(CatIStringableInterface *iface) {

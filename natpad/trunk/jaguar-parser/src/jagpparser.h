@@ -69,8 +69,6 @@ JagPParser *jagp_parser_new(JagPILexer *lexer, GroRunITokenFactory *token_factor
 
 /*GroAstSpec * */void jagp_parser_run(JagPParser *parser);
 
-CatArrayWo *jagp_parser_get_token_cash(JagPParser *parser);
-
 CatArrayWo *jagp_parser_get_messages(JagPParser *parser);
 
 G_END_DECLS

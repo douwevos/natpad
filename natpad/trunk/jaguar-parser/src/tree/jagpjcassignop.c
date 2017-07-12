@@ -23,7 +23,7 @@
 #include "jagpjcassignop.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPJCAssignOp"
 #include <logging/catlog.h>
 
@@ -69,7 +69,7 @@ static void l_finalize(GObject *object) {
 JagPJCAssignOp *jagp_jcassignop_new(JagPTag opcode, JagPJCExpression *lhs, JagPJCExpression *rhs) {
 	JagPJCAssignOp *result = g_object_new(JAGP_TYPE_JCASSIGNOP, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
+	jagp_jcexpression_construct((JagPJCExpression *) result);
 	result->opcode = opcode;
 	result->lhs = cat_ref_ptr(lhs);
 	result->rhs = cat_ref_ptr(rhs);

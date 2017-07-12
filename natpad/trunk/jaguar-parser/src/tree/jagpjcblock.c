@@ -23,7 +23,7 @@
 #include "jagpjcblock.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPJCBlock"
 #include <logging/catlog.h>
 
@@ -66,7 +66,7 @@ JagPJCBlock *jagp_jcblock_new(long long flags, CatArrayWo *stats) {
 	cat_ref_anounce(result);
 	result->flags = flags;
 	result->stats = cat_ref_ptr(stats);
-	result->endpos = -1;
+	result->endpos = NULL;
 	return result;
 }
 

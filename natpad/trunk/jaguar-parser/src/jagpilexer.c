@@ -48,3 +48,11 @@ JagPToken *jagp_ilexer_prev_token(JagPILexer *lexer) {
 	return JAGP_ILEXER_GET_INTERFACE(lexer)->prevToken(lexer);
 }
 
+JagPCursor *jagp_ilexer_err_pos(JagPILexer *lexer) {
+	return JAGP_ILEXER_GET_INTERFACE(lexer)->errPos(lexer);
+}
+
+void jagp_ilexer_set_err_pos(JagPILexer *lexer, JagPCursor *cursor) {
+	JAGP_ILEXER_GET_INTERFACE(lexer)->errPosSet(lexer, cursor);
+}
+

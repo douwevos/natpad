@@ -23,7 +23,7 @@
 #include "jagpjcexpression.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPJCExpression"
 #include <logging/catlog.h>
 
@@ -70,6 +70,11 @@ JagPJCExpression *jagp_jcexpression_new() {
 	cat_ref_anounce(result);
 	return result;
 }
+
+void jagp_jcexpression_construct(JagPJCExpression *expression) {
+	jagp_jctree_construct((JagPJCTree *) expression);
+}
+
 
 gboolean jagp_jcexpression_is_poly(JagPJCExpression *expression) {
 	JagPJCExpressionClass *c = JAGP_JCEXPRESSION_GET_CLASS(expression);

@@ -23,6 +23,7 @@
 #ifndef TREE_JAGPTREEINFO_H_
 #define TREE_JAGPTREEINFO_H_
 
+#include "../jagpcursor.h"
 #include "jagpjcexpression.h"
 #include <caterpillar.h>
 
@@ -50,8 +51,8 @@
 JagPJCExpression *jagp_tree_info_type_in(JagPJCExpression *tree);
 gboolean jagp_tree_info_is_expression_statement(JagPJCExpression *tree);
 
-
-int jagp_tree_info_get_end_pos(JagPJCTree *tree);
+JagPCursor *jagp_tree_info_get_start_cursor(JagPJCTree *tree);
+JagPCursor *jagp_tree_info_get_end_cursor(JagPJCTree *tree);
 
 int jagp_tree_info_op_prec(JagPTag op);
 

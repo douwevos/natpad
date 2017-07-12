@@ -950,10 +950,15 @@ void cat_string_wo_append_hexadecimal(CatStringWo *e_string_wo, unsigned long lo
 #define FM_LONG         4	// '%l'
 
 void cat_string_wo_format(CatStringWo *e_string_wo, const char *text, ...) {
-	CHECK_IF_WRITABLE();
 	va_list args;
-
 	va_start(args, text);
+	cat_string_wo_vformat(e_string_wo, text, args);
+	va_end(args);
+}
+
+void cat_string_wo_vformat(CatStringWo *e_string_wo, const char *text, va_list args) {
+	CHECK_IF_WRITABLE();
+
 
 	gboolean keep_running = TRUE;
 	int mode = FM_NONE;
@@ -1086,7 +1091,6 @@ void cat_string_wo_format(CatStringWo *e_string_wo, const char *text, ...) {
 		cidx++;
 	}
 
-	va_end(args);
 }
 
 

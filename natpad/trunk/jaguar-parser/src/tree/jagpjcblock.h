@@ -44,7 +44,7 @@ struct _JagPJCBlock {
 	JagPJCStatement parent;
 	long long flags;
 	CatArrayWo *stats;
-	int endpos;
+	JagPCursor *endpos;
 };
 
 struct _JagPJCBlockClass {

@@ -99,6 +99,15 @@ int cat_log_indent_level;
 
 #endif
 
+
+#if CAT_LOG_LEVEL<CAT_LOG_INFO
+#define cat_log_indent() cat_log_indent_level++;
+#define cat_log_dedent() cat_log_indent_level--;
+#else
+#define cat_log_indent()
+#define cat_log_dedent()
+#endif
+
 #if CAT_LOG_LEVEL<=CAT_LOG_FATAL
 #define cat_log_fatal(format, args...) \
 	cat_log_print("FATL", format, ##args); \

@@ -54,8 +54,12 @@ struct _JagPCursorClass {
 
 GType jagp_cursor_get_type();
 
-JagPCursor *jagp_cursor_new();
+JagPCursor *jagp_cursor_new(long long row, int column);
 
+gboolean jagp_cursor_left_or_above(const JagPCursor *cur_a, const JagPCursor *cur_b, gboolean eq_value);
+gboolean jagp_cursor_equal(const JagPCursor *cur_a, const JagPCursor *cur_b);
+
+void jagp_cursor_values(const JagPCursor *cur_a, long long *row, int *column);
 
 G_END_DECLS
 

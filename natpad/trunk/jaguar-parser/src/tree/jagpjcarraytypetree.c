@@ -23,7 +23,7 @@
 #include "jagpjcarraytypetree.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPJCArrayTypeTree"
 #include <logging/catlog.h>
 
@@ -53,7 +53,6 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagPJCArrayTypeTree *instance = JAGP_JCARRAY_TYPE_TREE(object);
 	cat_unref_ptr(instance->elemtype);
-	cat_stacktrace_print();
 	G_OBJECT_CLASS(jagp_jcarray_type_tree_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -69,7 +68,7 @@ static void l_finalize(GObject *object) {
 JagPJCArrayTypeTree *jagp_jcarray_type_tree_new(JagPJCExpression *elemtype) {
 	JagPJCArrayTypeTree *result = g_object_new(JAGP_TYPE_JCARRAY_TYPE_TREE, NULL);
 	cat_ref_anounce(result);
-//	JAGP_JCEXPRESSION_construct((JagPJCExpression *) result);
+	jagp_jcexpression_construct((JagPJCExpression *) result);
 	result->elemtype = cat_ref_ptr(elemtype);
 	return result;
 }

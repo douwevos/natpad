@@ -323,8 +323,8 @@ typedef struct _JagPJCTreeClass          JagPJCTreeClass;
 
 struct _JagPJCTree {
 	GObject parent;
-	int pos;
 	JagPCursor *cursor;
+	JagPCursor *cursor_end;
 };
 
 struct _JagPJCTreeClass {
@@ -340,7 +340,8 @@ void jagp_jctree_construct(JagPJCTree *tree);
 JagPTag jagp_jctree_get_tag(JagPJCTree *tree);
 gboolean jagp_jctree_has_tag(JagPJCTree *tree, JagPTag tag);
 
-int jagp_jctree_get_start_position(JagPJCTree *tree);
+JagPCursor *jagp_jctree_get_start_cursor(JagPJCTree *tree);
+JagPCursor *jagp_jctree_get_end_cursor(JagPJCTree *tree);
 
 G_END_DECLS
 

@@ -91,140 +91,138 @@ JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo 
 }
 
 
-static int l_map_symbol(GroRunIToken *token) {
-	GroRunFullToken *full_token = GRORUN_FULL_TOKEN(token);
-	int sym_index = grorun_full_token_get_user_index(full_token);
-	switch(sym_index) {
-		case JAGP_SYM_L_COLON : return 3;
-		case JAGP_SYM_L_DOT : return 3;
-		case JAGP_SYM_L_COMMA : return 3;
-		case JAGP_SYM_L_SEMI: return 3;
+static int l_map_symbol(JagPToken *token) {
+	switch(token->kind) {
+		case JAGP_KIND_COLON : return 3;
+		case JAGP_KIND_DOT : return 3;
+		case JAGP_KIND_COMMA : return 3;
+		case JAGP_KIND_SEMI: return 3;
 
-		case JAGP_SYM_L_IS : return 1;
+		case JAGP_KIND_EQ : return 1;
 
 		/* conditions */
-		case JAGP_SYM_L_EQ : return 1;
-		case JAGP_SYM_L_NE : return 1;
-		case JAGP_SYM_L_LT : return 1;
-		case JAGP_SYM_L_GT : return 1;
-		case JAGP_SYM_L_LE : return 1;
-		case JAGP_SYM_L_GE : return 1;
+		case JAGP_KIND_EQEQ : return 1;
+		case JAGP_KIND_BANGEQ : return 1;
+		case JAGP_KIND_LT : return 1;
+		case JAGP_KIND_GT : return 1;
+		case JAGP_KIND_LTEQ : return 1;
+		case JAGP_KIND_GTEQ : return 1;
 
 		/* literals */
-		case JAGP_SYM_LITERAL : return 5;
-//		case JAGP_SYM_OCTAL : return 4;
-//		case JAGP_SYM_DECIMAL : return 4;
-//		case JAGP_SYM_STRING : return 5;
-//		case JAGP_SYM_HEX : return 4;
-		case JAGP_SYM_IDENTIFIER : return 1;
+		case JAGP_KIND_STRINGLITERAL : return 5;
+//		case JAGP_KIND_OCTAL : return 4;
+//		case JAGP_KIND_DECIMAL : return 4;
+//		case JAGP_KIND_STRING : return 5;
+//		case JAGP_KIND_HEX : return 4;
+		case JAGP_KIND_IDENTIFIER : return 1;
 
 		/* unary operators */
-		case JAGP_SYM_L_QUESTION_MARK : return 7;
-		case JAGP_SYM_L_INC : return 7;
-		case JAGP_SYM_L_DEC : return 7;
-		case JAGP_SYM_L_NEG : return 7;
-		case JAGP_SYM_L_NOT : return 7;
+		case JAGP_KIND_QUES : return 7;
+		case JAGP_KIND_PLUSPLUS : return 7;
+		case JAGP_KIND_SUBSUB : return 7;
+		case JAGP_KIND_BANG : return 7;
+		case JAGP_KIND_TILDE : return 7;
 
-		case JAGP_SYM_L_MUL : return 7;
-		case JAGP_SYM_L_DIV : return 7;
-		case JAGP_SYM_L_MOD : return 7;
-		case JAGP_SYM_L_ADD : return 7;
-		case JAGP_SYM_L_SUB : return 7;
+		case JAGP_KIND_STAR : return 7;
+		case JAGP_KIND_SLASH : return 7;
+		case JAGP_KIND_PERCENT : return 7;
+		case JAGP_KIND_PLUS : return 7;
+		case JAGP_KIND_SUB : return 7;
 
-		case JAGP_SYM_L_BAR : return 6;
-		case JAGP_SYM_L_AND : return 6;
-		case JAGP_SYM_L_LOR : return 6;
-		case JAGP_SYM_L_LAND : return 6;
-		case JAGP_SYM_L_XOR : return 6;
-
-
-//		case JAGP_SYM_L_DIM : return 6;
-
-		case JAGP_SYM_L_LCUBRACE : return 9;
-		case JAGP_SYM_L_RCUBRACE : return 9;
-		case JAGP_SYM_L_LPAREN : return 9;
-		case JAGP_SYM_L_RPAREN : return 9;
-		case JAGP_SYM_L_LSQBRACE : return 4;
-		case JAGP_SYM_L_RSQBRACE : return 4;
+		case JAGP_KIND_BAR : return 6;
+		case JAGP_KIND_AMP : return 6;
+		case JAGP_KIND_BARBAR : return 6;
+		case JAGP_KIND_AMPAMP : return 6;
+		case JAGP_KIND_CARET : return 6;
 
 
-		case JAGP_SYM_L_MUL_IS : return 2;
-		case JAGP_SYM_L_DIV_IS : return 2;
-		case JAGP_SYM_L_MOD_IS : return 2;
-		case JAGP_SYM_L_ADD_IS : return 2;
-		case JAGP_SYM_L_SUB_IS : return 1;
-		case JAGP_SYM_L_SHL_IS : return 2;
-		case JAGP_SYM_L_SHR_IS : return 2;
-		case JAGP_SYM_L_AND_IS : return 2;
-		case JAGP_SYM_L_XOR_IS : return 2;
-		case JAGP_SYM_L_OR_IS : return 2;
+//		case JAGP_KIND_DIM : return 6;
+
+		case JAGP_KIND_LBRACE : return 9;
+		case JAGP_KIND_RBRACE : return 9;
+		case JAGP_KIND_LPAREN : return 9;
+		case JAGP_KIND_RPAREN : return 9;
+		case JAGP_KIND_LBRACKET : return 4;
+		case JAGP_KIND_RBRACKET : return 4;
+
+
+		case JAGP_KIND_STAREQ : return 2;
+		case JAGP_KIND_SLASHEQ : return 2;
+		case JAGP_KIND_PERCENTEQ : return 2;
+		case JAGP_KIND_PLUSEQ : return 2;
+		case JAGP_KIND_SUBEQ : return 1;
+		case JAGP_KIND_LTLTEQ : return 2;
+		case JAGP_KIND_GTGTEQ : return 2;
+		case JAGP_KIND_AMPEQ : return 2;
+		case JAGP_KIND_CARETEQ : return 2;
+		case JAGP_KIND_BAREQ : return 2;
 
 
 
-		case JAGP_SYM_L_SHRR_IS : return 1;
-		case JAGP_SYM_EOL_COMMENT : return 15;
-		case JAGP_SYM_FULL_COMMENT : return 3;
+		case JAGP_KIND_GTGTGTEQ : return 1;
+		case JAGP_KIND_COMMENT_EOL : return 15;
+		case JAGP_KIND_COMMENT_FULL : return 3;
 
-		case JAGP_SYM_K_PACKAGE : return 8;
-		case JAGP_SYM_K_IMPORT : return 8;
-		case JAGP_SYM_K_IMPLEMENTS : return 8;
-		case JAGP_SYM_K_INSTANCEOF : return 8;
-		case JAGP_SYM_K_EXTENDS : return 8;
+		case JAGP_KIND_PACKAGE : return 8;
+		case JAGP_KIND_IMPORT : return 8;
+		case JAGP_KIND_IMPLEMENTS : return 8;
+		case JAGP_KIND_INSTANCEOF : return 8;
+		case JAGP_KIND_EXTENDS : return 8;
 
-		case JAGP_SYM_K_PUBLIC : return 4;
-		case JAGP_SYM_K_PRIVATE : return 4;
-		case JAGP_SYM_K_PROTECTED : return 4;
-		case JAGP_SYM_K_STATIC : return 4;
-		case JAGP_SYM_K_ABSTRACT : return 5;
-		case JAGP_SYM_K_TRANSIENT : return 5;
-		case JAGP_SYM_K_FINAL : return 5;
-		case JAGP_SYM_K_VOLATILE : return 5;
-		case JAGP_SYM_K_NATIVE : return 5;
+		case JAGP_KIND_PUBLIC : return 4;
+		case JAGP_KIND_PRIVATE : return 4;
+		case JAGP_KIND_PROTECTED : return 4;
+		case JAGP_KIND_STATIC : return 4;
+		case JAGP_KIND_ABSTRACT : return 5;
+		case JAGP_KIND_TRANSIENT : return 5;
+		case JAGP_KIND_FINAL : return 5;
+		case JAGP_KIND_VOLATILE : return 5;
+		case JAGP_KIND_NATIVE : return 5;
 
-		case JAGP_SYM_K_DO : return 9;
-		case JAGP_SYM_K_TRY : return 9;
-		case JAGP_SYM_K_THROW : return 9;
-		case JAGP_SYM_K_THROWS : return 9;
-		case JAGP_SYM_K_FINALLY : return 9;
-		case JAGP_SYM_K_BREAK : return 9;
-		case JAGP_SYM_K_ELSE : return 9;
-//		case JAGP_SYM_K_INNER : return 9;
-		case JAGP_SYM_K_CASE : return 9;
-//		case JAGP_SYM_K_GOTO : return 9;
-		case JAGP_SYM_K_RETURN : return 9;
-		case JAGP_SYM_K_CATCH : return 9;
-		case JAGP_SYM_K_NEW : return 9;
-		case JAGP_SYM_K_FOR : return 9;
-		case JAGP_SYM_K_SWITCH : return 9;
-		case JAGP_SYM_K_CONTINUE : return 9;
-		case JAGP_SYM_K_WHILE : return 9;
-		case JAGP_SYM_K_SYNCHRONIZED : return 9;
-		case JAGP_SYM_K_DEFAULT : return 9;
-		case JAGP_SYM_K_IF : return 9;
+		case JAGP_KIND_DO : return 9;
+		case JAGP_KIND_TRY : return 9;
+		case JAGP_KIND_THROW : return 9;
+		case JAGP_KIND_THROWS : return 9;
+		case JAGP_KIND_FINALLY : return 9;
+		case JAGP_KIND_BREAK : return 9;
+		case JAGP_KIND_ELSE : return 9;
+//		case JAGP_KIND_INNER : return 9;
+		case JAGP_KIND_CASE : return 9;
+//		case JAGP_KIND_GOTO : return 9;
+		case JAGP_KIND_RETURN : return 9;
+		case JAGP_KIND_CATCH : return 9;
+		case JAGP_KIND_NEW : return 9;
+		case JAGP_KIND_FOR : return 9;
+		case JAGP_KIND_SWITCH : return 9;
+		case JAGP_KIND_CONTINUE : return 9;
+		case JAGP_KIND_WHILE : return 9;
+		case JAGP_KIND_SYNCHRONIZED : return 9;
+		case JAGP_KIND_DEFAULT : return 9;
+		case JAGP_KIND_IF : return 9;
 
-		case JAGP_SYM_K_BOOLEAN : return 12;
-		case JAGP_SYM_K_DOUBLE : return 12;
-		case JAGP_SYM_K_BYTE : return 12;
-		case JAGP_SYM_K_INT : return 12;
-		case JAGP_SYM_K_VOID : return 12;
-		case JAGP_SYM_K_FLOAT : return 12;
-		case JAGP_SYM_K_LONG : return 12;
-		case JAGP_SYM_K_SHORT : return 12;
-		case JAGP_SYM_K_CHAR : return 1;
+		case JAGP_KIND_BOOLEAN : return 12;
+		case JAGP_KIND_DOUBLE : return 12;
+		case JAGP_KIND_BYTE : return 12;
+		case JAGP_KIND_INT : return 12;
+		case JAGP_KIND_VOID : return 12;
+		case JAGP_KIND_FLOAT : return 12;
+		case JAGP_KIND_LONG : return 12;
+		case JAGP_KIND_SHORT : return 12;
+		case JAGP_KIND_CHAR : return 1;
 
-//		case JAGP_SYM_K_REST : return 15;
-//		case JAGP_SYM_K_VAR : return 15;
-//		case JAGP_SYM_K_CAST : return 15;
-//		case JAGP_SYM_K_FUTURE : return 15;
-//		case JAGP_SYM_K_CONST : return 15;
-//		case JAGP_SYM_K_GENERIC : return 15;
+//		case JAGP_KIND_REST : return 15;
+//		case JAGP_KIND_VAR : return 15;
+//		case JAGP_KIND_CAST : return 15;
+//		case JAGP_KIND_FUTURE : return 15;
+//		case JAGP_KIND_CONST : return 15;
+//		case JAGP_KIND_GENERIC : return 15;
 
-		case JAGP_SYM_K_INTERFACE : return 10;
-		case JAGP_SYM_K_CLASS : return 10;
+		case JAGP_KIND_INTERFACE : return 10;
+		case JAGP_KIND_CLASS : return 10;
 
-		case JAGP_SYM_K_SUPER : return 8;
-//		case JAGP_SYM_NULL : return 8;
-		case JAGP_SYM_K_THIS : return 8;
+		case JAGP_KIND_SUPER : return 8;
+//		case JAGP_KIND_NULL : return 8;
+		case JAGP_KIND_THIS : return 8;
 
 
 		default : {} break;
@@ -240,11 +238,15 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 	cha_revision_reader_set_forced_line_end(revision_reader, CHA_LINE_END_LF);
 	CatIUtf8Scanner *utf8_scanner = CAT_IUTF8_SCANNER(revision_reader);
 
-	JagPScanner *scanner = jagp_scanner_factory_create_scanner(priv->scanner_factory, utf8_scanner);
-	JagPLexerImpl *lexer_impl = jagp_lexer_impl_new(scanner);
+//	JagPScanner *scanner = jagp_scanner_factory_create_scanner(priv->scanner_factory, utf8_scanner);
+
+	JagPTokenizer *tokenizer = jagp_tokenizer_new(utf8_scanner);
+
+	JagPLexerImpl *lexer_impl = jagp_lexer_impl_new(tokenizer);
+	cat_log_debug("lexer_impl=%O", lexer_impl);
 	JagPParser *parser = jagp_parser_new((JagPILexer *) lexer_impl, priv->token_factory);
 	jagp_parser_run(parser);
-	cat_unref_ptr(lexer_impl);
+	cat_unref(lexer_impl);
 
 	/* tag lines */
 	CatArrayWo *message_list = jagp_parser_get_messages(parser);
@@ -275,24 +277,22 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 
 	DraSpellHelper *spell_helper = dra_augment_request_get_spell_helper(request);
 
-	CatArrayWo *token_cash = jagp_parser_get_token_cash(parser);
+	CatArrayWo *token_cash = jagp_lexer_impl_get_all_tokens(lexer_impl);
 	CatIIterator *iter = cat_array_wo_iterator(token_cash);
 	while(cat_iiterator_has_next(iter)) {
-		GroRunIToken *token = (GroRunIToken *) cat_iiterator_next(iter);
-
+		JagPToken *token = (JagPToken *) cat_iiterator_next(iter);
 		cat_log_debug("token=%O", token);
 
-		GroRunLocation *location = grorun_itoken_get_location(token);
-
 		int left_column, right_column;
-		long left_row, right_row;
-		grorun_location_get_all(location, &left_column, &left_row, &right_column, &right_row);
+		long long left_row, right_row;
+		jagp_cursor_values(token->cur_start, &left_row, &left_column);
+		jagp_cursor_values(token->cur_end, &right_row, &right_column);
 
 		dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, l_map_symbol(token));
 //
 		int sym_index = grorun_full_token_get_user_index((GroRunFullToken *) token);
-		if (sym_index==JAGP_SYM_EOL_COMMENT) {
-			GObject *val = grorun_itoken_get_value(token);
+		if (token->kind==JAGP_KIND_COMMENT_FULL || token->kind==JAGP_KIND_COMMENT_EOL) {
+			GObject *val = token->value;
 			if (CAT_IS_STRING_WO(val)) {
 				dra_spell_helper_scan(spell_helper, line_tag_printer, (CatStringWo *) val, left_column, left_row);
 			}
@@ -318,7 +318,7 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 //
 	cat_unref_ptr(utf8_scanner);
 //	cat_unref_ptr(plain_parser);
-	cat_unref_ptr(scanner);
+	cat_unref_ptr(tokenizer);
 	cat_unref_ptr(parser);
 	return TRUE;
 }

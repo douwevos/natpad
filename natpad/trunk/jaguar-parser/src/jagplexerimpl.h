@@ -25,7 +25,7 @@
 
 #include <caterpillar.h>
 #include "jagptoken.h"
-#include "jagpscanner.h"
+#include "jagptokenizer.h"
 
 G_BEGIN_DECLS
 
@@ -53,7 +53,9 @@ struct _JagPLexerImplClass {
 
 GType jagp_lexer_impl_get_type();
 
-JagPLexerImpl *jagp_lexer_impl_new(JagPScanner *scanner);
+JagPLexerImpl *jagp_lexer_impl_new(JagPTokenizer *tokenizer);
+
+CatArrayWo *jagp_lexer_impl_get_all_tokens(JagPLexerImpl *lexer_impl);
 
 G_END_DECLS
 

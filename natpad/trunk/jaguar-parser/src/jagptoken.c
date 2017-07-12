@@ -50,6 +50,8 @@ static void l_dispose(GObject *object) {
 	JagPToken *instance = JAGP_TOKEN(object);
 	cat_unref_ptr(instance->value);
 	cat_unref_ptr(instance->source);
+	cat_unref_ptr(instance->cur_start);
+	cat_unref_ptr(instance->cur_end);
 	G_OBJECT_CLASS(jagp_token_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -65,14 +67,17 @@ static void l_finalize(GObject *object) {
 JagPToken *jagp_token_new() {
 	JagPToken *result = g_object_new(JAGP_TYPE_TOKEN, NULL);
 	cat_ref_anounce(result);
+	cat_ref_ptr(result);
 	result->value = NULL;
 	result->source = NULL;
+	result->cur_start = NULL;
+	result->cur_end = NULL;
 	return result;
 }
 
-JagPName *jagp_token_name(JagPToken *token) {
-	JagPTokenClass *tclass = JAGP_TOKEN_GET_CLASS(token);
-	return tclass->name(token);
+
+GObject *jagp_token_get_value(JagPToken *token) {
+	return token->value;
 }
 
 JagPComment *jagp_token_comment(JagPToken *token, JagPCommentStyle comment_style) {
@@ -205,7 +210,11 @@ const char *l_descr(JagPTokenKind kind) {
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
 	JagPToken *instance = JAGP_TOKEN(self);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p, kind=%s(%d), value=%O]", iname, self, l_descr(instance->kind), instance->kind, instance->value);
+	if (instance->value) {
+		cat_string_wo_format(append_to, "%s[%s(%d), value=%O, start=%O]", iname, l_descr(instance->kind), instance->kind, instance->value, instance->cur_start);
+	} else {
+		cat_string_wo_format(append_to, "%s[%s(%d), start=%O]", iname, l_descr(instance->kind), instance->kind, instance->cur_start);
+	}
 }
 
 static void l_stringable_iface_init(CatIStringableInterface *iface) {
