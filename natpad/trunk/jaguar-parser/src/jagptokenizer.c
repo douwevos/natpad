@@ -38,6 +38,7 @@ struct _CharInfo {
 };
 
 struct _JagPTokenizerPrivate {
+	JagPNames *names;
 	CatIUtf8Scanner *input;
 	CatStreamStatus input_status;
 
@@ -110,8 +111,11 @@ static void jagp_tokenizer_init(JagPTokenizer *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPTokenizer *instance = JAGP_TOKENIZER(object);
-//	JagPTokenizerPrivate *priv = jagp_tokenizer_get_instance_private(instance);
+	JagPTokenizer *instance = JAGP_TOKENIZER(object);
+	JagPTokenizerPrivate *priv = jagp_tokenizer_get_instance_private(instance);
+	cat_unref_ptr(priv->input);
+	cat_free_ptr(priv->lookahead);
+	cat_unref_ptr(priv->names);
 	G_OBJECT_CLASS(jagp_tokenizer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -125,10 +129,11 @@ static void l_finalize(GObject *object) {
 
 static void l_scan_one_unichar_raw(JagPTokenizerPrivate *priv, CharInfo *old_ci, CharInfo *next_ci);
 
-JagPTokenizer *jagp_tokenizer_new(CatIUtf8Scanner *input) {
+JagPTokenizer *jagp_tokenizer_new(CatIUtf8Scanner *input, JagPNames *names) {
 	JagPTokenizer *result = g_object_new(JAGP_TYPE_TOKENIZER, NULL);
 	cat_ref_anounce(result);
 	JagPTokenizerPrivate *priv = jagp_tokenizer_get_instance_private(result);
+	priv->names = cat_ref_ptr(names);
 	priv->input = cat_ref_ptr(input);
 	priv->input_status = CAT_STREAM_OK;
 	priv->lookahead_size = 9;
@@ -835,6 +840,7 @@ static JagPToken *l_scan_ident(JagPTokenizer *tokenizer) {
 				result->kind = JAGP_KIND_ELSE;
 			} else if (strcmp("enum", bufchrs)==0) {
 				result->kind = JAGP_KIND_ENUM;
+				result->value = jagp_names_get(priv->names, buf);
 			}
 		} break;
 		case 'f' : {
@@ -938,7 +944,7 @@ static JagPToken *l_scan_ident(JagPTokenizer *tokenizer) {
 			break;
 	}
 	if (result->kind == JAGP_KIND_IDENTIFIER) {
-		result->value = (GObject *) buf;
+		result->value = jagp_names_get(priv->names, buf);
 	}
 	result->cur_start = jagp_cursor_new(start.left_row, start.left_column);
 	result->cur_end = jagp_cursor_new(cilast->right_row, cilast->right_column);

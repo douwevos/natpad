@@ -32,6 +32,7 @@ G_DEFINE_TYPE(JagPJCMethodDecl, jagp_jcmethod_decl, JAGP_TYPE_JCTREE);
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static JagPTag l_tree_get_tag(JagPJCTree *tree) { return JAGP_TAG_METHODDEF; }
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent);
 
 static void jagp_jcmethod_decl_class_init(JagPJCMethodDeclClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -40,6 +41,7 @@ static void jagp_jcmethod_decl_class_init(JagPJCMethodDeclClass *clazz) {
 
 	JagPJCTreeClass *tree_class = JAGP_JCTREE_CLASS(clazz);
 	tree_class->getTag = l_tree_get_tag;
+	tree_class->dump = l_tree_dump;
 }
 
 static void jagp_jcmethod_decl_init(JagPJCMethodDecl *instance) {
@@ -86,3 +88,24 @@ JagPJCMethodDecl *jagp_jcmethod_decl_new(JagPJCModifiers *mods, JagPName *name, 
 }
 
 
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent) {
+	JagPJCMethodDecl *unit = (JagPJCMethodDecl *) tree;
+	cat_log_print("DUMP", "%O------------------", indent);
+	cat_log_print("DUMP", "%OMethodDecl: name=%O, left=%O - right=%O", indent, unit->name, tree->cursor, tree->cursor_end);
+	cat_log_print("DUMP", "%O            modifiers:   %O", indent, unit->mods);
+	if (unit->typarams) {
+		cat_log_print("DUMP", "%O            type-params: %O", indent, unit->typarams);
+	}
+//	if (unit->extending) {
+//		cat_log_print("DUMP", "%O>          extends:     %O", indent, unit->extending);
+//	}
+//	if (unit->implementing) {
+//		cat_log_print("DUMP", "%O>          implements:  %O", indent, unit->implementing);
+//	}
+	if (unit->body) {
+		CatStringWo *cindent = cat_string_wo_new();
+		cat_string_wo_format(cindent, "%O  ", indent);
+		jagp_jctree_dump(unit->body, cindent);
+		cat_unref_ptr(cindent);
+	}
+}

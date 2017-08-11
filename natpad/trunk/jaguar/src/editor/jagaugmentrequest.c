@@ -21,8 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagaugmentrequest.h"
-#include "../parser/jagscanner.h"
-#include "../parser/jagplainparser.h"
 #include <dragonfly.h>
 
 #include <logging/catlogdefs.h>
@@ -31,9 +29,6 @@
 #include <logging/catlog.h>
 
 struct _JagAugmentRequestPrivate {
-	GroRunModel *model;
-	JagPScannerFactory *scanner_factory;
-	GroRunITokenFactory *token_factory;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -63,9 +58,6 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAugmentRequest *instance = JAG_AUGMENT_REQUEST(object);
 	JagAugmentRequestPrivate *priv = jag_augment_request_get_instance_private(instance);
-	cat_unref_ptr(priv->model);
-	cat_unref_ptr(priv->scanner_factory);
-	cat_unref_ptr(priv->token_factory);
 	G_OBJECT_CLASS(jag_augment_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -78,15 +70,11 @@ static void l_finalize(GObject *object) {
 }
 
 
-JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *slot_key,
-		GroRunModel *model, GroRunITokenFactory *token_factory, JagPScannerFactory *scanner_factory) {
+JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *slot_key) {
 	JagAugmentRequest *result = g_object_new(JAG_TYPE_AUGMENT_REQUEST, NULL);
 	cat_ref_anounce(result);
 	JagAugmentRequestPrivate *priv = jag_augment_request_get_instance_private(result);
 	dra_augment_request_construct((DraAugmentRequest *) result, document, a_revision, slot_key);
-	priv->scanner_factory = cat_ref_ptr(scanner_factory);
-	priv->token_factory = cat_ref_ptr(token_factory);
-	priv->model = cat_ref_ptr(model);
 	return result;
 }
 
@@ -240,11 +228,12 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 
 //	JagPScanner *scanner = jagp_scanner_factory_create_scanner(priv->scanner_factory, utf8_scanner);
 
-	JagPTokenizer *tokenizer = jagp_tokenizer_new(utf8_scanner);
+	JagPNames *names = jagp_names_new();
+	JagPTokenizer *tokenizer = jagp_tokenizer_new(utf8_scanner, names);
 
 	JagPLexerImpl *lexer_impl = jagp_lexer_impl_new(tokenizer);
 	cat_log_debug("lexer_impl=%O", lexer_impl);
-	JagPParser *parser = jagp_parser_new((JagPILexer *) lexer_impl, priv->token_factory);
+	JagPParser *parser = jagp_parser_new((JagPILexer *) lexer_impl, names);
 	jagp_parser_run(parser);
 	cat_unref(lexer_impl);
 
@@ -317,7 +306,7 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 //    jag_plain_parser_run(plain_parser);
 //
 	cat_unref_ptr(utf8_scanner);
-//	cat_unref_ptr(plain_parser);
+	cat_unref_ptr(names);
 	cat_unref_ptr(tokenizer);
 	cat_unref_ptr(parser);
 	return TRUE;

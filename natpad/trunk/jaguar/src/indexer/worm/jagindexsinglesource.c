@@ -22,10 +22,8 @@
 
 #include "jagindexsinglesource.h"
 #include "../../moose/srcfile/jagsrcfilecontentwo.h"
-#include "../../parser/jagscanner.h"
 #include "../source/jgiparsercontext.h"
-#include "../../parser/generated/runtime/jagparsercontext.h"
-#include "../../parser/generated/jagparser.h"
+#include <jaguarparser.h>
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -88,8 +86,46 @@ JagIndexSingleSource *jag_index_single_source_new(MooService *moo_service, MooId
 	return result;
 }
 
+static void l_populate_model(JagIndexSingleSource *index_ss, MooNodeWo *e_main, JagPJCCompilationUnit *compilation_unit) {
+
+	JagIndexSingleSourcePrivate *priv = JAG_INDEX_SINGLE_SOURCE_GET_PRIVATE(index_ss);
+	VipISequence *moo_sequence = (VipISequence *) priv->moo_service;
+
+//	switch(JAG_TOKEN(ast_token)->sym) {
+//	case JAG_SYMBOL_NONTERM_CLASS_HEADER : {
+//		JagAstToken *ast_class_name_token = JAG_AST_TOKEN(cat_array_wo_get(ast_token->e_children, 2));
+//		JagToken *token = JAG_TOKEN(ast_class_name_token);
+//		if (token->is_terminal && (CAT_IS_STRING_WO(token->value))) {
+//			CatStringWo *token_text = CAT_STRING_WO(token->value);
+//			MooNodeWo *e_class_node = moo_node_wo_new(vip_isequence_next(priv->moo_sequence), cat_ref_ptr(token_text), NULL, NULL, 0);
+//			moo_node_wo_append_child(priv->e_main, e_class_node);
+//			cat_unref_ptr(e_class_node);
+//		}
+//	} break;
+//	}
+
+	CatIIterator *defiter = cat_array_wo_iterator(compilation_unit->defs);
+	while(cat_iiterator_has_next(defiter)) {
+		GObject *def = cat_iiterator_next(defiter);
+		if (JAGP_IS_JCCLASS_DECL(def)) {
+			JagPJCClassDecl *classdcl = JAGP_JCCLASS_DECL(def);
+			if ((classdcl->modifiers->flags & JAGP_FLAG_INTERFACE)!=0) {
+				continue;
+			}
+			CatStringWo *token_text = jagp_name_get_string(classdcl->name);
+			MooNodeWo *e_class_node = moo_node_wo_new(vip_isequence_next(moo_sequence), cat_ref_ptr(token_text), NULL, NULL, 0);
+			moo_node_wo_append_child(e_main, e_class_node);
+			cat_unref_ptr(e_class_node);
+		}
+	}
+	cat_unref_ptr(defiter);
+
+}
+
+
 
 static void l_run_request(WorRequest *request) {
+	JagIndexSingleSource *index_ss = JAG_INDEX_SINGLE_SOURCE(request);
 	JagIndexSingleSourcePrivate *priv = JAG_INDEX_SINGLE_SOURCE_GET_PRIVATE(request);
 	cat_log_debug("indexing source:%o", priv->jag_source_id_path);
 
@@ -118,18 +154,39 @@ static void l_run_request(WorRequest *request) {
 		if (cat_string_wo_endswith_chars_len(a_name, ".java", 5)) {
 			CatIInputStream *in_stream = vip_ifile_open_input_stream(file);
 			CatUtf8InputStreamScanner *scanner = cat_utf8_input_stream_scanner_new(in_stream);
-			// TODO scanner should convert LFCRs and CRLFs to LFs otherwise rows will be calculated incorrectly
-			JagScanner *jag_scanner =  jag_scanner_new((CatIUtf8Scanner *) scanner);
-			jag_scanner->create_ast_tokens = TRUE;
-			jag_scanner->filter_non_parsable = TRUE;
-			JgiParserContext *context = jgi_parser_context_new((JagIScanner *) jag_scanner, (VipISequence *) priv->moo_service);
-			JagParser *cupParser = jag_parser_new((JagIScanner *) jag_scanner);
-			JagParserBase *cupBase = JAG_PARSER_BASE(cupParser);
-			JagToken *token = jag_parser_base_parse(cupBase, (JagParserContext *) context);
-			jag_token_dump(token);
-			cat_log_debug("token=%o", token);
 
-			MooNodeWo *sourcefile_root_node = jgi_parser_context_get_root_node(context);
+			JagPNames *names = jagp_names_new();
+			JagPTokenizer *tokenizer = jagp_tokenizer_new(scanner, names);
+			JagPILexer *lexer = (JagPILexer *) jagp_lexer_impl_new(tokenizer);
+			JagPParser *parser = jagp_parser_new(lexer, names);
+			jagp_parser_run(parser);
+
+			JagPJCCompilationUnit *compilation_unit = jagp_parser_get_compilation_unit(parser);
+//			jagp_jctree_dump((JagPJCTree *) compilation_unit, cat_string_wo_new());
+
+			CatArrayWo *tokens = jagp_lexer_impl_get_all_tokens((JagPLexerImpl *) lexer);
+
+
+
+
+//			// TODO scanner should convert LFCRs and CRLFs to LFs otherwise rows will be calculated incorrectly
+//			JagScanner *jag_scanner =  jag_scanner_new((CatIUtf8Scanner *) scanner);
+//			jag_scanner->create_ast_tokens = TRUE;
+//			jag_scanner->filter_non_parsable = TRUE;
+//			JgiParserContext *context = jgi_parser_context_new((JagIScanner *) jag_scanner, (VipISequence *) priv->moo_service);
+//			JagParser *cupParser = jag_parser_new((JagIScanner *) jag_scanner);
+//			JagParserBase *cupBase = JAG_PARSER_BASE(cupParser);
+//			JagToken *token = jag_parser_base_parse(cupBase, (JagParserContext *) context);
+//			jag_token_dump(token);
+//			cat_log_debug("token=%o", token);
+
+//			MooNodeWo *sourcefile_root_node = jgi_parser_context_get_root_node(context);
+
+			VipISequence *moo_sequence = (VipISequence *) priv->moo_service;
+			MooNodeWo *e_main = moo_node_wo_new(vip_isequence_next(moo_sequence), NULL, NULL, NULL, 0);
+
+			l_populate_model(index_ss, e_main, compilation_unit);
+			MooNodeWo *sourcefile_root_node = e_main;
 
 			MooTransaction *tx = moo_service_create_transaction((GObject *) request, priv->moo_service);
 			while(moo_transaction_retry(tx)) {
@@ -165,9 +222,9 @@ static void l_run_request(WorRequest *request) {
 				}
 			}
 
-			cat_unref_ptr(cupParser);
-			cat_unref_ptr(context);
-			cat_unref_ptr(jag_scanner);
+//			cat_unref_ptr(cupParser);
+//			cat_unref_ptr(context);
+//			cat_unref_ptr(jag_scanner);
 			cat_unref_ptr(tx);
 			cat_unref_ptr(scanner);
 			cat_unref_ptr(in_stream);

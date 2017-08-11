@@ -61,6 +61,7 @@ JagPJCExpression *jagp_tree_info_type_in(JagPJCExpression *tree) {
 			JagPJCAnnotatedType *ant = (JagPJCAnnotatedType *) tree;
 			return ant->underlying_type;
 		}
+		case JAGP_TAG_QUALIDENT: /* simple names */
 		case JAGP_TAG_IDENT: /* simple names */
 		case JAGP_TAG_TYPEIDENT: /* primitive name */
 		case JAGP_TAG_SELECT: /* qualified name */

@@ -105,19 +105,14 @@ static void doTest(const char *fname) {
 		CatUtf8InputStreamScanner *os = cat_utf8_input_stream_scanner_new(CAT_IINPUT_STREAM(sis));
 		CatIUtf8Scanner *utf8_scanner = CAT_IUTF8_SCANNER(os);
 
-		GroRunModel *model = grorun_model_new(jagp_parser_config_symbols, jagp_parser_config_nr_of_symbols, jagp_parser_config_states_text, jagp_parser_config_nr_of_states);
-
-		GroRunITokenFactory *token_factory = (GroRunITokenFactory *) grorun_full_token_factory_new();
-
-		JagPScannerFactory *scanner_factory = jagp_scanner_factory_new(GRORUN_ISYMBOL_PROVIDER(model), token_factory);
-
-//		JagPScanner *scanner = jagp_scanner_factory_create_scanner(scanner_factory, utf8_scanner);
-		JagPTokenizer *tokenizer = jagp_tokenizer_new(utf8_scanner);
+		JagPNames *names = jagp_names_new();
+		JagPTokenizer *tokenizer = jagp_tokenizer_new(utf8_scanner, names);
 		JagPLexerImpl *lexer_impl = jagp_lexer_impl_new(tokenizer);
 
-		JagPParser *parser = jagp_parser_new((JagPILexer *) lexer_impl, token_factory);
+		JagPParser *parser = jagp_parser_new((JagPILexer *) lexer_impl, names);
 		jagp_parser_run(parser);
 		cat_unref_ptr(parser);
+		cat_unref_ptr(names);
 	}
 
 }

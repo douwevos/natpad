@@ -178,16 +178,16 @@ int jgi_token_range_get_last_index(JgiTokenRange *token_range) {
 	return JGI_TOKEN_RANGE_GET_PRIVATE(token_range)->last_index;
 }
 
-JagAstToken *jgi_token_range_get_first(JgiTokenRange *token_range) {
+JagPToken *jgi_token_range_get_first(JgiTokenRange *token_range) {
 	JgiTokenRangePrivate *priv = JGI_TOKEN_RANGE_GET_PRIVATE(token_range);
 	int f = priv->first_index;
-	return (JagAstToken *) cat_array_wo_get(priv->e_token_list, f);
+	return (JagPToken *) cat_array_wo_get(priv->e_token_list, f);
 }
 
-JagAstToken *jgi_token_range_get_last(JgiTokenRange *token_range) {
+JagPToken *jgi_token_range_get_last(JgiTokenRange *token_range) {
 	JgiTokenRangePrivate *priv = JGI_TOKEN_RANGE_GET_PRIVATE(token_range);
 	int f = priv->last_index;
-	return (JagAstToken *) cat_array_wo_get(priv->e_token_list, f);
+	return (JagPToken *) cat_array_wo_get(priv->e_token_list, f);
 }
 
 CatArrayWo *e_jgi_token_range_get_raw_tokens(JgiTokenRange *token_range) {
@@ -198,7 +198,7 @@ void jgi_token_range_dump(JgiTokenRange *token_range) {
 	JgiTokenRangePrivate *priv = JGI_TOKEN_RANGE_GET_PRIVATE(token_range);
 	int idx;
 	for(idx=priv->first_index; idx<=priv->last_index; idx++) {
-		JagAstToken *token = (JagAstToken *) cat_array_wo_get(priv->e_token_list, idx);
+		JagPToken *token = (JagPToken *) cat_array_wo_get(priv->e_token_list, idx);
 		cat_log_print("DUMP", "## [%d] %o", idx, token);
 	}
 }

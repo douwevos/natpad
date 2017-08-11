@@ -49,7 +49,6 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagPToken *instance = JAGP_TOKEN(object);
 	cat_unref_ptr(instance->value);
-	cat_unref_ptr(instance->source);
 	cat_unref_ptr(instance->cur_start);
 	cat_unref_ptr(instance->cur_end);
 	G_OBJECT_CLASS(jagp_token_parent_class)->dispose(object);
@@ -69,7 +68,6 @@ JagPToken *jagp_token_new() {
 	cat_ref_anounce(result);
 	cat_ref_ptr(result);
 	result->value = NULL;
-	result->source = NULL;
 	result->cur_start = NULL;
 	result->cur_end = NULL;
 	return result;

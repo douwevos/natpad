@@ -23,6 +23,7 @@
 #ifndef JAGPTOKENIZER_H_
 #define JAGPTOKENIZER_H_
 
+#include "jagpnames.h"
 #include "jagptoken.h"
 #include <caterpillar.h>
 #include <gio/gio.h>
@@ -54,7 +55,7 @@ struct _JagPTokenizerClass {
 
 GType jagp_tokenizer_get_type();
 
-JagPTokenizer *jagp_tokenizer_new(CatIUtf8Scanner *input);
+JagPTokenizer *jagp_tokenizer_new(CatIUtf8Scanner *input, JagPNames *names);
 
 JagPToken *jagp_tokenizer_next(JagPTokenizer *tokenizer);
 

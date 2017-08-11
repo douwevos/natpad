@@ -25,6 +25,7 @@
 
 #include "jagpcursor.h"
 #include "code/jagpname.h"
+#include "tree/jagpjctree.h"
 #include "code/jagpcomment.h"
 #include <caterpillar.h>
 #include <grossruntime.h>
@@ -173,10 +174,9 @@ struct _JagPToken {
 	JagPCursor *cur_start;
 	JagPCursor *cur_end;
 	
-	
 	GObject *value;
-	GroRunFullToken *source;
 
+	JagPJCTree *owner;
 };
 
 struct _JagPTokenClass {

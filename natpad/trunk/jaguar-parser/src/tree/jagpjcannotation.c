@@ -67,7 +67,18 @@ JagPJCAnnotation *jagp_jcannotation_new(gboolean is_type_annotation, JagPJCTree 
 	jagp_jcexpression_construct((JagPJCExpression *) result);
 	result->is_type_annotation = is_type_annotation;
 	result->annotation_type = cat_ref_ptr(annotation_type);
+	if (annotation_type) {
+		annotation_type->owner = result;
+	}
 	result->args = cat_ref_ptr(args);
+	if (args) {
+		CatIIterator *iter = cat_array_wo_iterator(args);
+		while(cat_iiterator_has_next(iter)) {
+			JagPJCTree *argtree = (JagPJCTree *) cat_iiterator_next(iter);
+			argtree->owner = result;
+		}
+		cat_unref_ptr(iter);
+	}
 	return result;
 }
 

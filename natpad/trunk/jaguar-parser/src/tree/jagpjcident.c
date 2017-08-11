@@ -36,6 +36,7 @@ G_DEFINE_TYPE_WITH_CODE(JagPJCIdent, jagp_jcident, JAGP_TYPE_JCEXPRESSION,
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static JagPTag l_tree_get_tag(JagPJCTree *tree) { return JAGP_TAG_IDENT; }
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent);
 
 
 static void jagp_jcident_class_init(JagPJCIdentClass *clazz) {
@@ -45,6 +46,7 @@ static void jagp_jcident_class_init(JagPJCIdentClass *clazz) {
 
 	JagPJCTreeClass *tree_class = JAGP_JCTREE_CLASS(clazz);
 	tree_class->getTag = l_tree_get_tag;
+	tree_class->dump = l_tree_dump;
 }
 
 static void jagp_jcident_init(JagPJCIdent *instance) {
@@ -73,12 +75,24 @@ JagPJCIdent *jagp_jcident_new(JagPName *name) {
 	return result;
 }
 
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent) {
+	JagPJCIdent *fldacc = (JagPJCIdent *) tree;
+	cat_log_print("DUMP", "%OIdent: left=%O - right=%O", indent, tree->cursor, tree->cursor_end);
+	CatStringWo *cindent = cat_string_wo_new();
+	cat_string_wo_format(cindent, "%O  ", indent);
+	if (fldacc->name) {
+		cat_log_print("DUMP", "%O  name=%O", cindent, fldacc->name);
+	}
+
+	cat_unref_ptr(cindent);
+}
+
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
+	JagPJCIdent *instance = JAGP_JCIDENT(self);
+	cat_string_wo_format(append_to, "Ident[%O]", instance->name);
 }
 
 static void l_stringable_iface_init(CatIStringableInterface *iface) {

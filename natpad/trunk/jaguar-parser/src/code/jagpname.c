@@ -28,7 +28,7 @@
 #include <logging/catlog.h>
 
 struct _JagPNamePrivate {
-	void *dummy;
+	CatStringWo *text;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -64,18 +64,26 @@ static void l_finalize(GObject *object) {
 }
 
 
-JagPName *jagp_name_new() {
+JagPName *jagp_name_new(CatStringWo *text) {
 	JagPName *result = g_object_new(JAGP_TYPE_NAME, NULL);
 	cat_ref_anounce(result);
-//	G_OBJECT_construct((GObject *) result);
+	JagPNamePrivate *priv = jagp_name_get_instance_private(result);
+	priv->text = cat_ref_ptr(text);
 	return result;
 }
+
+CatStringWo *jagp_name_get_string(JagPName *name) {
+	JagPNamePrivate *priv = jagp_name_get_instance_private(name);
+	return priv->text;
+}
+
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-	cat_string_wo_format(append_to, "%s[%p]", iname, self);
+	JagPNamePrivate *priv = jagp_name_get_instance_private((JagPName *) self);
+	cat_string_wo_format(append_to, "name=%O", priv->text);
 }
 
 static void l_stringable_iface_init(CatIStringableInterface *iface) {

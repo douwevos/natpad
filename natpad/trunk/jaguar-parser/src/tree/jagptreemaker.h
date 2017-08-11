@@ -23,6 +23,7 @@
 #ifndef TREE_JAGPTREEMAKER_H_
 #define TREE_JAGPTREEMAKER_H_
 
+#include "../jagptoken.h"
 #include "jagpjcannotation.h"
 #include "jagpjcannotatedtype.h"
 #include "jagpjcarraytypetree.h"
@@ -129,6 +130,7 @@ JagPJCMethodDecl *jagp_tree_maker_method_def2(JagPTreeMaker *tree_maker, JagPJCM
 							JagPJCBlock *body,JagPJCExpression *defaultValue);
 JagPJCVariableDecl *jagp_tree_maker_var_def(JagPTreeMaker *tree_maker, JagPJCModifiers *mods, JagPName *name, JagPJCExpression *vartype, JagPJCExpression *init);
 JagPJCVariableDecl *jagp_tree_maker_receiver_var_def(JagPTreeMaker *tree_maker, JagPJCModifiers *mods, JagPJCExpression *nameexpr, JagPJCExpression *vartype);
+JagPJCVariableDecl *jagp_tree_maker_receiver_var_def_ext(JagPTreeMaker *tree_maker, JagPJCModifiers *mods, JagPJCExpression *nameexpr, JagPJCExpression *vartype, JagPJCExpression *init);
 JagPJCSkip *jagp_tree_maker_skip(JagPTreeMaker *tree_maker);
 JagPJCBlock *jagp_tree_maker_block(JagPTreeMaker *tree_maker, long long flags, CatArrayWo /*JagPJCStatement*/*stats);
 JagPJCDoWhileLoop *jagp_tree_maker_do_loop(JagPTreeMaker *tree_maker, JagPJCStatement *body, JagPJCExpression *cond);
@@ -179,7 +181,7 @@ JagPJCCatch *jagp_tree_maker_catch(JagPTreeMaker *tree_maker, JagPJCVariableDecl
 
 JagPJCModifiers *jagp_tree_maker_modifiers(JagPTreeMaker *tree_maker, long long flags, CatArrayWo *annotations);
 JagPJCIdent *jagp_tree_maker_ident(JagPTreeMaker *tree_maker, JagPName *name);
-JagPJCFieldAccess *jagp_tree_maker_select(JagPTreeMaker *tree_maker, JagPJCExpression *selected, JagPName *selector);
+JagPJCFieldAccess *jagp_tree_maker_select(JagPTreeMaker *tree_maker, JagPJCExpression *selected, JagPToken *selector);
 JagPJCMemberReference *jagp_tree_maker_reference(JagPTreeMaker *tree_maker, JagPReferenceMode mode, JagPName *name,
             JagPJCExpression *expr, CatArrayWo /*<JCExpression>*/ *typeargs);
 
