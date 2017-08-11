@@ -55,8 +55,7 @@ struct _JagAugmentRequestClass {
 
 GType jag_augment_request_get_type();
 
-JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *slot_key,
-		GroRunModel *model, GroRunITokenFactory *token_factory, JagPScannerFactory *scanner_factory);
+JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *slot_key);
 
 G_END_DECLS
 

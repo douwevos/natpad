@@ -111,6 +111,16 @@ gboolean jagp_cursor_equal(const JagPCursor *cur_a, const JagPCursor *cur_b) {
 }
 
 void jagp_cursor_values(const JagPCursor *cursor, long long *row, int *column) {
+	if (cursor==NULL) {
+		if (row) {
+			*row = -1;
+		}
+
+		if (column) {
+			*column = -1;
+		}
+		return;
+	}
 	JagPCursorPrivate *priv = jagp_cursor_get_instance_private((JagPCursor *) cursor);
 	if (row) {
 		*row = priv->row;

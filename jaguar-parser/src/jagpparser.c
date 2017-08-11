@@ -24,6 +24,7 @@
 #include "jagptoken.h"
 #include "jagpidiagnosticposition.h"
 #include "jagpsimplediagnosticposition.h"
+#include "ntree/jagpqualident.h"
 #include "tree/jagpjcmodifiers.h"
 #include "tree/jagpjcblock.h"
 #include "tree/jagpjcmemberreference.h"
@@ -39,6 +40,8 @@
 #define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPParser"
 #include <logging/catlog.h>
+
+//define OLD 1
 
 /** The number of precedence levels of infix operators.
  */
@@ -59,7 +62,6 @@
 
 struct _JagPParserPrivate {
 	JagPILexer *lexer;
-	GroRunITokenFactory *token_factory;
 	CatArrayWo *messages;
 	JagPJCCompilationUnit *compilation_unit;
 
@@ -189,7 +191,6 @@ static void l_dispose(GObject *object) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(instance);
 	cat_unref_ptr(priv->compilation_unit);
 	cat_unref_ptr(priv->lexer);
-	cat_unref_ptr(priv->token_factory);
 	cat_unref_ptr(priv->tree_maker);
 	cat_unref_ptr(priv->messages);
 	cat_unref_ptr(priv->typeAnnotationsPushedBack);
@@ -247,7 +248,7 @@ static void l_error_diag(JagPParser *parser, JagPIDiagnosticPosition *err_pos, c
 	cat_unref_ptr(location);
 	cat_unref_ptr(msg);
 
-	cat_array_wo_append(priv->messages, m);
+	cat_array_wo_append(priv->messages, (GObject *) m);
 	cat_unref_ptr(m);
 
 }
@@ -439,13 +440,12 @@ static void *toP(JagPParser *parser, void *p) {
 }
 
 
-JagPParser *jagp_parser_new(JagPILexer *lexer, GroRunITokenFactory *token_factory) {
+JagPParser *jagp_parser_new(JagPILexer *lexer, JagPNames *names) {
 	JagPParser *result = g_object_new(JAGP_TYPE_PARSER, NULL);
 	cat_ref_anounce(result);
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(result);
 	cat_log_debug("lexer=%O", lexer);
 	priv->lexer = cat_ref_ptr(lexer);
-	priv->token_factory = cat_ref_ptr(token_factory);
 	priv->token_index = -1;
 	priv->messages = cat_array_wo_new();
 
@@ -461,21 +461,21 @@ JagPParser *jagp_parser_new(JagPILexer *lexer, GroRunITokenFactory *token_factor
 	priv->error_pos = NULL;
 	priv->error_tree = NULL;
 
-	priv->names_error = jagp_name_new();
-	priv->names_asterisk = jagp_name_new();
-	priv->names_this = jagp_name_new();
-	priv->names_class = jagp_name_new();
-	priv->names_super = jagp_name_new();
-	priv->names_empty = jagp_name_new();
-	priv->names_init = jagp_name_new();
-	priv->names_module = jagp_name_new();
+	priv->names_error = jagp_names_by_chars(names, "error");
+	priv->names_asterisk = jagp_names_by_chars(names, "asterisk");
+	priv->names_this = jagp_names_by_chars(names, "this");
+	priv->names_class = jagp_names_by_chars(names, "class");
+	priv->names_super = jagp_names_by_chars(names, "super");
+	priv->names_empty = jagp_names_by_chars(names, "empty");
+	priv->names_init = jagp_names_by_chars(names, "init");
+	priv->names_module = jagp_names_by_chars(names, "module");
 
-	priv->names_requires = jagp_name_new();
-	priv->names_exports = jagp_name_new();
-	priv->names_to = jagp_name_new();
-	priv->names_provides = jagp_name_new();
-	priv->names_with = jagp_name_new();
-	priv->names_uses = jagp_name_new();
+	priv->names_requires = jagp_names_by_chars(names, "requires");
+	priv->names_exports = jagp_names_by_chars(names, "exports");
+	priv->names_to = jagp_names_by_chars(names, "to");
+	priv->names_provides = jagp_names_by_chars(names, "provides");
+	priv->names_with = jagp_names_by_chars(names, "with");
+	priv->names_uses = jagp_names_by_chars(names, "uses");
 	priv->messages = cat_array_wo_new();
 
 	return result;
@@ -556,6 +556,12 @@ CatArrayWo *jagp_parser_get_messages(JagPParser *parser) {
 	return priv->messages;
 }
 
+JagPJCCompilationUnit *jagp_parser_get_compilation_unit(JagPParser *parser) {
+	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
+	return priv->compilation_unit;
+}
+
+
 gboolean lax_identifier_accepts(JagPTokenKind kind) {
 	return (kind == JAGP_KIND_IDENTIFIER) || (kind == JAGP_KIND_UNDERSCORE) || (kind == JAGP_KIND_ASSERT) || (kind == JAGP_KIND_ENUM);
 }
@@ -567,11 +573,17 @@ static void l_store_end(JagPParser *parser, JagPJCTree *tree, JagPCursor *endpos
 
 static void l_set_error_end_pos(JagPParser *parser, JagPCursor *err_pos) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
+	if (err_pos==NULL) {
+		cat_log_fatal("err_pos is NULL");
+		return;
+	}
+	if (priv->error_pos) {
+		if (jagp_cursor_left_or_above(err_pos, priv->error_pos, TRUE)) {
+			return;
+		}
+	}
 	cat_ref_swap(priv->error_pos, err_pos);
 }
-
-
-
 
 static JagPJCErroneous *l_syntax_error(JagPParser *parser, JagPCursor *pos, CatArrayWo /*<JCTree>*/ *errs, const char *key, CatArrayWo *args) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
@@ -605,7 +617,10 @@ static void l_accept(JagPParser *parser, JagPTokenKind tk) {
 		JagPIDiagnosticPosition *diag = (JagPIDiagnosticPosition *) jagp_simple_diagnostic_position_new(jagp_ilexer_prev_token(priv->lexer)->cur_end);
 		CatArrayWo *args = cat_array_wo_new();
 //		cat_array_wo_append(args, tk);
-		l_report_syntax_error(parser, diag, "expected", args);
+		cat_stacktrace_print();
+		CatStringWo *p = cat_string_wo_new();
+		cat_string_wo_format(p, "expected: %d", tk);
+		l_report_syntax_error(parser, diag, cat_string_wo_getchars(p), args);
 		cat_unref_ptr(args);
 		cat_unref_ptr(diag);
 	}
@@ -764,8 +779,8 @@ static JagPJCStatement *l_class_or_interface_or_enum_declaration(JagPParser *par
 static JagPJCClassDecl *l_class_declaration(JagPParser *parser, JagPJCModifiers *mods, JagPComment *dc);
 static JagPJCClassDecl *l_interface_declaration(JagPParser *parser, JagPJCModifiers *mods, JagPComment *dc);
 static JagPJCClassDecl *l_enum_declaration(JagPParser *parser, JagPJCModifiers *mods, JagPComment *dc);
-static CatArrayWo */*<JCTree>*/ l_enum_body(JagPParser *parser, JagPName *enumName);
-static JagPJCTree *l_enumerator_declaration(JagPParser *parser, JagPName *enumName);
+static CatArrayWo */*<JCTree>*/ l_enum_body(JagPParser *parser, JagPToken *enumName);
+static JagPJCTree *l_enumerator_declaration(JagPParser *parser, JagPToken *enumName);
 static CatArrayWo */*<JagPJCExpression>*/ l_type_list(JagPParser *parser);
 static CatArrayWo */*<JCTree>*/ l_class_or_interface_body(JagPParser *parser, JagPName *className, gboolean isInterface);
 static CatArrayWo */*<JCTree>*/ l_class_or_interface_body_declaration(JagPParser *parser, JagPName *className, gboolean isInterface);
@@ -807,9 +822,12 @@ static JagPCursor *l_list_head_pos(CatArrayWo *tree_list) {
 }
 
 /* M1 */
-static JagPName *l_ident(JagPParser *parser, gboolean advance_on_errors) {
+static JagPName *l_ident2(JagPParser *parser, gboolean advance_on_errors, JagPToken **token) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
 	cat_log_debug("l_ident:token=%d", priv->token->kind);
+	if (token) {
+		*token = token;
+	}
 	if (priv->token->kind == JAGP_KIND_IDENTIFIER) {
 		JagPName *name = (JagPName *) priv->token->value;
 		l_next_token(parser);
@@ -828,7 +846,7 @@ static JagPName *l_ident(JagPParser *parser, gboolean advance_on_errors) {
 			l_check_type_annotations(parser);
 			JagPName *name = JAGP_NAME(jagp_token_get_value(priv->token));
 			l_next_token(parser);
-			return name;
+			return cat_ref_ptr(name);
 		} else {
 			l_error_at(parser, priv->token->cur_start, "this.as.identifier");
 			l_next_token(parser);
@@ -842,14 +860,54 @@ static JagPName *l_ident(JagPParser *parser, gboolean advance_on_errors) {
 		}
 		JagPName *name = JAGP_NAME(jagp_token_get_value(priv->token));
 		l_next_token(parser);
-		return name;
+		return cat_ref_ptr(name);
 	} else {
 		l_accept(parser, JAGP_KIND_IDENTIFIER);
 		if (advance_on_errors) {
 			l_next_token(parser);
+		} else {
+			if (token) {
+				*token = NULL;
+			}
 		}
 		return cat_ref_ptr(priv->names_error);
 	}
+}
+
+static JagPName *l_ident(JagPParser *parser, gboolean advance_on_errors) {
+	return l_ident2(parser, advance_on_errors, NULL);
+}
+
+
+/* M1 */
+static JagPToken *l_ident_new(JagPParser *parser) {
+	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
+	JagPToken *result = priv->token;
+	cat_log_debug("l_ident:token=%d", priv->token->kind);
+	if (priv->token->kind == JAGP_KIND_IDENTIFIER) {
+	} else if (priv->token->kind == JAGP_KIND_ASSERT) {
+		l_error_at(parser, priv->token->cur_start, "assert.as.identifier");
+	} else if (priv->token->kind == JAGP_KIND_ENUM) {
+		l_error_at(parser, priv->token->cur_start, "enum.as.identifier");
+	} else if (priv->token->kind == JAGP_KIND_THIS) {
+		if (priv->allowThisIdent) {
+			/* Make sure we're using a supported source version. */
+			l_check_type_annotations(parser);
+		} else {
+			l_error_at(parser, priv->token->cur_start, "this.as.identifier");
+		}
+	} else if (priv->token->kind == JAGP_KIND_UNDERSCORE) {
+		if (priv->allowUnderscoreIdentifier) {
+//			warning(priv->token->cur_start, "underscore.as.identifier");
+		} else {
+			l_error_at(parser, priv->token->cur_start, "underscore.as.identifier");
+		}
+	} else {
+		l_accept(parser, JAGP_KIND_IDENTIFIER);
+		return NULL;
+	}
+	l_next_token(parser);
+	return result;
 }
 
 /**
@@ -857,9 +915,10 @@ static JagPName *l_ident(JagPParser *parser, gboolean advance_on_errors) {
  */
 /* M1 */
 static JagPJCExpression *l_qualident(JagPParser *parser, gboolean allow_annos) {
+#ifdef OLD
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
-	JagPName *ident_name = l_ident(parser, FALSE);
 	jagp_tree_maker_at(priv->tree_maker, priv->token->cur_start);
+	JagPName *ident_name = l_ident(parser, FALSE);
 	JagPJCExpression *ident = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, ident_name);
 	cat_unref_ptr(ident_name);
 	while (priv->token->kind == JAGP_KIND_DOT) {
@@ -870,9 +929,8 @@ static JagPJCExpression *l_qualident(JagPParser *parser, gboolean allow_annos) {
 			tyannos = l_type_annotations_opt(parser);
 		}
 		jagp_tree_maker_at(priv->tree_maker, pos);
-		JagPName *sub_name = l_ident(parser, FALSE);
+		JagPToken *sub_name = l_ident_new(parser);
 		JagPJCExpression *next_t = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, ident, sub_name);
-		cat_unref_ptr(sub_name);
 		cat_unref_ptr(ident);
 		ident = next_t;
 		if (tyannos != NULL && cat_array_wo_size(tyannos)>0) {
@@ -885,6 +943,28 @@ static JagPJCExpression *l_qualident(JagPParser *parser, gboolean allow_annos) {
 		cat_unref_ptr(tyannos);
 	}
 	return ident;
+#else
+
+	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
+	jagp_tree_maker_at(priv->tree_maker, priv->token->cur_start);
+	JagPToken *ident = l_ident_new(parser);
+	JagPQualident *qualident = jagp_qualident_new(ident);
+	while (priv->token->kind == JAGP_KIND_DOT) {
+		JagPToken *dot = priv->token;
+		l_next_token(parser);
+		CatArrayWo *tyannos = NULL;
+		if (allow_annos) {
+			tyannos = l_type_annotations_opt(parser);
+		}
+		JagPToken *ident = l_ident_new(parser);
+
+		jagp_qualident_add_dot_ident(qualident, dot, tyannos, ident);
+		cat_unref_ptr(tyannos);
+	}
+	return qualident;
+#endif
+
+
 }
 
 /* M1 */
@@ -1601,9 +1681,8 @@ static JagPJCExpression *l_term3_other(JagPParser *parser, CatArrayWo /*JagPJCEx
 		result = l_lambda_expression_or_statement(parser, FALSE, FALSE, pos);
 	} else {
 		jagp_tree_maker_at(priv->tree_maker, priv->token->cur_start);
-		JagPName *id_name = l_ident(parser, FALSE);
+		JagPToken *id_name = l_ident_new(parser);
 		result = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, id_name);
-		cat_unref_ptr(id_name);
 		cat_log_debug("l_term3:result=%O, token=%d", result, priv->token->kind);
 		gboolean keep_looping = TRUE;
 		while(keep_looping) {
@@ -1685,6 +1764,7 @@ static JagPJCExpression *l_term3_other(JagPParser *parser, CatArrayWo /*JagPJCEx
 					gboolean was_handled = FALSE;
 					if ((priv->mode & JAGP_MODE_EXPR) != 0) {
 						switch (priv->token->kind) {
+							case JAGP_KIND_THIS :
 							case JAGP_KIND_CLASS : {
 									if (typeArgs != NULL) {
 										cat_unref_ptr(typeArgs);
@@ -1694,24 +1774,7 @@ static JagPJCExpression *l_term3_other(JagPParser *parser, CatArrayWo /*JagPJCEx
 									priv->mode = JAGP_MODE_EXPR;
 									jagp_tree_maker_at(priv->tree_maker, pos);
 									JagPJCExpression *selector = result;
-									result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selector, priv->names_class);
-									cat_unref_ptr(selector);
-									l_next_token(parser);
-									result = l_term3_other_done(parser, result, typeArgs);
-									was_handled = TRUE;
-								}
-								break;
-
-							case JAGP_KIND_THIS : {
-									if (typeArgs != NULL) {
-										cat_unref_ptr(typeArgs);
-										cat_log_dedent();
-										return l_illegal(parser, priv->token->cur_start);
-									}
-									priv->mode = JAGP_MODE_EXPR;
-									jagp_tree_maker_at(priv->tree_maker, pos);
-									JagPJCExpression *selector = result;
-									result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selector, priv->names_this);
+									result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selector, priv->token);
 									cat_unref_ptr(selector);
 									l_next_token(parser);
 									result = l_term3_other_done(parser, result, NULL);
@@ -1719,11 +1782,12 @@ static JagPJCExpression *l_term3_other(JagPParser *parser, CatArrayWo /*JagPJCEx
 								}
 								break;
 
+
 							case JAGP_KIND_SUPER : {
 									priv->mode = JAGP_MODE_EXPR;
 									jagp_tree_maker_at(priv->tree_maker, pos);
 									JagPJCExpression *selector = result;
-									result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selector, priv->names_super);
+									result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selector, priv->token);
 									cat_unref_ptr(selector);
 									JagPJCExpression *supexpr = result;
 									result = l_super_suffix(parser, typeArgs, supexpr);
@@ -1767,9 +1831,8 @@ static JagPJCExpression *l_term3_other(JagPParser *parser, CatArrayWo /*JagPJCEx
 						}
 						/* typeArgs saved for next loop iteration. */
 						jagp_tree_maker_at(priv->tree_maker, pos);
-						JagPName *sel_fld_name = l_ident(parser, FALSE);
+						JagPToken *sel_fld_name = l_ident_new(parser);
 						JagPJCFieldAccess *nfa = jagp_tree_maker_select(priv->tree_maker, result, sel_fld_name);
-						cat_unref_ptr(sel_fld_name);
 						cat_unref_ptr(result);
 						result = (JagPJCExpression *) nfa;
 						if (tyannos != NULL && cat_array_wo_size(tyannos)>0) {
@@ -1819,11 +1882,10 @@ static JagPJCExpression *l_term3_other(JagPParser *parser, CatArrayWo /*JagPJCEx
 							l_next_token(parser);
 							priv->mode = JAGP_MODE_TYPE;
 							jagp_tree_maker_at(priv->tree_maker, priv->token->cur_start);
-							JagPName *snm = l_ident(parser, FALSE);
+							JagPToken *snm = l_ident_new(parser);
 							JagPJCExpression *selector = result;
 							result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selector, snm);
 							cat_unref_ptr(selector);
-							cat_unref_ptr(snm);
 							JagPJCExpression *argsexpr = result;
 							result = l_type_arguments_apply_opt(parser, argsexpr);
 							cat_unref_ptr(argsexpr);
@@ -1931,7 +1993,7 @@ static JagPJCExpression *l_term3(JagPParser *parser) {
 			if ((priv->mode & JAGP_MODE_EXPR) != 0) {
 				priv->mode = JAGP_MODE_EXPR;
 				jagp_tree_maker_at(priv->tree_maker, pos);
-				JagPJCExpression *ident = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, priv->names_this);
+				JagPJCExpression *ident = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, priv->token);
 				l_next_token(parser);
 				if (typeArgs == NULL) {
 					result = l_arguments_opt(parser, NULL, ident);
@@ -1949,7 +2011,7 @@ static JagPJCExpression *l_term3(JagPParser *parser) {
 			if ((priv->mode & JAGP_MODE_EXPR) != 0) {
 				priv->mode = JAGP_MODE_EXPR;
 				jagp_tree_maker_at(priv->tree_maker, pos);
-				JagPJCExpression *ident = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, priv->names_super);
+				JagPJCExpression *ident = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, priv->token);
 				result = l_super_suffix(parser, typeArgs, ident);
 				cat_unref_ptr(typeArgs);
 				cat_unref_ptr(ident);
@@ -2129,7 +2191,7 @@ static JagPJCExpression *l_term3_rest(JagPParser *parser, JagPJCExpression *t, C
 				priv->mode = JAGP_MODE_EXPR;
 				jagp_tree_maker_at(priv->tree_maker, pos1);
 				JagPJCExpression *selected = result;
-				result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selected, priv->names_super);
+				result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selected, priv->token);
 				result = to(parser, result);
 				cat_unref_ptr(selected);
 				l_next_token(parser);
@@ -2160,11 +2222,15 @@ static JagPJCExpression *l_term3_rest(JagPParser *parser, JagPJCExpression *t, C
 				
 				jagp_tree_maker_at(priv->tree_maker, pos1);
 				JagPJCExpression *selected = result;
-				JagPName *selector = l_ident(parser, TRUE);
+				JagPToken *selector = l_ident_new(parser);
+				if (selector==NULL) {
+					selector = priv->token;
+					// TODO error
+					l_next_token(parser);
+				}
 				result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selected, selector);
 				result = toP(parser, result);
 				cat_unref_ptr(selected);
-				cat_unref_ptr(selector);
 				if (tyannos != NULL && cat_array_wo_size(tyannos)>0) {
 					jagp_tree_maker_at(priv->tree_maker, l_list_head_pos(tyannos));
 					JagPJCExpression *underlying_type = result;
@@ -2574,10 +2640,9 @@ static JagPJCExpression *l_super_suffix(JagPParser *parser, CatArrayWo */*<JagPJ
 		typeArgs = (priv->token->kind == JAGP_KIND_LT) ? l_type_arguments(parser, FALSE) : NULL;
 		jagp_tree_maker_at(priv->tree_maker, pos);
 		JagPJCExpression *selected = t;
-		JagPName *selector = l_ident(parser, FALSE);
+		JagPToken *selector = l_ident_new(parser);
 		JagPJCExpression *select = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selected, selector);
 		select = toP(parser, select);
-		cat_unref_ptr(selector);
 		result = l_arguments_opt(parser, typeArgs, select);
 		cat_unref_ptr(select);
 		cat_unref_ptr(typeArgs);
@@ -2783,9 +2848,8 @@ static JagPJCExpression *l_type_argument(JagPParser *parser) {
 		JagPJCExpression *wc = (JagPJCExpression *) jagp_tree_maker_wildcard(priv->tree_maker,t,NULL);
 		wc = toP(parser, wc);
 		jagp_tree_maker_at(priv->tree_maker, priv->token->cur_start);
-		JagPName *id_name = l_ident(parser, FALSE);
+		JagPToken *id_name = l_ident_new(parser);
 		JagPJCIdent *id = jagp_tree_maker_ident(priv->tree_maker, id_name);
-		cat_unref_ptr(id_name);
 		id = toP(parser, id);
 		jagp_tree_maker_at(priv->tree_maker, pos);
 		CatArrayWo *errs = cat_array_wo_new();
@@ -2922,6 +2986,7 @@ static JagPJCExpression *l_brackets_suffix(JagPParser *parser, JagPJCExpression 
 		priv->mode = JAGP_MODE_EXPR;
 		JagPCursor *pos = priv->token->cur_start;
 		l_next_token(parser);
+		JagPToken *selector = priv->token;
 		l_accept(parser, JAGP_KIND_CLASS);
 //		if (priv->token->cur_start == endPosTable.errorEndPos) {
 //			// error recovery
@@ -2950,7 +3015,7 @@ static JagPJCExpression *l_brackets_suffix(JagPParser *parser, JagPJCExpression 
 //				syntaxError("no.annotations.on.dot.class");
 //			}
 			jagp_tree_maker_at(priv->tree_maker, pos);
-			result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, t, priv->names_class);
+			result = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, t, selector);
 			result = toP(parser, result);
 //		}
 	} else if ((priv->mode & JAGP_MODE_TYPE) != 0) {
@@ -3068,10 +3133,9 @@ static JagPJCExpression *l_creator(JagPParser *parser, JagPCursor *newpos, CatAr
 		CatArrayWo */*<JagPJCAnnotation>*/ tyannos = l_type_annotations_opt(parser);
 		jagp_tree_maker_at(priv->tree_maker, pos);
 		JagPJCExpression *selected = creatorid;
-		JagPName *selector = l_ident(parser, FALSE);
+		JagPToken *selector = l_ident_new(parser);
 		creatorid = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, selected, selector);
 		cat_unref_ptr(selected);
-		cat_unref_ptr(selector);
 		creatorid = toP(parser, creatorid);
 
 		if (tyannos != NULL && cat_array_wo_size(tyannos)>0) {
@@ -3183,9 +3247,8 @@ static JagPJCExpression *l_inner_creator(JagPParser *parser, JagPCursor *newpos,
 	CatArrayWo */*<JagPJCAnnotation>*/ newAnnotations = l_type_annotations_opt(parser);
 
 	jagp_tree_maker_at(priv->tree_maker, priv->token->cur_start);
-	JagPName *name = l_ident(parser, FALSE);
+	JagPToken *name = l_ident_new(parser);
 	JagPJCExpression *t = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, name);
-	cat_unref_ptr(name);
 	t = toP(parser, t);
 
 	if (cat_array_wo_size(newAnnotations)>0) {
@@ -4393,10 +4456,14 @@ static JagPJCVariableDecl *l_variable_declarator_rest(JagPParser *parser, JagPCu
 /* M1 */
 static JagPJCVariableDecl *l_variable_declarator_id(JagPParser *parser, JagPJCModifiers *mods, JagPJCExpression *type, gboolean lambdaParameter) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
+	cat_log_debug("l_variable_declarator_id:token=%O, lambdaParameter=%d", priv->token, lambdaParameter);
 	cat_log_indent();
-	cat_log_debug("l_variable_declarator_id:token=%d, lambdaParameter=%d", priv->token->kind, lambdaParameter);
 	JagPCursor *pos = priv->token->cur_start;
+#ifdef OLD
 	JagPName *name;
+#else
+	JagPJCExpression *expression;
+#endif
 	if (lambdaParameter && (priv->token->kind == JAGP_KIND_UNDERSCORE)) {
 //		log.error(pos, "underscore.as.identifier.in.lambda");
 //		name = priv->token->name();
@@ -4404,8 +4471,14 @@ static JagPJCVariableDecl *l_variable_declarator_id(JagPParser *parser, JagPJCMo
 	} else {
 		if (priv->allowThisIdent && !lambdaParameter) {
 			JagPJCExpression *pn = l_qualident(parser, FALSE);
+			cat_log_debug("l_variable_declarator_id:pn=%O, token=%O", pn, priv->token);
+#ifdef OLD
 			if (jagp_jctree_has_tag((JagPJCTree *) pn, JAGP_TAG_IDENT) && ((JagPJCIdent *)pn)->name != priv->names_this) {
-				name = cat_ref_ptr(((JagPJCIdent *)pn)->name);
+				name = cat_ref_ptr(((JagPJCIdent *) pn)->name);
+#else
+			if (jagp_qualident_is_plain_but_not_this(pn, priv->names_this)) {
+				expression = cat_ref_ptr(pn);
+#endif
 			} else {
 				if ((mods->flags & JAGP_FLAG_VARARGS) != 0) {
 //					log.error(priv->token->cur_start, "varargs.and.receiver");
@@ -4417,26 +4490,44 @@ static JagPJCVariableDecl *l_variable_declarator_id(JagPParser *parser, JagPJCMo
 				JagPJCVariableDecl *recvvardecl = jagp_tree_maker_receiver_var_def(priv->tree_maker, mods, pn, type);
 				recvvardecl = toP(parser, recvvardecl);
 				cat_unref_ptr(pn);
+				cat_log_dedent();
+				cat_log_debug("l_variable_declarator_id:done:result=%O", recvvardecl);
 				return recvvardecl;
 			}
 			cat_unref_ptr(pn);
 		} else {
+#ifdef OLD
 			name = l_ident(parser, FALSE);
+#else
+			expression = l_ident_new(parser);
+			cat_ref_ptr(expression);
+#endif
 		}
 	}
-	cat_log_debug("l_variable_declarator_id:name=%O", name);
+#ifdef OLD
+			cat_log_debug("l_variable_declarator_id:name=%O", name);
+#else
+			cat_log_debug("l_variable_declarator_id:expression=%O", expression);
+#endif
 	if ((mods->flags & JAGP_FLAG_VARARGS) != 0 &&
 			priv->token->kind == JAGP_KIND_LBRACKET) {
 //		log.error(priv->token->cur_start, "varargs.and.old.array.syntax");
 	}
 	JagPJCExpression *opt_smpl = type = l_brackets_opt_simple(parser, type);
 	jagp_tree_maker_at(priv->tree_maker, pos);
+#ifdef OLD
+	cat_log_debug("l_variable_declarator_id:name=%O", name);
 	JagPJCVariableDecl *result = jagp_tree_maker_var_def(priv->tree_maker, mods, name, opt_smpl, NULL);
 	cat_unref_ptr(name);
+#else
+			cat_log_debug("l_variable_declarator_id:expression=%O", expression);
+	JagPJCVariableDecl *result = jagp_tree_maker_receiver_var_def(priv->tree_maker, mods, expression, opt_smpl);
+	cat_unref_ptr(expression);
+#endif
 // M1	cat_unref_ptr(opt_smpl);
 	result = toP(parser, result);
-	cat_log_debug("l_variable_declarator_id:done:result=%O", result);
 	cat_log_dedent();
+	cat_log_debug("l_variable_declarator_id:done:result=%O", result);
 	return result;
 }
 
@@ -4551,12 +4642,14 @@ static JagPJCCompilationUnit *l_parse_compilation_unit(JagPParser *parser) {
 		while (priv->token->kind != JAGP_KIND_EOF) {
 			cat_log_debug("priv->token=%O, eof=%d", priv->token, JAGP_KIND_EOF);
 
+			if (priv->error_pos!=NULL && jagp_cursor_left_or_above(priv->token->cur_start, priv->error_pos, TRUE)) {
 //			if (priv->token->cur_start <= endPosTable.errorEndPos) {
-//				// error recovery
-//				l_skip(parser, checkForImports, FALSE, FALSE, FALSE);
-//				if (priv->token->kind == EOF)
-//					break;
-//			}
+				// error recovery
+				l_skip(parser, checkForImports, FALSE, FALSE, FALSE);
+				if (priv->token->kind == JAGP_KIND_EOF) {
+					break;
+				}
+			}
 			if (checkForImports && mods == NULL && priv->token->kind == JAGP_KIND_IMPORT) {
 				seenImport = TRUE;
 				GObject *imde = (GObject *) l_import_declaration(parser);
@@ -4693,9 +4786,8 @@ static JagPJCTree *l_import_declaration(JagPParser *parser) {
 		l_next_token(parser);
 	}
 	jagp_tree_maker_at(priv->tree_maker, priv->token->cur_start);
-	JagPName *i_name = l_ident(parser, FALSE);
+	JagPToken *i_name = l_ident_new(parser);
 	JagPJCExpression *pid = (JagPJCExpression *) jagp_tree_maker_ident(priv->tree_maker, i_name);
-	cat_unref_ptr(i_name);
 	pid = toP(parser, pid);
 	do {
 		JagPCursor *pos1 = priv->token->cur_start;
@@ -4703,18 +4795,16 @@ static JagPJCTree *l_import_declaration(JagPParser *parser) {
 		if (priv->token->kind == JAGP_KIND_STAR) {
 			jagp_tree_maker_at(priv->tree_maker, pos1);
 			JagPJCExpression *field = pid;
-			pid = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, field, priv->names_asterisk);
+			pid = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, field, priv->token);
 			cat_unref_ptr(field);
 			pid = to(parser, pid);
 			l_next_token(parser);
 			break;
 		} else {
 			jagp_tree_maker_at(priv->tree_maker, pos1);
-			i_name = l_ident(parser, FALSE);
+			JagPToken *selector = l_ident_new(parser);
 			JagPJCExpression *field = pid;
-			pid = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, field, i_name);
-			cat_unref_ptr(field);
-			cat_unref_ptr(i_name);
+			pid = (JagPJCExpression *) jagp_tree_maker_select(priv->tree_maker, field, selector);
 			pid = to(parser, pid);
 		}
 	} while (priv->token->kind == JAGP_KIND_DOT);
@@ -4731,8 +4821,9 @@ static JagPJCTree *l_import_declaration(JagPParser *parser) {
  */
 /* M1 */
 static JagPJCTree *l_type_declaration(JagPParser *parser, JagPJCModifiers *mods, JagPComment *docComment) {
-	cat_log_debug("l_type_declaration");
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
+	cat_log_debug("l_type_declaration:token=%O", priv->token);
+	cat_log_indent();
 	JagPCursor *pos = priv->token->cur_start;
 	JagPJCTree *result = NULL;
 	if (mods == NULL && priv->token->kind == JAGP_KIND_SEMI) {
@@ -4745,6 +4836,8 @@ static JagPJCTree *l_type_declaration(JagPParser *parser, JagPJCModifiers *mods,
 		result = (JagPJCTree *) l_class_or_interface_or_enum_declaration(parser, mods_sub, docComment);
 		cat_unref_ptr(mods_sub);
 	}
+	cat_log_dedent();
+	cat_log_debug("l_type_declaration:result=%O", result);
 	return result;
 }
 
@@ -4755,23 +4848,23 @@ static JagPJCTree *l_type_declaration(JagPParser *parser, JagPJCModifiers *mods,
  */
 /* M1 */
 static JagPJCStatement *l_class_or_interface_or_enum_declaration(JagPParser *parser, JagPJCModifiers *mods, JagPComment *dc) {
-	cat_log_debug("l_class_or_interface_or_enum_declaration");
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
+	cat_log_debug("l_class_or_interface_or_enum_declaration:token=%O", priv->token);
+	JagPJCStatement *result = NULL;
 	if (priv->token->kind == JAGP_KIND_CLASS) {
-		return (JagPJCStatement *) l_class_declaration(parser, mods, dc);
+		result = (JagPJCStatement *) l_class_declaration(parser, mods, dc);
 	} else if (priv->token->kind == JAGP_KIND_INTERFACE) {
-		return (JagPJCStatement *) l_interface_declaration(parser, mods, dc);
+		result = (JagPJCStatement *) l_interface_declaration(parser, mods, dc);
 	} else if (priv->token->kind == JAGP_KIND_ENUM) {
-		return (JagPJCStatement *) l_enum_declaration(parser, mods, dc);
+		result = (JagPJCStatement *) l_enum_declaration(parser, mods, dc);
 	} else {
 		JagPCursor *pos = priv->token->cur_start;
 		CatArrayWo */*<JCTree>*/ errs = cat_array_wo_new();
 		if (lax_identifier_accepts(priv->token->kind)) {
 			cat_array_wo_append(errs, (GObject *) mods);
 			jagp_tree_maker_at(priv->tree_maker, pos);
-			JagPName *id = l_ident(parser, FALSE);
+			JagPToken *id = l_ident_new(parser);
 			JagPJCIdent *ident = jagp_tree_maker_ident(priv->tree_maker, id);
-			cat_unref_ptr(id);
 			ident = toP(parser, ident);
 			cat_array_wo_append(errs, (GObject *) ident);
 			cat_unref_ptr(ident);
@@ -4780,12 +4873,14 @@ static JagPJCStatement *l_class_or_interface_or_enum_declaration(JagPParser *par
 			cat_array_wo_append(errs, (GObject *) mods);
 		}
 		JagPJCExpression *err = NULL;
+
+		l_syntax_error(parser, pos, errs, "expected class, interface or enum", NULL);
 //		JagPJCExpression *err = syntaxError(pos, errs, "expected3",JAGP_KIND_CLASS, JAGP_KIND_INTERFACE, JAGP_KIND_ENUM);
 		cat_unref_ptr(errs);
-		JagPJCExpressionStatement *result = jagp_tree_maker_exec(priv->tree_maker, err);
+		result = (JagPJCStatement *) jagp_tree_maker_exec(priv->tree_maker, err);
 		result = toP(parser, result);
-		return (JagPJCStatement *) result;
 	}
+	return (JagPJCStatement *) result;
 }
 
 /** ClassDeclaration = CLASS Ident TypeParametersOpt [EXTENDS Type]
@@ -4868,7 +4963,7 @@ static JagPJCClassDecl *l_enum_declaration(JagPParser *parser, JagPJCModifiers *
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
 	JagPCursor *pos = priv->token->cur_start;
 	l_accept(parser, JAGP_KIND_ENUM);
-	JagPName *name = l_ident(parser, FALSE);
+	JagPToken *name = l_ident_new(parser);
 
 	CatArrayWo */*<JagPJCExpression>*/ implementing = NULL;
 	if (priv->token->kind == JAGP_KIND_IMPLEMENTS) {
@@ -4882,11 +4977,10 @@ static JagPJCClassDecl *l_enum_declaration(JagPParser *parser, JagPJCModifiers *
 	mods->flags |= JAGP_FLAG_ENUM;
 	jagp_tree_maker_at(priv->tree_maker, pos);
 	CatArrayWo *emptylist = cat_array_wo_new();
-	JagPJCClassDecl *result = jagp_tree_maker_class_def(priv->tree_maker, mods, name, emptylist, NULL, implementing, defs);
+	JagPJCClassDecl *result = jagp_tree_maker_class_def(priv->tree_maker, mods, (JagPName *) name->value, emptylist, NULL, implementing, defs);
 	cat_unref_ptr(emptylist);
 	result = toP(parser, result);
 	l_attach(parser, (JagPJCTree *) result, dc);
-	cat_unref_ptr(name);
 	cat_unref_ptr(implementing);
 	cat_unref_ptr(defs);
 	return result;
@@ -4896,7 +4990,7 @@ static JagPJCClassDecl *l_enum_declaration(JagPParser *parser, JagPJCModifiers *
  *                  [ ";" {ClassBodyDeclaration} ] "}"
  */
 /* M1 */
-static CatArrayWo */*<JCTree>*/ l_enum_body(JagPParser *parser, JagPName *enumName) {
+static CatArrayWo */*<JCTree>*/ l_enum_body(JagPParser *parser, JagPToken *enumName) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
 	l_accept(parser, JAGP_KIND_LBRACE);
 	CatArrayWo /*<JagPJCTree>*/ *defs = cat_array_wo_new();
@@ -4924,8 +5018,8 @@ static CatArrayWo */*<JCTree>*/ l_enum_body(JagPParser *parser, JagPName *enumNa
 	if (priv->token->kind == JAGP_KIND_SEMI) {
 		l_next_token(parser);
 		while (priv->token->kind != JAGP_KIND_RBRACE && priv->token->kind != JAGP_KIND_EOF) {
-			GObject *clorinbode = (GObject *) l_class_or_interface_body_declaration(parser, enumName,FALSE);
-			cat_array_wo_append(defs, clorinbode);
+			CatArrayWo *clorinbode = (CatArrayWo *) l_class_or_interface_body_declaration(parser, (JagPName *) enumName->value,FALSE);
+			cat_array_wo_append_all(defs, clorinbode);
 			cat_unref_ptr(clorinbode);
 //			if (priv->token->cur_start <= endPosTable.errorEndPos) {
 //				// error recovery
@@ -4940,7 +5034,7 @@ static CatArrayWo */*<JCTree>*/ l_enum_body(JagPParser *parser, JagPName *enumNa
 /** EnumeratorDeclaration = AnnotationsOpt [TypeArguments] IDENTIFIER [ Arguments ] [ "{" ClassBody "}" ]
  */
 /* M1 */
-static JagPJCTree *l_enumerator_declaration(JagPParser *parser, JagPName *enumName) {
+static JagPJCTree *l_enumerator_declaration(JagPParser *parser, JagPToken *enumName) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
 	JagPComment *dc = jagp_token_comment(priv->token, JAGP_COMMENT_STYLE_JAVADOC);
 	int flags = JAGP_FLAG_PUBLIC|JAGP_FLAG_STATIC|JAGP_FLAG_FINAL|JAGP_FLAG_ENUM;
@@ -5029,8 +5123,8 @@ static CatArrayWo */*<JCTree>*/ l_class_or_interface_body(JagPParser *parser, Ja
 //	}
 	CatArrayWo /*<JagPJCTree>*/ *defs = cat_array_wo_new();
 	while (priv->token->kind != JAGP_KIND_RBRACE && priv->token->kind != JAGP_KIND_EOF) {
-		GObject *clorinbode = (GObject *) l_class_or_interface_body_declaration(parser, className, isInterface);
-		cat_array_wo_append(defs, clorinbode);
+		CatArrayWo *clorinbode = (CatArrayWo *) l_class_or_interface_body_declaration(parser, className, isInterface);
+		cat_array_wo_append_all(defs, clorinbode);
 		cat_unref_ptr(clorinbode);
 		if (jagp_cursor_left_or_above(priv->token->cur_start,priv->error_pos, TRUE)) {
 		   /* error recovery */
@@ -5142,6 +5236,7 @@ static CatArrayWo /*<JCTree>*/ *l_class_or_interface_body_declaration(JagPParser
 				cat_array_wo_append(result, mdr);
 				cat_unref_ptr(mdr);
 			} else {
+				cat_log_debug("token=%O", priv->token);
 				pos = priv->token->cur_start;
 				JagPName *name = l_ident(parser, FALSE);
 				if (priv->token->kind == JAGP_KIND_LPAREN) {
@@ -5271,6 +5366,7 @@ static CatArrayWo */*<JagPJCExpression>*/ l_qualident_list(JagPParser *parser) {
 
 		typeAnnos = l_type_annotations_opt(parser);
 		qi = l_qualident(parser, TRUE);
+		cat_log_debug("qi=%O, next=%O", qi, priv->token);
 		if (cat_array_wo_size(typeAnnos)>0) {
 			JagPJCExpression *at = l_insert_annotations_to_most_inner(parser, qi, typeAnnos, FALSE);
 			cat_array_wo_append(ts, (GObject *) at);
@@ -5279,8 +5375,9 @@ static CatArrayWo */*<JagPJCExpression>*/ l_qualident_list(JagPParser *parser) {
 			cat_array_wo_append(ts, (GObject *) qi);
 		}
 		cat_unref_ptr(qi);
-	cat_unref_ptr(typeAnnos);
+		cat_unref_ptr(typeAnnos);
 	}
+	cat_log_debug("done, next=%O", priv->token);
 	return ts;
 }
 
@@ -5520,7 +5617,7 @@ static JagPJCExpression *l_insert_annotations_to_most_inner(JagPParser *parser, 
 /* M1 */
 static JagPJCVariableDecl *l_formal_parameter(JagPParser *parser, gboolean lambdaParameter) {
 	JagPParserPrivate *priv = jagp_parser_get_instance_private(parser);
-	cat_log_debug("l_formal_parameters:token=%O", priv->token);
+	cat_log_debug("l_formal_parameter:token=%O", priv->token);
 	cat_log_indent();
 	JagPJCModifiers *mods = l_opt_final(parser, JAGP_FLAG_PARAMETER);
 	/* need to distinguish between vararg annos and array annos
@@ -5552,7 +5649,7 @@ static JagPJCVariableDecl *l_formal_parameter(JagPParser *parser, gboolean lambd
 	cat_unref_ptr(mods);
 	cat_unref_ptr(type);
 	cat_log_dedent();
-	cat_log_debug("l_formal_parameters:done:result=%O", result);
+	cat_log_debug("l_formal_parameter:done:result=%O", result);
 	return result;
 }
 

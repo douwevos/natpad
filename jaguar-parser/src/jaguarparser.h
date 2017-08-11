@@ -29,5 +29,7 @@
 #include "jagplexerimpl.h"
 #include "../src-generated/jagpparserconfig.h"
 #include "tree/jagpjccompilationunit.h"
+#include "tree/jagpjcclassdecl.h"
+#include "code/jagpflags.h"
 
 #endif /* JAGUARPARSER_H_ */

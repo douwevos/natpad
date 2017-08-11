@@ -52,14 +52,15 @@ module {
 #		}
 	
 		
-		natpadCup {
-			grammar './etc/java_15.cup';
-			jsonconfig './etc/parser-config.json';
-			updateOnly 'true';
-		}
+#		natpadCup {
+#			grammar './etc/java_15.cup';
+#			jsonconfig './etc/parser-config.json';
+#			updateOnly 'true';
+#		}
 		cc { 
 			src { path './src/'; }  
 			src { path './src-generated/'; }  
+			natpad.cc.args {}
 			destdir './compiled/'; 
 			depdir 'deps';
 		}

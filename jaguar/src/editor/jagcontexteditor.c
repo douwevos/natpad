@@ -21,28 +21,22 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagcontexteditor.h"
-#include "../parser/generated/jagparser.h"
-#include "../parser/generated/runtime/jagparsercontext.h"
-#include "../parser/generated/runtime/jagtoken.h"
-#include "../indexer/source/jgiparsercontext.h"
 #include "../indexer/jgiastutil.h"
 #include "../indexer/model/jgitokenrange.h"
 #include "../moose/library/jaglibrarycontentwo.h"
 #include "../moose/srcfolder/jagsrcfoldercontentwo.h"
 #include "../moose/srcfile/jagsrcfilecontentwo.h"
 #include "../moose/package/jagpackagecontent.h"
-#include "../parser/jagasttoken.h"
-#include "../parser/jagscanner.h"
+#include <jaguarparser.h>
 #include <elk.h>
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_WARN
+#define CAT_LOG_LEVEL CAT_LOG_ALL
 #define CAT_LOG_CLAZZ "JagContextEditor"
 #include <logging/catlog.h>
 
 struct _JagContextEditorPrivate {
 	JagIndexer *indexer;
-	JgiParserContext *parser_context;
 	MooNodeWo *moo_root_node;
 };
 
@@ -91,7 +85,6 @@ JagContextEditor *jag_context_editor_new(DraEditorPanel *editor_panel, JagIndexe
 	dra_context_editor_construct((DraContextEditor *) result, editor_panel);
 	priv->indexer = cat_ref_ptr(indexer);
 	priv->moo_root_node = NULL;
-	priv->parser_context = NULL;
 	return result;
 }
 
@@ -176,12 +169,17 @@ static CatStringWo *l_create_fqn_name(JgiTokenRange *name_token_range, int row, 
 	CatStringWo *e_result = cat_string_wo_new();
 	CatIIterator *iter = jgi_token_range_iterator(name_token_range);
 	while(cat_iiterator_has_next(iter)) {
-		JagToken *token = (JagToken *) cat_iiterator_next(iter);
-		cat_log_debug("sym=%d, state=%d, text=%s, l/r=%d#%d/%d#%d", token->sym, token->parse_state, token->symbol_text, token->left, token->left_row, token->right, token->right_row);
-		CatStringWo *a_token_text = CAT_STRING_WO(token->value);
+		JagPToken *token = (JagPToken *) cat_iiterator_next(iter);
+		cat_log_error("token=%O", token);
+//		cat_log_debug("sym=%d, state=%d, text=%s, l/r=%d#%d/%d#%d", token->kind, token->parse_state, token->symbol_text, token->left, token->left_row, token->right, token->right_row);
+		CatStringWo *a_token_text = NULL;
+		if (token->value) {
+			JagPName *token_text = JAGP_NAME(token->value);
+			a_token_text = jagp_name_get_string(token_text);
+		}
 		cat_log_debug("a_token_text=%o", a_token_text);
 		if (a_token_text==NULL) {
-			if (token->sym==JAG_SYMBOL_TERM_DOT) {
+			if (token->kind==JAGP_KIND_DOT) {
 				a_token_text = cat_string_wo_new_with(".");
 			} else {
 				cat_ref_ptr(a_token_text);
@@ -191,10 +189,14 @@ static CatStringWo *l_create_fqn_name(JgiTokenRange *name_token_range, int row, 
 		}
 
 		if (a_token_text!=NULL) {
-			if (row<0 || row>token->right_row || (row==token->right_row && column>=token->right)) {
+			int l_col, r_col;
+			long long l_row, r_row;
+			jagp_cursor_values(token->cur_start, &l_row, &l_col);
+			jagp_cursor_values(token->cur_end, &r_row, &r_col);
+			if (row<0 || row>r_row || (row==r_row && column>=r_col)) {
 				cat_string_wo_append(e_result, a_token_text);
 			} else {
-				int sublen = column - token->left;
+				int sublen = column - l_col;
 				CatStringWo *e_subpart = cat_string_wo_new_sub(a_token_text, 0, sublen);
 				e_subpart = cat_string_wo_anchor(e_subpart, 0);
 				cat_string_wo_append(e_result, e_subpart);
@@ -209,15 +211,13 @@ static CatStringWo *l_create_fqn_name(JgiTokenRange *name_token_range, int row, 
 	return e_result;
 }
 
-static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_context, JgiTokenRange *name_token_range) {
+static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_context, JgiTokenRange *name_token_range, CatArrayWo *tokens, int focus_index) {
 	JagContextEditorPrivate *priv = jag_context_editor_get_instance_private(context_editor);
 
 	int import_token_index = jgi_token_range_get_first_index(name_token_range)-1;
 	int semi_index = -1;
 
-	int focus_index = jgi_parser_context_get_focus_index(priv->parser_context);
-	CatArrayWo *e_token_array = jgi_parser_context_get_token_array(priv->parser_context);
-	JagAstToken *ast_token_at_focus = (JagAstToken *) cat_array_wo_get(e_token_array, focus_index);
+	JagPToken *ast_token_at_focus = (JagPToken *) cat_array_wo_get(tokens, focus_index);
 
 	if (name_token_range) {
 		CatArrayWo *e_package_name_list = cat_array_wo_new();
@@ -228,7 +228,7 @@ static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_c
 
 		CatStringWo *e_qname_as_text = l_create_fqn_name(name_token_range, row, column);
 		CatStringWo *a_full_name = cat_string_wo_anchor(e_qname_as_text, 0);
-		cat_log_debug("IMPORT %o ... SEMI", a_full_name);
+		cat_log_error("IMPORT %o ... SEMI", a_full_name);
 
 		/* source folders */
 		CatArrayWo *src_folder_nodes = l_get_moose_src_folder_nodes(context_editor, ac_context);
@@ -268,7 +268,7 @@ static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_c
 								}
 								if (e_nn) {
 									CatStringWo *a_tesn = cat_string_wo_anchor(e_nn, 0);
-									cat_log_trace("tesn=%o", a_tesn);
+									cat_log_trace("tesn=%O, a_full_name=%O", a_tesn, a_full_name);
 									if (cat_string_wo_beginswith(a_tesn, a_full_name)) {
 										cat_array_wo_append(e_package_name_list, (GObject *) a_tesn);
 									}
@@ -351,35 +351,47 @@ static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_c
 
 
 		semi_index = focus_index+1;
-		int trow = JAG_TOKEN(ast_token_at_focus)->left_row;
-		while(semi_index<cat_array_wo_size(e_token_array)) {
-			JagToken *semi_token = (JagToken *) cat_array_wo_get(e_token_array, semi_index);
-			if (semi_token->sym==JAG_SYMBOL_TERM_SEMICOLON) {
+		long long trow;
+		int tcol;
+		jagp_cursor_values(ast_token_at_focus->cur_start, &row, &tcol);
+		while(semi_index<cat_array_wo_size(tokens)) {
+			JagPToken *semi_token = (JagPToken *) cat_array_wo_get(tokens, semi_index);
+			if (semi_token->kind==JAGP_KIND_SEMI) {
 				break;
 			}
-			if (semi_token->left_row!=trow) {
+			long long row;
+			int col;
+			jagp_cursor_values(semi_token->cur_start, &row, &col);
+			if (row!=trow) {
 				semi_index--;
 				break;
 			}
 			semi_index++;
 		}
-		if (semi_index>=cat_array_wo_size(e_token_array)) {
-			semi_index = cat_array_wo_size(e_token_array)-1;
+		if (semi_index>=cat_array_wo_size(tokens)) {
+			semi_index = cat_array_wo_size(tokens)-1;
 		}
 
 
-		JagToken *semi_token = (JagToken *) cat_array_wo_get(e_token_array, semi_index);
-		JagToken *package_token = (JagToken *) cat_array_wo_get(e_token_array, import_token_index);
+		JagPToken *semi_token = (JagPToken *) cat_array_wo_get(tokens, semi_index);
+		JagPToken *package_token = (JagPToken *) cat_array_wo_get(tokens, import_token_index);
 
-		ChaCursorWo *cursor_start = dra_ac_context_create_cursor(ac_context, package_token->left, package_token->left_row);
-		ChaCursorWo *cursor_end = dra_ac_context_create_cursor(ac_context, semi_token->right, semi_token->right_row);
+		int st_col, pt_col;
+		long long st_row, pt_row;
+		jagp_cursor_values(package_token->cur_start, &pt_row, &pt_col);
+		jagp_cursor_values(semi_token->cur_end, &st_row, &st_col);
+
+		ChaCursorWo *cursor_start = dra_ac_context_create_cursor(ac_context, pt_col, pt_row);
+		ChaCursorWo *cursor_end = dra_ac_context_create_cursor(ac_context, st_col, st_row);
 
 		CatIIterator *iter = cat_array_wo_iterator(e_package_name_list);
+		cat_log_debug("e_package_name_list.size=%d", cat_array_wo_size(e_package_name_list));
 		while(cat_iiterator_has_next(iter)) {
 			CatStringWo *a_pkg_name = (CatStringWo *) cat_iiterator_next(iter);
 			CatStringWo *e_replace = cat_string_wo_new_with("import ");
 			cat_string_wo_append(e_replace, a_pkg_name);
 			cat_string_wo_append_chars(e_replace, ";");
+			cat_log_debug("e_replace=%O", e_replace);
 			CatStringWo *a_full_statement = cat_string_wo_anchor(e_replace, 0);
 			DraAcReplaceEntry *entry = dra_ac_replace_entry_new(a_pkg_name, a_full_statement);
 			dra_ac_add_entry(ac_context, (DraAcEntry *) entry);
@@ -395,58 +407,65 @@ static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_c
 	}
 }
 
-
-
-
-static void l_enlist_identifier(JagContextEditor *context_editor, DraAcContext *ac_context) {
+static void l_enlist_identifier(JagContextEditor *context_editor, DraAcContext *ac_context, JagPParser *parser, CatArrayWo *tokens, int focus_index) {
 	JagContextEditorPrivate *priv = jag_context_editor_get_instance_private(context_editor);
 
-	int focus_index = jgi_parser_context_get_focus_index(priv->parser_context);
-	CatArrayWo *e_token_array = jgi_parser_context_get_token_array(priv->parser_context);
-
-	cat_log_on_debug({
-		JagAstToken *ast_token_at_focus = (JagAstToken *) cat_array_wo_get(e_token_array, focus_index);
-		CatStringWo *dt = jag_ast_token_as_string(ast_token_at_focus);
-		cat_log_debug("enlisting for identifier: %s", cat_string_wo_getchars(dt));
-	});
-
-
-	JgiTokenRange *token_range = jgi_ast_util_extract_name_root(e_token_array, focus_index);
+	JgiTokenRange *token_range = jgi_ast_util_extract_name_root(tokens, focus_index);
 	jgi_token_range_dump(token_range);
-
-
 	int prec_index = jgi_token_range_get_first_index(token_range)-1;
 	if (prec_index<0) {
 		return;
 	}
-	JagAstToken *prec_token = (JagAstToken *) cat_array_wo_get(e_token_array, prec_index);
-
-	switch(JAG_TOKEN(prec_token)->sym) {
-		case JAG_SYMBOL_TERM_IMPORT : {
-			l_enlist_import(context_editor, ac_context, token_range);
+	JagPToken *prec_token = (JagPToken *) cat_array_wo_get(tokens, prec_index);
+	switch(prec_token->kind) {
+		case JAGP_KIND_IMPORT : {
+			l_enlist_import(context_editor, ac_context, token_range, tokens, focus_index);
+			cat_log_warn("would enlist imports now");
 		} break;
 	}
 
-//	JagAstToken *name_root = jgi_ast_util_extract_name_root(ast_token_at_focus);
-//	jgi_ast_util_dump_reverse(ast_token_at_focus, name_root);
 }
 
-void l_dump_stack(JagParserContext *parser_context) {
-	int stackIdx;
-	CatStringWo *e_indent = cat_string_wo_new();
-	for(stackIdx=0; stackIdx<cat_array_wo_size(parser_context->e_stack); stackIdx++) {
-		JagToken *token = (JagToken *) cat_array_wo_get(parser_context->e_stack, stackIdx);
-		if (token!=NULL) {
-			cat_log_debug("stack[%d] : %ssym=%d, state=%d, text=%s, l/r=%d#%d/%d#%d", stackIdx, cat_string_wo_getchars(e_indent), token->sym, token->parse_state, token->symbol_text, token->left, token->left_row, token->right, token->right_row);
+//
+//void l_dump_stack(JagParserContext *parser_context) {
+//	int stackIdx;
+//	CatStringWo *e_indent = cat_string_wo_new();
+//	for(stackIdx=0; stackIdx<cat_array_wo_size(parser_context->e_stack); stackIdx++) {
+//		JagToken *token = (JagToken *) cat_array_wo_get(parser_context->e_stack, stackIdx);
+//		if (token!=NULL) {
+//			cat_log_debug("stack[%d] : %ssym=%d, state=%d, text=%s, l/r=%d#%d/%d#%d", stackIdx, cat_string_wo_getchars(e_indent), token->sym, token->parse_state, token->symbol_text, token->left, token->left_row, token->right, token->right_row);
+//		}
+//		if (!token->is_terminal) {
+////		if (JAG_IS_AST_TOKEN(token)) {
+//			cat_string_wo_append_chars(e_indent, "  ");
+//		}
+//	}
+//	cat_unref_ptr(e_indent);
+//}
+
+int l_index_of_token(CatArrayWo *tokens, long long row, int column) {
+	int idx;
+	int count = cat_array_wo_size(tokens);
+	long long row_start, row_end;
+	int column_start, column_end;
+	for(idx=0; idx<count; idx++) {
+		JagPToken *token = cat_array_wo_get(tokens, idx);
+		jagp_cursor_values(token->cur_start, &row_start, &column_start);
+		if (row_start>row) {
+			return -1;
+		} else if (row_start==row && column<column_start) {
+			continue;
 		}
-		if (!token->is_terminal) {
-//		if (JAG_IS_AST_TOKEN(token)) {
-			cat_string_wo_append_chars(e_indent, "  ");
+		jagp_cursor_values(token->cur_end, &row_end, &column_end);
+		if (row_end<row) {
+			continue;
+		} else if (row_end==row && column>column_end) {
+			continue;
 		}
+		return idx;
 	}
-	cat_unref_ptr(e_indent);
+	return -1;
 }
-
 
 static void l_enlist(JagContextEditor *context_editor, DraAcContext *ac_context) {
 	JagContextEditorPrivate *priv = jag_context_editor_get_instance_private(context_editor);
@@ -457,52 +476,90 @@ static void l_enlist(JagContextEditor *context_editor, DraAcContext *ac_context)
 	cha_revision_reader_set_forced_line_end(revision_reader, CHA_LINE_END_LF);
 
 	CatIUtf8Scanner *scanner = CAT_IUTF8_SCANNER(revision_reader);
+	JagPNames *names = jagp_names_new();
+	JagPTokenizer *tokenizer = jagp_tokenizer_new(scanner, names);
+	JagPILexer *lexer = (JagPILexer *) jagp_lexer_impl_new(tokenizer);
+	JagPParser *parser = jagp_parser_new(lexer, names);
+	jagp_parser_run(parser);
 
-	JagScanner *java_scanner = jag_scanner_new(scanner);
-	java_scanner->filter_non_parsable = TRUE;
-	java_scanner->create_ast_tokens = TRUE;
-	JagParser *jav_parser = jag_parser_new(JAG_ISCANNER(java_scanner));
+	JagPJCCompilationUnit *compilation_unit = jagp_parser_get_compilation_unit(parser);
+	cat_log_on_debug({
+		jagp_jctree_dump((JagPJCTree *) compilation_unit, cat_string_wo_new());
+	});
+
+	CatArrayWo *tokens = jagp_lexer_impl_get_all_tokens((JagPLexerImpl *) lexer);
 
 	long long int row = 0;
 	int column = 0;
 	dra_ac_context_get_cursor_location(ac_context, &column, &row);
-
-	cat_log_debug("for row=%d column=%d", row, column);
-
-
-	MooService *moo_service = jag_indexer_get_moo_service(priv->indexer);
-
-	JgiParserContext *parser_context = jgi_parser_context_new(JAG_ISCANNER(java_scanner), (VipISequence *) moo_service);
-	priv->parser_context = parser_context;
-	jgi_parser_context_enlist_tokens(parser_context, row, column);
-
-//	priv->indexer_parser_context = parser_context;
-	jag_parser_base_parse(JAG_PARSER_BASE(jav_parser), JAG_PARSER_CONTEXT(parser_context));
-	l_dump_stack(JAG_PARSER_CONTEXT(parser_context));
-
-	jgi_parser_context_dump_stack_with_focus(parser_context);
-
-	int focus_index = jgi_parser_context_get_focus_index(parser_context);
-	CatArrayWo *e_token_array = jgi_parser_context_get_token_array(parser_context);
-	JagToken *token_at_focus = (JagToken *) cat_array_wo_get(e_token_array, focus_index);
-
-	if (token_at_focus) {
-		switch(token_at_focus->sym) {
-			case JAG_SYMBOL_TERM_IDENTIFIER :
-			case JAG_SYMBOL_TERM_DOT : {
-				l_enlist_identifier(context_editor, ac_context);
-			} break;
-//				l_enlist_identifier(request);
-//			} break;
-			default : {
-				cat_log_warn("symbol not handled yet");
-			} break;
+	int focus_index = l_index_of_token(tokens, row, column);
+	if (focus_index>=0) {
+		JagPToken *token_at_focus = (JagPToken *) cat_array_wo_get(tokens, focus_index);
+		if (token_at_focus) {
+			switch(token_at_focus->kind) {
+				case JAGP_KIND_IDENTIFIER :
+				case JAGP_KIND_DOT : {
+					l_enlist_identifier(context_editor, ac_context, parser, tokens, focus_index);
+				} break;
+		////				l_enlist_identifier(request);
+		////			} break;
+		//			default : {
+		//				cat_log_warn("symbol not handled yet");
+		//			} break;
+				}
 		}
 	}
+	cat_unref_ptr(parser);
+	cat_unref_ptr(names);
+	cat_unref_ptr(tokenizer);
+	cat_unref_ptr(lexer);
 
-	cat_unref_ptr(jav_parser);
-	cat_unref_ptr(java_scanner);
-	cat_unref_ptr(scanner);
+
+//	JagScanner *java_scanner = jag_scanner_new(scanner);
+//	java_scanner->filter_non_parsable = TRUE;
+//	java_scanner->create_ast_tokens = TRUE;
+//	JagParser *jav_parser = jag_parser_new(JAG_ISCANNER(java_scanner));
+//
+//	long long int row = 0;
+//	int column = 0;
+//	dra_ac_context_get_cursor_location(ac_context, &column, &row);
+//
+//	cat_log_debug("for row=%d column=%d", row, column);
+//
+//
+//	MooService *moo_service = jag_indexer_get_moo_service(priv->indexer);
+//
+//	JgiParserContext *parser_context = jgi_parser_context_new(JAG_ISCANNER(java_scanner), (VipISequence *) moo_service);
+//	priv->parser_context = parser_context;
+//	jgi_parser_context_enlist_tokens(parser_context, row, column);
+//
+////	priv->indexer_parser_context = parser_context;
+//	jag_parser_base_parse(JAG_PARSER_BASE(jav_parser), JAG_PARSER_CONTEXT(parser_context));
+//	l_dump_stack(JAG_PARSER_CONTEXT(parser_context));
+//
+//	jgi_parser_context_dump_stack_with_focus(parser_context);
+//
+//	int focus_index = jgi_parser_context_get_focus_index(parser_context);
+//	CatArrayWo *e_token_array = jgi_parser_context_get_token_array(parser_context);
+//	JagToken *token_at_focus = (JagToken *) cat_array_wo_get(e_token_array, focus_index);
+//
+//	if (token_at_focus) {
+//		switch(token_at_focus->sym) {
+//			case JAG_SYMBOL_TERM_IDENTIFIER :
+//			case JAG_SYMBOL_TERM_DOT : {
+//				l_enlist_identifier(context_editor, ac_context);
+//			} break;
+////				l_enlist_identifier(request);
+////			} break;
+//			default : {
+//				cat_log_warn("symbol not handled yet");
+//			} break;
+//		}
+//	}
+//
+//	cat_unref_ptr(jav_parser);
+//	cat_unref_ptr(java_scanner);
+//	cat_unref_ptr(scanner);
 }
 
 

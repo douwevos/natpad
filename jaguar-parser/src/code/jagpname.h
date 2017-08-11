@@ -51,7 +51,9 @@ struct _JagPNameClass {
 
 GType jagp_name_get_type();
 
-JagPName *jagp_name_new();
+JagPName *jagp_name_new(CatStringWo *text);
+
+CatStringWo *jagp_name_get_string(JagPName *name);
 
 G_END_DECLS
 

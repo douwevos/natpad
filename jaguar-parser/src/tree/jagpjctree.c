@@ -44,11 +44,15 @@ G_DEFINE_TYPE_WITH_CODE(JagPJCTree, jagp_jctree, G_TYPE_OBJECT,
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
+static void l_dump(JagPJCTree *tree, CatStringWo *indent);
+
 
 static void jagp_jctree_class_init(JagPJCTreeClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
+
+	clazz->dump = l_dump;
 }
 
 static void jagp_jctree_init(JagPJCTree *instance) {
@@ -97,6 +101,16 @@ gboolean jagp_jctree_has_tag(JagPJCTree *tree, JagPTag tag) {
 
 JagPCursor *jagp_jctree_get_start_cursor(JagPJCTree *tree) {
 	return jagp_tree_info_get_start_cursor(tree);
+}
+
+void jagp_jctree_dump(JagPJCTree *tree, CatStringWo *indent) {
+	JAGP_JCTREE_GET_CLASS(tree)->dump(tree, indent);
+}
+
+
+static void l_dump(JagPJCTree *tree, CatStringWo *indent) {
+	const char *iname = g_type_name_from_instance((GTypeInstance *) tree);
+	cat_log_print("DUMP", "%Ono dump for %s", indent, iname);
 }
 
 

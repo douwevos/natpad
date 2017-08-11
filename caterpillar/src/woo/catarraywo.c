@@ -218,8 +218,6 @@ CatIIterator *cat_array_wo_iterator(CatArrayWo *array) {
 	return (CatIIterator *) result;
 }
 
-
-
 int cat_array_wo_find_index(CatArrayWo *array, const void *search_item, int hint_index) {
 	CatArrayWoPrivate *priv = cat_array_wo_get_instance_private(array);
 	cat_log_detail("array=%p", array);

@@ -32,6 +32,7 @@ G_DEFINE_TYPE(JagPJCBlock, jagp_jcblock, JAGP_TYPE_JCSTATEMENT);
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static JagPTag l_tree_get_tag(JagPJCTree *tree) { return JAGP_TAG_BLOCK; }
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent);
 
 static void jagp_jcblock_class_init(JagPJCBlockClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -40,6 +41,7 @@ static void jagp_jcblock_class_init(JagPJCBlockClass *clazz) {
 
 	JagPJCTreeClass *tree_class = JAGP_JCTREE_CLASS(clazz);
 	tree_class->getTag = l_tree_get_tag;
+	tree_class->dump = l_tree_dump;
 }
 
 static void jagp_jcblock_init(JagPJCBlock *instance) {
@@ -70,3 +72,18 @@ JagPJCBlock *jagp_jcblock_new(long long flags, CatArrayWo *stats) {
 	return result;
 }
 
+
+
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent) {
+	JagPJCBlock *unit = (JagPJCBlock *) tree;
+	cat_log_print("DUMP", "%OBlock: flags=%ld, left=%O - right=%O", indent, unit->flags, tree->cursor, tree->cursor_end);
+	CatStringWo *cindent = cat_string_wo_new();
+	cat_string_wo_format(cindent, "%O  ", indent);
+	CatIIterator *iter = cat_array_wo_iterator(unit->stats);
+	while(cat_iiterator_has_next(iter)) {
+		JagPJCTree *child = (JagPJCTree *) cat_iiterator_next(iter);
+		jagp_jctree_dump(child, cindent);
+	}
+	cat_unref_ptr(iter);
+	cat_unref_ptr(cindent);
+}

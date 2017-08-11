@@ -266,7 +266,7 @@ void dra_ac_context_provider_finished(DraAcContext *context) {
 
 void dra_ac_context_wait_for_providers_to_finish(DraAcContext *context) {
 	DraAcContextPrivate *priv = dra_ac_context_get_instance_private(context);
-	int64_t s = cat_date_current_time()+200;
+	int64_t s = cat_date_current_time()+2200;
 
 	cat_lock_lock(priv->lock);
 	while(priv->content_requests_pending>0) {

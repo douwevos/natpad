@@ -23,8 +23,8 @@
 #ifndef JGITOKENRANGE_H_
 #define JGITOKENRANGE_H_
 
-#include "../../parser/jagasttoken.h"
 #include <caterpillar.h>
+#include <jaguarparser.h>
 
 G_BEGIN_DECLS
 
@@ -59,8 +59,8 @@ JgiTokenRange *jgi_token_range_new(CatArrayWo *e_token_list, int first_index, in
 int jgi_token_range_get_first_index(JgiTokenRange *token_range);
 int jgi_token_range_get_last_index(JgiTokenRange *token_range);
 
-JagAstToken *jgi_token_range_get_first(JgiTokenRange *token_range);
-JagAstToken *jgi_token_range_get_last(JgiTokenRange *token_range);
+JagPToken *jgi_token_range_get_first(JgiTokenRange *token_range);
+JagPToken *jgi_token_range_get_last(JgiTokenRange *token_range);
 
 CatArrayWo *e_jgi_token_range_get_raw_tokens(JgiTokenRange *token_range);
 

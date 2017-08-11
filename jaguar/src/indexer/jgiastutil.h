@@ -23,13 +23,9 @@
 #ifndef JGIASTUTIL_H_
 #define JGIASTUTIL_H_
 
-#include "../parser/jagasttoken.h"
 #include "model/jgitokenrange.h"
 #include <caterpillar.h>
 
-
 JgiTokenRange *jgi_ast_util_extract_name_root(CatArrayWo *e_token_array, int token_index);
-
-void jgi_ast_util_dump_reverse(JagAstToken *token, JagAstToken *token_root_opt);
 
 #endif /* JGIASTUTIL_H_ */

@@ -140,6 +140,13 @@ JagPJCVariableDecl *jagp_tree_maker_receiver_var_def(JagPTreeMaker *tree_maker, 
 	return tree;
 }
 
+JagPJCVariableDecl *jagp_tree_maker_receiver_var_def_ext(JagPTreeMaker *tree_maker, JagPJCModifiers *mods, JagPJCExpression *nameexpr, JagPJCExpression *vartype, JagPJCExpression *init) {
+	JagPJCVariableDecl *tree = jagp_jcvariable_decl_new(mods, NULL, nameexpr, vartype, init);
+	tree->parent.parent.cursor = cat_ref_ptr(tree_maker->cursor);
+	return tree;
+}
+
+
 JagPJCSkip *jagp_tree_maker_skip(JagPTreeMaker *tree_maker) {
 	JagPJCSkip *tree = jagp_jcskip_new();
 	tree->parent.parent.cursor = cat_ref_ptr(tree_maker->cursor);
@@ -457,8 +464,8 @@ JagPJCLiteral *jagp_tree_maker_literal(JagPTreeMaker *tree_maker, JagPTypeTag ty
 }
 
 
-JagPJCFieldAccess *jagp_tree_maker_select(JagPTreeMaker *tree_maker, JagPJCExpression *selected, JagPName *selector) {
-	JagPJCFieldAccess *tree = jagp_jcfield_access_new(selected, selector, NULL);
+JagPJCFieldAccess *jagp_tree_maker_select(JagPTreeMaker *tree_maker, JagPJCExpression *selected, JagPToken *selector) {
+	JagPJCFieldAccess *tree = jagp_jcfield_access_new(selected, selector);
 	tree->parent.parent.cursor = cat_ref_ptr(tree_maker->cursor);
 	return tree;
 }

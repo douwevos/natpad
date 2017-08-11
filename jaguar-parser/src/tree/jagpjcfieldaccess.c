@@ -32,6 +32,7 @@ G_DEFINE_TYPE(JagPJCFieldAccess, jagp_jcfield_access, JAGP_TYPE_JCEXPRESSION);
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static JagPTag l_tree_get_tag(JagPJCTree *tree) { return JAGP_TAG_SELECT; }
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent);
 
 static void jagp_jcfield_access_class_init(JagPJCFieldAccessClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -40,6 +41,7 @@ static void jagp_jcfield_access_class_init(JagPJCFieldAccessClass *clazz) {
 
 	JagPJCTreeClass *tree_class = JAGP_JCTREE_CLASS(clazz);
 	tree_class->getTag = l_tree_get_tag;
+	tree_class->dump = l_tree_dump;
 }
 
 static void jagp_jcfield_access_init(JagPJCFieldAccess *instance) {
@@ -50,7 +52,6 @@ static void l_dispose(GObject *object) {
 	JagPJCFieldAccess *instance = JAGP_JCFIELD_ACCESS(object);
 	cat_unref_ptr(instance->name);
 	cat_unref_ptr(instance->selected);
-	cat_unref_ptr(instance->sym);
 	G_OBJECT_CLASS(jagp_jcfield_access_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -62,12 +63,26 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-JagPJCFieldAccess *jagp_jcfield_access_new(JagPJCExpression *selected, JagPName *name, /*JagPSymbol*/ GObject *sym) {
+JagPJCFieldAccess *jagp_jcfield_access_new(JagPJCExpression *selected, JagPJCTree *name) {
 	JagPJCFieldAccess *result = g_object_new(JAGP_TYPE_JCFIELD_ACCESS, NULL);
 	cat_ref_anounce(result);
 	result->selected = cat_ref_ptr(selected);
 	result->name = cat_ref_ptr(name);
-	result->sym = cat_ref_ptr(sym);
 	return result;
 }
 
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent) {
+	JagPJCFieldAccess *fldacc = (JagPJCFieldAccess *) tree;
+	cat_log_print("DUMP", "%OFieldAccess: left=%O - right=%O", indent, tree->cursor, tree->cursor_end);
+	CatStringWo *cindent = cat_string_wo_new();
+	cat_string_wo_format(cindent, "%O  ", indent);
+	if (fldacc->selected) {
+		jagp_jctree_dump((JagPJCTree *) fldacc->selected, cindent);
+	}
+	if (fldacc->name) {
+		cat_log_print("DUMP", "%O  name=%O", cindent, fldacc->name);
+//		jagp_jctree_dump(fldacc->name, cindent);
+	}
+
+	cat_unref_ptr(cindent);
+}

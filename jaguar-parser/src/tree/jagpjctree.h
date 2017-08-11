@@ -302,6 +302,8 @@ enum _JagPTag {
 	JAGP_TAG_REQUIRES,
 	JAGP_TAG_USES,
 
+	JAGP_TAG_QUALIDENT,
+
     /** A synthetic let expression, of type LetExpr.
      */
 	JAGP_TAG_LETEXPR                         // ala scheme
@@ -325,11 +327,13 @@ struct _JagPJCTree {
 	GObject parent;
 	JagPCursor *cursor;
 	JagPCursor *cursor_end;
+	JagPJCTree *owner;
 };
 
 struct _JagPJCTreeClass {
 	GObjectClass parent_class;
 	JagPTag (*getTag)(JagPJCTree *tree);
+	void (*dump)(JagPJCTree *tree, CatStringWo *indent);
 };
 
 
@@ -342,6 +346,8 @@ gboolean jagp_jctree_has_tag(JagPJCTree *tree, JagPTag tag);
 
 JagPCursor *jagp_jctree_get_start_cursor(JagPJCTree *tree);
 JagPCursor *jagp_jctree_get_end_cursor(JagPJCTree *tree);
+
+void jagp_jctree_dump(JagPJCTree *tree, CatStringWo *indent);
 
 G_END_DECLS
 

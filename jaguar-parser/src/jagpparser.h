@@ -25,6 +25,8 @@
 
 #include "jagpscanner.h"
 #include "jagpilexer.h"
+#include "jagpnames.h"
+#include "tree/jagpjccompilationunit.h"
 #include <caterpillar.h>
 #include <grossruntime.h>
 
@@ -65,9 +67,11 @@ struct _JagPParserClass {
 
 GType jagp_parser_get_type();
 
-JagPParser *jagp_parser_new(JagPILexer *lexer, GroRunITokenFactory *token_factory);
+JagPParser *jagp_parser_new(JagPILexer *lexer, JagPNames *names);
 
 /*GroAstSpec * */void jagp_parser_run(JagPParser *parser);
+
+JagPJCCompilationUnit *jagp_parser_get_compilation_unit(JagPParser *parser);
 
 CatArrayWo *jagp_parser_get_messages(JagPParser *parser);
 

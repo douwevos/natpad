@@ -1,8 +1,8 @@
 /*
-   File:    jagpjcimport.c
+   File:    jagpnames.c
    Project: jaguar-parser
    Author:  Douwe Vos
-   Date:    May 3, 2017
+   Date:    Jul 15, 2017
    e-mail:  dmvos2000(at)yahoo.com
 
    Copyright (C) 2017 Douwe Vos.
@@ -20,76 +20,87 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "jagpjcimport.h"
+#include "jagpnames.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_WARN
-#define CAT_LOG_CLAZZ "JagPJCImport"
+#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_CLAZZ "JagPNames"
 #include <logging/catlog.h>
+
+struct _JagPNamesPrivate {
+	CatHashMapWo *map;
+};
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagPJCImport, jagp_jcimport, JAGP_TYPE_JCTREE,
+G_DEFINE_TYPE_WITH_CODE(JagPNames, jagp_names, G_TYPE_OBJECT,
+		G_ADD_PRIVATE(JagPNames)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
-static JagPTag l_tree_get_tag(JagPJCTree *tree) { return JAGP_TAG_IMPORT; }
-static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent);
 
-static void jagp_jcimport_class_init(JagPJCImportClass *clazz) {
+static void jagp_names_class_init(JagPNamesClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
-
-	JagPJCTreeClass *tree_class = JAGP_JCTREE_CLASS(clazz);
-	tree_class->getTag = l_tree_get_tag;
-	tree_class->dump = l_tree_dump;
 }
 
-static void jagp_jcimport_init(JagPJCImport *instance) {
+static void jagp_names_init(JagPNames *instance) {
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	JagPJCImport *instance = JAGP_JCIMPORT(object);
-	cat_unref_ptr(instance->qualid);
-	G_OBJECT_CLASS(jagp_jcimport_parent_class)->dispose(object);
+//	JagPNames *instance = JAGP_NAMES(object);
+//	JagPNamesPrivate *priv = jagp_names_get_instance_private(instance);
+	G_OBJECT_CLASS(jagp_names_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(jagp_jcimport_parent_class)->finalize(object);
+	G_OBJECT_CLASS(jagp_names_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 
-JagPJCImport *jagp_jcimport_new(JagPJCTree *qualid, gboolean import_static) {
-	JagPJCImport *result = g_object_new(JAGP_TYPE_JCIMPORT, NULL);
+JagPNames *jagp_names_new() {
+	JagPNames *result = g_object_new(JAGP_TYPE_NAMES, NULL);
 	cat_ref_anounce(result);
-	result->import_static = import_static;
-	result->qualid = cat_ref_ptr(qualid);
+	JagPNamesPrivate *priv = jagp_names_get_instance_private(result);
+	priv->map = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 	return result;
 }
 
-
-static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent) {
-	JagPJCImport *imp = (JagPJCImport *) tree;
-	cat_log_print("DUMP", "%OImport: %s left=%O - right=%O", indent, imp->import_static ? "" : "static,", tree->cursor, tree->cursor_end);
-	CatStringWo *cindent = cat_string_wo_new();
-	cat_string_wo_format(cindent, "%O  ", indent);
-	jagp_jctree_dump(imp->qualid, cindent);
-	cat_unref_ptr(cindent);
+JagPName *jagp_names_get(JagPNames *names, CatStringWo *text) {
+	JagPNamesPrivate *priv = jagp_names_get_instance_private(names);
+	JagPName *result = (JagPName *) cat_hash_map_wo_get(priv->map, text);
+	if (result == NULL) {
+		CatStringWo *ct = cat_string_wo_clone(text, CAT_CLONE_DEPTH_AS_ANCHORED);
+		result = jagp_name_new(text);
+		cat_hash_map_wo_put(priv->map, (GObject *) ct, (GObject *) result);
+		cat_unref(ct);
+		cat_unref(result);
+	}
+	return result;
 }
 
+JagPName *jagp_names_by_chars(JagPNames *names, const char *txt) {
+	CatStringWo *tmp = cat_string_wo_new_data(txt);
+	JagPName *result = jagp_names_get(names, tmp);
+	cat_unref_ptr(tmp);
+	return result;
+}
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
+	JagPNames *instance = JAGP_NAMES(self);
+	JagPNamesPrivate *priv = jagp_names_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
+
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 
@@ -98,4 +109,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

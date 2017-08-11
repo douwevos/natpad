@@ -44,18 +44,16 @@ typedef struct _JagPJCFieldAccessClass          JagPJCFieldAccessClass;
 struct _JagPJCFieldAccess {
 	JagPJCExpression parent;
 	JagPJCExpression *selected;
-	JagPName *name;
-	/*JagPSymbol*/ GObject *sym;
+	JagPJCTree *name;
 };
 
 struct _JagPJCFieldAccessClass {
 	JagPJCExpressionClass parent_class;
 };
 
-
 GType jagp_jcfield_access_get_type();
 
-JagPJCFieldAccess *jagp_jcfield_access_new(JagPJCExpression *selected, JagPName *name, /*JagPSymbol*/ GObject *sym);
+JagPJCFieldAccess *jagp_jcfield_access_new(JagPJCExpression *selected, JagPJCTree *name);
 
 G_END_DECLS
 

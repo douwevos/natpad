@@ -32,6 +32,7 @@ G_DEFINE_TYPE(JagPJCVariableDecl, jagp_jcvariable_decl, JAGP_TYPE_JCSTATEMENT);
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static JagPTag l_tree_get_class(JagPJCTree *tree) { return JAGP_TAG_VARDEF; }
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent);
 
 static void jagp_jcvariable_decl_class_init(JagPJCVariableDeclClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -40,6 +41,7 @@ static void jagp_jcvariable_decl_class_init(JagPJCVariableDeclClass *clazz) {
 
 	JagPJCTreeClass *tree_class = JAGP_JCTREE_CLASS(clazz);
 	tree_class->getTag = l_tree_get_class;
+	tree_class->dump = l_tree_dump;
 }
 
 static void jagp_jcvariable_decl_init(JagPJCVariableDecl *instance) {
@@ -76,3 +78,18 @@ JagPJCVariableDecl *jagp_jcvariable_decl_new(JagPJCModifiers *mods, JagPName *na
 	return result;
 }
 
+
+static void l_tree_dump(JagPJCTree *tree, CatStringWo *indent) {
+	JagPJCVariableDecl *unit = (JagPJCVariableDecl *) tree;
+	cat_log_print("DUMP", "%OVariableDecl: %O, left=%O - right=%O", indent, unit->name, tree->cursor, tree->cursor_end);
+	cat_log_print("DUMP", "%O              modifiers:   %O", indent, unit->mods);
+	if (unit->vartype) {
+		cat_log_print("DUMP", "%O              type-params: %O", indent, unit->vartype);
+	}
+	if (unit->nameexpr) {
+		cat_log_print("DUMP", "%O              name-expr:   %O", indent, unit->nameexpr);
+	}
+	if (unit->init) {
+		cat_log_print("DUMP", "%O              init:        %O", indent, unit->init);
+	}
+}
