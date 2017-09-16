@@ -3,7 +3,6 @@
 #define JAGPAST_ACTIONS_H_
 
 #include <grossruntime.h>
-#include "jagpcompilationunit.h"
 
 G_BEGIN_DECLS
 
