@@ -53,6 +53,8 @@ static void jag_decompiler_class_init(JagDecompilerClass *clazz) {
 }
 
 
+
+
 static void jag_decompiler_init(JagDecompiler *instance) {
 	JagDecompilerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_DECOMPILER, JagDecompilerPrivate);
 	instance->priv = priv;
