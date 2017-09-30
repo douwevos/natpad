@@ -25,6 +25,7 @@
 
 #include "../chapagewo.h"
 #include "../chammap.h"
+#include "../../charset/chaiconverter.h"
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -52,7 +53,7 @@ struct _ChaMMapPageWoClass {
 
 GType cha_mmap_page_wo_get_type();
 
-ChaMMapPageWo *cha_mmap_page_wo_new(ChaMMap *map, gsize offset, gsize length, short line_count);
+ChaMMapPageWo *cha_mmap_page_wo_new(ChaIConverter *converter, ChaMMap *map, gsize offset, gsize length, short line_count);
 
 CAT_WO_BASE_H(ChaMMapPageWo,cha_mmap_page_wo);
 

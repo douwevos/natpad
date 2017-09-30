@@ -23,6 +23,7 @@
 #include "chadocumentview.h"
 
 #include <cairo.h>
+#include <pango/pangofc-font.h>
 #include <catiiterator.h>
 #include <catistringable.h>
 #include <catlib.h>
@@ -360,6 +361,7 @@ static void l_apply_preferences(ChaDocumentView *document_view) {
 		if (new_font_descr) {
 			if (!pango_font_description_equal(new_font_descr, old_font_descr)) {
 				pango_context_set_font_description(priv->pango_context, new_font_descr);
+				pango_context_load_font(priv->pango_context, new_font_descr);
 				pango_context_changed(priv->pango_context);
 				font_was_initialized = l_initialize_font(document_view);
 			}
@@ -374,6 +376,7 @@ static void l_apply_preferences(ChaDocumentView *document_view) {
 		}
 		cat_log_debug("mfd=%s", pango_font_description_get_family(mfd));
 		pango_context_set_font_description(priv->pango_context, mfd);
+		pango_context_load_font(priv->pango_context, mfd);
 		pango_context_changed(priv->pango_context);
 		font_was_initialized = l_initialize_font(document_view);
 	}
@@ -425,7 +428,6 @@ static gboolean l_initialize_font(ChaDocumentView *document_view) {
 	PangoContext *pango_context = priv->pango_context;
 
 	PangoFontDescription *font_desc = pango_context_get_font_description(pango_context);
-
 
 	const char *font_fam = pango_font_description_get_family(font_desc);
 	int nr_families = 0;
@@ -685,6 +687,15 @@ gboolean cha_document_view_layout_page(ChaDocumentView *document_view, ChaPageWo
 						sub_line_count = 1;
 					}
 				} else {
+//					cat_log_print("DUMP", "utf8_text.text_len=%d",utf8_text.text_len);
+//					int sidx;
+//					for(sidx=0; sidx<utf8_text.text_len; sidx++) {
+//						if ((sidx%32)==0) {
+//							printf("\n%x: ", sidx);
+//						}
+//						printf("%02x ", (0xff & utf8_text.text[sidx]));
+//					}
+//					printf("\n");
 					pango_layout_set_text(pango_layout, utf8_text.text, utf8_text.text_len);
 					PangoRectangle inkt_rect;
 					pango_layout_get_pixel_extents(pango_layout, NULL, &inkt_rect);
@@ -887,6 +898,21 @@ static void l_run_relayout_pages(ChaDocumentView *document_view, ChaRevisionWo *
 
 	gboolean invalidate_lines_at_end = FALSE;
 
+	PangoContext *pango_context = priv->pango_context;
+	PangoFontDescription *font_desc = pango_context_get_font_description(pango_context);
+	PangoFont *pango_font = pango_context_load_font(pango_context, font_desc);
+	cairo_scaled_font_t *sf_ref = NULL;
+	cairo_font_face_t *ff = NULL;
+	if (PANGO_IS_CAIRO_FONT(pango_font)) {
+		cairo_scaled_font_t *scft = pango_cairo_font_get_scaled_font((PangoCairoFont *) pango_font);
+		sf_ref = cairo_scaled_font_reference(scft);
+		ff = cairo_scaled_font_get_font_face(sf_ref);
+		cairo_font_face_reference(ff);
+		cat_log_error("pango_font=did lock");
+	}
+	cat_log_error("pango_font=%O", pango_font);
+
+
 	priv->last_slot_key_idx = cha_revision_wo_get_slot_index(a_rev, (GObject *) priv->a_slot_key, priv->last_slot_key_idx);
 	ChaCursorWo *cursor_wo = cha_revision_wo_get_cursor(a_rev);
 	ChaLineLocationWo *ll = cha_cursor_wo_get_line_location(cursor_wo);
@@ -925,6 +951,11 @@ static void l_run_relayout_pages(ChaDocumentView *document_view, ChaRevisionWo *
 		cat_unref_ptr(page_layout);
 	}
 	cat_log_detail("<<<<<<<<<<<<<< l_run_relayout_pages");
+
+	if (sf_ref) {
+		cairo_font_face_destroy(ff);
+		cairo_scaled_font_destroy(sf_ref);
+	}
 
 	if (invalidate_lines_at_end) {
 		cha_document_view_invalidate_lines(document_view);

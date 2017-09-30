@@ -564,7 +564,6 @@ void cat_string_wo_append_char(CatStringWo *e_string_wo, gchar char_2_app) {
 	priv->data[new_length] = (gchar) 0;
 }
 
-
 void cat_string_wo_append_chars(CatStringWo *e_string_wo, const char *chars_2_app) {
 	if (chars_2_app==NULL) {
 		return;
@@ -1373,6 +1372,17 @@ gboolean cat_string_wo_to_valid_utf8(CatStringWo *e_string_wo, const char *text,
 	return is_valid;
 }
 
+char *cat_string_wo_steal_chars(CatStringWo *e_string_wo) {
+	CHECK_IF_WRITABLE(NULL);
+	CatStringWoPrivate *priv = cat_string_wo_get_instance_private(e_string_wo);
+	if (priv->data_size==-1) {
+		return strndup(priv->data, priv->size);
+	}
+	char *result = priv->data;
+	priv->data = NULL;
+	priv->size = 0;
+	return result;
+}
 
 
 CatStringWo *cat_string_wo_create_editable(CatStringWo *instance) {

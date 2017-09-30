@@ -153,6 +153,8 @@ int cat_string_wo_from_utf8_pos(const CatStringWo *instance, int utf8_offset);
 
 int cat_string_wo_unichar_next_offset(const CatStringWo *string_wo, int offset);
 
+char *cat_string_wo_steal_chars(CatStringWo *e_string_wo);
+
 CatStringWo *cat_string_wo_anchor(CatStringWo *instance, int version) __attribute_warn_unused_result__;
 CatStringWo *cat_string_wo_get_original(CatStringWo *instance);
 gboolean cat_string_wo_is_anchored(const CatStringWo *instance);

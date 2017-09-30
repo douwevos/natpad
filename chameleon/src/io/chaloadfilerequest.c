@@ -210,7 +210,7 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 		case CHA_LINE_END_MIXED :
 			break;
 	}
-	cat_log_debug("is_last_line=%d", is_last_line);
+//	cat_log_debug("is_last_line=%d", is_last_line);
 
 	if (priv->page_line_count == CHA_PAGE_SIZE_PREF || is_last_line) {
 
@@ -222,9 +222,9 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 			priv->page_line_count++;
 		}
 
+		ChaIConverter *converter = cha_document_get_input_converter(priv->document);
 
-
-		ChaPageWo *new_page = (ChaPageWo *) cha_mmap_page_wo_new(priv->map_data, pg_offset, length, priv->page_line_count);
+		ChaPageWo *new_page = (ChaPageWo *) cha_mmap_page_wo_new(converter, priv->map_data, pg_offset, length, priv->page_line_count);
 		cat_array_wo_append(priv->unwritten_pages, (GObject *) new_page);
 
 		priv->page_start = off_line_start;

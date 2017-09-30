@@ -40,6 +40,7 @@ struct _ChaLineDescr {
 
 
 struct _ChaMMapPageWoPrivate {
+	ChaIConverter *converter;
 	ChaMMap *map;
 	gsize offset;
 	gsize length;
@@ -110,6 +111,7 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ChaMMapPageWo *instance = CHA_MMAP_PAGE_WO(object);
 	ChaMMapPageWoPrivate *priv = cha_mmap_page_wo_get_instance_private(instance);
+	cat_unref_ptr(priv->converter);
 	cat_unref_ptr(priv->map);
 	if (priv->lines) {
 		int idx;
@@ -132,11 +134,12 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-ChaMMapPageWo *cha_mmap_page_wo_new(ChaMMap *map, gsize offset, gsize length, short line_count) {
+ChaMMapPageWo *cha_mmap_page_wo_new(ChaIConverter *converter, ChaMMap *map, gsize offset, gsize length, short line_count) {
 	ChaMMapPageWo *result = g_object_new(CHA_TYPE_MMAP_PAGE_WO, NULL);
 	cat_ref_anounce(result);
 	ChaMMapPageWoPrivate *priv = cha_mmap_page_wo_get_instance_private(result);
 	cha_page_wo_construct((ChaPageWo *) result, FALSE);
+	priv->converter = cat_ref_ptr(converter);
 	priv->map = cat_ref_ptr(map);
 	priv->offset = offset;
 	priv->length = length;
@@ -152,11 +155,25 @@ static gboolean l_scanned_line_enlist(char *off_line_start, char *off_line_end, 
 	ChaMMapPageWoPrivate *priv = (ChaMMapPageWoPrivate *) data;
 	struct _ChaLineDescr *ldscr = priv->lines+priv->lines_hold_cnt;
 //	cat_log_trace("lines_hold_cnt=%d, line_count=%d", (int) priv->lines_hold_cnt, (int) priv->line_count);
-	ldscr->start2 = off_line_start;
+
+	ChaConvertRequest convert_request;
+	convert_request.error_count = 0;
+	convert_request.forward_conversion = TRUE;
+	convert_request.output = NULL;
+	convert_request.text = off_line_start;
+	convert_request.text_length = (off_line_end-off_line_start);
+	convert_request.output = NULL;
+	cha_iconverter_convert(priv->converter, &convert_request);
+
+//	cat_log_print("DUMP", "errors=%d, converter=%O", convert_request.error_count, priv->converter);
+
 	ldscr->line_end = line_end;
-	ldscr->length = (off_line_end-off_line_start);
+	ldscr->length = cat_string_wo_length(convert_request.output);
+	ldscr->start2 = cat_string_wo_steal_chars(convert_request.output);
 	ldscr->mapped = TRUE;
 	priv->lines_hold_cnt++;
+
+	cat_unref_ptr(convert_request.output);
 	return TRUE;
 }
 
@@ -342,6 +359,19 @@ static const ChaUtf8Text l_page_utf8_at(ChaPageWo *page, int line_index, gboolea
 		}
 	}
 
+//	if (result.text_needs_cleanup) {
+//
+//		ChaConvertRequest convert_request;
+//		convert_request.error_count = 0;
+//		convert_request.forward_conversion = TRUE;
+//		convert_request.output = NULL;
+//		convert_request.text = xtxt;
+//		convert_request.output = NULL;
+//		cha_iconverter_convert(priv->converter, &convert_request);
+//		xlen = cat_string_wo_length(convert_request.output);
+//		xtxt = cat_string_wo_steal_chars(convert_request.output);
+//		cat_unref_ptr(convert_request.output);
+//	}
 
 	if (do_scan) {
 		unsigned char *ptr = (unsigned char *) xtxt;

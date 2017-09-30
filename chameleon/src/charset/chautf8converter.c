@@ -113,17 +113,129 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 
 	char *out = base;
 
+	cat_log_debug("run");
+
+
 	int cp_len = 0;
 	while(text<text_end) {
-		int fb = 0xff & *text++;
-		if ((fb & 0x80)==0) {
+		int bt0 = 0xff & *text++;
+		if ((bt0 & 0x80)==0) {
 			cp_len = 0;
-		} else if (fb>=0xc2 && fb<=0xDF) {
+		} else if (bt0>=0xc2 && bt0<=0xDF) {
 			cp_len = 1;
-		} else if (fb>=0xE0 && fb<=0xEF) {
+		} else if ((bt0==0xE0)) {
 			cp_len = 2;
-		} else if (fb >= 0xF0 && fb<=0xF4) {
+
+			if (text+cp_len>text_end) {
+				request->error_count++;
+				*out = '.';
+				out++;
+				break;
+			}
+
+			int fb1 = 0xff & *text++;
+			int ob1 = (int) ((fb1 & 0x3f) | (0x80));
+			if (ob1!=fb1) {
+				request->error_count++;
+				cat_log_debug("error inc");
+			}
+
+			int fb2 = 0xff & *text++;
+			int ob2 = (int) ((fb2 & 0x3f) | (0x80));
+			if (ob2!=fb2) {
+				request->error_count++;
+				cat_log_debug("error inc");
+			}
+
+			cat_log_debug("fb=%x %x %x", bt0, fb1, fb2);
+			cat_log_debug("ob=%x %x %x", bt0, ob1, ob2);
+
+			if (
+				((bt0==0xe0) && (ob1<0xA0 || ob1>0xA5)) ||
+				((bt0==0xeD) && (ob1<0x80 || ob1>0x9F))
+			   ) {
+					*out = '.';
+					out++;
+					request->error_count++;
+					cat_log_debug("error inc");
+					continue;
+			}
+
+
+			*out = (char) bt0;
+			out++;
+
+			*out = (char) ob1;
+			out++;
+			*out = (char) ob2;
+			out++;
+
+//			cat_log_debug("fb=%2x %2x %2x", bt0, ob1, ob2);
+
+
+			continue;
+
+		} else if (bt0 >= 0xF0 && bt0<=0xF4) {
 			cp_len = 3;
+
+			if (text+cp_len>text_end) {
+				request->error_count++;
+				*out = '.';
+				out++;
+				break;
+			}
+
+
+			int fb1 = 0xff & *text++;
+			char ob1 = (char) ((fb1 & 0x3f) | (0x80));
+			if (ob1!=fb1) {
+				request->error_count++;
+			}
+
+			int fb2 = 0xff & *text++;
+			char ob2 = (char) ((fb2 & 0x3f) | (0x80));
+			if (ob2!=fb2) {
+				request->error_count++;
+			}
+
+
+			int fb3 = 0xff & *text++;
+			char ob3 = (char) ((fb3 & 0x3f) | (0x80));
+			if (ob3!=fb3) {
+				request->error_count++;
+			}
+
+			if (bt0==0xf4) {
+				if (ob1<0x80 || ob1>0x8f) {
+					*out = '.';
+					out++;
+					request->error_count++;
+					continue;
+				}
+			} else if (bt0==0xf0) {
+				if (ob1<0x90 || ob1>0xBf) {
+					*out = '.';
+					out++;
+					request->error_count++;
+					continue;
+				}
+			}
+
+
+			*out = (char) bt0;
+			out++;
+
+			*out = ob1;
+			out++;
+			*out = ob2;
+			out++;
+			*out = ob3;
+			out++;
+
+
+			continue;
+
+
 			// TODO all unicodes
 //		} else if ((fb & 0xFC) == 0xF8) {
 //		} else if ((fb & 0xFC) == 0xF8) {
@@ -142,12 +254,12 @@ static void l_convert(ChaIConverter *self, ChaConvertRequest *request) {
 			out++;
 			break;
 		}
-		*out = (char) fb;
+		*out = (char) bt0;
 		out++;
 		while(cp_len>0) {
-			fb = (int) *text++;
-			char ob = (char) ((fb & 0x3f) | (0x80));
-			if (ob!=fb) {
+			bt0 = 0xff & *text++;
+			char ob = (char) ((bt0 & 0x3f) | (0x80));
+			if (ob!=bt0) {
 				request->error_count++;
 			}
 			*out = ob;
