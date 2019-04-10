@@ -104,7 +104,6 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 			if (cat_string_wo_endswith(a_name, CAT_S(xan_s_ext_json))) {
 				ElkService *elk_service = (ElkService *) priv->elk_service;
 				ElkDocumentIO *document_io = priv->elk_service->document_io;
-				ElkPreferencesService *prefs_service = elk_service_get_preferences_service(elk_service);
 				XanEditorFactory *factory = xan_editor_factory_new((LeaIPanelOwner *) elk_service->panel_owner, priv->connector, document_io, file_to_open);
 				cat_array_wo_append(e_enlist_to, (GObject *) factory);
 				cat_unref_ptr(factory);
@@ -123,10 +122,7 @@ static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	XanService *instance = XAN_SERVICE(self);
-	XanServicePrivate *priv = xan_service_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

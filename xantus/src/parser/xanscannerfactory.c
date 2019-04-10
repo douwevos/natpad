@@ -69,7 +69,7 @@ static void l_finalize(GObject *object) {
 }
 
 static void l_create_symbol(CatArrayWo *symbols, const char *text, int id) {
-	CatStringWo *t = text==NULL ? NULL : cat_string_wo_new_data(text);
+	const CatStringWo *t = text==NULL ? NULL : cat_string_wo_new_data(text);
 	GroRunSymbol *sym = grorun_symbol_new(TRUE, t, id);
 	cat_unref_ptr(t);
 	cat_array_wo_append(symbols, (GObject *) sym);
@@ -114,10 +114,7 @@ XanScanner *xan_scanner_factory_create_scanner(XanScannerFactory *factory, CatIU
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	XanScannerFactory *instance = XAN_SCANNER_FACTORY(self);
-	XanScannerFactoryPrivate *priv = xan_scanner_factory_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

@@ -197,7 +197,7 @@ static void l_panel_reconfigure(CowPanel *self, GObject *config) {
 	DraPrefsColorMapPanel *instance = DRA_PREFS_COLOR_MAP_PANEL(self);
 	DraPrefsColorMapPanelPrivate *priv = dra_prefs_color_map_panel_get_instance_private(instance);
 
-	cat_log_error("config=%o", config);
+	cat_log_debug("config=%o", config);
 	CatWo *e_prefs = CAT_WO(config);
 	if (e_prefs!=NULL) {
 		e_prefs = cat_wo_clone(e_prefs, CAT_CLONE_DEPTH_MAIN);
@@ -208,7 +208,7 @@ static void l_panel_reconfigure(CowPanel *self, GObject *config) {
 
 	if (e_prefs!=NULL) {
 
-		cat_log_error("e_prefs=%p", e_prefs);
+		cat_log_debug("e_prefs=%p", e_prefs);
 		DraPreferencesWo *dra_prefs = (DraPreferencesWo *) cow_ientry_accessor_get(priv->entry_accessor, e_prefs);
 		DraPreferencesWo *e_dra_prefs = NULL;
 		if (dra_prefs == NULL) {

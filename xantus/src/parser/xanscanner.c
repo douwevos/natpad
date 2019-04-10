@@ -23,7 +23,7 @@
 #include "xanscanner.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "XanScanner"
 #include <logging/catlog.h>
 
@@ -301,7 +301,7 @@ static GroRunIToken *l_scan_mode_start_or_name_colon(XanScanner *xan_scanner, gb
 		}
 
 
-		if (g_unichar_isalpha(ch)) {
+		if (g_unichar_isalpha(ch) || ch=='-' || ch=='_') {
 			base_class->advance(scanner, 0);
 			has_chars = TRUE;
 		} else if (ch=='>'){
@@ -367,7 +367,7 @@ static GroRunIToken *l_scan_mode_open_name_colon(XanScanner *xan_scanner) {
 	XanScannerPrivate *priv = xan_scanner_get_instance_private(xan_scanner);
 	GroRunScannerBase *scanner = (GroRunScannerBase *) xan_scanner;
 	GroRunScannerBaseClass *base_class = GRORUN_SCANNER_BASE_GET_CLASS(scanner);
-	gunichar *lookahead = base_class->getLookaheadBuffer(scanner);
+//	gunichar *lookahead = base_class->getLookaheadBuffer(scanner);
 
 	gboolean has_chars = FALSE;
 	GroRunIToken *result = l_scan_mode_start_or_name_colon(xan_scanner, &has_chars);
@@ -396,7 +396,7 @@ static GroRunIToken *l_scan_mode_open_name(XanScanner *xan_scanner) {
 	} else {
 		priv->scan_mode = XAN_MODE_TERMINATOR_NAME_COLON;
 	}
-	return base_class->createTokenBasic(scanner, XAN_SYM_COLON, NULL);
+	return base_class->createTokenBasic(scanner, XAN_SYM_COLON, 1);
 }
 
 
@@ -522,10 +522,7 @@ static void l_scanner_iface_init(GroRunIScannerInterface *iface) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	XanScanner *instance = XAN_SCANNER(self);
-	XanScannerPrivate *priv = xan_scanner_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

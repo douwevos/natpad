@@ -6,7 +6,6 @@ module {
 		module 'chameleon';
 		module 'gross-runtime';
 		module 'elk';
-		module 'turtle';
 	}
 
 	clear {

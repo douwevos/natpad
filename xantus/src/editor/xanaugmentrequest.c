@@ -23,7 +23,7 @@
 #include "xanaugmentrequest.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "XanAugmentRequest"
 #include <logging/catlog.h>
 
@@ -56,8 +56,9 @@ static void xan_augment_request_init(XanAugmentRequest *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	XanAugmentRequest *instance = XAN_AUGMENT_REQUEST(object);
-//	XanAugmentRequestPrivate *priv = xan_augment_request_get_instance_private(instance);
+	XanAugmentRequest *instance = XAN_AUGMENT_REQUEST(object);
+	XanAugmentRequestPrivate *priv = xan_augment_request_get_instance_private(instance);
+	cat_unref_ptr(priv->scanner_factory);
 	G_OBJECT_CLASS(xan_augment_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -87,8 +88,8 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 	CatIUtf8Scanner *utf8_scanner = CAT_IUTF8_SCANNER(revision_reader);
 
 
-	CatStringWo *slot_key = dra_augment_request_get_slot_key(request);
-	int slot_key_idx = cha_revision_wo_get_slot_index(a_revision, (GObject *) slot_key, -1);
+//	CatStringWo *slot_key = dra_augment_request_get_slot_key(request);
+//	int slot_key_idx = cha_revision_wo_get_slot_index(a_revision, (GObject *) slot_key, -1);
 //	XanDomNode *dom_node = (XanDomNode *) cha_revision_wo_get_slot_content_ref(a_revision, slot_key_idx, slot_key);
 
 
@@ -130,7 +131,7 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 			} break;
 
 			case XAN_SYM_TEXT : {
-				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 2);
+				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 12);
 			} break;
 
 			case XAN_SYM_ID : {
@@ -138,12 +139,13 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 			} break;
 
 			case XAN_SYM_LITERAL : {
-				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 11);
+				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 12);
 			} break;
 			case XAN_SYM_COMMENT : {
 				dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, 15);
 			}
 		}
+		cat_unref_ptr(token);
 	}
 
 
