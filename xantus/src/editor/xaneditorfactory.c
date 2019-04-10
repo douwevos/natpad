@@ -22,7 +22,6 @@
 
 #include "xaneditorfactory.h"
 #include "xaneditorpanel.h"
-#include "../outline/xanoutlinepanel.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_ALL
@@ -101,20 +100,8 @@ static GtkWidget *l_create_editor(ElkIResourceEditorFactory *self, MooNodeWo *mo
 	return (GtkWidget *) result;
 }
 
-static GtkWidget *l_create_outline(ElkIResourceEditorFactory *self, MooNodeWo *moo_node, GtkWidget *editor) {
-	XanEditorFactoryPrivate *priv = xan_editor_factory_get_instance_private((XanEditorFactory *) self);
-
-	ElkDocumentBin *document_bin = elk_document_io_open_document_for_file(priv->document_io, priv->document_file);
-	XanOutlinePanel *result = xan_outline_panel_new(priv->panel_owner, document_bin, priv->connector);
-//	xan_outline_panel_set_moose_node((ElkEditorPanel *) result, moo_node);
-	return (GtkWidget *) result;
-}
-
-
-
 static void l_resource_factory_iface_init(ElkIResourceEditorFactoryInterface *iface) {
 	iface->createEditor = l_create_editor;
-	iface->createOutline = l_create_outline;
 }
 
 /********************* end ElkIResourceEditorFactory implementation *********************/
@@ -122,10 +109,7 @@ static void l_resource_factory_iface_init(ElkIResourceEditorFactoryInterface *if
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	XanEditorFactory *instance = XAN_EDITOR_FACTORY(self);
-	XanEditorFactoryPrivate *priv = xan_editor_factory_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

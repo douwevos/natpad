@@ -33,7 +33,7 @@ struct _XanTokenPrivate {
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(XanToken, xan_token, G_TYPE_OBJECT,
+G_DEFINE_TYPE_WITH_CODE(XanToken, xan_token, G_TYPE_OBJECT, // @suppress("Unused static function")
 		G_ADD_PRIVATE(XanToken)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
@@ -69,7 +69,7 @@ static void l_finalize(GObject *object) {
 XanToken *xan_token_new() {
 	XanToken *result = g_object_new(XAN_TYPE_TOKEN, NULL);
 	cat_ref_anounce(result);
-	XanTokenPrivate *priv = xan_token_get_instance_private(result);
+//	XanTokenPrivate *priv = xan_token_get_instance_private(result);
 //	G_OBJECT_construct((GObject *) result);
 	return result;
 }
@@ -78,8 +78,8 @@ XanToken *xan_token_new() {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	XanToken *instance = XAN_TOKEN(self);
-	XanTokenPrivate *priv = xan_token_get_instance_private(instance);
+//	XanToken *instance = XAN_TOKEN(self);
+//	XanTokenPrivate *priv = xan_token_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);

@@ -52,8 +52,9 @@ static void xan_parser_init(XanParser *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	XanParser *instance = XAN_PARSER(object);
-//	XanParserPrivate *priv = xan_parser_get_instance_private(instance);
+	XanParser *instance = XAN_PARSER(object);
+	XanParserPrivate *priv = xan_parser_get_instance_private(instance);
+	cat_unref_ptr(priv->scanner);
 	G_OBJECT_CLASS(xan_parser_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -107,10 +108,7 @@ void xan_parser_parse(XanParser *parser) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	XanParser *instance = XAN_PARSER(self);
-	XanParserPrivate *priv = xan_parser_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

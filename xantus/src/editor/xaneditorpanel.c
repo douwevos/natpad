@@ -33,7 +33,7 @@ struct _XanEditorPanelPrivate {
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(XanEditorPanel, xan_editor_panel, ELK_TYPE_EDITOR_PANEL,
+G_DEFINE_TYPE_WITH_CODE(XanEditorPanel, xan_editor_panel, ELK_TYPE_EDITOR_PANEL, // @suppress("Unused static function")
 		G_ADD_PRIVATE(XanEditorPanel)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
@@ -69,7 +69,6 @@ static void l_finalize(GObject *object) {
 XanEditorPanel *xan_editor_panel_new(LeaIPanelOwner *panel_owner, ElkDocumentBin *document_bin, XanEditorConnector *connector) {
 	XanEditorPanel *result = g_object_new(XAN_TYPE_EDITOR_PANEL, NULL);
 	cat_ref_anounce(result);
-	XanEditorPanelPrivate *priv = xan_editor_panel_get_instance_private(result);
 	elk_editor_panel_construct((ElkEditorPanel *) result, panel_owner, document_bin, (DraIConnectorRequestFactory *) connector);
 	return result;
 }
@@ -79,10 +78,7 @@ XanEditorPanel *xan_editor_panel_new(LeaIPanelOwner *panel_owner, ElkDocumentBin
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	XanEditorPanel *instance = XAN_EDITOR_PANEL(self);
-	XanEditorPanelPrivate *priv = xan_editor_panel_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 
