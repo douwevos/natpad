@@ -16,9 +16,9 @@ module {
 
 	compile {
 		cc { 
+			natpad.cc.args {}
 			arg "-D_GLIBCXX_USE_CXX11_ABI=0";
 			src { path './src/'; }
-			natpad.cc.args {}
 		
 			destdir './compiled/'; 
 			depdir 'deps';

@@ -35,7 +35,7 @@ struct _JagDecompilerPrivate {
 	JagDecImportRepository *import_repository;
 };
 
-G_DEFINE_TYPE (JagDecompiler, jag_decompiler, G_TYPE_OBJECT)
+G_DEFINE_TYPE (JagDecompiler, jag_decompiler, G_TYPE_OBJECT) // @suppress("Unused static function")
 
 static gpointer parent_class = NULL;
 

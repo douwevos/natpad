@@ -37,7 +37,7 @@ struct _VipRefreshNodeRequestPrivate {
 	CatReadableTreeNode *node_to_refresh;
 };
 
-G_DEFINE_TYPE(VipRefreshNodeRequest, vip_refresh_node_request, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE(VipRefreshNodeRequest, vip_refresh_node_request, WOR_TYPE_REQUEST); // @suppress("Unused static function")
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);

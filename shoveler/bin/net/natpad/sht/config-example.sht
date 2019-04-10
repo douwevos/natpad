@@ -1,0 +1,35 @@
+  elk {
+    own-process 'No';
+    one-instance 'Yes';
+    full-screen 'Yes';
+  }
+  pronghorn {
+    use-workspace-path 'No';
+    workspace-path '';
+  }
+  astarte {
+    block-selection-mode 'No';
+    ignore-escape-key 'No';
+    limit-cursor-to-text 'Yes';
+    show-line-numbers 'Yes';
+    word-wrap-lines 'Yes';
+    fast_x11_scroll 'No';
+  }
+  jaguar {
+  }
+  
+  DocumentClass(name,grammar,filename-pattern);
+  
+  tern {
+    document-class {
+      name 'C:\\bash\\test';
+      grammar 'bash';
+      filename-pattern {'*.sh','*.bash'}
+    }
+    document-class DocumentClass('cmd','cmd',{'*.bat'}) {}
+  }
+
+  
+  
+  
+  

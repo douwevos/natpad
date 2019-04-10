@@ -78,7 +78,7 @@ static ChaDocumentView *l_initialize_document_view(ChaEditor *editor, ChaDocumen
 static void l_marker_clicked(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 static void l_marker_over(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 static void l_marker_out(ChaEditor *editor);
-static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag);
+static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event);
 
 
 static void dra_editor_class_init(DraEditorClass *clazz) {
@@ -396,7 +396,7 @@ void dra_editor_show_auto_complete_popup(DraEditor *editor, DraAcContext *ac_con
 DraAcContext *dra_editor_create_auto_complete_context(DraEditor *editor);
 
 
-static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag) {
+static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event) {
 	DraEditorPanel *editor_panel = dra_editor_get_panel(editor);
 	DraPanelOwner *panel_owner = (DraPanelOwner *) lea_panel_get_panel_owner((LeaPanel *) editor_panel);
 
@@ -442,7 +442,7 @@ static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos
 
 	GtkMenuShell *menu = lea_menu_action_get_menu_shell(lma);
 	gtk_widget_show_all((GtkWidget *) menu);
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 3, gtk_get_current_event_time());
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), event);
 }
 
 static gboolean l_key_press_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer data) {
@@ -724,7 +724,7 @@ static gboolean l_button_press_event_cb(GtkWidget *gwidget, GdkEventButton *eev,
 			cat_unref_ptr(a_rev);
 		}
 
-		editor_class->showContextMenu(editor, cursor, (int) eev->x, (int) eev->y, spell_tag);
+		editor_class->showContextMenu(editor, cursor, (int) eev->x, (int) eev->y, spell_tag, (GdkEvent *) eev);
 		cat_unref_ptr(spell_tag)
 		return TRUE;
 	}
@@ -816,10 +816,12 @@ void dra_editor_show_auto_complete_popup(DraEditor *editor, DraAcContext *ac_con
 	GtkWidget *editor_widget = GTK_WIDGET(editor);
 	int editor_x, editor_y;
 	GdkWindow *widget_window = gtk_widget_get_window(editor_widget);
-//	gdk_window_get_root_origin(widget_window, &editor_x, &editor_y);
-	GdkScreen *screen = gdk_window_get_screen(widget_window);
-	int screen_width = gdk_screen_get_width(screen);
-	int screen_height = gdk_screen_get_height(screen);
+	GdkDisplay *gdk_display = gdk_window_get_display(widget_window);
+	GdkMonitor *monitor = gdk_display_get_primary_monitor(gdk_display);
+	GdkRectangle geom;
+	gdk_monitor_get_geometry(monitor, &geom);
+	int screen_width = geom.width;
+	int screen_height = geom.height;
 
 
 	GtkWidget *top_widget = gtk_widget_get_toplevel(GTK_WIDGET(editor));

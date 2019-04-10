@@ -364,7 +364,6 @@ void cha_line_end_to_string(ChaLineEnd line_end, CatStringWo *e_string) {
 		case CHA_LINE_END_LFCR :
 			cat_string_wo_append_chars_len(e_string, let+1, 2);
 			break;
-		case CHA_LINE_END_MIXED :
 		case CHA_LINE_END_NONE :
 			break;
 	}

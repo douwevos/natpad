@@ -156,7 +156,7 @@ static void l_run_request(WorRequest *request) {
 			CatUtf8InputStreamScanner *scanner = cat_utf8_input_stream_scanner_new(in_stream);
 
 			JagPNames *names = jagp_names_new();
-			JagPTokenizer *tokenizer = jagp_tokenizer_new(scanner, names);
+			JagPTokenizer *tokenizer = jagp_tokenizer_new((CatIUtf8Scanner *) scanner, names);
 			JagPILexer *lexer = (JagPILexer *) jagp_lexer_impl_new(tokenizer);
 			JagPParser *parser = jagp_parser_new(lexer, names);
 			jagp_parser_run(parser);
@@ -164,7 +164,7 @@ static void l_run_request(WorRequest *request) {
 			JagPJCCompilationUnit *compilation_unit = jagp_parser_get_compilation_unit(parser);
 //			jagp_jctree_dump((JagPJCTree *) compilation_unit, cat_string_wo_new());
 
-			CatArrayWo *tokens = jagp_lexer_impl_get_all_tokens((JagPLexerImpl *) lexer);
+//			CatArrayWo *tokens = jagp_lexer_impl_get_all_tokens((JagPLexerImpl *) lexer);
 
 
 

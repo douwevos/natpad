@@ -36,7 +36,7 @@ JgiTokenRange *jgi_ast_util_extract_name_root(CatArrayWo *e_token_array, int tok
 
 	JagPToken *cur_token = (JagPToken *) cat_array_wo_get(e_token_array, ml_index);
 
-	gboolean do_run_parenting = TRUE;
+//	gboolean do_run_parenting = TRUE;
 	int hold_index = -1;
 	int dot_at_index = ml_index-1;
 
@@ -49,13 +49,15 @@ JgiTokenRange *jgi_ast_util_extract_name_root(CatArrayWo *e_token_array, int tok
 			case JAGP_KIND_DOT : {
 				ml_index--;
 //				cur_token = (JagPToken *) cat_array_wo_get(e_token_array, ml_index);
-				do_run_parenting = TRUE;
+//				do_run_parenting = TRUE;
 			} break;
 			case JAGP_KIND_IDENTIFIER : {
 				ml_index--;
 //				cur_token = (JagPToken *) cat_array_wo_get(e_token_array, ml_index);
-				do_run_parenting = TRUE;
+//				do_run_parenting = TRUE;
 			} break;
+			default :
+				break;
 		}
 
 		cat_log_debug("cur_token=%o, hold=%d, ml=%d", cur_token, hold_index, ml_index);

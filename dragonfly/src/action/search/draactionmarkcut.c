@@ -94,7 +94,7 @@ void dra_action_mark_cut_set_editor(DraActionMarkCut *action, DraEditorPanel *ed
 }
 
 static void l_action_run(LeaAction *self) {
-	DraActionMarkCutPrivate *priv = dra_action_mark_cut_get_instance_private((DraActionMarkCut *) self);
+//	DraActionMarkCutPrivate *priv = dra_action_mark_cut_get_instance_private((DraActionMarkCut *) self);
 }
 
 /********************* start CatIStringable implementation *********************/
@@ -103,7 +103,6 @@ static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append
 	DraActionMarkCut *instance = DRA_ACTION_MARK_CUT(self);
 	DraActionMarkCutPrivate *priv = dra_action_mark_cut_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p editor_panel=%p]", iname, self, priv->editor_panel);
 }
 

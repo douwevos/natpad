@@ -1,0 +1,50 @@
+module {
+
+	name 'chameleon.test';
+	
+	dependencies {
+		module 'chameleon';
+		module 'uchardet';
+		module 'gtk3';
+		module 'worm';
+	}
+
+	clear {
+		remove '[%=module.builddir%]';
+	}
+
+	compile {
+		cc {
+			natpad.cc.args {}
+			src { path './src-ut/'; }  
+			destdir './compiled-ut/';
+			depdir 'deps-ut'; 
+		}
+	}
+
+	package {
+
+		natpad.pre.link {}	
+	
+		clink {
+			src { path './compiled-ut/'; }
+			output './chameleon-ut';
+			natpad.cc.args {}
+		}
+
+
+	}	
+
+
+	export {
+		lib {
+			path '.';
+			libname 'chameleon';
+		}
+		headers {
+			dir './src-ut/';
+		}
+	}
+
+
+}

@@ -36,8 +36,6 @@ typedef enum {
 	CHA_LINE_END_CRLF,	/* 13 10 */
 	CHA_LINE_END_LFCR,	/* 10 13 */
 
-	CHA_LINE_END_MIXED
-
 } ChaLineEnd;
 
 

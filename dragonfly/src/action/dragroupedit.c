@@ -37,6 +37,7 @@
 #include "edit/draactiontolowercase.h"
 #include "edit/draactiontouppercase.h"
 #include "edit/draactionformat.h"
+#include "edit/draactionopendeclaration.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -65,7 +66,7 @@ struct _DraGroupEditPrivate {
 	DraActionFormat *action_format;
 
 	DraActionGotoLine *action_goto_line;
-	DraActionGotoLine *action_open_declaration;
+	DraActionOpenDeclaration *action_open_declaration;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);

@@ -36,6 +36,7 @@ module {
 			src { path './compiled/'; }
 			output './natpad';
 			natpad.cc.args {}
+			
 		}
 		
 		reference 'natpad.package';

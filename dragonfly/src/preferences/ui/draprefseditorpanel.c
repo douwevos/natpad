@@ -109,8 +109,8 @@ static gboolean l_block_selection_toggled(GtkToggleButton *toggle_button, gpoint
 static void l_tab_size_changed(GtkSpinButton *text_entry, gpointer user_data);
 static void l_font_set(GtkFontButton *font_button, gpointer user_data);
 
-static gboolean l_font_filter(PangoFontFamily *family, PangoFontFace *face, gpointer data) {
-	return pango_font_family_is_monospace(family);
+//static gboolean l_font_filter(PangoFontFamily *family, PangoFontFace *face, gpointer data) {
+//	return pango_font_family_is_monospace(family);
 //	const char *facename = pango_font_face_get_face_name(face);
 //	PangoFontDescription *descr = pango_font_face_describe(face);
 //	pango_fon
@@ -121,7 +121,7 @@ static gboolean l_font_filter(PangoFontFamily *family, PangoFontFace *face, gpoi
 //    } else {
 //	return validate_single_font(family, FONT_FILTER_LATIN_MONO);
 //    }
-}
+//}
 
 DraPrefsEditorPanel *dra_prefs_editor_panel_new(CowIEntryAccessor *entry_accessor) {
 	DraPrefsEditorPanel *result = g_object_new(DRA_TYPE_PREFS_EDITOR_PANEL, NULL);
@@ -242,7 +242,7 @@ static void l_tab_size_changed(GtkSpinButton *text_entry, gpointer user_data) {
 static void l_font_set(GtkFontButton *font_button, gpointer user_data) {
 	DraPrefsEditorPanel *panel = DRA_PREFS_EDITOR_PANEL(user_data);
 	DraPrefsEditorPanelPrivate *priv = dra_prefs_editor_panel_get_instance_private(panel);
-	const gchar *font_name = gtk_font_button_get_font_name(font_button);
+	const gchar *font_name = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(font_button));
 	cha_preferences_wo_set_font_name(priv->e_ast_prefs, cat_string_wo_new_with(font_name));
 	l_notify_modification(panel);
 }
@@ -289,7 +289,7 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(priv->w_sb_tab_size), cha_preferences_wo_get_tab_size(priv->e_ast_prefs));
 		CatStringWo *font_name = cha_preferences_wo_get_font_name(priv->e_ast_prefs);
 		if (font_name) {
-			gtk_font_button_set_font_name(GTK_FONT_BUTTON(priv->w_fb_font), cat_string_wo_getchars(font_name));
+			gtk_font_chooser_set_font(GTK_FONT_CHOOSER(priv->w_fb_font), cat_string_wo_getchars(font_name));
 		}
 	}
 

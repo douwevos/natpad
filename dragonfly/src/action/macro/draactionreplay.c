@@ -91,10 +91,7 @@ static void l_action_run(LeaAction *self) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	DraActionReplay *instance = DRA_ACTION_REPLAY(self);
-	DraActionReplayPrivate *priv = dra_action_replay_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

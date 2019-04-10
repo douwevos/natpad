@@ -66,8 +66,10 @@ static void lea_grip_move_init(LeaGripMove *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	LeaGripMove *instance = LEA_GRIP_MOVE(object);
-//	LeaGripMovePrivate *priv = lea_grip_move_get_instance_private(instance);
+	LeaGripMove *instance = LEA_GRIP_MOVE(object);
+	LeaGripMovePrivate *priv = lea_grip_move_get_instance_private(instance);
+	cat_unref_ptr(priv->drop_proposal);
+	cat_unref_ptr(priv->surface);
 	G_OBJECT_CLASS(lea_grip_move_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -90,11 +92,6 @@ LeaGripMove *lea_grip_move_new(LeaSurface *surface, int panel_idx) {
 
 	return result;
 }
-
-
-
-
-
 
 #define MAGNET_SIZE 30
 

@@ -240,7 +240,8 @@ static gboolean l_but_number_col_toggled(GtkColorButton *color_button, gpointer 
 static void l_font_set(GtkFontButton *font_button, gpointer user_data) {
 	ChaEditorPrinter *editor_printer = CHA_EDITOR_PRINTER(user_data);
 	ChaEditorPrinterPrivate *priv = cha_editor_printer_get_instance_private(editor_printer);
-	const gchar *font_name = gtk_font_button_get_font_name(font_button);
+	const gchar *font_name = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(font_button));
+//	const gchar *font_name = gtk_font_button_get_font_name(font_button);
 	cha_print_settings_set_font_name(priv->cha_print_settings, cat_string_wo_new_with(font_name));
 }
 
@@ -339,7 +340,8 @@ static gboolean l_but_overide_toggled(GtkToggleButton *toggle_button, gpointer u
 
 
 		CatStringWo *font_name = cha_preferences_wo_get_font_name(a_prefs);
-		gtk_font_button_set_font_name((GtkFontButton *) priv->w_font, cat_string_wo_getchars(font_name));
+		gtk_font_chooser_set_font(GTK_FONT_CHOOSER(priv->w_font), cat_string_wo_getchars(font_name));
+
 
 
 		cha_print_settings_set_font_name(priv->cha_print_settings, font_name);
@@ -392,7 +394,7 @@ static GtkWidget *l_create_custom_widget(GtkPrintOperation *operation, gpointer 
 	gtk_color_chooser_set_rgba((GtkColorChooser *) priv->w_but_num_color, &rgba);
 	CatStringWo *font_name = cha_print_settings_get_font_name(priv->cha_print_settings);
 	if (font_name) {
-		gtk_font_button_set_font_name((GtkFontButton *) priv->w_font, cat_string_wo_getchars(font_name));
+		gtk_font_chooser_set_font(GTK_FONT_CHOOSER(priv->w_font), cat_string_wo_getchars(font_name));
 	}
 	gtk_toggle_button_set_active((GtkToggleButton *) priv->w_line_wrapping, cha_print_settings_get_wrap_lines(priv->cha_print_settings));
 	gtk_toggle_button_set_active((GtkToggleButton *) priv->w_enable_markup, cha_print_settings_get_print_markup(priv->cha_print_settings));

@@ -202,7 +202,6 @@ static CatStringWo *l_selection_get_as_text(ChaSelection *selection, struct _Cha
 						cat_string_wo_append_char(buf, 0xA);
 						cat_string_wo_append_char(buf, 0xD);
 						break;
-					case CHA_LINE_END_MIXED :
 					case CHA_LINE_END_NONE :
 						break;
 				}
@@ -376,7 +375,6 @@ static CatHashMapWo *l_selection_get_for_clipboard(ChaSelection *selection, stru
 						cat_string_wo_append_char(plain_text_buf, 0xD);
 						break;
 					case CHA_LINE_END_NONE :
-					case CHA_LINE_END_MIXED :
 						break;
 				}
 				if (richt_text_buf && utf8_text.line_end!=CHA_LINE_END_NONE) {

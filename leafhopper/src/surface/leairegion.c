@@ -40,7 +40,7 @@ void lea_iregion_size_allocate(LeaIRegion *self, GtkAllocation *allocation) {
 }
 
 const GtkAllocation lea_iregion_get_allocation(LeaIRegion *self) {
-	GtkAllocation allocation;
+	GtkAllocation allocation = {0};
 	g_return_val_if_fail(LEA_IS_IREGION(self), allocation);
 	return LEA_IREGION_GET_INTERFACE(self)->getAllocation(self);
 }

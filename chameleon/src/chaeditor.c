@@ -395,7 +395,10 @@ static void l_deprecated_scroll(ChaEditor *editor, int dx, int dy) {
 	int height = gtk_widget_get_allocated_height(widget);
 	int width = gtk_widget_get_allocated_width(widget);
 
-	cairo_t *cr = gdk_cairo_create(window);
+	cairo_region_t *region = gdk_window_get_clip_region(window);
+	GdkDrawingContext *drawing_context = gdk_window_begin_draw_frame(window, region);
+	cairo_t *cr = gdk_drawing_context_get_cairo_context(drawing_context);
+
 	/* clipping restricts the intermediate surface's size, so it's a good idea to use it. */
 	GdkRectangle area;
 	area.x = 0;
@@ -430,7 +433,8 @@ static void l_deprecated_scroll(ChaEditor *editor, int dx, int dy) {
 	/* Now copy the intermediate target back */
 	cairo_pop_group_to_source (cr);
 	cairo_paint (cr);
-	cairo_destroy (cr);
+	gdk_window_end_draw_frame(window, drawing_context);
+
 	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 	gdk_window_flush(window);
 	G_GNUC_END_IGNORE_DEPRECATIONS
@@ -467,7 +471,9 @@ static void l_deprecated_scroll(ChaEditor *editor, int dx, int dy) {
 	cat_log_debug("invalid_rect.y=%d, height=%d", invalid_rect.y, invalid_rect.height);
 	gdk_window_invalidate_rect(window, &invalid_rect, TRUE);
 
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 	gdk_window_process_updates(window, TRUE);
+	G_GNUC_END_IGNORE_DEPRECATIONS
 
 	while ((gtk_events_pending()) != 0) {
 		gtk_main_iteration();
@@ -485,7 +491,6 @@ static void l_hadjustment_value_changed(GtkAdjustment *adjustment, ChaEditor *ed
 		GdkWindow *window = gtk_widget_get_window((GtkWidget *) editor);
 		cha_document_view_invalidate_lines(priv->document_view);
 		gdk_window_scroll(window, dx, 0);
-		gdk_window_process_updates(window, TRUE);
 	}
 }
 
@@ -513,7 +518,6 @@ static void l_vadjustment_value_changed(GtkAdjustment *adjustment, ChaEditor *ed
 			cha_document_view_invalidate_lines(priv->document_view);
 		}
 		gdk_window_scroll(window, 0, dy);
-		gdk_window_process_updates(window, TRUE);
 		cha_document_view_set_in_scroll(priv->document_view, FALSE);
     }
 }

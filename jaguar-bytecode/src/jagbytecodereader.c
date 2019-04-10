@@ -42,7 +42,7 @@ struct _JagBytecodeReaderPrivate {
 	JagJObjectInputStream *ostream;
 };
 
-G_DEFINE_TYPE (JagBytecodeReader, jag_bytecode_reader, G_TYPE_OBJECT)
+G_DEFINE_TYPE (JagBytecodeReader, jag_bytecode_reader, G_TYPE_OBJECT) // @suppress("Unused static function")
 
 static gpointer parent_class = NULL;
 

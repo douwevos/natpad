@@ -56,8 +56,6 @@ static void jag_augment_request_init(JagAugmentRequest *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	JagAugmentRequest *instance = JAG_AUGMENT_REQUEST(object);
-	JagAugmentRequestPrivate *priv = jag_augment_request_get_instance_private(instance);
 	G_OBJECT_CLASS(jag_augment_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -73,7 +71,6 @@ static void l_finalize(GObject *object) {
 JagAugmentRequest *jag_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *slot_key) {
 	JagAugmentRequest *result = g_object_new(JAG_TYPE_AUGMENT_REQUEST, NULL);
 	cat_ref_anounce(result);
-	JagAugmentRequestPrivate *priv = jag_augment_request_get_instance_private(result);
 	dra_augment_request_construct((DraAugmentRequest *) result, document, a_revision, slot_key);
 	return result;
 }
@@ -221,7 +218,6 @@ static int l_map_symbol(JagPToken *token) {
 
 
 static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revision, DraKeywordPrinter *keyword_printer, DraKeywordPrinter *line_tag_printer) {
-	JagAugmentRequestPrivate *priv = jag_augment_request_get_instance_private((JagAugmentRequest *) request);
 	ChaRevisionReader *revision_reader = cha_revision_reader_new(a_revision, NULL, NULL);
 	cha_revision_reader_set_forced_line_end(revision_reader, CHA_LINE_END_LF);
 	CatIUtf8Scanner *utf8_scanner = CAT_IUTF8_SCANNER(revision_reader);
@@ -279,7 +275,7 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 
 		dra_keyword_printer_print_fg_color(keyword_printer, left_row, left_column, right_row, right_column, l_map_symbol(token));
 //
-		int sym_index = grorun_full_token_get_user_index((GroRunFullToken *) token);
+//		int sym_index = grorun_full_token_get_user_index((GroRunFullToken *) token);
 		if (token->kind==JAGP_KIND_COMMENT_FULL || token->kind==JAGP_KIND_COMMENT_EOL) {
 			GObject *val = token->value;
 			if (CAT_IS_STRING_WO(val)) {
@@ -316,10 +312,7 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagAugmentRequest *instance = JAG_AUGMENT_REQUEST(self);
-	JagAugmentRequestPrivate *priv = jag_augment_request_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

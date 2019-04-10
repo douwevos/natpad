@@ -611,8 +611,6 @@ void cha_document_remove_listener(ChaDocument *document, ChaIDocumentListener *l
 
 
 CatArrayWo *cha_document_create_line_list(const ChaDocument *document, const CatStringWo *text) {
-	ChaDocumentPrivate *priv = cha_document_get_instance_private((ChaDocument *) document);
-	ChaIConverter *converter = priv->input_converter;
 	if (cat_string_wo_length(text)==0) {
 		return NULL;
 	}

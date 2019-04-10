@@ -304,12 +304,15 @@ static void l_gdk_event_handler(GdkEvent *event, gpointer data) {
 					GdkEventExpose *evt_exp = (GdkEventExpose *) event;
 					GdkWindow *frame_window = gtk_widget_get_window((GtkWidget *) frame);
 					if (evt_exp->window!=frame_window) {
-						cairo_t *cr = gdk_cairo_create(frame_window);
+						cairo_region_t *region = gdk_window_get_clip_region(frame_window);
+						GdkDrawingContext *drawing_context = gdk_window_begin_draw_frame(frame_window, region);
+						cairo_t *cr = gdk_drawing_context_get_cairo_context(drawing_context);
+
 						GtkAllocation alloc;
 						gtk_widget_get_allocation((GtkWidget *) priv->top_layer, &alloc);
 						cairo_translate(cr, alloc.x, alloc.y);
 						gtk_widget_draw((GtkWidget *) priv->top_layer, cr);
-						cairo_destroy(cr);
+						gdk_window_end_draw_frame(frame_window, drawing_context);
 					}
 					return;
 				}

@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagcontexteditor.h"
+#include "jageditorpanel.h"
 #include "../indexer/jgiastutil.h"
 #include "../indexer/model/jgitokenrange.h"
 #include "../moose/library/jaglibrarycontentwo.h"
@@ -52,10 +53,15 @@ G_DEFINE_TYPE_WITH_CODE(JagContextEditor, jag_context_editor, DRA_TYPE_CONTEXT_E
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
+static void l_open_declaration(DraContextEditor *context_editor);
+
 static void jag_context_editor_class_init(JagContextEditorClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
+
+	DraContextEditorClass *context_class = DRA_CONTEXT_EDITOR_CLASS(clazz);
+	context_class->openDeclaration = l_open_declaration;
 }
 
 static void jag_context_editor_init(JagContextEditor *instance) {
@@ -212,8 +218,6 @@ static CatStringWo *l_create_fqn_name(JgiTokenRange *name_token_range, int row, 
 }
 
 static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_context, JgiTokenRange *name_token_range, CatArrayWo *tokens, int focus_index) {
-	JagContextEditorPrivate *priv = jag_context_editor_get_instance_private(context_editor);
-
 	int import_token_index = jgi_token_range_get_first_index(name_token_range)-1;
 	int semi_index = -1;
 
@@ -351,9 +355,9 @@ static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_c
 
 
 		semi_index = focus_index+1;
-		long long trow;
-		int tcol;
-		jagp_cursor_values(ast_token_at_focus->cur_start, &row, &tcol);
+		long long trow=0;
+		int tcol = 0;
+		jagp_cursor_values(ast_token_at_focus->cur_start, &trow, &tcol);
 		while(semi_index<cat_array_wo_size(tokens)) {
 			JagPToken *semi_token = (JagPToken *) cat_array_wo_get(tokens, semi_index);
 			if (semi_token->kind==JAGP_KIND_SEMI) {
@@ -408,8 +412,6 @@ static void l_enlist_import(JagContextEditor *context_editor, DraAcContext *ac_c
 }
 
 static void l_enlist_identifier(JagContextEditor *context_editor, DraAcContext *ac_context, JagPParser *parser, CatArrayWo *tokens, int focus_index) {
-	JagContextEditorPrivate *priv = jag_context_editor_get_instance_private(context_editor);
-
 	JgiTokenRange *token_range = jgi_ast_util_extract_name_root(tokens, focus_index);
 	jgi_token_range_dump(token_range);
 	int prec_index = jgi_token_range_get_first_index(token_range)-1;
@@ -422,6 +424,9 @@ static void l_enlist_identifier(JagContextEditor *context_editor, DraAcContext *
 			l_enlist_import(context_editor, ac_context, token_range, tokens, focus_index);
 			cat_log_warn("would enlist imports now");
 		} break;
+		default : {
+
+		}
 	}
 
 }
@@ -449,7 +454,7 @@ int l_index_of_token(CatArrayWo *tokens, long long row, int column) {
 	long long row_start, row_end;
 	int column_start, column_end;
 	for(idx=0; idx<count; idx++) {
-		JagPToken *token = cat_array_wo_get(tokens, idx);
+		JagPToken *token = (JagPToken *) cat_array_wo_get(tokens, idx);
 		jagp_cursor_values(token->cur_start, &row_start, &column_start);
 		if (row_start>row) {
 			return -1;
@@ -468,8 +473,6 @@ int l_index_of_token(CatArrayWo *tokens, long long row, int column) {
 }
 
 static void l_enlist(JagContextEditor *context_editor, DraAcContext *ac_context) {
-	JagContextEditorPrivate *priv = jag_context_editor_get_instance_private(context_editor);
-
 //	priv->indexer_project = l_get_indexer_project(request);
 
 	ChaRevisionReader *revision_reader = dra_ac_context_create_revision_reader(ac_context);
@@ -503,9 +506,9 @@ static void l_enlist(JagContextEditor *context_editor, DraAcContext *ac_context)
 				} break;
 		////				l_enlist_identifier(request);
 		////			} break;
-		//			default : {
+					default : {
 		//				cat_log_warn("symbol not handled yet");
-		//			} break;
+					} break;
 				}
 		}
 	}
@@ -562,6 +565,10 @@ static void l_enlist(JagContextEditor *context_editor, DraAcContext *ac_context)
 //	cat_unref_ptr(scanner);
 }
 
+
+static void l_open_declaration(DraContextEditor *context_editor) {
+//	DraEditorPanel *editor_panel = (JagEditorPanel *) dra_context_editor_get_panel(context_editor);
+}
 
 /********************* start DraIAcContentProvider implementation *********************/
 

@@ -209,7 +209,7 @@ static GroRunIToken *l_scanner_next(GroRunIScanner *self) {
 
 		if (token!=NULL) {
 			cat_log_debug("token=%O", token);
-			if (gro_scanner_is_eof(priv->scanner, token)) {
+			if (armp_scanner_is_eof(priv->scanner, token)) {
 				break;
 			}
 

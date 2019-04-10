@@ -93,7 +93,7 @@ DraSpellHelper *dra_spell_helper_create(DraPreferencesWo *a_prefs) {
 		return result;
 	}
 	if (lang == NULL) {
-		lang = cat_string_wo_new_data("en_US");
+		lang = cat_string_wo_new_with("en_US");
 	} else {
 		cat_ref_ptr(lang);
 	}
@@ -274,10 +274,7 @@ CatArrayWo *dra_spell_helper_enlist_languages(DraSpellHelper *spell_helper) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	DraSpellHelper *instance = DRA_SPELL_HELPER(self);
-	DraSpellHelperPrivate *priv = dra_spell_helper_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p]", iname, self);
 }
 

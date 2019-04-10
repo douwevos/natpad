@@ -207,7 +207,6 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 		case CHA_LINE_END_LFCR :
 		case CHA_LINE_END_CRLF :
 			is_last_line = off_line_end + 2 >= end_ptr; break;
-		case CHA_LINE_END_MIXED :
 			break;
 	}
 	cat_log_debug("is_last_line=%d", is_last_line);
@@ -264,8 +263,6 @@ static gboolean l_scanned_line_full_mode(char *off_line_start, char *off_line_en
 		case CHA_LINE_END_LFCR :
 		case CHA_LINE_END_CRLF :
 			is_last_line = off_line_end + 2 >= end_ptr; break;
-		case CHA_LINE_END_MIXED :
-			break;
 	}
 
 	ChaIConverter *converter = cha_document_get_input_converter(priv->document);
