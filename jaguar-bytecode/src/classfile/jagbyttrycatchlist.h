@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTTRYCATCHLIST_H_
 #define JAGBYTTRYCATCHLIST_H_
 
@@ -61,8 +60,6 @@ JagBytTryCatchList *jag_byt_try_catch_list_new(CatArrayWo *e_attr_code_exception
 int jag_byt_try_catch_list_count(JagBytTryCatchList *try_catch_list);
 JagBytTryCatch *jag_byt_try_catch_list_get(JagBytTryCatchList *try_catch_list, int index);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTTRYCATCHLIST_H_ */

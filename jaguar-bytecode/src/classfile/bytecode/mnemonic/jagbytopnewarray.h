@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPNEWARRAY_H_
 #define JAGBYTOPNEWARRAY_H_
 
@@ -64,8 +63,6 @@ JagBytType jag_byt_op_new_array_get_primitive_type(JagBytOpNewArray *op_new_arra
 
 int jag_byt_op_new_array_get_class_info_pool_index(JagBytOpNewArray *op_new_array);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTOPNEWARRAY_H_ */

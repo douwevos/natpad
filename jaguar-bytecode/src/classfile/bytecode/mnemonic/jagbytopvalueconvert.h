@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPVALUECONVERT_H_
 #define JAGBYTOPVALUECONVERT_H_
 
@@ -59,7 +58,5 @@ GType jag_byt_op_value_convert_get_type();
 JagBytOpValueConvert *jag_byt_op_value_convert_new(JagBytOperation operation, int offset, JagBytType source_type, JagBytType destination_type);
 
 G_END_DECLS
-
-
 
 #endif /* JAGBYTOPVALUECONVERT_H_ */

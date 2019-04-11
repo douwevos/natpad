@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPCHECKCAST_H_
 #define JAGBYTOPCHECKCAST_H_
 
@@ -60,6 +59,5 @@ JagBytOpCheckCast *jag_byt_op_check_cast_new(JagBytOperation operation, int offs
 int jag_byt_op_check_cast_get_class_info_pool_index(JagBytOpCheckCast *op_check_cast);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPCHECKCAST_H_ */

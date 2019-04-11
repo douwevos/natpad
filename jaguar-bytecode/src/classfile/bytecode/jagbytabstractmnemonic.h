@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTABSTRACTMNEMONIC_H_
 #define JAGBYTABSTRACTMNEMONIC_H_
 
@@ -58,6 +57,5 @@ GType jag_byt_abstract_mnemonic_get_type();
 void jag_byt_abstract_mnemonic_construct(JagBytAbstractMnemonic *abstract_mnemonic, JagBytOperation operation, int offset, int length);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTABSTRACTMNEMONIC_H_ */

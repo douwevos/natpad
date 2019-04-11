@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopget.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -32,7 +33,11 @@ struct _JagBytOpGetPrivate {
 	int pool_field_reference_index;
 };
 
-G_DEFINE_TYPE (JagBytOpGet, jag_byt_op_get, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagBytOpGet, jag_byt_op_get, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
+});
 
 static gpointer parent_class = NULL;
 
@@ -83,6 +88,37 @@ int jag_byt_op_get_get_field_reference_pool_index(JagBytOpGet *op_get) {
 	return JAG_BYT_OP_GET_GET_PRIVATE(op_get)->pool_field_reference_index;
 }
 
+/********************* start JagBytIMnemonicInterface implementation *********************/
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+
+	JagBytOpGetPrivate *priv = JAG_BYT_OP_GET_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new();
+	short opp_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(opp_code) {
+		case OP_GETSTATIC :
+			cat_string_wo_append_chars(result, "getstatic ");
+			break;
+		case OP_GETFIELD :
+			cat_string_wo_append_chars(result, "getfield ");
+			break;
+		default :
+			break;
+	}
+	cat_string_wo_append_decimal(result, priv->pool_field_reference_index);
+	return result;
+}
 
 
+static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->getOffset = p_iface->getOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getLength = p_iface->getLength;
+	iface->toString = l_to_string;
+}
 
+/********************* end JagBytIMnemonicInterface implementation *********************/

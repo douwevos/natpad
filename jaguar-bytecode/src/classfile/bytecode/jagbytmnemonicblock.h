@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTMNEMONICBLOCK_H_
 #define JAGBYTMNEMONICBLOCK_H_
 
@@ -68,8 +67,6 @@ JagBytIMnemonic *jag_byt_mnemonic_block_get(JagBytMnemonicBlock *mnemonic_block,
 
 JagBytLabel *jag_byt_mnemonic_block_find_or_create_label_at(JagBytMnemonicBlock *mnemonic_block, int mnemonic_index);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTMNEMONICBLOCK_H_ */

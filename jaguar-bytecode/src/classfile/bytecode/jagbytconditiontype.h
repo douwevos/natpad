@@ -21,10 +21,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONDITIONTYPE_H_
 #define JAGBYTCONDITIONTYPE_H_
 
+#include <glib-object.h>
+
+G_BEGIN_DECLS
 
 enum _JagBytConditionType {
 	JAG_BYT_CONDITION_TYPE_EQUAL,
@@ -40,5 +42,7 @@ typedef enum _JagBytConditionType JagBytConditionType;
 JagBytConditionType jag_byt_condition_type_opposite(JagBytConditionType condition_type);
 
 const char *jag_byt_condition_type_text(JagBytConditionType condition_type);
+
+G_END_DECLS
 
 #endif /* JAGBYTCONDITIONTYPE_H_ */

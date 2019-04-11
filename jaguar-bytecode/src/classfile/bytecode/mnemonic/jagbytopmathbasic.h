@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPMATHBASIC_H_
 #define JAGBYTOPMATHBASIC_H_
 
@@ -62,6 +61,5 @@ JagBytOpMathBasic *jag_byt_op_math_basic_new(JagBytOperation operation, int offs
 JagBytMathOperator jag_byt_op_math_basic_get_math_operator(JagBytOpMathBasic *op_math_logic);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPMATHBASIC_H_ */

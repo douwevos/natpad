@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPMULTIANEWARRAY_H_
 #define JAGBYTOPMULTIANEWARRAY_H_
 
@@ -60,7 +59,6 @@ JagBytOpMultiANewArray *jag_byt_op_multi_a_new_array_new(int offset, int class_p
 int jag_byt_op_multi_a_new_array_get_class_info_pool_index(JagBytOpMultiANewArray *op_multi_new_array);
 
 int jag_byt_op_multi_a_new_array_get_nr_of_dimensions(JagBytOpMultiANewArray *op_multi_new_array);
-
 
 G_END_DECLS
 

@@ -21,11 +21,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPINVOKE_H_
 #define JAGBYTOPINVOKE_H_
 
 #include "../jagbytabstractmnemonic.h"
+#include "../jagbytimnemonic.h"
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -63,6 +63,5 @@ int jag_byt_op_invoke_get_methodref_pool_index(JagBytOpInvoke *op_invoke);
 int jag_byt_op_invoke_get_count(JagBytOpInvoke *op_invoke);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPINVOKE_H_ */

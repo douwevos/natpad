@@ -54,7 +54,7 @@ struct _JagBytAttributeLineNumberTableClass {
 	JagBytAttributeClass parent_class;
 };
 
-CatS jag_txt_attribute_line_number_table;
+extern CatS jag_txt_attribute_line_number_table;
 
 
 GType jag_byt_attribute_line_number_table_get_type();

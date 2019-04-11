@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPTHROW_H_
 #define JAGBYTOPTHROW_H_
 
@@ -55,6 +54,5 @@ GType jag_byt_op_throw_get_type();
 JagBytOpThrow *jag_byt_op_throw_new(int offset);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPTHROW_H_ */

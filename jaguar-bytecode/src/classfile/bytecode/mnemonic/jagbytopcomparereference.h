@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPCOMPAREREFERENCE_H_
 #define JAGBYTOPCOMPAREREFERENCE_H_
 
@@ -62,8 +61,6 @@ JagBytConditionType jag_byt_op_compare_reference_get_condition_type(JagBytOpComp
 
 gboolean jag_byt_op_compare_reference_is_with_zero(JagBytOpCompareReference *compare_reference);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTOPCOMPAREREFERENCE_H_ */

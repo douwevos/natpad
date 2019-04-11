@@ -22,14 +22,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytoparraylength.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagBytOpArrayLength"
 #include <logging/catlog.h>
 
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-G_DEFINE_TYPE(JagBytOpArrayLength, jag_byt_op_array_length, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+G_DEFINE_TYPE_WITH_CODE(JagBytOpArrayLength, jag_byt_op_array_length, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static gpointer parent_class = NULL;
 
@@ -68,8 +72,21 @@ JagBytOpArrayLength *jag_byt_op_array_length_new(int offset) {
 	return result;
 }
 
+/********************* start JagBytIMnemonic implementation *********************/
 
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	return cat_string_wo_new_with("arraylength");
+}
 
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
 
-
-
+/********************* end JagBytIMnemonic implementation *********************/

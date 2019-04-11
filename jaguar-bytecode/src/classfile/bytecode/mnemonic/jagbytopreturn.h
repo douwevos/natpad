@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPRETURN_H_
 #define JAGBYTOPRETURN_H_
 
@@ -61,6 +60,5 @@ JagBytOpReturn *jag_byt_op_return_new(JagBytOperation operation, int offset, Jag
 JagBytType jag_byt_op_return_get_return_type(JagBytOpReturn *op_return);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPRETURN_H_ */

@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPNEW_H_
 #define JAGBYTOPNEW_H_
-
 
 #include "../jagbytabstractmnemonic.h"
 #include <caterpillar.h>
@@ -61,6 +59,5 @@ JagBytOpNew *jag_byt_op_new_new(int offset, int class_pool_index);
 int jag_byt_op_new_get_pool_index(JagBytOpNew *op_new);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPNEW_H_ */

@@ -54,7 +54,7 @@ struct _JagBytAttributeLocalVariableTableClass {
 	JagBytAttributeClass parent_class;
 };
 
-CatS jag_txt_attribute_local_variable_table;
+extern CatS jag_txt_attribute_local_variable_table;
 
 
 GType jag_byt_attribute_local_variable_table_get_type();

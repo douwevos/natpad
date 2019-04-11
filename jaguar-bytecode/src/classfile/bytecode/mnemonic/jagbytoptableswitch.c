@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytoptableswitch.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -35,15 +36,16 @@ struct _JagBytOpTableSwitchPrivate {
 	int *table;
 };
 
-G_DEFINE_TYPE (JagBytOpTableSwitch, jag_byt_op_table_switch, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_CODE(JagBytOpTableSwitch, jag_byt_op_table_switch, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_table_switch_class_init(JagBytOpTableSwitchClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
 	g_type_class_add_private(clazz, sizeof(JagBytOpTableSwitchPrivate));
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -58,16 +60,20 @@ static void jag_byt_op_table_switch_init(JagBytOpTableSwitch *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpTableSwitch *instance = JAG_BYT_OP_TABLE_SWITCH(object);
-//	JagBytOpTableSwitchPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_table_switch_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	JagBytOpTableSwitch *instance = JAG_BYT_OP_TABLE_SWITCH(object);
+	JagBytOpTableSwitchPrivate *priv = instance->priv;
+	if (priv->table!=NULL) {
+		g_free(priv->table);
+		priv->table = NULL;
+	}
+	G_OBJECT_CLASS(jag_byt_op_table_switch_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -84,3 +90,36 @@ JagBytOpTableSwitch *jag_byt_op_table_switch_new(int offset, int default_value, 
 	priv->table = table;
 	return result;
 }
+
+/********************* start JagBytIMnemonic implementation *********************/
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpTableSwitchPrivate *priv = JAG_BYT_OP_TABLE_SWITCH_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new_with("tableswitch ");
+
+	cat_string_wo_append_decimal(result, priv->low_value);
+	cat_string_wo_append_char(result, '/');
+	cat_string_wo_append_decimal(result, priv->high_value);
+
+	int count = priv->high_value-priv->low_value+1;
+	int idx;
+	for(idx=0; idx<count; idx++) {
+		int u = priv->table[idx];
+		cat_string_wo_append_chars(result, ", ");
+		cat_string_wo_append_decimal(result, u);
+	}
+	return result;
+}
+
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
+
+/********************* end JagBytIMnemonic implementation *********************/

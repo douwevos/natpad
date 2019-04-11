@@ -29,6 +29,8 @@
 #include "../label/jagbytlabelrepository.h"
 #include <glib-object.h>
 
+G_BEGIN_DECLS
+
 #define JAG_BYT_TYPE_IMNEMONIC_BLOCK                 (jag_byt_imnemonic_block_get_type())
 #define JAG_BYT_IMNEMONIC_BLOCK(obj)                 (G_TYPE_CHECK_INSTANCE_CAST((obj), JAG_BYT_TYPE_IMNEMONIC_BLOCK, JagBytIMnemonicBlock))
 #define JAG_BYT_IS_IMNEMONIC_BLOCK(obj)              (G_TYPE_CHECK_INSTANCE_TYPE((obj), JAG_BYT_TYPE_IMNEMONIC_BLOCK))
@@ -56,6 +58,6 @@ int jag_byt_imnemonic_block_count(JagBytIMnemonicBlock *self);
 int jag_byt_imnemonic_block_find_by_bytecode_offset(JagBytIMnemonicBlock *self, int bytecodeOffset);
 JagBytLabelRepository *jag_byt_imnemonic_block_get_label_repository(JagBytIMnemonicBlock *self);
 
-
+G_END_DECLS
 
 #endif /* JAGBYTIMNEMONICBLOCK_H_ */

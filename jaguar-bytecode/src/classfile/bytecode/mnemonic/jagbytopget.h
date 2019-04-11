@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPGET_H_
 #define JAGBYTOPGET_H_
 
@@ -60,6 +59,5 @@ JagBytOpGet *jag_byt_op_get_new(JagBytOperation operation, int offset, int pool_
 int jag_byt_op_get_get_field_reference_pool_index(JagBytOpGet *op_get);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPGET_H_ */

@@ -56,7 +56,7 @@ struct _JagBytAttributeCodeClass {
 	JagBytAttributeClass parent_class;
 };
 
-CatS jag_txt_attribute_code;
+extern CatS jag_txt_attribute_code;
 
 
 GType jag_byt_attribute_code_get_type();

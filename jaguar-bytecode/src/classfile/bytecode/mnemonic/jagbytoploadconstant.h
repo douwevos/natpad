@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPLOADCONSTANT_H_
 #define JAGBYTOPLOADCONSTANT_H_
 
@@ -62,8 +61,6 @@ JagBytType jag_byt_op_load_constant_get_constant_type(JagBytOpLoadConstant *load
 
 CatIStringable *jag_byt_op_load_constant_get_contant_value(JagBytOpLoadConstant *load_constant);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTOPLOADCONSTANT_H_ */

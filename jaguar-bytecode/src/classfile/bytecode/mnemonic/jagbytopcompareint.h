@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPCOMPAREINT_H_
 #define JAGBYTOPCOMPAREINT_H_
 
@@ -63,8 +62,6 @@ JagBytConditionType jag_byt_op_compare_int_get_condition_type(JagBytOpCompareInt
 
 gboolean jag_byt_op_compare_int_is_with_zero(JagBytOpCompareInt *compare_int);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTOPCOMPAREINT_H_ */

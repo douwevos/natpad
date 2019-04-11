@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopinvoke.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -33,7 +34,11 @@ struct _JagBytOpInvokePrivate {
 	int count;
 };
 
-G_DEFINE_TYPE (JagBytOpInvoke, jag_byt_op_invoke, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagBytOpInvoke, jag_byt_op_invoke, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static gpointer parent_class = NULL;
 
@@ -56,8 +61,6 @@ static void jag_byt_op_invoke_init(JagBytOpInvoke *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpInvoke *instance = JAG_BYT_OP_INVOKE(object);
-//	JagBytOpInvokePrivate *priv = instance->priv;
 	G_OBJECT_CLASS(parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -99,5 +102,44 @@ int jag_byt_op_invoke_get_count(JagBytOpInvoke *op_invoke) {
 	return JAG_BYT_OP_INVOKE_GET_PRIVATE(op_invoke)->count;
 }
 
+/********************* start JagBytIMnemonic implementation *********************/
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpInvoke *instance = (JagBytOpInvoke *) self;
+	JagBytOpInvokePrivate *priv = instance->priv;
+	CatStringWo *result = cat_string_wo_new();
+	short opp_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(opp_code) {
+		case OP_INVOKEVIRTUAL :
+			cat_string_wo_append_chars(result, "invokevirtual ");
+			break;
+		case OP_INVOKESPECIAL :
+			cat_string_wo_append_chars(result, "invokespecial ");
+			break;
+		case OP_INVOKESTATIC :
+			cat_string_wo_append_chars(result, "invokestatic ");
+			break;
+		case OP_INVOKEDYNAMIC :
+			cat_string_wo_append_chars(result, "invokedynamic ");
+			break;
+		default :
+			break;
+	}
+	cat_string_wo_append_decimal(result, priv->methodref_pool_index);
+	return result;
+}
 
 
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
+
+
+/********************* end JagBytIMnemonic implementation *********************/

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPSTOREFASTINDEX_H_
 #define JAGBYTOPSTOREFASTINDEX_H_
 
@@ -61,6 +60,5 @@ JagBytOpStoreFastIndex *jag_byt_op_store_fast_index_new(JagBytOperation operatio
 int jag_byt_op_store_fast_index_get_frame_index(JagBytOpStoreFastIndex *store_fast_index);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPSTOREFASTINDEX_H_ */

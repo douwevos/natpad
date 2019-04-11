@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytoploadconstant.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -33,7 +34,11 @@ struct _JagBytOpLoadConstantPrivate {
 	CatIStringable *constant_value;
 };
 
-G_DEFINE_TYPE (JagBytOpLoadConstant, jag_byt_op_load_constant, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagBytOpLoadConstant, jag_byt_op_load_constant, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static gpointer parent_class = NULL;
 
@@ -91,3 +96,42 @@ CatIStringable *jag_byt_op_load_constant_get_contant_value(JagBytOpLoadConstant 
 }
 
 
+/********************* start JagBytIMnemonic implementation *********************/
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	CatStringWo *result = cat_string_wo_new();
+	short op_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(op_code) {
+		case OP_ICONST_M1 : cat_string_wo_append_chars(result, "iconst_m1"); break;
+		case OP_ICONST_0 : cat_string_wo_append_chars(result, "iconst_0"); break;
+		case OP_ICONST_1 : cat_string_wo_append_chars(result, "iconst_1"); break;
+		case OP_ICONST_2 : cat_string_wo_append_chars(result, "iconst_2"); break;
+		case OP_ICONST_3 : cat_string_wo_append_chars(result, "iconst_3"); break;
+		case OP_ICONST_4 : cat_string_wo_append_chars(result, "iconst_4"); break;
+		case OP_ICONST_5 : cat_string_wo_append_chars(result, "iconst_5"); break;
+		case OP_LCONST_0 : cat_string_wo_append_chars(result, "lconst_0"); break;
+		case OP_LCONST_1 : cat_string_wo_append_chars(result, "lconst_1"); break;
+		case OP_FCONST_0 : cat_string_wo_append_chars(result, "fconst_0"); break;
+		case OP_FCONST_1 : cat_string_wo_append_chars(result, "fconst_1"); break;
+		case OP_FCONST_2 : cat_string_wo_append_chars(result, "fconst_2"); break;
+		case OP_DCONST_0 : cat_string_wo_append_chars(result, "dconst_0"); break;
+		case OP_DCONST_1 : cat_string_wo_append_chars(result, "dconst_1"); break;
+		default :
+			break;
+	}
+	return result;
+}
+
+
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
+
+/********************* end JagBytIMnemonic implementation *********************/

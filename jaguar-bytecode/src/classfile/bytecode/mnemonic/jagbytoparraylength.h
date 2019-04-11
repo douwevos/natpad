@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPARRAYLENGTH_H_
 #define JAGBYTOPARRAYLENGTH_H_
 
@@ -55,6 +54,5 @@ GType jag_byt_op_array_length_get_type();
 JagBytOpArrayLength *jag_byt_op_array_length_new(int offset);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPARRAYLENGTH_H_ */

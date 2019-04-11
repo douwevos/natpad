@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPINCREMENT_H_
 #define JAGBYTOPINCREMENT_H_
-
 
 #include "../jagbytabstractmnemonic.h"
 #include <caterpillar.h>
@@ -61,9 +59,6 @@ JagBytOpIncrement *jag_byt_op_increment_new(int offset, int index, int constant,
 int jag_byt_op_increment_get_frame_index(JagBytOpIncrement *op_increment);
 int jag_byt_op_increment_get_increment_value(JagBytOpIncrement *op_increment);
 
-
 G_END_DECLS
-
-
 
 #endif /* JAGBYTOPINCREMENT_H_ */

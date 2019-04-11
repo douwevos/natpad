@@ -22,7 +22,6 @@
 
 #include "jagclasseditorfactory.h"
 #include "jageditorpanel.h"
-#include <jaguardecompiler.h>
 #include <jaguarbytecode.h>
 #include <elk.h>
 
@@ -108,16 +107,20 @@ static ChaDocument *l_create_document_for_class(ChaDocumentManager *document_man
 	JagBytClassfile *classfile = jag_bytecode_reader_parse_bytecode(bytecode_reader);
 
 	if (classfile) {
-		JagDecompiler *decompiler = jag_decompiler_new(classfile);
-		JagAstTp *ast_type = jag_decompiler_create_type(decompiler);
 
-		JagAstWriter *ast_writer = jag_ast_writer_new();
-		jag_ast_tp_write(ast_type, ast_writer);
-		CatStringWo *a_source = jag_ast_writer_to_string(ast_writer);
+		JagByteCodePrinter *printer = jag_byte_code_printer_new();
 
-		cat_unref_ptr(decompiler);
-		cat_unref_ptr(ast_type);
-		cat_unref_ptr(ast_writer);
+		char *text = jag_byte_code_printer_print(printer, classfile);
+
+		CatStringWo *a_source = cat_string_wo_new_with(text);
+
+//		JagAstWriter *ast_writer = jag_ast_writer_new();
+//		jag_ast_tp_write(ast_type, ast_writer);
+//		CatStringWo *a_source = jag_ast_writer_to_string(ast_writer);
+//
+//		cat_unref_ptr(decompiler);
+//		cat_unref_ptr(ast_type);
+//		cat_unref_ptr(ast_writer);
 
 
 //		CatStringWo *e_source = jag_raw_classfile_as_source(classfile);

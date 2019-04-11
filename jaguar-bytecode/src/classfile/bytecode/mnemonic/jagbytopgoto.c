@@ -35,7 +35,7 @@ struct _JagBytOpGotoPrivate {
 
 static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagBytOpGoto, jag_byt_op_goto, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, {
+G_DEFINE_TYPE_WITH_CODE(JagBytOpGoto, jag_byt_op_goto, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
 });
 
@@ -100,7 +100,24 @@ static int l_mnemonic_get_branch_offset(JagBytIMnemonic *self) {
 	return JAG_BYT_OP_GOTO_GET_PRIVATE(self)->branch_offset + offset;
 }
 
-
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpGotoPrivate *priv = JAG_BYT_OP_GOTO_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new();
+	short opp_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(opp_code) {
+		case OP_GOTO :
+			cat_string_wo_append_chars(result, "goto ");
+			break;
+		case OP_GOTO_W :
+			cat_string_wo_append_chars(result, "goto_w ");
+			break;
+		default :
+			break;
+	}
+	int offset = jag_byt_imnemonic_get_offset(self);
+	cat_string_wo_append_decimal(result, priv->branch_offset + offset);
+	return result;
+}
 
 
 static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
@@ -111,6 +128,7 @@ static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 	iface->getContinuesOffset = l_mnemonic_get_continues_offset;
 	iface->getBranchOffset = l_mnemonic_get_branch_offset;
 	iface->getLength = p_iface->getLength;
+	iface->toString = l_to_string;
 }
 
 /********************* end JagBytIMnemonicInterface implementation *********************/

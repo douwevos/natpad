@@ -80,5 +80,4 @@ CatStringWo *jag_byt_method_header_as_text(JagBytMethodHeader *method_header, Ca
 
 G_END_DECLS
 
-
 #endif /* JAGBYTMETHODHEADER_H_ */

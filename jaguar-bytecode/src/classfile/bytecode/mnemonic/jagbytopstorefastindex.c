@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopstorefastindex.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -33,15 +34,16 @@ struct _JagBytOpStoreFastIndexPrivate {
 	int index;
 };
 
-G_DEFINE_TYPE (JagBytOpStoreFastIndex, jag_byt_op_store_fast_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_CODE(JagBytOpStoreFastIndex, jag_byt_op_store_fast_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_store_fast_index_class_init(JagBytOpStoreFastIndexClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
 	g_type_class_add_private(clazz, sizeof(JagBytOpStoreFastIndexPrivate));
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -56,16 +58,14 @@ static void jag_byt_op_store_fast_index_init(JagBytOpStoreFastIndex *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpStoreFastIndex *instance = JAG_BYT_OP_STORE_FAST_INDEX(object);
-//	JagBytOpStoreFastIndexPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_store_fast_index_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_store_fast_index_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -84,8 +84,35 @@ int jag_byt_op_store_fast_index_get_frame_index(JagBytOpStoreFastIndex *store_fa
 	return JAG_BYT_OP_STORE_FAST_INDEX_GET_PRIVATE(store_fast_index)->index;
 }
 
+/********************* start JagBytIMnemonic implementation *********************/
 
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpStoreFastIndexPrivate *priv = JAG_BYT_OP_STORE_FAST_INDEX_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new();
+	short op_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(priv->value_type) {
+		case JAG_BYT_TYPE_INT : cat_string_wo_append_char(result, 'i'); break;
+		case JAG_BYT_TYPE_LONG : cat_string_wo_append_char(result, 'l'); break;
+		case JAG_BYT_TYPE_FLOAT : cat_string_wo_append_char(result, 'f'); break;
+		case JAG_BYT_TYPE_DOUBLE : cat_string_wo_append_char(result, 'd'); break;
+		case JAG_BYT_TYPE_REFERENCE : cat_string_wo_append_char(result, 'a'); break;
+		case JAG_BYT_TYPE_CHAR : cat_string_wo_append_char(result, 'c'); break;
+		case JAG_BYT_TYPE_SHORT : cat_string_wo_append_char(result, 's'); break;
+	}
+	cat_string_wo_append_chars(result, "store_");
+	cat_string_wo_append_decimal(result, priv->index);
+	return result;
+}
 
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
 
-
-
+/********************* end JagBytIMnemonic implementation *********************/

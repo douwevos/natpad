@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPPUSH_H_
 #define JAGBYTOPPUSH_H_
 
@@ -60,8 +59,6 @@ JagBytOpPush *jag_byt_op_push_new_short(int offset, int value);
 
 int jag_byt_op_push_get_value(JagBytOpPush *op_push);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTOPPUSH_H_ */

@@ -29,12 +29,13 @@
 
 G_BEGIN_DECLS
 
-typedef enum _JagBytLabelType JagBytLabelType;
 
 enum _JagBytLabelType {
 	JAG_BYT_LABEL_TYPE_HARD,
 	JAG_BYT_LABEL_TYPE_SOFT
 };
+
+typedef enum _JagBytLabelType JagBytLabelType;
 
 #define JAG_BYT_TYPE_LABEL              (jag_byt_label_get_type())
 #define JAG_BYT_LABEL(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), jag_byt_label_get_type(), JagBytLabel))
@@ -44,10 +45,8 @@ enum _JagBytLabelType {
 #define JAG_BYT_LABEL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_LABEL, JagBytLabelClass))
 #define JAG_BYT_LABEL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_LABEL, JagBytLabelPrivate))
 
-typedef struct _JagBytLabel               JagBytLabel;
+struct _JagBytLabelPrivate;
 typedef struct _JagBytLabelPrivate        JagBytLabelPrivate;
-typedef struct _JagBytLabelClass          JagBytLabelClass;
-
 
 struct _JagBytLabel {
 	GObject parent;
@@ -57,6 +56,10 @@ struct _JagBytLabel {
 struct _JagBytLabelClass {
 	GObjectClass parent_class;
 };
+
+
+typedef struct _JagBytLabel               JagBytLabel;
+typedef struct _JagBytLabelClass          JagBytLabelClass;
 
 
 GType jag_byt_label_get_type();

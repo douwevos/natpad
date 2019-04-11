@@ -29,9 +29,6 @@
 
 G_BEGIN_DECLS
 
-
-typedef enum _JagAstModifier JagAstModifier;
-
 enum _JagAstModifier {
 	JAG_AST_MODIFIER_PUBLIC = 0x0001,
 	JAG_AST_MODIFIER_PRIVATE = 0x0002,
@@ -45,6 +42,7 @@ enum _JagAstModifier {
 	JAG_AST_MODIFIER_INTERFACE = 0x200
 };
 
+typedef enum _JagAstModifier JagAstModifier;
 
 #define JAG_AST_TYPE_MODIFIERS              (jag_ast_modifiers_get_type())
 #define JAG_AST_MODIFIERS(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), jag_ast_modifiers_get_type(), JagAstModifiers))

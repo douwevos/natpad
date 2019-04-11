@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCATCH_H_
 #define JAGBYTCATCH_H_
 
@@ -59,8 +58,6 @@ JagBytCatch *jag_byt_catch_new(JagAstDeclarationType *exception_type, int handle
 
 JagAstDeclarationType *jag_byt_catch_get_exception_type(JagBytCatch *catch);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTCATCH_H_ */
