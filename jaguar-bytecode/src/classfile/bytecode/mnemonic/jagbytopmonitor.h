@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPMONITOR_H_
 #define JAGBYTOPMONITOR_H_
 
@@ -55,6 +54,5 @@ GType jag_byt_op_monitor_get_type();
 JagBytOpMonitor *jag_byt_op_monitor_new(JagBytOperation operation, int offset);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPMONITOR_H_ */

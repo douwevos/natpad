@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTFINALLY_H_
 #define JAGBYTFINALLY_H_
 
@@ -57,6 +56,5 @@ GType jag_byt_finally_get_type();
 JagBytFinally *jag_byt_finally_new(int handle_pc);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTFINALLY_H_ */

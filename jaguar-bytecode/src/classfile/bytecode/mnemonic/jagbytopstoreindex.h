@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPSTOREINDEX_H_
 #define JAGBYTOPSTOREINDEX_H_
 
@@ -61,6 +60,5 @@ JagBytOpStoreIndex *jag_byt_op_store_index_new(JagBytOperation operation, int of
 int jag_byt_op_store_index_get_frame_index(JagBytOpStoreIndex *store_index);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPSTOREINDEX_H_ */

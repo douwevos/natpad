@@ -52,7 +52,7 @@ struct _JagBytAttributeExceptionsClass {
 	JagBytAttributeClass parent_class;
 };
 
-CatS jag_txt_attribute_exceptions;
+extern CatS jag_txt_attribute_exceptions;
 
 GType jag_byt_attribute_exceptions_get_type();
 

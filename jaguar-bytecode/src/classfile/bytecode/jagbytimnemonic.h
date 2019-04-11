@@ -26,7 +26,11 @@
 #define JAGBYTIMNEMONIC_H_
 
 #include "jagbytoperation.h"
+#include "../label/jagbytlabelrepository.h"
 #include <glib-object.h>
+#include <caterpillar.h>
+
+G_BEGIN_DECLS
 
 #define JAG_BYT_TYPE_IMNEMONIC                 (jag_byt_imnemonic_get_type())
 #define JAG_BYT_IMNEMONIC(obj)                 (G_TYPE_CHECK_INSTANCE_CAST((obj), JAG_BYT_TYPE_IMNEMONIC, JagBytIMnemonic))
@@ -47,6 +51,7 @@ struct _JagBytIMnemonicInterface {
 	int (*getBranchOffset)(JagBytIMnemonic *self);
 	//String (*toString)(JagBytIMnemonic *self, IMnemonicBlock imnemonicBlock);
 	short (*getOppCode)(JagBytIMnemonic *self);
+	CatStringWo *(*toString)(JagBytIMnemonic *self, JagBytLabelRepository *label_repository);
 
 };
 
@@ -60,7 +65,8 @@ int jag_byt_imnemonic_get_branch_offset(JagBytIMnemonic *self);
 //String jag_byt_imnemonic_toString(JagBytIMnemonic *self, IMnemonicBlock imnemonicBlock);
 short jag_byt_imnemonic_get_opp_code(JagBytIMnemonic *self);
 
+CatStringWo *jag_byt_imnemonic_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository);
 
-
+G_END_DECLS
 
 #endif /* JAGBYTIMNEMONIC_H_ */

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPDUPLICATE_H_
 #define JAGBYTOPDUPLICATE_H_
 
@@ -55,7 +54,5 @@ GType jag_byt_op_duplicate_get_type();
 JagBytOpDuplicate *jag_byt_op_duplicate_new(JagBytOperation operation, int offset);
 
 G_END_DECLS
-
-
 
 #endif /* JAGBYTOPDUPLICATE_H_ */

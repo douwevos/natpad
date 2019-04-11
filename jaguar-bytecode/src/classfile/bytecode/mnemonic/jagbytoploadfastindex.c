@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytoploadfastindex.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -33,7 +34,11 @@ struct _JagBytOpLoadFastIndexPrivate {
 	int index;
 };
 
-G_DEFINE_TYPE (JagBytOpLoadFastIndex, jag_byt_op_load_fast_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagBytOpLoadFastIndex, jag_byt_op_load_fast_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static gpointer parent_class = NULL;
 
@@ -56,8 +61,6 @@ static void jag_byt_op_load_fast_index_init(JagBytOpLoadFastIndex *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpLoadFastIndex *instance = JAG_BYT_OP_LOAD_FAST_INDEX(object);
-//	JagBytOpLoadFastIndexPrivate *priv = instance->priv;
 	G_OBJECT_CLASS(parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -83,8 +86,48 @@ int jag_byt_op_load_fast_index_get_frame_index(JagBytOpLoadFastIndex *load_fast_
 	return JAG_BYT_OP_LOAD_FAST_INDEX_GET_PRIVATE(load_fast_index)->index;
 }
 
+/********************* start JagBytIMnemonic implementation *********************/
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	CatStringWo *result = cat_string_wo_new();
+	short op_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(op_code) {
+		case OP_ILOAD_0 : cat_string_wo_append_chars(result, "iload_0"); break;
+		case OP_ILOAD_1 : cat_string_wo_append_chars(result, "iload_1"); break;
+		case OP_ILOAD_2 : cat_string_wo_append_chars(result, "iload_2"); break;
+		case OP_ILOAD_3 : cat_string_wo_append_chars(result, "iload_3"); break;
+		case OP_LLOAD_0 : cat_string_wo_append_chars(result, "lload_0"); break;
+		case OP_LLOAD_1 : cat_string_wo_append_chars(result, "lload_1"); break;
+		case OP_LLOAD_2 : cat_string_wo_append_chars(result, "lload_2"); break;
+		case OP_LLOAD_3 : cat_string_wo_append_chars(result, "lload_3"); break;
+		case OP_FLOAD_0 : cat_string_wo_append_chars(result, "fload_0"); break;
+		case OP_FLOAD_1 : cat_string_wo_append_chars(result, "fload_1"); break;
+		case OP_FLOAD_2 : cat_string_wo_append_chars(result, "fload_2"); break;
+		case OP_FLOAD_3 : cat_string_wo_append_chars(result, "fload_3"); break;
+		case OP_DLOAD_0 : cat_string_wo_append_chars(result, "dload_0"); break;
+		case OP_DLOAD_1 : cat_string_wo_append_chars(result, "dload_1"); break;
+		case OP_DLOAD_2 : cat_string_wo_append_chars(result, "dload_2"); break;
+		case OP_DLOAD_3 : cat_string_wo_append_chars(result, "dload_3"); break;
+		case OP_ALOAD_0 : cat_string_wo_append_chars(result, "aload_0"); break;
+		case OP_ALOAD_1 : cat_string_wo_append_chars(result, "aload_1"); break;
+		case OP_ALOAD_2 : cat_string_wo_append_chars(result, "aload_2"); break;
+		case OP_ALOAD_3 : cat_string_wo_append_chars(result, "aload_3"); break;
+		default :
+			break;
+	}
+	return result;
+}
 
 
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
 
-
-
+/********************* end JagBytIMnemonic implementation *********************/

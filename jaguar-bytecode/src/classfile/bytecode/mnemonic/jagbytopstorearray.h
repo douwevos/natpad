@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPSTOREARRAY_H_
 #define JAGBYTOPSTOREARRAY_H_
 
@@ -61,6 +60,5 @@ JagBytOpStoreArray *jag_byt_op_store_array_new(JagBytOperation operation, int of
 JagBytType jag_byt_op_store_array_get_store_type(JagBytOpStoreArray *store_array);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPSTOREARRAY_H_ */

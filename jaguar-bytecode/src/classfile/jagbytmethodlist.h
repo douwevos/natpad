@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTMETHODLIST_H_
 #define JAGBYTMETHODLIST_H_
 
@@ -64,8 +63,6 @@ JagBytMethod *jag_byt_method_list_get_at(JagBytMethodList *method_list, int inde
 
 CatIIterator *jag_byt_method_list_iterator(JagBytMethodList *method_list);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTMETHODLIST_H_ */

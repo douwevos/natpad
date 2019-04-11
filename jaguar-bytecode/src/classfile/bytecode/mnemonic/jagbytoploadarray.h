@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPLOADARRAY_H_
 #define JAGBYTOPLOADARRAY_H_
 
@@ -61,6 +60,5 @@ JagBytOpLoadArray *jag_byt_op_load_array_new(JagBytOperation operation, int offs
 JagBytType jag_byt_op_load_array_get_load_type(JagBytOpLoadArray *op_load_array);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPLOADARRAY_H_ */

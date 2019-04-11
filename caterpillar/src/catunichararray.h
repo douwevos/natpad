@@ -23,8 +23,8 @@
 #ifndef CATUNICHARARRAY_H_
 #define CATUNICHARARRAY_H_
 
-#include <glib-object.h>
 #include "woo/catstringwo.h"
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -34,11 +34,6 @@ G_BEGIN_DECLS
 #define CAT_IS_UNICHAR_ARRAY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_UNICHAR_ARRAY))
 #define CAT_IS_UNICHAR_ARRAY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_UNICHAR_ARRAY))
 #define CAT_UNICHAR_ARRAY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_UNICHAR_ARRAY, CatUnicharArrayClass))
-
-
-typedef struct _CatUnicharArray         CatUnicharArray;
-
-typedef struct _CatUnicharArrayClass    CatUnicharArrayClass;
 
 struct _CatUnicharArray {
 	GInitiallyUnowned parent;
@@ -51,6 +46,11 @@ struct _CatUnicharArray {
 struct _CatUnicharArrayClass {
 	GInitiallyUnownedClass parent_class;
 };
+
+typedef struct _CatUnicharArray         CatUnicharArray;
+
+typedef struct _CatUnicharArrayClass    CatUnicharArrayClass;
+
 
 GType cat_unichar_array_get_type(void);
 
@@ -93,6 +93,6 @@ void cat_unichar_array_set_length(CatUnicharArray *char_array, int length);
 //static gchar cat_char_to_lower(gchar ch) {
 //void cat_string_to_lowercase(CatString *txt) {
 
-
+G_END_DECLS
 
 #endif /* CATUNICHARARRAY_H_ */

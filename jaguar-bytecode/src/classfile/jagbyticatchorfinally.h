@@ -21,11 +21,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTICATCHORFINALLY_H_
 #define JAGBYTICATCHORFINALLY_H_
 
 #include <glib-object.h>
+
+G_BEGIN_DECLS
 
 #define JAG_BYT_TYPE_ICATCH_OR_FINALLY                 (jag_byt_icatch_or_finally_get_type())
 #define JAG_BYT_ICATCH_OR_FINALLY(obj)                 (G_TYPE_CHECK_INSTANCE_CAST((obj), JAG_BYT_TYPE_ICATCH_OR_FINALLY, JagBytICatchOrFinally))
@@ -46,5 +47,6 @@ GType jag_byt_icatch_or_finally_get_type(void);
 
 int jag_byt_icatch_or_finally_get_handle_pc(JagBytICatchOrFinally *self);
 
+G_END_DECLS
 
 #endif /* JAGBYTICATCHORFINALLY_H_ */

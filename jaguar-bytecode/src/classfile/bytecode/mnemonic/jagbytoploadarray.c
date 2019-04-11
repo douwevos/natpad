@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytoploadarray.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -32,7 +33,11 @@ struct _JagBytOpLoadArrayPrivate {
 	JagBytType array_content_type;
 };
 
-G_DEFINE_TYPE (JagBytOpLoadArray, jag_byt_op_load_array, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagBytOpLoadArray, jag_byt_op_load_array, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static gpointer parent_class = NULL;
 
@@ -55,8 +60,6 @@ static void jag_byt_op_load_array_init(JagBytOpLoadArray *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpLoadArray *instance = JAG_BYT_OP_LOAD_ARRAY(object);
-//	JagBytOpLoadArrayPrivate *priv = instance->priv;
 	G_OBJECT_CLASS(parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -83,6 +86,52 @@ JagBytType jag_byt_op_load_array_get_load_type(JagBytOpLoadArray *op_load_array)
 }
 
 
+/********************* start JagBytIMnemonic implementation *********************/
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpLoadArrayPrivate *priv = JAG_BYT_OP_LOAD_ARRAY_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new();
+	switch(priv->array_content_type) {
+		case JAG_BYT_TYPE_INT :
+			cat_string_wo_append_chars(result, "iaload");
+			break;
+		case JAG_BYT_TYPE_LONG :
+			cat_string_wo_append_chars(result, "laload");
+			break;
+		case JAG_BYT_TYPE_FLOAT :
+			cat_string_wo_append_chars(result, "faload");
+			break;
+		case JAG_BYT_TYPE_DOUBLE :
+			cat_string_wo_append_chars(result, "daload");
+			break;
+		case JAG_BYT_TYPE_REFERENCE :
+			cat_string_wo_append_chars(result, "aaload");
+			break;
+		case JAG_BYT_TYPE_BYTE :
+			cat_string_wo_append_chars(result, "baload");
+			break;
+		case JAG_BYT_TYPE_CHAR :
+			cat_string_wo_append_chars(result, "caload");
+			break;
+		case JAG_BYT_TYPE_SHORT :
+			cat_string_wo_append_chars(result, "saload");
+			break;
+		default :
+			break;
+	}
+	return result;
+}
 
 
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
 
+/********************* end JagBytIMnemonic implementation *********************/

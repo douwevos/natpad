@@ -48,15 +48,13 @@ enum _CatStreamEol {
 
 typedef enum _CatStreamStatus CatStreamStatus;
 
-
-
-typedef enum _CatSeekType CatSeekType;
-
 enum _CatSeekType {
 	CAT_SEEK_SET,
 	CAT_SEEK_SET_FROM_END,
 	CAT_SEEK_FORWARD,
 };
+
+typedef enum _CatSeekType CatSeekType;
 
 
 #endif /* CATSTREAM_H_ */

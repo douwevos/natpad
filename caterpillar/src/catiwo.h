@@ -23,9 +23,6 @@
 #ifndef CATIWO_H_
 #define CATIWO_H_
 
-
-typedef enum _CatWoState CatWoState;
-
 enum _CatWoState {
 	/* The object is Read-Only*/
 	CAT_WO_READONLY,
@@ -36,5 +33,7 @@ enum _CatWoState {
 	/* the object is writable and was changed */
 	CAT_WO_MODIFIED
 };
+
+typedef enum _CatWoState CatWoState;
 
 #endif /* CATIWO_H_ */

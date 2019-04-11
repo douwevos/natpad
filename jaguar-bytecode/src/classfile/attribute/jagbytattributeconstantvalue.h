@@ -52,7 +52,7 @@ struct _JagBytAttributeConstantValueClass {
 	JagBytAttributeClass parent_class;
 };
 
-CatS jag_txt_attribute_constant_value;
+extern CatS jag_txt_attribute_constant_value;
 
 
 GType jag_byt_attribute_constant_value_get_type();

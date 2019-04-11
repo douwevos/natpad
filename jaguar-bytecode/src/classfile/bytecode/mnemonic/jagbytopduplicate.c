@@ -22,14 +22,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopduplicate.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagBytOpDuplicate"
 #include <logging/catlog.h>
 
+static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-G_DEFINE_TYPE (JagBytOpDuplicate, jag_byt_op_duplicate, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+G_DEFINE_TYPE_WITH_CODE(JagBytOpDuplicate, jag_byt_op_duplicate, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
+});
 
 static gpointer parent_class = NULL;
 
@@ -49,7 +53,6 @@ static void jag_byt_op_duplicate_init(JagBytOpDuplicate *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpDuplicate *instance = JAG_BYT_OP_DUPLICATE(object);
 	G_OBJECT_CLASS(parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -69,7 +72,46 @@ JagBytOpDuplicate *jag_byt_op_duplicate_new(JagBytOperation operation, int offse
 }
 
 
+/********************* start JagBytIMnemonicInterface implementation *********************/
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	CatStringWo *result = cat_string_wo_new();
+	short opp_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(opp_code) {
+		case OP_DUP :
+			cat_string_wo_append_chars(result, "dup");
+			break;
+		case OP_DUP_X1 :
+			cat_string_wo_append_chars(result, "dup_x1");
+			break;
+		case OP_DUP_X2 :
+			cat_string_wo_append_chars(result, "dup_x2");
+			break;
+		case OP_DUP2 :
+			cat_string_wo_append_chars(result, "dup2");
+			break;
+		case OP_DUP2_X1 :
+			cat_string_wo_append_chars(result, "dup2_x1");
+			break;
+		case OP_DUP2_X2 :
+			cat_string_wo_append_chars(result, "dup2_x2");
+			break;
+		default :
+			break;
+	}
+	return result;
+}
 
 
+static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->getOffset = p_iface->getOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getLength = p_iface->getLength;
+	iface->toString = l_to_string;
+}
 
-
+/********************* end JagBytIMnemonicInterface implementation *********************/

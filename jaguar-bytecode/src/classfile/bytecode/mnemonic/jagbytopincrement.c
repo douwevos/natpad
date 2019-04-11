@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopincrement.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -34,7 +35,11 @@ struct _JagBytOpIncrementPrivate {
 	gboolean is_wide;
 };
 
-G_DEFINE_TYPE (JagBytOpIncrement, jag_byt_op_increment, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagBytOpIncrement, jag_byt_op_increment, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
+});
 
 static gpointer parent_class = NULL;
 
@@ -57,8 +62,6 @@ static void jag_byt_op_increment_init(JagBytOpIncrement *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpIncrement *instance = JAG_BYT_OP_INCREMENT(object);
-//	JagBytOpIncrementPrivate *priv = instance->priv;
 	G_OBJECT_CLASS(parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -81,8 +84,6 @@ JagBytOpIncrement *jag_byt_op_increment_new(int offset, int index, int constant,
 	return result;
 }
 
-
-
 int jag_byt_op_increment_get_frame_index(JagBytOpIncrement *op_increment) {
 	return JAG_BYT_OP_INCREMENT_GET_PRIVATE(op_increment)->index;
 }
@@ -92,4 +93,27 @@ int jag_byt_op_increment_get_increment_value(JagBytOpIncrement *op_increment) {
 }
 
 
+/********************* start JagBytIMnemonicInterface implementation *********************/
 
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpIncrementPrivate *priv = JAG_BYT_OP_INCREMENT_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new_with("inc ");
+	int offset = jag_byt_imnemonic_get_offset(self);
+	cat_string_wo_append_decimal(result, priv->index);
+	cat_string_wo_append_chars(result, ", ");
+	cat_string_wo_append_decimal(result, priv->constant);
+	return result;
+}
+
+static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->getOffset = p_iface->getOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getLength = p_iface->getLength;
+	iface->toString = l_to_string;
+}
+
+/********************* end JagBytIMnemonicInterface implementation *********************/

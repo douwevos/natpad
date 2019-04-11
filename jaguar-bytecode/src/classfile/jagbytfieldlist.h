@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTFIELDLIST_H_
 #define JAGBYTFIELDLIST_H_
-
 
 #include "jagbytfield.h"
 #include <caterpillar.h>
@@ -64,9 +62,6 @@ JagBytField *jag_byt_field_list_get_at(JagBytFieldList *field_list, int index);
 
 CatIIterator *jag_byt_field_list_iterator(JagBytFieldList *field_list);
 
-
 G_END_DECLS
-
-
 
 #endif /* JAGBYTFIELDLIST_H_ */

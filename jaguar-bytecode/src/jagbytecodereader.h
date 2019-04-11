@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTECODEREADER_H_
 #define JAGBYTECODEREADER_H_
 
@@ -60,7 +59,5 @@ JagBytecodeReader *jag_bytecode_reader_new(CatIInputStream *bytecode_stream);
 JagBytClassfile *jag_bytecode_reader_parse_bytecode(JagBytecodeReader *reader);
 
 G_END_DECLS
-
-
 
 #endif /* JAGBYTECODEREADER_H_ */

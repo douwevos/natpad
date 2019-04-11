@@ -45,7 +45,7 @@ struct _JagBytAttributeCodePrivate {
 	JagBytAttributeMap *attribute_map;
 };
 
-G_DEFINE_TYPE (JagBytAttributeCode, jag_byt_attribute_code, JAG_BYT_TYPE_ATTRIBUTE)
+G_DEFINE_TYPE (JagBytAttributeCode, jag_byt_attribute_code, JAG_BYT_TYPE_ATTRIBUTE) // @suppress("Unused static function")
 
 static gpointer parent_class = NULL;
 

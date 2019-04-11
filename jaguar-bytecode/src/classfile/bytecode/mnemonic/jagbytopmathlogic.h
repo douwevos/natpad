@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPMATHLOGIC_H_
 #define JAGBYTOPMATHLOGIC_H_
-
 
 #include "../jagbytabstractmnemonic.h"
 #include "../jagbyttype.h"
@@ -63,6 +61,5 @@ JagBytOpMathLogic *jag_byt_op_math_logic_new(JagBytOperation operation, int offs
 JagBytMathOperator jag_byt_op_math_logic_get_bitwise_operator(JagBytOpMathLogic *op_math_logic);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPMATHLOGIC_H_ */

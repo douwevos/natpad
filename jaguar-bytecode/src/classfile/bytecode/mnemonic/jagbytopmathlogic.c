@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopmathlogic.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -33,15 +34,16 @@ struct _JagBytOpMathLogicPrivate {
 	JagBytMathOperator math_operator;
 };
 
-G_DEFINE_TYPE (JagBytOpMathLogic, jag_byt_op_math_logic, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_CODE(JagBytOpMathLogic, jag_byt_op_math_logic, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_math_logic_class_init(JagBytOpMathLogicClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
 	g_type_class_add_private(clazz, sizeof(JagBytOpMathLogicPrivate));
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -56,16 +58,14 @@ static void jag_byt_op_math_logic_init(JagBytOpMathLogic *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpMathLogic *instance = JAG_BYT_OP_MATH_LOGIC(object);
-//	JagBytOpMathLogicPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_math_logic_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_math_logic_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -84,5 +84,37 @@ JagBytMathOperator jag_byt_op_math_logic_get_bitwise_operator(JagBytOpMathLogic 
 }
 
 
+/********************* start JagBytIMnemonic implementation *********************/
 
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	CatStringWo *result = cat_string_wo_new();
+	JagBytOpMathLogicPrivate *priv = JAG_BYT_OP_MATH_LOGIC_GET_PRIVATE(self);
+	switch(priv->math_type) {
+		case JAG_BYT_TYPE_INT : cat_string_wo_append_char(result, 'i'); break;
+		case JAG_BYT_TYPE_LONG : cat_string_wo_append_char(result, 'l'); break;
+		default : break;
+	}
 
+	switch(priv->math_operator) {
+		case JAG_BYT_MATH_OPERATOR_SHIFT_LEFT : cat_string_wo_append_chars(result, "shl"); break;
+		case JAG_BYT_MATH_OPERATOR_SHIFT_RIGHT : cat_string_wo_append_chars(result, "shr"); break;
+		case JAG_BYT_MATH_OPERATOR_UNSIGNED_SHIFT_RIGHT : cat_string_wo_append_chars(result, "ushr"); break;
+		case JAG_BYT_MATH_OPERATOR_BITWISE_AND : cat_string_wo_append_chars(result, "and"); break;
+		case JAG_BYT_MATH_OPERATOR_BITWISE_OR : cat_string_wo_append_chars(result, "or"); break;
+		case JAG_BYT_MATH_OPERATOR_BITWISE_XOR : cat_string_wo_append_chars(result, "xor"); break;
+	}
+	return result;
+}
+
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
+
+/********************* end JagBytIMnemonic implementation *********************/

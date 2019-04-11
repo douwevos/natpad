@@ -25,6 +25,7 @@
 #ifndef JAGUARBYTECODE_H_
 #define JAGUARBYTECODE_H_
 
+#include "ByteCodePrinter.h"
 #include "jagbytecodereader.h"
 #include "classfile/jagbytcatch.h"
 #include "classfile/jagbytclassfile.h"

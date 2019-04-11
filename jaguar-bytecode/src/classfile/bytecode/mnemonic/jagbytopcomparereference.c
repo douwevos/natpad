@@ -37,7 +37,7 @@ struct _JagBytOpCompareReferencePrivate {
 
 static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagBytOpCompareReference, jag_byt_op_compare_reference, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, {
+G_DEFINE_TYPE_WITH_CODE(JagBytOpCompareReference, jag_byt_op_compare_reference, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
 });
 
@@ -62,8 +62,6 @@ static void jag_byt_op_compare_reference_init(JagBytOpCompareReference *instance
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpCompareReference *instance = JAG_BYT_OP_COMPARE_REFERENCE(object);
-//	JagBytOpCompareReferencePrivate *priv = instance->priv;
 	G_OBJECT_CLASS(parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -96,8 +94,6 @@ gboolean jag_byt_op_compare_reference_is_with_zero(JagBytOpCompareReference *com
 }
 
 
-
-
 /********************* start JagBytIMnemonicInterface implementation *********************/
 
 
@@ -105,6 +101,37 @@ static int l_mnemonic_get_branch_offset(JagBytIMnemonic *self) {
 	JagBytOpCompareReferencePrivate *priv = JAG_BYT_OP_COMPARE_REFERENCE_GET_PRIVATE(self);
 	int offset = jag_byt_imnemonic_get_offset(self);
 	return offset+priv->branch_offset;
+}
+
+
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpCompareReferencePrivate *priv = JAG_BYT_OP_COMPARE_REFERENCE_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new();
+	if (priv->with_zero) {
+		switch(priv->condition_type) {
+			case JAG_BYT_CONDITION_TYPE_EQUAL :
+				cat_string_wo_append_chars(result, "ifnull ");
+				break;
+			case JAG_BYT_CONDITION_TYPE_NOT_EQUAL :
+				cat_string_wo_append_chars(result, "ifnonnull ");
+				break;
+			default :
+				break;
+		}
+	} else {
+		switch(priv->condition_type) {
+			case JAG_BYT_CONDITION_TYPE_EQUAL :
+				cat_string_wo_append_chars(result, "if_acmpeq ");
+				break;
+			case JAG_BYT_CONDITION_TYPE_NOT_EQUAL :
+				cat_string_wo_append_chars(result, "if_acmpne ");
+				break;
+			default :
+				break;
+		}
+	}
+	cat_string_wo_append_decimal(result, priv->branch_offset);
+	return result;
 }
 
 
@@ -116,7 +143,7 @@ static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 	iface->getContinuesOffset = p_iface->getContinuesOffset;
 	iface->getBranchOffset = l_mnemonic_get_branch_offset;
 	iface->getLength = p_iface->getLength;
-
+	iface->toString = l_to_string;
 }
 
 /********************* end JagBytIMnemonicInterface implementation *********************/

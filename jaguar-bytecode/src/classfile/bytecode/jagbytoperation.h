@@ -25,8 +25,6 @@
 #ifndef JAGBYTOPERATION_H_
 #define JAGBYTOPERATION_H_
 
-typedef enum _JagBytOperation JagBytOperation;
-
 enum _JagBytOperation {
 
 	OP_NOP              = 0x00, //, "nop"),
@@ -287,6 +285,7 @@ enum _JagBytOperation {
 	OP_IMPDEP2		= 0xFF, //, "impdep2")		/* reserved */
 };
 
+typedef enum _JagBytOperation JagBytOperation;
 
 
 //	;

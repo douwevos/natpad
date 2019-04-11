@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPPUSHINDEX_H_
 #define JAGBYTOPPUSHINDEX_H_
 
@@ -59,6 +58,5 @@ JagBytOpPushIndex *jag_byt_op_push_index_new(JagBytOperation operation, int offs
 int jag_byt_op_push_index_get_pool_index(JagBytOpPushIndex *op_push_index);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPPUSHINDEX_H_ */

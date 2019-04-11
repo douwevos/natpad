@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopvalueconvert.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -33,15 +34,16 @@ struct _JagBytOpValueConvertPrivate {
 	JagBytType destination_type;
 };
 
-G_DEFINE_TYPE (JagBytOpValueConvert, jag_byt_op_value_convert, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_CODE(JagBytOpValueConvert, jag_byt_op_value_convert, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_value_convert_class_init(JagBytOpValueConvertClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
 	g_type_class_add_private(clazz, sizeof(JagBytOpValueConvertPrivate));
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -56,16 +58,14 @@ static void jag_byt_op_value_convert_init(JagBytOpValueConvert *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpValueConvert *instance = JAG_BYT_OP_VALUE_CONVERT(object);
-//	JagBytOpValueConvertPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_value_convert_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_value_convert_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -79,8 +79,40 @@ JagBytOpValueConvert *jag_byt_op_value_convert_new(JagBytOperation operation, in
 	return result;
 }
 
+/********************* start JagBytIMnemonic implementation *********************/
 
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	CatStringWo *result = cat_string_wo_new();
+	short op_code = jag_byt_imnemonic_get_opp_code(self);
+	switch(op_code) {
+		case OP_I2L : cat_string_wo_append_chars(result, "i2l"); break;
+		case OP_I2F : cat_string_wo_append_chars(result, "i2f"); break;
+		case OP_I2D : cat_string_wo_append_chars(result, "i2d"); break;
+		case OP_I2S : cat_string_wo_append_chars(result, "i2s"); break;
+		case OP_I2B : cat_string_wo_append_chars(result, "i2b"); break;
+		case OP_I2C : cat_string_wo_append_chars(result, "i2c"); break;
+		case OP_L2I : cat_string_wo_append_chars(result, "l2i"); break;
+		case OP_L2F : cat_string_wo_append_chars(result, "l2f"); break;
+		case OP_L2D : cat_string_wo_append_chars(result, "l2d"); break;
+		case OP_D2I : cat_string_wo_append_chars(result, "d2i"); break;
+		case OP_D2L : cat_string_wo_append_chars(result, "d2l"); break;
+		case OP_D2F : cat_string_wo_append_chars(result, "d2f"); break;
+		case OP_F2I : cat_string_wo_append_chars(result, "f2i"); break;
+		case OP_F2L : cat_string_wo_append_chars(result, "f2l"); break;
+		case OP_F2D : cat_string_wo_append_chars(result, "f2d"); break;
+	}
+	return result;
+}
 
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
 
-
-
+/********************* end JagBytIMnemonic implementation *********************/

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPGOTO_H_
 #define JAGBYTOPGOTO_H_
 
@@ -58,6 +57,5 @@ GType jag_byt_op_goto_get_type();
 JagBytOpGoto *jag_byt_op_goto_new(JagBytOperation operation, int offset, int branch_offset);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPGOTO_H_ */

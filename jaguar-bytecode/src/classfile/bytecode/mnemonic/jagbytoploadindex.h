@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPLOADINDEX_H_
 #define JAGBYTOPLOADINDEX_H_
 
@@ -61,6 +60,5 @@ JagBytOpLoadIndex *jag_byt_op_load_index_new(JagBytOperation operation, int offs
 int jag_byt_op_load_index_get_frame_index(JagBytOpLoadIndex *load_index);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPLOADINDEX_H_ */

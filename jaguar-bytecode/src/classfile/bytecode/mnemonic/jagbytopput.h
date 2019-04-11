@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPPUT_H_
 #define JAGBYTOPPUT_H_
-
 
 #include "../jagbytabstractmnemonic.h"
 #include <caterpillar.h>
@@ -60,9 +58,6 @@ JagBytOpPut *jag_byt_op_put_new(JagBytOperation operation, int offset, int pool_
 
 int jag_byt_op_put_get_field_reference_pool_index(JagBytOpPut *op_put);
 
-
 G_END_DECLS
-
-
 
 #endif /* JAGBYTOPPUT_H_ */

@@ -37,9 +37,6 @@
 
 G_BEGIN_DECLS
 
-
-
-
 #define JAG_BYT_TYPE_CLASSFILE              (jag_byt_classfile_get_type())
 #define JAG_BYT_CLASSFILE(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), jag_byt_classfile_get_type(), JagBytClassfile))
 #define JAG_BYT_CLASSFILE_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), JAG_BYT_TYPE_CLASSFILE, JagBytClassfileClass))

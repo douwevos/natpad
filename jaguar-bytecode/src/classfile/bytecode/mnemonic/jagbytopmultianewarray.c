@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "jagbytopmultianewarray.h"
+#include "../jagbytimnemonic.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -33,15 +34,16 @@ struct _JagBytOpMultiANewArrayPrivate {
 	int dim_count;
 };
 
-G_DEFINE_TYPE (JagBytOpMultiANewArray, jag_byt_op_multi_a_new_array, JAG_BYT_TYPE_ABSTRACT_MNEMONIC)
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_CODE(JagBytOpMultiANewArray, jag_byt_op_multi_a_new_array, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
+);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_multi_a_new_array_class_init(JagBytOpMultiANewArrayClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
 	g_type_class_add_private(clazz, sizeof(JagBytOpMultiANewArrayPrivate));
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -56,16 +58,14 @@ static void jag_byt_op_multi_a_new_array_init(JagBytOpMultiANewArray *instance) 
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpMultiANewArray *instance = JAG_BYT_OP_MULTI_A_NEW_ARRAY(object);
-//	JagBytOpMultiANewArrayPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_multi_a_new_array_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_multi_a_new_array_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -89,4 +89,26 @@ int jag_byt_op_multi_a_new_array_get_nr_of_dimensions(JagBytOpMultiANewArray *op
 	return JAG_BYT_OP_MULTI_A_NEW_ARRAY_GET_PRIVATE(op_multi_new_array)->dim_count;
 }
 
+/********************* start JagBytIMnemonic implementation *********************/
 
+static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
+	JagBytOpMultiANewArrayPrivate *priv = JAG_BYT_OP_MULTI_A_NEW_ARRAY_GET_PRIVATE(self);
+	CatStringWo *result = cat_string_wo_new_with("multianewarray ");
+	cat_string_wo_append_decimal(result, priv->class_pool_index);
+	cat_string_wo_append_chars(result, ", ");
+	cat_string_wo_append_decimal(result, priv->dim_count);
+	return result;
+}
+
+static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
+	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);
+	iface->getBranchOffset = p_iface->getBranchOffset;
+	iface->getContinuesOffset = p_iface->getContinuesOffset;
+	iface->getLength = p_iface->getLength;
+	iface->getOffset = p_iface->getOffset;
+	iface->getOperation = p_iface->getOperation;
+	iface->getOppCode = p_iface->getOppCode;
+	iface->toString = l_to_string;
+}
+
+/********************* end JagBytIMnemonic implementation *********************/

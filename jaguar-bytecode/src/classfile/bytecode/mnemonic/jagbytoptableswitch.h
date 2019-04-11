@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTOPTABLESWITCH_H_
 #define JAGBYTOPTABLESWITCH_H_
 
@@ -58,6 +57,5 @@ GType jag_byt_op_table_switch_get_type();
 JagBytOpTableSwitch *jag_byt_op_table_switch_new(int offset, int default_value, int low_value, int high_value, int *table);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTOPTABLESWITCH_H_ */

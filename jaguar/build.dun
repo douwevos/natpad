@@ -9,7 +9,6 @@ module {
 		module 'caterpillar';
 		module 'jaguar-bytecode';
 		module 'jaguar-parser';
-		module 'jaguar-decompiler';
 		module 'elk';
 		module 'gross-cc-dung';
 		module 'gross-runtime';
