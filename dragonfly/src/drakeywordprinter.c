@@ -287,7 +287,6 @@ void dra_keyword_printer_flush_line_tags(DraKeywordPrinter *printer) {
 
 
 void dra_keyword_printer_print_line_tag(DraKeywordPrinter *printer, DraLineTagWo *c_line_tag_wo) {
-	cat_stacktrace_print();
 	DraKeywordPrinterPrivate *priv = dra_keyword_printer_get_instance_private(printer);
 	int row = dra_line_tag_wo_get_row(c_line_tag_wo);
 	if (row<priv->current_line_index) {

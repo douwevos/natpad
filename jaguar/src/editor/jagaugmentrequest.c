@@ -33,7 +33,7 @@ struct _JagAugmentRequestPrivate {
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagAugmentRequest, jag_augment_request, DRA_TYPE_AUGMENT_REQUEST,
+G_DEFINE_TYPE_WITH_CODE(JagAugmentRequest, jag_augment_request, DRA_TYPE_AUGMENT_REQUEST, // @suppress("Unused static function")
 		G_ADD_PRIVATE(JagAugmentRequest)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
