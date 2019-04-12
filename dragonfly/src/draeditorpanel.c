@@ -113,6 +113,10 @@ void dra_editor_panel_construct(DraEditorPanel *editor_panel, LeaIPanelOwner *pa
 	DraEditorPanelClass *editor_pan_class = DRA_EDITOR_PANEL_GET_CLASS(editor_panel);
 	priv->focus_order_index = 0;
 
+	if (request_factory == NULL) {
+		request_factory = dra_panel_owner_get_default_augmentor((DraPanelOwner *) panel_owner);
+	}
+
 
 //	CatStringWo *a_slot_key_spell = cat_string_wo_new("spell-checker");
 //	a_slot_key_spell = cat_string_wo_anchor(a_slot_key_spell, 0);

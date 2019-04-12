@@ -27,6 +27,7 @@
 #include "spell/draspellhelper.h"
 #include "document/draconnectormap.h"
 #include "macros/dramacromanager.h"
+#include "document/draiconnectorrequestfactory.h"
 #include <chameleon.h>
 #include <caterpillar.h>
 #include <leafhopper.h>
@@ -90,6 +91,7 @@ DraSpellHelper *dra_panel_owner_get_spell_helper(DraPanelOwner *panel_owner);
 
 void dra_panel_owner_setup_context_menu(DraPanelOwner *panel_owner, LeaActionGroup *ctx_menu_grp, DraEditor *editor, ChaCursorWo *cursor);
 
+DraIConnectorRequestFactory *dra_panel_owner_get_default_augmentor(DraPanelOwner *panel_owner);
 
 G_END_DECLS
 

@@ -24,6 +24,7 @@
 #include "draeditor.h"
 #include "drastatusbarcontent.h"
 #include "action/dragroupmain.h"
+#include "document/drabasicaugmentor.h"
 #include <cow.h>
 
 #include <logging/catlogdefs.h>
@@ -59,6 +60,8 @@ struct _DraPanelOwnerPrivate {
 	DraConnectorMap *connector_map;
 
 	DraPreferencesWo *a_preferences;
+
+	DraBasicAugmentor *default_augmentor;
 };
 
 static void l_panel_owner_iface_init(LeaIPanelOwnerInterface *iface);
@@ -108,6 +111,7 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->w_status_bar_content);
 	cat_unref_ptr(priv->macro_manager);
 	cat_unref_ptr(priv->connector_map);
+	cat_unref_ptr(priv->default_augmentor);
 	G_OBJECT_CLASS(dra_panel_owner_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -122,6 +126,7 @@ static void l_finalize(GObject *object) {
 
 void dra_panel_owner_construct(DraPanelOwner *panel_owner, LeaFrame *frame, WorService *wor_service) {
 	DraPanelOwnerPrivate *priv = dra_panel_owner_get_instance_private(panel_owner);
+	priv->default_augmentor = dra_basic_augmentor_new();
 	priv->frame = cat_ref_ptr(frame);
 	priv->key_context = lea_key_context_new((CatStringWo *) cat_string_wo_new_with("dragonfly-key-context"));
 	priv->e_panel_list = cat_array_wo_new();
@@ -179,6 +184,11 @@ DraConnectorMap *dra_panel_owner_get_connector_map(DraPanelOwner *panel_owner) {
 DraSpellHelper *dra_panel_owner_get_spell_helper(DraPanelOwner *panel_owner) {
 	DraPanelOwnerPrivate *priv = dra_panel_owner_get_instance_private(panel_owner);
 	return dra_connector_map_get_spell_helper(priv->connector_map);
+}
+
+DraIConnectorRequestFactory *dra_panel_owner_get_default_augmentor(DraPanelOwner *panel_owner) {
+	DraPanelOwnerPrivate *priv = dra_panel_owner_get_instance_private(panel_owner);
+	return (DraIConnectorRequestFactory *) priv->default_augmentor;
 }
 
 
