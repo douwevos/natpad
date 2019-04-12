@@ -80,6 +80,7 @@ gboolean cha_line_layout_set_preedit(ChaLineLayout *line_layout, const CatString
 
 
 const CatStringWo *cha_line_layout_get_text(const ChaLineLayout *line_layout);
+ChaLineEnd cha_line_layout_get_line_end(const ChaLineLayout *line_layout);
 
 gboolean cha_line_Layout_set_y_position(ChaLineLayout *line_layout, long long int ypos);
 

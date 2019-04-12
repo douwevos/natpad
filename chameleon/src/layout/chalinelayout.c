@@ -247,6 +247,11 @@ const CatStringWo *cha_line_layout_get_text(const ChaLineLayout *line_layout) {
 	return priv->a_text;
 }
 
+ChaLineEnd cha_line_layout_get_line_end(const ChaLineLayout *line_layout) {
+	ChaLineLayoutPrivate *priv = cha_line_layout_get_instance_private((ChaLineLayout *) line_layout);
+	return priv->line_end;
+}
+
 
 void cha_line_layout_mark_dirty(ChaLineLayout *line_layout) {
 	ChaLineLayoutPrivate *priv = cha_line_layout_get_instance_private(line_layout);

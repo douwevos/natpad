@@ -204,8 +204,6 @@ ChaRevisionWo *cha_document_get_editable_revision(ChaDocument *document) {
 }
 
 
-
-
 void cha_document_anchor_document(ChaDocument *document) {
 	cha_document_anchor_document_full(document, CHA_DOCUMENT_ANCHOR_MODE_ADD_HISTORY);
 }

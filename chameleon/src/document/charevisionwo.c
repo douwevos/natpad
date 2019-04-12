@@ -38,6 +38,8 @@ struct _ChaRevisionWoPrivate {
 	ChaPageListWo *page_list;
 	ChaFormWo *form;
 	ChaLoadToken *load_token;
+	ChaLineEnd line_ends;
+	gboolean line_ends_are_mixed;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -108,6 +110,8 @@ ChaRevisionWo *cha_revision_wo_new() {
 	priv->cursor = cha_cursor_wo_new();
 	priv->load_token = NULL;
 	priv->form = NULL;
+	priv->line_ends = CHA_LINE_END_LF;
+	priv->line_ends_are_mixed = FALSE;
 	ChaPageWo *page = (ChaPageWo *) cha_full_page_wo_new(NULL);
 	cha_page_list_wo_add_page(priv->page_list, page);
 	ChaLineWo *line = cha_line_wo_new();
@@ -189,6 +193,15 @@ void cha_revision_wo_set_slot_content(ChaRevisionWo *revision, int slot_index, G
 	}
 }
 
+ChaLineEnd cha_revision_wo_get_line_ends(const ChaRevisionWo *revision) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) revision);
+	return priv->line_ends;
+}
+
+gboolean cha_revision_wo_get_line_ends_are_mixed(const ChaRevisionWo *revision) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) revision);
+	return priv->line_ends_are_mixed;
+}
 
 static void l_dump(const ChaRevisionWo *revision) {
 	cat_log_on_trace({
@@ -209,7 +222,6 @@ static void l_dump(const ChaRevisionWo *revision) {
 		}
 	})
 }
-
 
 int cha_revision_wo_get_page_list_version(const ChaRevisionWo *revision) {
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) revision);
@@ -254,6 +266,14 @@ ChaLoadToken *cha_revision_wo_get_load_token(ChaRevisionWo *revision) {
 			cat_log_error("Object is read only:%o", e_revision); \
 			return rval; \
 		} \
+
+
+void cha_revision_wo_set_line_ends(ChaRevisionWo *e_revision, ChaLineEnd line_ends, gboolean line_ends_are_mixed) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(e_revision);
+	CHECK_IF_WRITABLE();
+	priv->line_ends = line_ends;
+	priv->line_ends_are_mixed = line_ends_are_mixed;
+}
 
 void cha_revision_wo_set_load_token(ChaRevisionWo *e_revision, ChaLoadToken *load_token) {
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(e_revision);
@@ -504,10 +524,7 @@ void cha_revision_wo_line_multi_replace(ChaRevisionWo *e_revision, long long row
 				}
 				dest_utf8_offset = next_out;
 			}
-
 		}
-
-
 
 		if (left_result && replace_idx==0) {
 			*left_result = cat_string_wo_length(e_buf);
@@ -1220,6 +1237,8 @@ void cha_revision_wo_clear(ChaRevisionWo *e_revision) {
 		priv->page_list = e_list;
 	}
 	cha_page_list_wo_clear(priv->page_list);
+	priv->line_ends = CHA_LINE_END_NONE;
+	priv->line_ends_are_mixed = FALSE;
 }
 
 gboolean cha_revision_wo_move_lines_to(ChaRevisionWo *e_revision, ChaLineLocationWo *ll_first, ChaLineLocationWo *ll_last, int delta) {
@@ -1405,6 +1424,8 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 		priv->cursor = cat_ref_ptr(rpriv->cursor);
 		priv->load_token = cat_ref_ptr(rpriv->load_token);
 		priv->form = cat_ref_ptr(rpriv->form);
+		priv->line_ends = rpriv->line_ends;
+		priv->line_ends_are_mixed = rpriv->line_ends_are_mixed;
 	} else {
 		priv->page_list = NULL;
 		priv->enriched_count = 0;
@@ -1412,6 +1433,8 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 		priv->cursor = NULL;
 		priv->load_token = NULL;
 		priv->form = NULL;
+		priv->line_ends = CHA_LINE_END_NONE;
+		priv->line_ends_are_mixed = FALSE;
 	}
 	return CAT_WO_CLASS(cha_revision_wo_parent_class)->constructEditable(e_uninitialized, original, info);
 }
@@ -1610,6 +1633,8 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->version = priv_src->version;
 		priv->enrichment_data = cat_ref_ptr(priv->enrichment_data);
 		priv->form = cha_form_wo_clone(priv_src->form, CAT_CLONE_DEPTH_NONE);
+		priv->line_ends = priv_src->line_ends;
+		priv->line_ends_are_mixed = priv_src->line_ends_are_mixed;
 	} else {
 		priv->page_list = cha_page_list_wo_new();
 		priv->enriched_count = 0;
@@ -1617,6 +1642,8 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->cursor = cha_cursor_wo_new();
 		priv->load_token = NULL;
 		priv->form = NULL;
+		priv->line_ends = CHA_LINE_END_NONE;
+		priv->line_ends_are_mixed = FALSE;
 	}
 
 	CatWoClass *wocls = CAT_WO_CLASS(cha_revision_wo_parent_class);
