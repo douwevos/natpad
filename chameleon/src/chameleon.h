@@ -53,6 +53,7 @@
 #include "uow/chauowinserttemplate.h"
 #include "uow/chauownextformfield.h"
 #include "uow/chauowformclear.h"
+#include "uow/chauowsetlineends.h"
 #include "preferences/chapreferenceswo.h"
 #include "preferences/chaprefscolormapwo.h"
 #include "preferences/chaprefstemplatewo.h"

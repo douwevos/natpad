@@ -106,7 +106,7 @@ gboolean cha_page_wo_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) {
 	return CHA_PAGE_WO_GET_CLASS(page)->writeToStream(page, write_req);
 }
 
-static char let[] = { 13, 10, 13 };
+static char let[] = { 13, 10, 13, 21 };
 
 gboolean cha_page_wo_write_single_line(ChaPageWo *page, ChaWriteReq *write_req, const char *txt_data, int txt_len, ChaLineEnd line_end) {
 	gsize written;
@@ -130,13 +130,11 @@ gboolean cha_page_wo_write_single_line(ChaPageWo *page, ChaWriteReq *write_req, 
 		return TRUE;
 	}
 
-	if (write_req->force_line_end!=CHA_LINE_END_NONE) {
-		line_end = write_req->force_line_end;
-	}
-
-
 	gboolean result = TRUE;
 	switch(line_end) {
+		case CHA_LINE_END_NL :
+			result = g_output_stream_write_all(out_stream, let+3, 1, &written, NULL, (GError **) &(write_req->error));
+			break;
 		case CHA_LINE_END_CR :
 			result = g_output_stream_write_all(out_stream, let, 1, &written, NULL, (GError **) &(write_req->error));
 			break;
@@ -272,6 +270,11 @@ void cha_scan_lines(char *text, char *end, ChaScannedLine cha_scanned_line, void
 			keep_running = cha_scanned_line(off_last, off, le, data);
 			off = next_off;
 			off_last = next_off;
+		} else if (ch==0x15) {
+			keep_running = cha_scanned_line(off_last, off, CHA_LINE_END_NL, data);
+			off++;
+			off_last = off;
+
 		} else {	
 			off++;
 		}

@@ -49,6 +49,8 @@ struct _LeaFullMenuItem {
 	CatStringWo *a_stock_id;
 	LeaKeySequence *key_sequence;
 	int key_pixel_width;
+	gboolean toggable;
+	gboolean is_toggled;
 };
 
 struct _LeaFullMenuItemClass {
@@ -64,6 +66,11 @@ void lea_full_menu_item_construct(LeaFullMenuItem *item);
 
 void lea_full_menu_item_set_key_sequence(LeaFullMenuItem *item, LeaKeySequence *key_sequence);
 void lea_full_menu_item_set_stock_id(LeaFullMenuItem *item, CatStringWo *a_stock_id);
+
+void lea_full_menu_item_set_toggable(LeaFullMenuItem *item, gboolean toggable);
+
+gboolean lea_full_menu_item_is_toggled(LeaFullMenuItem *item);
+void lea_full_menu_item_set_toggled(LeaFullMenuItem *item, gboolean toggled);
 
 
 G_END_DECLS

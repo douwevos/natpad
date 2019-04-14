@@ -134,7 +134,7 @@ static gboolean l_page_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) 
 		CatStringWo *text = cha_line_wo_get_text(line);
 		const char *txt_data = cat_string_wo_getchars(text);
 		int txt_len = cat_string_wo_length(text);
-		if (!cha_page_wo_write_single_line(page, write_req, txt_data, txt_len, cha_line_wo_get_line_end(line))) {
+		if (!cha_page_wo_write_single_line(page, write_req, txt_data, txt_len, cha_line_wo_compute_line_end(line, write_req->line_ends, write_req->line_ends_are_mixed))) {
 			result = FALSE;
 			break;
 		}

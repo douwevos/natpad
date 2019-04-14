@@ -114,7 +114,7 @@ void dra_editor_panel_construct(DraEditorPanel *editor_panel, LeaIPanelOwner *pa
 	priv->focus_order_index = 0;
 
 	if (request_factory == NULL) {
-//		request_factory = dra_panel_owner_get_default_augmentor((DraPanelOwner *) panel_owner);
+		request_factory = dra_panel_owner_get_default_augmentor((DraPanelOwner *) panel_owner);
 	}
 
 

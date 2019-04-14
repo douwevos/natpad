@@ -205,6 +205,7 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 	gboolean is_last_line = FALSE;
 	switch(line_end) {
 		case CHA_LINE_END_NONE : is_last_line = TRUE; break;
+		case CHA_LINE_END_NL :
 		case CHA_LINE_END_LF :
 		case CHA_LINE_END_CR :
 			is_last_line = off_line_end + 1 >= end_ptr; break;
@@ -271,6 +272,7 @@ static gboolean l_scanned_line_full_mode(char *off_line_start, char *off_line_en
 	gboolean is_last_line = FALSE;
 	switch(line_end) {
 		case CHA_LINE_END_NONE : is_last_line = TRUE; break;
+		case CHA_LINE_END_NL :
 		case CHA_LINE_END_LF :
 		case CHA_LINE_END_CR :
 			is_last_line = off_line_end + 1 >= end_ptr; break;
@@ -299,7 +301,7 @@ static gboolean l_scanned_line_full_mode(char *off_line_start, char *off_line_en
 	priv->convert_request.output = NULL;
 
 //	CatStringWo *text = (CatStringWo *) cat_string_wo_new_anchored(off_line_start, off_line_end-off_line_start);
-	cat_log_trace("line_end=%d text=%s, is_last_line=%d", line_end, text, is_last_line);
+	cat_log_error("line_end=%d text=%s, is_last_line=%d", line_end, text, is_last_line);
 	ChaLineWo *line = cha_line_wo_new_anchored(text, line_end);
 	cat_array_wo_append(priv->lines, (GObject *) line);
 

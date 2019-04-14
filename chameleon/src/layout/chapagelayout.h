@@ -23,6 +23,7 @@
 #ifndef CHAPAGELAYOUT_H_
 #define CHAPAGELAYOUT_H_
 
+#include "../document/chalinewo.h"
 #include <caterpillar.h>
 #include <gtk/gtk.h>
 
@@ -48,6 +49,8 @@ struct _ChaPageLayoutContext {
 	int page_version;
 	short font_version;
 	int settings_version;
+	ChaLineEnd line_ends;
+	gboolean line_ends_are_mixed;
 };
 
 struct _ChaPageLayout {

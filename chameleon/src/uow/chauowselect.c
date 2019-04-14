@@ -57,8 +57,6 @@ static void cha_uow_select_init(ChaUowSelect *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	ChaUowSelect *instance = CHA_UOW_SELECT(object);
-//	ChaUowSelectPrivate *priv = cha_uow_select_get_instance_private(instance);
 	G_OBJECT_CLASS(cha_uow_select_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }

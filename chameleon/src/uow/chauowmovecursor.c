@@ -98,8 +98,12 @@ static void l_next_column(ChaUowMoveCursor *move_cursor, ChaDocumentView *docume
 	ChaLineWo *line = cha_page_wo_line_at(page, page_line_index);
 	ChaLineLayout *a_line_layout = cha_document_view_get_line_layout_ref(document_view, line);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
+
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 
 	PangoContext *pango_context = cha_document_view_get_pango_context(document_view);
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
@@ -187,8 +191,11 @@ static void l_prev_column(ChaUowMoveCursor *move_cursor, ChaDocumentView *docume
 	PangoContext *pango_context = cha_document_view_get_pango_context(document_view);
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 	cha_line_layout_update(a_line_layout, pango_context, color_map);
 	PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 
@@ -273,8 +280,11 @@ static void l_prev_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 	ChaLineLayout *a_line_layout = cha_document_view_get_line_layout_ref(document_view, line);
 	PangoContext *pango_context = cha_document_view_get_pango_context(document_view);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
 	cha_line_layout_update(a_line_layout, pango_context, color_map);
 	PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
@@ -318,7 +328,8 @@ static void l_prev_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 
 			PangoContext *pango_context = cha_document_view_get_pango_context(document_view);
 			cha_line_layout_lock(a_line_layout, TRUE);
-			cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+			line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
+			cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 			cha_line_layout_update(a_line_layout, pango_context, color_map);
 			PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 
@@ -398,8 +409,11 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 	PangoContext *pango_context = cha_document_view_get_pango_context(document_view);
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 	cha_line_layout_update(a_line_layout, pango_context, color_map);
 	PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 
@@ -441,7 +455,8 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 			ChaLineLayout *a_line_layout = cha_document_view_get_line_layout_ref(document_view, line);
 			cat_log_debug("a_line_layout=%o", a_line_layout);
 			cha_line_layout_lock(a_line_layout, TRUE);
-			cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+			line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
+			cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 			cha_line_layout_update(a_line_layout, pango_context, color_map);
 
 			PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
@@ -524,7 +539,10 @@ static void l_begin_of_line(ChaUowMoveCursor *move_cursor, ChaDocumentView *docu
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 	cha_line_layout_update(a_line_layout, pango_context, color_map);
 	PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 
@@ -553,7 +571,10 @@ static void l_end_of_line(ChaUowMoveCursor *move_cursor, ChaDocumentView *docume
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 	cha_line_layout_update(a_line_layout, pango_context, color_map);
 	PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 
@@ -611,8 +632,11 @@ static void l_page_down(ChaUowMoveCursor *move_cursor, ChaDocumentView *document
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
 
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 	cha_line_layout_update(a_line_layout, pango_context, color_map);
 	PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 	int line_count = pango_layout_get_line_count(pango_layout);
@@ -685,8 +709,9 @@ static void l_page_down(ChaUowMoveCursor *move_cursor, ChaDocumentView *document
 				cat_unref_ptr(line);
 				line = cha_page_wo_line_at(page, page_line_index);
 				a_line_layout = cha_document_view_get_line_layout_ref(document_view, line);
+				line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 				cha_line_layout_lock(a_line_layout, TRUE);
-				cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+				cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 				cha_line_layout_update(a_line_layout, pango_context, color_map);
 				pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 //				line_count = pango_layout_get_line_count(pango_layout);
@@ -762,8 +787,11 @@ static void l_page_up(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_v
 	ChaPrefsColorMapWo *color_map = cha_document_view_get_color_map(document_view);
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
 
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
+	ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 	cha_line_layout_lock(a_line_layout, TRUE);
-	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+	cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 	cha_line_layout_update(a_line_layout, pango_context, color_map);
 	PangoLayout *pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 	int line_count = pango_layout_get_line_count(pango_layout);
@@ -834,8 +862,9 @@ static void l_page_up(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_v
 				cat_unref_ptr(line);
 				line = cha_page_wo_line_at(page, page_line_index);
 				a_line_layout = cha_document_view_get_line_layout_ref(document_view, line);
+				line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 				cha_line_layout_lock(a_line_layout, TRUE);
-				cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
+				cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), line_end, view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version);
 				cha_line_layout_update(a_line_layout, pango_context, color_map);
 				pango_layout = cha_line_layout_get_pango_layout(a_line_layout);
 				line_count = pango_layout_get_line_count(pango_layout);

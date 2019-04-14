@@ -425,10 +425,27 @@ static void l_attachable_visibility_set(LeaIAttachable *self, gboolean sensitivi
 	}
 }
 
+static void l_attachable_toggability_set(LeaIAttachable *self, gboolean toggable) {
+	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(self);
+	if (LEA_IS_FULL_MENU_ITEM(priv->menu_item)) {
+		lea_full_menu_item_set_toggable((LeaFullMenuItem *) priv->menu_item, toggable);
+	}
+}
+
+
+static void l_attachable_toggled(LeaIAttachable *self, gboolean toggled) {
+	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(self);
+	if (LEA_IS_FULL_MENU_ITEM(priv->menu_item)) {
+		lea_full_menu_item_set_toggled((LeaFullMenuItem *) priv->menu_item, toggled);
+	}
+}
+
 
 static void l_attachable_iface_init(LeaIAttachableInterface *iface) {
 	iface->sensitivitySet = l_attachable_sensitivity_set;
 	iface->visibilitySet = l_attachable_visibility_set;
+	iface->toggabilitySet = l_attachable_toggability_set;
+	iface->toggled = l_attachable_toggled;
 }
 
 /********************* end LeaIAttachable implementation *********************/

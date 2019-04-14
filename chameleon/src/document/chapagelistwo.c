@@ -31,6 +31,8 @@ struct _ChaPageListWoPrivate {
 	int version;
 	int enriched_count;
 	CatArrayWo *page_array;
+	ChaLineEnd line_ends;
+	gboolean line_ends_are_mixed;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -86,6 +88,8 @@ ChaPageListWo *cha_page_list_wo_new() {
 	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private(result);
 	cat_wo_construct((CatWo *) result, TRUE);
 	priv->page_array = cat_array_wo_new();
+	priv->line_ends = CHA_LINE_END_LF;
+	priv->line_ends_are_mixed = FALSE;
 	return result;
 }
 
@@ -142,6 +146,17 @@ long long cha_page_list_wo_page_line_count(ChaPageListWo *page_list) {
 	}
 	cat_unref_ptr(iter);
 	return result;
+}
+
+
+ChaLineEnd cha_page_list_wo_get_line_ends(const ChaPageListWo *page_list) {
+	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private((ChaPageListWo *) page_list);
+	return priv->line_ends;
+}
+
+gboolean cha_page_list_wo_get_line_ends_are_mixed(const ChaPageListWo *page_list) {
+	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private((ChaPageListWo *) page_list);
+	return priv->line_ends_are_mixed;
 }
 
 
@@ -276,11 +291,19 @@ void cha_page_list_wo_remove_range(ChaPageListWo *e_page_list, int first, int la
 }
 
 
+void cha_page_list_wo_set_line_ends(ChaPageListWo *e_page_list, ChaLineEnd line_ends, gboolean line_ends_are_mixed) {
+	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private(e_page_list);
+	CHECK_IF_WRITABLE();
+	priv->line_ends = line_ends;
+	priv->line_ends_are_mixed = line_ends_are_mixed;
+}
 
 void cha_page_list_wo_clear(ChaPageListWo *e_page_list) {
 	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private(e_page_list);
 	CHECK_IF_WRITABLE_ARRAY()
 	cat_array_wo_clear(priv->page_array);
+	priv->line_ends = CHA_LINE_END_NONE;
+	priv->line_ends_are_mixed = FALSE;
 }
 
 void cha_page_list_wo_dump(const ChaPageListWo *list, CatStringWo *e_buf) {
@@ -339,8 +362,12 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 	if (original) {
 		ChaPageListWoPrivate *rpriv = cha_page_list_wo_get_instance_private((ChaPageListWo *) original);
 		priv->page_array = cat_ref_ptr(rpriv->page_array);
+		priv->line_ends = rpriv->line_ends;
+		priv->line_ends_are_mixed = rpriv->line_ends_are_mixed;
 	} else {
 		priv->page_array = NULL;
+		priv->line_ends = CHA_LINE_END_NONE;
+		priv->line_ends_are_mixed = FALSE;
 	}
 	return CAT_WO_CLASS(cha_page_list_wo_parent_class)->constructEditable(e_uninitialized, original, info);
 }
@@ -361,9 +388,13 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		ChaPageListWoPrivate *priv_src = cha_page_list_wo_get_instance_private(CHA_PAGE_LIST_WO(wo_source));
 		priv->page_array = cat_array_wo_clone(priv_src->page_array, CAT_CLONE_DEPTH_NONE);
 		priv->enriched_count = priv_src->enriched_count;
+		priv->line_ends = priv_src->line_ends;
+		priv->line_ends_are_mixed = priv_src->line_ends_are_mixed;
 	} else {
 		priv->page_array = cat_array_wo_new();
 		priv->enriched_count = 0;
+		priv->line_ends = CHA_LINE_END_NONE;
+		priv->line_ends_are_mixed = FALSE;
 	}
 
 	CatWoClass *wocls = CAT_WO_CLASS(cha_page_list_wo_parent_class);
@@ -382,7 +413,8 @@ static gboolean l_equal(const CatWo *wo_a, const CatWo *wo_b) {
 	}
 	const ChaPageListWoPrivate *priv_a = cha_page_list_wo_get_instance_private((ChaPageListWo *) wo_a);
 	const ChaPageListWoPrivate *priv_b = cha_page_list_wo_get_instance_private((ChaPageListWo *) wo_b);
-	return cat_array_wo_equal(priv_a->page_array, priv_b->page_array, NULL);
+	return cat_array_wo_equal(priv_a->page_array, priv_b->page_array, NULL)&& priv_a->line_ends == priv_b->line_ends
+			&& priv_a->line_ends_are_mixed == priv_b->line_ends_are_mixed;
 }
 
 /********************* start CatIStringable implementation *********************/

@@ -41,12 +41,15 @@ struct _LeaIAttachableInterface {
 	GTypeInterface parent_iface;
 	void (*sensitivitySet)(LeaIAttachable *self, gboolean sensitivity);
 	void (*visibilitySet)(LeaIAttachable *self, gboolean visibility);
+	void (*toggabilitySet)(LeaIAttachable *self, gboolean toggable);
+	void (*toggled)(LeaIAttachable *self, gboolean toggled);
 };
 
 GType lea_iattachable_get_type(void);
 
 void lea_iattachable_sensitivity_set(LeaIAttachable *self, gboolean sensitivity);
 void lea_iattachable_visibility_set(LeaIAttachable *self, gboolean visibility);
-
+void lea_iattachable_toggability_set(LeaIAttachable *self, gboolean toggable);
+void lea_iattachable_toggled(LeaIAttachable *self, gboolean toggled);
 
 #endif /* LEAIATTACHABLE_H_ */

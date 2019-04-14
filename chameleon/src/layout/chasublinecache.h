@@ -62,6 +62,8 @@ struct _ChaSubLineCacheUpdate {
 	gboolean cache_dirty;
 	gboolean highlight_current_line;
 	ChaPrefsColorMapWo *color_map;
+	gboolean line_ends_are_mixed;
+	ChaLineEnd line_ends;
 };
 
 

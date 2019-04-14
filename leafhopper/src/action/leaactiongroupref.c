@@ -248,6 +248,8 @@ static void l_attachable_visibility_set(LeaIAttachable *self, gboolean sensitivi
 static void l_attachable_iface_init(LeaIAttachableInterface *iface) {
 	iface->sensitivitySet = l_attachable_sensitivity_set;
 	iface->visibilitySet = l_attachable_visibility_set;
+	iface->toggabilitySet = NULL;
+	iface->toggled = NULL;
 }
 
 /********************* end LeaIAttachable implementation *********************/

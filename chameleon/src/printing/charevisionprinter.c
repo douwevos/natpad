@@ -214,7 +214,8 @@ static void l_create_pages(ChaRevisionPrinter *revision_print) {
 	gboolean wrap_lines = cha_print_settings_get_wrap_lines(priv->print_settings);
 	gboolean do_print_markup = cha_print_settings_get_print_markup(priv->print_settings);
 
-
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_revision);
 
 	ChaPrintPage *last_page = NULL;
 
@@ -223,7 +224,7 @@ static void l_create_pages(ChaRevisionPrinter *revision_print) {
 		ChaLineLocationWo *line_location = (ChaLineLocationWo *) cat_iiterator_next(line_iterator);
 		ChaLineWo *line = cha_revision_wo_line_at_location(a_revision, line_location);
 		CatStringWo *a_text = cha_line_wo_get_text(line);
-		ChaLineEnd line_end = cha_line_wo_get_line_end(line);
+		ChaLineEnd line_end = cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed);
 
 		ChaLineLayout *line_layout = NULL;
 		ChaDocumentViewClass *dv_class = CHA_DOCUMENT_VIEW_GET_CLASS(document_view);

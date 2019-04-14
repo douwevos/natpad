@@ -168,6 +168,12 @@ static gunichar l_scan_utf8_char(CatIUtf8Scanner *self, CatStreamStatus *status)
 						le = cha_line_wo_get_line_end(priv->a_cur_line);
 					}
 					switch(le) {
+						case CHA_LINE_END_NL :
+							if (nidx==0) {
+								priv->cur_char_index++;
+								return (gunichar) 0x15;
+							}
+							break;
 						case CHA_LINE_END_CR :
 							if (nidx==0) {
 								priv->cur_char_index++;

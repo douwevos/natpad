@@ -159,6 +159,8 @@ static void l_mark_toggle_all(ChaDocumentView *document_view, ChaRevisionWo *e_r
 static void l_mark_copy(ChaDocumentView *document_view, ChaRevisionWo *e_revision) {
 	int page_idx;
 	int page_count = cha_revision_wo_page_count(e_revision);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(e_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(e_revision);
 	cat_log_debug("page_count=%d", page_count);
 	CatStringWo *e_buf = cat_string_wo_new();
 	for(page_idx=0; page_idx<page_count; page_idx++) {
@@ -173,7 +175,11 @@ static void l_mark_copy(ChaDocumentView *document_view, ChaRevisionWo *e_revisio
 				if (cha_page_wo_is_line_marked(page, line_idx)) {
 					const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(page, line_idx, FALSE);
 					cat_string_wo_append_chars_len(e_buf, utf8_text.text, utf8_text.text_len);
-					cha_line_end_to_string(utf8_text.line_end, e_buf);
+					ChaLineEnd line_end = utf8_text.line_end;
+					if (line_end!=CHA_LINE_END_NONE && !line_ends_are_mixed) {
+						line_end = line_ends;
+					}
+					cha_line_end_to_string(line_end, e_buf);
 					cha_utf8_text_cleanup(&utf8_text);
 				}
 			}

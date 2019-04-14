@@ -213,11 +213,10 @@ static int l_draw_eol(cairo_t *cairo, ChaSubLineCacheUpdate *update_ctx, int x_l
 	pango_layout_get_extents(update_ctx->scratch, NULL, &log_rect);
 
 	int xa = x_left;
-	int xb = x_left + log_rect.width/PANGO_SCALE + 5;
+	int xb = x_left + log_rect.width/PANGO_SCALE + 6;
 
-	cairo_save(cairo);
 	cha_prefs_color_map_wo_set_cairo_color(color_map, cairo, 15);
-	l_rounded_rect2(cairo, 1+x_left-update_ctx->view_x,1, xb - xa, update_ctx->sub_line_height-2);
+	l_rounded_rect2(cairo, 1+x_left-update_ctx->view_x,1, xb - 1 - xa, update_ctx->sub_line_height-2);
 	cha_prefs_color_map_wo_set_cairo_color(color_map, cairo, 0);
 	cairo_move_to(cairo, x_left+3-update_ctx->view_x, 0);
 	pango_cairo_show_layout(cairo, update_ctx->scratch);
@@ -433,29 +432,18 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 
 			/* show EOL */
 			if (is_last_sub_line) {
+				cairo_save(cairo);
+
 				int x_left;
 				pango_layout_line_index_to_x(pango_line, pango_line->start_index+pango_line->length-1, TRUE, &x_left);
 				x_left = x_left/PANGO_SCALE;
 
 				ChaLineEnd line_end = cha_line_layout_get_line_end(priv->line_layout);
+				if (line_end==CHA_LINE_END_NL) {
+					x_left = l_draw_eol(cairo, update_ctx, x_left, "NL");
+				}
 				if (line_end==CHA_LINE_END_CR || line_end==CHA_LINE_END_CRLF) {
 					x_left = l_draw_eol(cairo, update_ctx, x_left, "CR");
-
-//					pango_layout_set_text(update_ctx->scratch, "CR", 2);
-//
-//					PangoRectangle log_rect;
-//					pango_layout_get_extents(update_ctx->scratch, NULL, &log_rect);
-//
-//					int xa = x_left;
-//					int xb = x_left + log_rect.width/PANGO_SCALE + 5;
-//
-//					cairo_save(cairo);
-//					cha_prefs_color_map_wo_set_cairo_color(color_map, cairo, 15);
-//					l_rounded_rect2(cairo, 1+x_left-update_ctx->view_x,1, xb - xa, update_ctx->sub_line_height-2);
-//					cha_prefs_color_map_wo_set_cairo_color(color_map, cairo, 0);
-//					cairo_move_to(cairo, x_left+2-update_ctx->view_x, 0);
-//					pango_cairo_show_layout(cairo, update_ctx->scratch);
-//					x_left = xb;
 				}
 				if (line_end==CHA_LINE_END_LF || line_end==CHA_LINE_END_CRLF || line_end==CHA_LINE_END_LFCR) {
 					x_left = l_draw_eol(cairo, update_ctx, x_left, "LF");

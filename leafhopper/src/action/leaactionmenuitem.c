@@ -68,8 +68,6 @@ static void l_dispose(GObject *object) {
 }
 
 
-
-
 static void _update_label(LeaActionMenuItem *menu_item) {
 	GtkWidget *child = gtk_bin_get_child(GTK_BIN(menu_item));
 

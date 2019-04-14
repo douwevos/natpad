@@ -37,6 +37,7 @@
 #include "edit/draactiontolowercase.h"
 #include "edit/draactiontouppercase.h"
 #include "edit/draactionformat.h"
+#include "edit/dragrouplineendings.h"
 #include "edit/draactionopendeclaration.h"
 
 #include <logging/catlogdefs.h>
@@ -64,6 +65,7 @@ struct _DraGroupEditPrivate {
 	DraActionToLowerCase *action_to_lower_case;
 	DraActionToUpperCase *action_to_upper_case;
 	DraActionFormat *action_format;
+	DraGroupLineEndings *group_line_endings;
 
 	DraActionGotoLine *action_goto_line;
 	DraActionOpenDeclaration *action_open_declaration;
@@ -108,6 +110,7 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->action_to_lower_case);
 	cat_unref_ptr(priv->action_to_upper_case);
 	cat_unref_ptr(priv->action_format);
+	cat_unref_ptr(priv->group_line_endings);
 
 	cat_unref_ptr(priv->key_context);
 	G_OBJECT_CLASS(dra_group_edit_parent_class)->dispose(object);
@@ -190,33 +193,43 @@ DraGroupEdit *dra_group_edit_new(LeaKeyContext *key_context, gpointer clipboard_
 
 	priv->action_indent = dra_action_indent_new();
 	lea_action_set_key_context((LeaAction *) priv->action_indent, key_context);
-	lea_action_set_order((LeaAction *) priv->action_indent, -6);
+	lea_action_set_order((LeaAction *) priv->action_indent, -7);
 	lea_action_group_add(grp_context, (LeaAction *) priv->action_indent);
 
 	priv->action_dedent = dra_action_dedent_new();
 	lea_action_set_key_context((LeaAction *) priv->action_dedent, key_context);
-	lea_action_set_order((LeaAction *) priv->action_dedent, -5);
+	lea_action_set_order((LeaAction *) priv->action_dedent, -6);
 	lea_action_group_add(grp_context, (LeaAction *) priv->action_dedent);
 
 	priv->action_toggle_line_comment = dra_action_toggle_line_comment_new();
 	lea_action_set_key_context((LeaAction *) priv->action_toggle_line_comment, key_context);
-	lea_action_set_order((LeaAction *) priv->action_toggle_line_comment, -4);
+	lea_action_set_order((LeaAction *) priv->action_toggle_line_comment, -5);
 	lea_action_group_add(grp_context, (LeaAction *) priv->action_toggle_line_comment);
 
 	priv->action_to_lower_case = dra_action_to_lower_case_new();
 	lea_action_set_key_context((LeaAction *) priv->action_to_lower_case, key_context);
-	lea_action_set_order((LeaAction *) priv->action_to_lower_case, -3);
+	lea_action_set_order((LeaAction *) priv->action_to_lower_case, -4);
 	lea_action_group_add(grp_context, (LeaAction *) priv->action_to_lower_case);
 
 	priv->action_to_upper_case = dra_action_to_upper_case_new();
 	lea_action_set_key_context((LeaAction *) priv->action_to_upper_case, key_context);
-	lea_action_set_order((LeaAction *) priv->action_to_upper_case, -2);
+	lea_action_set_order((LeaAction *) priv->action_to_upper_case, -3);
 	lea_action_group_add(grp_context, (LeaAction *) priv->action_to_upper_case);
 
 	priv->action_format = dra_action_format_new();
 	lea_action_set_key_context((LeaAction *) priv->action_format, key_context);
+	lea_action_set_order((LeaAction *) priv->action_format, -2);
+	lea_action_group_add(grp_context, (LeaAction *) priv->action_format);
+
+	priv->group_line_endings = dra_group_line_endings_new(key_context);
+	lea_action_set_order((LeaAction *) priv->group_line_endings, -1);
+	lea_action_group_add(grp_context, (LeaAction *) priv->group_line_endings);
+
+
+	lea_action_set_key_context((LeaAction *) priv->action_format, key_context);
 	lea_action_set_order((LeaAction *) priv->action_format, -1);
 	lea_action_group_add(grp_context, (LeaAction *) priv->action_format);
+
 
 	cat_unref(grp_context);
 
@@ -252,6 +265,11 @@ void dra_group_edit_set_history_info(DraGroupEdit *group_edit, int history_index
 	dra_action_redo_set_has_redo(priv->action_redo, history_index+1<history_length);
 }
 
+void dra_group_edit_set_line_ends(DraGroupEdit *group_edit, ChaLineEnd line_ends, gboolean line_ends_are_mixed) {
+	DraGroupEditPrivate *priv = dra_group_edit_get_instance_private(group_edit);
+	dra_group_line_endings_set_line_ends(priv->group_line_endings, line_ends, line_ends_are_mixed);
+}
+
 
 void dra_group_edit_set_editor_panel(DraGroupEdit *group_edit, DraEditorPanel *editor_panel) {
 	DraGroupEditPrivate *priv = dra_group_edit_get_instance_private(group_edit);
@@ -273,6 +291,7 @@ void dra_group_edit_set_editor_panel(DraGroupEdit *group_edit, DraEditorPanel *e
 	dra_action_goto_line_set_editor_panel(priv->action_goto_line, editor_panel);
 	dra_action_open_declaration_set_editor_panel(priv->action_open_declaration, editor_panel);
 	dra_action_format_set_editor_panel(priv->action_format, editor_panel);
+	dra_group_line_endings_set_editor_panel(priv->group_line_endings, editor_panel);
 }
 
 

@@ -102,6 +102,9 @@ static void l_run_request(WorRequest *request) {
 	write_req.out_stream = (GOutputStream *) out_stream;
 	write_req.needs_conversion = FALSE;
 	write_req.charset_converter = priv->output_converter;
+	write_req.line_ends = cha_revision_wo_get_line_ends(rev);
+	write_req.line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(rev);
+
 	ChaIConverter *input_converter = cha_document_get_input_converter(priv->document);
 
 	if (priv->output_converter!=input_converter) {
@@ -110,8 +113,6 @@ static void l_run_request(WorRequest *request) {
 			write_req.charset_converter = input_converter;
 		}
 	}
-
-	write_req.force_line_end = cha_document_get_line_end_user(priv->document);
 
 	if (out_stream) {
 		int page_count = cha_revision_wo_page_count(rev);
