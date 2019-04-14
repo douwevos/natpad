@@ -203,7 +203,6 @@ NatpadWindow *natpad_window_new(GApplication *application, ElkPreferencesService
 
 
 	priv->jag_service = jag_service_new(wor_service, priv->elk_service, priv->moo_service);
-//	priv->che_service = che_service_new(config_container, priv->workspace_service, wor_service);
 	priv->che_service = che_service_new(wor_service, priv->elk_service);
 
 	priv->ter_service = ter_service_new(wor_service, priv->elk_service, priv->vip_service);

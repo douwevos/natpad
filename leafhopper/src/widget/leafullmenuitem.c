@@ -31,7 +31,7 @@
 #include "logging/catlog.h"
 
 
-G_DEFINE_TYPE(LeaFullMenuItem, lea_full_menu_item, GTK_TYPE_MENU_ITEM)
+G_DEFINE_TYPE(LeaFullMenuItem, lea_full_menu_item, GTK_TYPE_MENU_ITEM) // @suppress("Unused static function")
 
 static void _dispose(GObject *object);
 static void _menu_item_toggle_size_request(GtkMenuItem *menu_item, gint *requisition);
@@ -137,7 +137,26 @@ static void _update_image(LeaFullMenuItem *item) {
 		item->image = NULL;
 	}
 
-	if (item->a_stock_id!=NULL) {
+	if (item->toggable) {
+		if (item->is_toggled) {
+//			GtkWidget *image = gtk_image_new();
+//			item->image = GTK_IMAGE(image);
+//
+//			cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 120, 120);
+//			cairo_t *cr = cairo_create(surface);
+//
+//			cairo_set_source_rgb(cr, 0,0,0);
+//			cairo_move_to(cr, 20,50);
+//			cairo_line_to(cr, 50,80);
+//			cairo_set_line_width(cr, 4);
+//			cairo_stroke(cr);
+//
+//			gtk_image_set_from_surface(GTK_IMAGE(image), surface);
+//			gtk_widget_set_parent(image, GTK_WIDGET(item));
+//			gtk_widget_show(image);
+		}
+
+	} else if (item->a_stock_id!=NULL) {
 		GtkWidget *image = gtk_image_new();
 		const char *stock_id = cat_string_wo_getchars(item->a_stock_id);
 		cat_log_debug("setting stock_id=%s", stock_id);
@@ -164,7 +183,17 @@ static void _menu_item_toggle_size_request(GtkMenuItem *menu_item, gint *requisi
 	LeaFullMenuItem *this = LEA_FULL_MENU_ITEM(menu_item);
 	*requisition = 0;
 
-	if (this->image) {
+	if (this->toggable) {
+		guint toggle_spacing;
+		gtk_widget_style_get(GTK_WIDGET(menu_item), "toggle_spacing", &toggle_spacing, NULL);
+		PangoLayout *pango_layout = gtk_widget_create_pango_layout(GTK_WIDGET(menu_item), "✓");
+		PangoRectangle log_rect;
+		pango_layout_get_extents(pango_layout, NULL, &log_rect);
+		int check_mark_width = log_rect.width/PANGO_SCALE;
+		cat_unref_ptr(pango_layout);
+		*requisition = check_mark_width + toggle_spacing;
+
+	} else if (this->image) {
 		int image_width;
 
 		gtk_widget_get_preferred_width(GTK_WIDGET(this->image), NULL, &image_width);
@@ -246,34 +275,40 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *cairo) {
 		if (GTK_WIDGET_CLASS(parent_class)->draw) {
 			GTK_WIDGET_CLASS(parent_class)->draw(widget, cairo);
 		}
-		if (this->key_sequence) {
-			CatStringWo *a_accel = lea_key_sequence_to_string(this->key_sequence);
-			PangoLayout *pango_layout = gtk_widget_create_pango_layout(widget, cat_string_wo_getchars(a_accel));
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(widget, &allocation);
 
-			int x,y;
-			GtkAllocation allocation;
-			gtk_widget_get_allocation(widget, &allocation);
-			y = allocation.y;
-			x = allocation.x + allocation.width - this->key_pixel_width;
-			cat_log_debug("x=%d, y=%d", x, y);
+		GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
+		if (child) {
+			GtkLabel *label = GTK_LABEL(child);
+			int label_y;
+			gtk_label_get_layout_offsets(label, NULL, &label_y);
 
-			GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
-			if (child) {
-				GtkLabel *label = GTK_LABEL(child);
-				gtk_label_get_layout_offsets(label, NULL, &y);
-				y -= allocation.y;
+
+			if (this->key_sequence) {
+				CatStringWo *a_accel = lea_key_sequence_to_string(this->key_sequence);
+				PangoLayout *pango_layout = gtk_widget_create_pango_layout(widget, cat_string_wo_getchars(a_accel));
+				int y = label_y - allocation.y;
+				int x = allocation.x + allocation.width - this->key_pixel_width;
+				cat_log_debug("x=%d, y=%d", x, y);
 				gtk_render_layout(gtk_widget_get_style_context(child), cairo, x, y, pango_layout);
+
+				cat_unref(pango_layout);
+				cat_unref(a_accel);
 			}
 
-
-			cat_unref(pango_layout);
-			cat_unref(a_accel);
+			if (this->is_toggled && this->toggable) {
+				PangoLayout *pango_layout = gtk_widget_create_pango_layout(widget, "✓");
+				int y = label_y - allocation.y;
+				int x = allocation.x;
+				cat_log_debug("x=%d, y=%d", x, y);
+				gtk_render_layout(gtk_widget_get_style_context(child), cairo, x, y, pango_layout);
+				cat_unref(pango_layout);
+			}
 		}
 	}
 	return FALSE;
 }
-
-
 
 
 void lea_full_menu_item_set_key_sequence(LeaFullMenuItem *item, LeaKeySequence *key_sequence) {
@@ -285,6 +320,21 @@ void lea_full_menu_item_set_stock_id(LeaFullMenuItem *item, CatStringWo *a_stock
 		return;
 	}
 	cat_ref_swap(item->a_stock_id, a_stock_id);
+	_update_image(item);
+}
+
+
+void lea_full_menu_item_set_toggable(LeaFullMenuItem *item, gboolean toggable) {
+	item->toggable = toggable;
+	_update_image(item);
+}
+
+gboolean lea_full_menu_item_is_toggled(LeaFullMenuItem *item) {
+	return item->is_toggled;
+}
+
+void lea_full_menu_item_set_toggled(LeaFullMenuItem *item, gboolean toggled) {
+	item->is_toggled = toggled;
 	_update_image(item);
 }
 

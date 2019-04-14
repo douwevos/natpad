@@ -37,7 +37,6 @@ struct _ChaDocumentPrivate {
 	CatAtomicReference *a_revision_saved;
 	CatAtomicReference *a_revision_ref;	// <ChaRevisionWo *> last stable edition
 	ChaLineEnd line_end_saved;
-	ChaLineEnd line_end_user;
 	ChaRevisionWo *e_revision;
 	ChaEnrichmentDataMapWo *enrichment_map;
 	CatWeakList *listeners;
@@ -121,7 +120,6 @@ void cha_document_construct(ChaDocument *document, struct _ChaDocumentManager *d
 	priv->read_only = FALSE;
 	priv->input_converter = cha_document_manager_get_converter(document_manager, NULL);
 	priv->line_end_saved = CHA_LINE_END_NONE;
-	priv->line_end_user = CHA_LINE_END_NONE;
 }
 
 
@@ -151,19 +149,6 @@ void cha_document_set_big_file_mode(ChaDocument *document, gboolean big_file_mod
 gboolean cha_document_is_big_file_mode(ChaDocument *document) {
 	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
 	return priv->big_file_mode;
-}
-
-
-ChaLineEnd cha_document_get_line_end_user(ChaDocument *document) {
-	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
-	return priv->line_end_user;
-}
-
-void cha_document_set_line_end_user(ChaDocument *document, ChaLineEnd line_end) {
-	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
-	if (priv->line_end_user!=line_end) {
-		priv->line_end_user = line_end;
-	}
 }
 
 
@@ -202,8 +187,6 @@ ChaRevisionWo *cha_document_get_editable_revision(ChaDocument *document) {
 	}
 	return priv->e_revision;
 }
-
-
 
 
 void cha_document_anchor_document(ChaDocument *document) {
@@ -585,7 +568,6 @@ static void l_notify_mode_changed(ChaDocument *document) {
 	ChaModeInfo mode_info;
 	mode_info.big_file_mode = priv->big_file_mode;
 	mode_info.read_only = priv->read_only;
-	mode_info.line_end_user = priv->line_end_user;
 	mode_info.line_end_saved = priv->line_end_saved;
 	CatIIterator *iter = cat_weak_list_iterator(priv->listeners);
 	while(cat_iiterator_has_next(iter)) {
@@ -609,6 +591,7 @@ void cha_document_remove_listener(ChaDocument *document, ChaIDocumentListener *l
 	cat_weak_list_remove(priv->listeners, (GObject *) listener);
 }
 
+#define SMALLEST(a,b1,b2) (a>=0 && (a<b1 || b1<0) && (a<b2 || b2<0))
 
 CatArrayWo *cha_document_create_line_list(const ChaDocument *document, const CatStringWo *text) {
 	if (cat_string_wo_length(text)==0) {
@@ -620,77 +603,73 @@ CatArrayWo *cha_document_create_line_list(const ChaDocument *document, const Cat
 	int idx = 0;
 	int idx_13 = 0;
 	int idx_10 = 0;
+	int idx_21 = 0;
 	idx_13 = cat_string_wo_index_of(text, (gchar) 0xd);
 	idx_10 = cat_string_wo_index_of(text, (gchar) 0xa);
+	idx_21 = cat_string_wo_index_of(text, (gchar) 0x15);
 	const char *text_ptr = cat_string_wo_getchars(text);
 	while(TRUE) {
-		cat_log_debug("idx_13=%d, idx_10=%d", idx_13, idx_10);
-		if (idx_13<0) {
-			if (idx_10<0) {
-				int length = cat_string_wo_length(text)-idx;
-				if (length>0) {
-					CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
+		cat_log_debug("idx_13=%d, idx_10=%d, idx_21", idx_13, idx_10, idx_21);
+
+		if (idx_13<0 && idx_10<0 && idx_21<0) {
+			int length = cat_string_wo_length(text)-idx;
+			if (length>0) {
+				CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
 //					CatStringWo *new_line = cha_charset_converter_convert(converter, text_ptr+idx, length, NULL, NULL);
-					ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_NONE);
-					cat_log_debug("last e_line=%o", e_line);
-					cat_array_wo_append(result, (GObject *) e_line);
-					cat_unref_ptr(e_line);
-				}
-				break;
+				ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_NONE);
+				cat_log_debug("last e_line=%o", e_line);
+				cat_array_wo_append(result, (GObject *) e_line);
+				cat_unref_ptr(e_line);
 			}
-			int length = idx_10-idx;
-			CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
-//			CatStringWo *new_line = cha_charset_converter_convert(converter, text_ptr+idx, length, NULL, NULL);
-			ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_LF);
-			cat_array_wo_append(result, (GObject *) e_line);
-			cat_unref_ptr(e_line);
-			idx = idx_10+1;
-			idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-		} else if (idx_10<0) {
+			break;
+		}
+
+		if (SMALLEST(idx_13, idx_10, idx_21)) {
 			int length = idx_13-idx;
 			CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
-//			CatStringWo *new_line = cha_charset_converter_convert(converter, text_ptr+idx, length, NULL, NULL);
-			ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_CR);
+
+			ChaLineEnd line_end = CHA_LINE_END_CR;
+			if (idx_10==idx_13+1) {
+				line_end = CHA_LINE_END_CRLF;
+				idx = idx_10+1;
+				idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
+				idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
+			} else {
+				idx = idx_13+1;
+				idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
+			}
+
+			ChaLineWo *e_line = cha_line_wo_new_with(new_line, line_end);
 			cat_array_wo_append(result, (GObject *) e_line);
 			cat_unref_ptr(e_line);
-			idx = idx_13+1;
-			idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-		} else {
-			if (idx_10<idx_13) {
-				int length = idx_10-idx;
-				CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
-//				CatStringWo *new_line = cha_charset_converter_convert(converter, text_ptr+idx, length, NULL, NULL);
-				ChaLineEnd line_end = CHA_LINE_END_LF;
-				if (idx_10+1==idx_13) {
-					line_end = CHA_LINE_END_LFCR;
-					idx = idx_13+1;
-					idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-					idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-				} else {
-					idx = idx_10+1;
-					idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-				}
-				ChaLineWo *e_line = cha_line_wo_new_with(new_line, line_end);
-				cat_array_wo_append(result, (GObject *) e_line);
-				cat_unref_ptr(e_line);
+		} else if (SMALLEST(idx_10, idx_13, idx_21)) {
+			int length = idx_10-idx;
+			CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
+
+			ChaLineEnd line_end = CHA_LINE_END_LF;
+			if (idx_13==idx_10+1) {
+				line_end = CHA_LINE_END_LFCR;
+				idx = idx_13+1;
+				idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
+				idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
 			} else {
-				int length = idx_13-idx;
-				CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
-//				CatStringWo *new_line = cha_charset_converter_convert(converter, text_ptr+idx, length, NULL, NULL);
-				ChaLineEnd line_end = CHA_LINE_END_CR;
-				if (idx_13+1==idx_10) {
-					line_end = CHA_LINE_END_CRLF;
-					idx = idx_10+1;
-					idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
-					idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-				} else {
-					idx = idx_13+1;
-					idx_13 = cat_string_wo_index_of_from(text, (gchar) 0xd, idx);
-				}
-				ChaLineWo *e_line = cha_line_wo_new_with(new_line, line_end);
-				cat_array_wo_append(result, (GObject *) e_line);
-				cat_unref_ptr(e_line);
+				idx = idx_10+1;
+				idx_10 = cat_string_wo_index_of_from(text, (gchar) 0xa, idx);
 			}
+
+			ChaLineWo *e_line = cha_line_wo_new_with(new_line, line_end);
+			cat_array_wo_append(result, (GObject *) e_line);
+			cat_unref_ptr(e_line);
+		} else if (SMALLEST(idx_21, idx_10, idx_13)) {
+			int length = idx_10-idx;
+			CatStringWo *new_line = cat_string_wo_new_with_len(text_ptr+idx, length);
+
+			idx = idx_21+1;
+			idx_21 = cat_string_wo_index_of_from(text, (gchar) 0x15, idx);
+
+			ChaLineWo *e_line = cha_line_wo_new_with(new_line, CHA_LINE_END_NL);
+			cat_array_wo_append(result, (GObject *) e_line);
+			cat_unref_ptr(e_line);
 		}
 	}
 	return result;

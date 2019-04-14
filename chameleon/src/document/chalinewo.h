@@ -35,6 +35,7 @@ typedef enum {
 	CHA_LINE_END_LF,	/* 10 */
 	CHA_LINE_END_CRLF,	/* 13 10 */
 	CHA_LINE_END_LFCR,	/* 10 13 */
+	CHA_LINE_END_NL,	/* 21 */
 
 } ChaLineEnd;
 
@@ -79,6 +80,8 @@ void cha_line_wo_set_text(ChaLineWo *e_line, CatStringWo *c_text);
 void cha_line_wo_set_line_end(ChaLineWo *e_line, ChaLineEnd line_end);
 
 ChaLineEnd cha_line_wo_get_line_end(ChaLineWo *line);
+ChaLineEnd cha_line_wo_compute_line_end(ChaLineWo *line, ChaLineEnd line_ends, gboolean line_ends_are_mixed);
+
 int cha_line_wo_byte_count(const ChaLineWo *line);
 int cha_line_wo_byte_count_real(const ChaLineWo *line);
 

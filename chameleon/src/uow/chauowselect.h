@@ -28,7 +28,6 @@
 
 G_BEGIN_DECLS
 
-
 typedef enum {
 	CHA_UOW_SELECT_ALL, CHA_UOW_SELECT_WORD, CHA_UOW_SELECT_LINE
 } ChaUowSelectKind;
@@ -60,6 +59,5 @@ GType cha_uow_select_get_type();
 ChaUowSelect *cha_uow_select_new(ChaUowSelectKind kind);
 
 G_END_DECLS
-
 
 #endif /* CHAUOWSELECT_H_ */

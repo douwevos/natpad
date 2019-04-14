@@ -140,6 +140,8 @@ static CatStringWo *l_selection_get_as_text(ChaSelection *selection, struct _Cha
 	ChaSelectionPrivate *priv = cha_selection_get_protected(selection);
 	ChaDocument *doc = cha_document_view_get_document(document_view);
 	ChaRevisionWo *a_rev = cha_document_get_current_revision_ref(doc);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_rev);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_rev);
 	ChaPageWo *a_page = NULL;
 	if ((priv->top_page_index==priv->bottom_page_index) && (priv->top_page_line_index==priv->bottom_page_line_index)) {
 
@@ -187,7 +189,14 @@ static CatStringWo *l_selection_get_as_text(ChaSelection *selection, struct _Cha
 				} else {
 					cat_string_wo_append_chars_len(buf, utf8_text.text, utf8_text.text_len);
 				}
-				switch(utf8_text.line_end) {
+				ChaLineEnd line_end = utf8_text.line_end;
+				if (line_end!=CHA_LINE_END_NONE && !line_ends_are_mixed) {
+					line_end = line_ends;
+				}
+				switch(line_end) {
+					case CHA_LINE_END_NL :
+						cat_string_wo_append_char(buf, 0x15);
+						break;
 					case CHA_LINE_END_CR :
 						cat_string_wo_append_char(buf, 0xD);
 						break;
@@ -296,6 +305,9 @@ static CatHashMapWo *l_selection_get_for_clipboard(ChaSelection *selection, stru
 		cha_utf8_text_cleanup(&utf8_text);
 
 	} else {
+		ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_rev);
+		gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_rev);
+
 		int page_index = priv->top_page_index;
 		int page_line_index = priv->top_page_line_index;
 		int page_line_count;
@@ -359,7 +371,14 @@ static CatHashMapWo *l_selection_get_for_clipboard(ChaSelection *selection, stru
 						}
 					}
 				}
-				switch(utf8_text.line_end) {
+				ChaLineEnd line_end = utf8_text.line_end;
+				if (line_end!=CHA_LINE_END_NONE && !line_ends_are_mixed) {
+					line_end = line_ends;
+				}
+				switch(line_end) {
+					case CHA_LINE_END_NL :
+						cat_string_wo_append_char(plain_text_buf, 0x15);
+						break;
 					case CHA_LINE_END_CR :
 						cat_string_wo_append_char(plain_text_buf, 0xD);
 						break;
@@ -377,7 +396,7 @@ static CatHashMapWo *l_selection_get_for_clipboard(ChaSelection *selection, stru
 					case CHA_LINE_END_NONE :
 						break;
 				}
-				if (richt_text_buf && utf8_text.line_end!=CHA_LINE_END_NONE) {
+				if (richt_text_buf && line_end!=CHA_LINE_END_NONE) {
 					cat_string_wo_append_chars(richt_text_buf, "\n\\par ");
 				}
 

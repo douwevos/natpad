@@ -120,6 +120,11 @@ gboolean lea_action_is_visible(LeaAction *action);
 
 gboolean lea_action_update_visibility(LeaAction *action);
 
+void lea_action_set_toggable(LeaAction *action, gboolean toggable);
+
+void lea_action_set_toggled(LeaAction *action, gboolean toggled);
+gboolean lea_action_is_toggled(LeaAction *action);
+
 
 void lea_action_set_default_key_sequence(LeaAction *action, LeaKeySequence *key_sequence);
 

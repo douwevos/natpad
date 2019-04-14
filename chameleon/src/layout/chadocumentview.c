@@ -719,7 +719,10 @@ gboolean cha_document_view_layout_page(ChaDocumentView *document_view, ChaPageWo
 
 					cat_log_debug("line=%o", a_line);
 
-					if (cha_line_layout_set_text(line_layout, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version)) {
+					ChaLineEnd line_end = cha_line_wo_compute_line_end(a_line, page_layout_context->line_ends, page_layout_context->line_ends_are_mixed);
+					if (cha_line_layout_set_text(line_layout, cha_line_wo_get_text(a_line),
+							line_end,
+							view_ctx.wrap_lines, view_ctx.tab_size, view_ctx.text_view_width, view_ctx.font_version)) {
 						cha_line_layout_update(line_layout, pango_context, priv->color_map);
 					}
 					cha_line_layout_get_width_and_sub_line_count(line_layout, &line_width, &sub_line_count);
@@ -910,6 +913,8 @@ static void l_run_relayout_pages(ChaDocumentView *document_view, ChaRevisionWo *
 				page_layout_context.page_version = cat_wo_get_version((CatWo *) page);
 				page_layout_context.text_layout_width = text_layout_width;
 				page_layout_context.font_version = priv->ctx.font_version;
+				page_layout_context.line_ends = cha_revision_wo_get_line_ends(a_rev);
+				page_layout_context.line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_rev);
 				gboolean did_layout = cha_document_view_layout_page(document_view, page, &(page_layout_context), page_layout, FALSE);
 				cat_log_debug("did_layout:%d", did_layout);
 				if (did_layout) {
@@ -987,6 +992,8 @@ void cha_document_view_mark_layout_x_cursor(ChaDocumentView *document_view, ChaR
 	PangoLayout *pango_layout = NULL;
 	ChaLineWo *a_line = NULL;
 	ChaLineLayout *line_layout_ref = NULL;
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_revision);
 	if (is_big_mode) {
 		pango_layout = priv->ctx.wrap_lines ? priv->pango_layout_wrap : priv->pango_layout_no_wrap;
 		ChaUtf8Text utf8_text = cha_page_wo_utf8_at(a_page, page_line_idx, FALSE);
@@ -996,7 +1003,7 @@ void cha_document_view_mark_layout_x_cursor(ChaDocumentView *document_view, ChaR
 		a_line = cha_page_wo_line_at(a_page, page_line_idx);
 		line_layout_ref = cha_document_view_get_line_layout_ref(document_view, a_line);
 		cha_line_layout_lock(line_layout_ref, TRUE);
-		cha_line_layout_set_text(line_layout_ref, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+		cha_line_layout_set_text(line_layout_ref, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 		cha_line_layout_update(line_layout_ref, priv->pango_context, priv->color_map);
 		pango_layout = cha_line_layout_get_pango_layout(line_layout_ref);
 	}
@@ -1025,6 +1032,8 @@ ChaLineLocationWo *cha_document_view_cursor_at_marker(ChaDocumentView *document_
 	long long int page_y = 0;
 
 	ChaRevisionWo *a_revision = cha_document_get_current_revision_ref(priv->document);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_revision);
 	gboolean is_big_mode = cha_document_is_big_file_mode(priv->document);
 	int page_cnt = cha_revision_wo_page_count(a_revision);
 	int page_idx;
@@ -1090,7 +1099,7 @@ ChaLineLocationWo *cha_document_view_cursor_at_marker(ChaDocumentView *document_
 				cat_log_trace("line=%o", line);
 				a_line_layout = cha_document_view_get_line_layout_ref(document_view, line);
 				cha_line_layout_lock(a_line_layout, TRUE);
-				gboolean new_text = cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+				gboolean new_text = cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 				if (new_text) {
 					cha_line_layout_update(a_line_layout, priv->pango_context, priv->color_map);
 				}
@@ -1189,6 +1198,8 @@ ChaCursorWo *cha_document_view_cursor_at_xy(ChaDocumentView *document_view, int 
 	long long int page_y = 0;
 
 	ChaRevisionWo *a_revision = cha_document_get_current_revision_ref(priv->document);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_revision);
 	gboolean is_big_mode = cha_document_is_big_file_mode(priv->document);
 	int page_cnt = cha_revision_wo_page_count(a_revision);
 	int page_idx;
@@ -1263,7 +1274,7 @@ ChaCursorWo *cha_document_view_cursor_at_xy(ChaDocumentView *document_view, int 
 				cat_log_trace("line=%o", line);
 				a_line_layout = cha_document_view_get_line_layout_ref(document_view, line);
 				cha_line_layout_lock(a_line_layout, TRUE);
-				gboolean new_text = cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_get_line_end(line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+				gboolean new_text = cha_line_layout_set_text(a_line_layout, cha_line_wo_get_text(line), cha_line_wo_compute_line_end(line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 				if (new_text) {
 					cha_line_layout_update(a_line_layout, priv->pango_context, priv->color_map);
 				}
@@ -1378,6 +1389,9 @@ ChaCursorWo *cha_document_view_cursor_at_xy(ChaDocumentView *document_view, int 
 static long long int l_location_to_view_y(ChaDocumentView *document_view, ChaRevisionWo *revision, ChaCursorWo *cursor, int *o_line_height, int *view_x_cursor) {
 	ChaDocumentViewPrivate *priv = cha_document_view_get_instance_private(document_view);
 	long long int result = 0l;
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(revision);
+
 	ChaLineLocationWo *location = cha_cursor_wo_get_line_location(cursor);
 	int page_index = cha_line_location_wo_get_page_index(location);
 	ChaPageWo *page = cha_revision_wo_page_at(revision, page_index);
@@ -1400,7 +1414,7 @@ static long long int l_location_to_view_y(ChaDocumentView *document_view, ChaRev
 		line_layout = cha_document_view_get_line_layout_ref(document_view, a_line);
 		cha_line_layout_lock(line_layout, TRUE);
 
-		gboolean new_text = cha_line_layout_set_text(line_layout, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+		gboolean new_text = cha_line_layout_set_text(line_layout, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 		if (new_text) {
 			cha_line_layout_update(line_layout, priv->pango_context, priv->color_map);
 		}
@@ -1446,7 +1460,7 @@ static long long int l_location_to_view_y(ChaDocumentView *document_view, ChaRev
 			ChaLineLayout *pline_layout = cha_document_view_get_line_layout_ref(document_view, a_line);
 			cha_line_layout_lock(pline_layout, TRUE);
 
-			gboolean new_text = cha_line_layout_set_text(pline_layout, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+			gboolean new_text = cha_line_layout_set_text(pline_layout, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 			if (new_text) {
 				cha_line_layout_update(pline_layout, priv->pango_context, priv->color_map);
 			}
@@ -1728,6 +1742,9 @@ gboolean cha_document_view_check_cache_boundaries(ChaDocumentView *document_view
 
 static void l_selection_pre_apply(ChaDocumentView *document_view, ChaRevisionWo *revision_ref) {
 	ChaDocumentViewPrivate *priv = cha_document_view_get_instance_private(document_view);
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(revision_ref);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(revision_ref);
+
 	PangoContext *pango_context = priv->pango_context;
 	ChaCursorWo *cursor_start = cha_selection_get_start(priv->selection);
 	ChaCursorWo *cursor_end = cha_selection_get_end(priv->selection);
@@ -1740,20 +1757,20 @@ static void l_selection_pre_apply(ChaDocumentView *document_view, ChaRevisionWo 
 		e_line_layout_start = cha_document_view_get_line_layout_ref_for_cursor(document_view, revision_ref, cursor_start, &a_line);
 		e_line_layout_end = e_line_layout_start;
 		cha_line_layout_lock(e_line_layout_start, TRUE);
-		cha_line_layout_set_text(e_line_layout_start, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+		cha_line_layout_set_text(e_line_layout_start, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 		cha_line_layout_update_pango_layout(e_line_layout_start, pango_context);
 		cat_unref_ptr(a_line);
 	} else {
 		ChaLineWo *a_line = NULL;
 		e_line_layout_start = cha_document_view_get_line_layout_ref_for_cursor(document_view, revision_ref, cursor_start, &a_line);
 		cha_line_layout_lock(e_line_layout_start, TRUE);
-		cha_line_layout_set_text(e_line_layout_start, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+		cha_line_layout_set_text(e_line_layout_start, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 		cha_line_layout_update_pango_layout(e_line_layout_start, pango_context);
 		cat_unref_ptr(a_line);
 
 		e_line_layout_end = cha_document_view_get_line_layout_ref_for_cursor(document_view, revision_ref, cursor_end, &a_line);
 		cha_line_layout_lock(e_line_layout_end, TRUE);
-		cha_line_layout_set_text(e_line_layout_end, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+		cha_line_layout_set_text(e_line_layout_end, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, line_ends, line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 		cha_line_layout_update_pango_layout(e_line_layout_end, pango_context);
 		cat_unref_ptr(a_line);
 	}
@@ -1920,7 +1937,10 @@ static void l_invalidate_revision(ChaDocumentView *document_view, ChaRevisionWo 
 	cache_update.window = window;
 	cache_update.color_map = priv->color_map;
 	cache_update.highlight_current_line = priv->highlight_current_line;
+	cache_update.line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(revision_ref);
+	cache_update.line_ends = cha_revision_wo_get_line_ends(revision_ref);
 
+	cat_log_trace("line_ends: mixed=%d, ends=%d", cache_update.line_ends_are_mixed, cache_update.line_ends);
 
 	for(page_idx=0; page_idx<page_cnt; page_idx++) {
 		ChaPageWo *page = cha_revision_wo_page_at(revision_ref, page_idx);
@@ -1959,6 +1979,11 @@ static void l_invalidate_revision(ChaDocumentView *document_view, ChaRevisionWo 
 		cat_log_detail("invalidate----page_layout=%p", page_layout);
 		if (cha_page_layout_versions_start_update(page_layout, cat_wo_get_version((CatWo *) page), priv->ctx.text_layout_width, priv->ctx.font_version)) {
 			ChaPageLayoutContext pg_lay_ctx;
+			pg_lay_ctx.page_version = cat_wo_get_version((CatWo *) page);
+			pg_lay_ctx.text_layout_width =  priv->ctx.text_layout_width;
+			pg_lay_ctx.font_version = priv->ctx.font_version;
+			pg_lay_ctx.line_ends = cha_revision_wo_get_line_ends(revision_ref);
+			pg_lay_ctx.line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(revision_ref);
 			cha_document_view_layout_page(document_view, page, &pg_lay_ctx, page_layout, FALSE);
 			cha_document_view_page_set_layout(document_view, page, page_layout, &(pg_lay_ctx), TRUE);
 			cat_log_debug("page layout:page_layout=%o", page_layout);
@@ -2011,7 +2036,7 @@ static void l_invalidate_revision(ChaDocumentView *document_view, ChaRevisionWo 
 			cha_line_layout_lock(line_layout, TRUE);
 
 
-			gboolean new_text = cha_line_layout_set_text(line_layout, cha_line_wo_get_text(a_line), cha_line_wo_get_line_end(a_line), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
+			gboolean new_text = cha_line_layout_set_text(line_layout, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, cache_update.line_ends, cache_update.line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 
 			int phy_x_cursor_bytes = cha_cursor_wo_get_x_cursor_bytes(a_cursor);
 

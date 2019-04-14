@@ -71,6 +71,11 @@ int cha_revision_wo_get_slot_index(ChaRevisionWo *revision, GObject *slot_key, i
 GObject *cha_revision_wo_get_slot_content_ref(ChaRevisionWo *revision, int slot_index, GObject *slot_key);
 void cha_revision_wo_set_slot_content(ChaRevisionWo *revision, int slot_index, GObject *slot_key, GObject *content);
 
+ChaLineEnd cha_revision_wo_get_line_ends(const ChaRevisionWo *revision);
+gboolean cha_revision_wo_get_line_ends_are_mixed(const ChaRevisionWo *revision);
+
+void cha_revision_wo_set_line_ends(ChaRevisionWo *e_revision, ChaLineEnd line_ends, gboolean line_ends_are_mixed);
+
 
 ChaLoadToken *cha_revision_wo_get_load_token(ChaRevisionWo *revision);
 void cha_revision_wo_set_load_token(ChaRevisionWo *e_revision, ChaLoadToken *load_token);

@@ -189,6 +189,15 @@ void cha_revision_wo_set_slot_content(ChaRevisionWo *revision, int slot_index, G
 	}
 }
 
+ChaLineEnd cha_revision_wo_get_line_ends(const ChaRevisionWo *revision) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) revision);
+	return cha_page_list_wo_get_line_ends(priv->page_list);
+}
+
+gboolean cha_revision_wo_get_line_ends_are_mixed(const ChaRevisionWo *revision) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) revision);
+	return cha_page_list_wo_get_line_ends_are_mixed(priv->page_list);
+}
 
 static void l_dump(const ChaRevisionWo *revision) {
 	cat_log_on_trace({
@@ -209,7 +218,6 @@ static void l_dump(const ChaRevisionWo *revision) {
 		}
 	})
 }
-
 
 int cha_revision_wo_get_page_list_version(const ChaRevisionWo *revision) {
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private((ChaRevisionWo *) revision);
@@ -254,6 +262,18 @@ ChaLoadToken *cha_revision_wo_get_load_token(ChaRevisionWo *revision) {
 			cat_log_error("Object is read only:%o", e_revision); \
 			return rval; \
 		} \
+
+
+void cha_revision_wo_set_line_ends(ChaRevisionWo *e_revision, ChaLineEnd line_ends, gboolean line_ends_are_mixed) {
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(e_revision);
+	CHECK_IF_WRITABLE();
+	if (cha_page_list_wo_is_anchored(priv->page_list)) {
+		ChaPageListWo *e_list = cha_page_list_wo_create_editable(priv->page_list);
+		cat_unref_ptr(priv->page_list);
+		priv->page_list = e_list;
+	}
+	cha_page_list_wo_set_line_ends(priv->page_list, line_ends, line_ends_are_mixed);
+}
 
 void cha_revision_wo_set_load_token(ChaRevisionWo *e_revision, ChaLoadToken *load_token) {
 	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(e_revision);
@@ -504,10 +524,7 @@ void cha_revision_wo_line_multi_replace(ChaRevisionWo *e_revision, long long row
 				}
 				dest_utf8_offset = next_out;
 			}
-
 		}
-
-
 
 		if (left_result && replace_idx==0) {
 			*left_result = cat_string_wo_length(e_buf);

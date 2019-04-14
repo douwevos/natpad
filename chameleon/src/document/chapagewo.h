@@ -72,9 +72,10 @@ typedef struct _ChaWriteReq ChaWriteReq;
 struct _ChaWriteReq {
 	GOutputStream *out_stream;
 	ChaIConverter *charset_converter;
-	gboolean force_line_end;
 	GError *error;
 	gboolean needs_conversion;
+	ChaLineEnd line_ends;
+	gboolean line_ends_are_mixed;
 };
 
 struct _ChaPageWoClass {

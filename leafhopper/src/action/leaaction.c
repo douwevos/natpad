@@ -45,6 +45,8 @@ struct _LeaActionPrivate {
 	gboolean is_visible_self;
 	gboolean is_visible_group;
 	gboolean is_visible;
+	gboolean toggable;
+	gboolean is_toggled;
 	int order;
 };
 
@@ -149,6 +151,8 @@ void lea_action_attach(LeaAction *action, LeaIAttachable *attachable) {
 	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
 	cat_weak_list_append(priv->attach_list, (GObject *) attachable);
 	lea_iattachable_sensitivity_set(attachable, priv->is_sensitive);
+	lea_iattachable_toggability_set(attachable, priv->toggable);
+	lea_iattachable_toggled(attachable, priv->is_toggled);
 }
 
 void lea_action_detach(LeaAction *action, LeaIAttachable *attachable) {
@@ -279,7 +283,35 @@ gboolean lea_action_is_visible_group(LeaAction *action) {
 	return LEA_ACTION_GET_PRIVATE(action)->is_visible_self;
 }
 
+void lea_action_set_toggable(LeaAction *action, gboolean toggable) {
+	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	priv->toggable = toggable;
+	CatIIterator *iterator = cat_weak_list_iterator(priv->attach_list);
+	while(cat_iiterator_has_next(iterator)) {
+		LeaIAttachable *attachable = (LeaIAttachable *) cat_iiterator_next(iterator);
+		lea_iattachable_toggability_set(attachable, toggable);
+	}
+	cat_unref(iterator);
+}
 
+void lea_action_set_toggled(LeaAction *action, gboolean toggled) {
+	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	if (priv->is_toggled == toggled) {
+		return;
+	}
+	priv->is_toggled = toggled;
+	CatIIterator *iterator = cat_weak_list_iterator(priv->attach_list);
+	while(cat_iiterator_has_next(iterator)) {
+		LeaIAttachable *attachable = (LeaIAttachable *) cat_iiterator_next(iterator);
+		lea_iattachable_toggled(attachable, toggled);
+	}
+	cat_unref(iterator);
+}
+
+gboolean lea_action_is_toggled(LeaAction *action) {
+	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	return priv->is_toggled;
+}
 
 
 void lea_action_set_default_key_sequence(LeaAction *action, LeaKeySequence *key_sequence) {

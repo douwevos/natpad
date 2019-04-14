@@ -79,6 +79,11 @@ void cha_page_list_wo_set_page_at(ChaPageListWo *e_page_list, ChaPageWo *page, i
 void cha_page_list_wo_remove_page_at(ChaPageListWo *e_page_list, int index);
 void cha_page_list_wo_remove_range(ChaPageListWo *e_page_list, int first, int last);
 
+
+ChaLineEnd cha_page_list_wo_get_line_ends(const ChaPageListWo *page_list);
+gboolean cha_page_list_wo_get_line_ends_are_mixed(const ChaPageListWo *page_list) ;
+void cha_page_list_wo_set_line_ends(ChaPageListWo *e_page_list, ChaLineEnd line_ends, gboolean line_ends_are_mixed);
+
 void cha_page_list_wo_clear(ChaPageListWo *e_page_list);
 
 ChaPageListWo *cha_page_list_wo_create_editable(ChaPageListWo *instance);

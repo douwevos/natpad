@@ -190,6 +190,18 @@ ChaLineEnd cha_line_wo_get_line_end(ChaLineWo *line) {
 	return priv->line_end;
 }
 
+ChaLineEnd cha_line_wo_compute_line_end(ChaLineWo *line, ChaLineEnd line_ends, gboolean line_ends_are_mixed) {
+	const ChaLineWoPrivate *priv = cha_line_wo_get_instance_private((ChaLineWo *) line);
+	if (priv->line_end == CHA_LINE_END_NONE) {
+		return CHA_LINE_END_NONE;
+	} else if (!line_ends_are_mixed) {
+		return line_ends;
+	}
+	return priv->line_end;
+
+}
+
+
 void cha_line_wo_set_line_end(ChaLineWo *e_line, ChaLineEnd line_end) {
 	CHECK_IF_WRITABLE()
 	ChaLineWoPrivate *priv = cha_line_wo_get_instance_private(e_line);
@@ -207,6 +219,7 @@ int cha_line_wo_byte_count_real(const ChaLineWo *line) {
 	const ChaLineWoPrivate *priv = cha_line_wo_get_instance_private((ChaLineWo *) line);
 	int length = cat_string_wo_length(priv->text);
 	switch(priv->line_end) {
+	case CHA_LINE_END_NL :
 	case CHA_LINE_END_CR :
 	case CHA_LINE_END_LF :
 		length++;
@@ -352,6 +365,9 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 void cha_line_end_to_string(ChaLineEnd line_end, CatStringWo *e_string) {
 	char let[] = { 13, 10, 13 };
 	switch(line_end) {
+		case CHA_LINE_END_NL :
+			cat_string_wo_append_char(e_string, 0x15);
+			break;
 		case CHA_LINE_END_CR :
 			cat_string_wo_append_chars_len(e_string, let, 1);
 			break;

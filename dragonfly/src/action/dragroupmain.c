@@ -41,6 +41,8 @@ struct _DraGroupMainPrivate {
 	DraGroupSearch *group_search;
 	DraGroupMacro *group_macro;
 	gboolean clipboard_has_text;
+	ChaLineEnd line_ends;
+	gboolean line_ends_are_mixed;
 
 	DraActionPrint *action_print;
 	DraActionPrintPreview *action_print_preview;
@@ -170,6 +172,8 @@ void dra_group_main_set_editor_panel(DraGroupMain *group_main, DraEditorPanel *e
 	int history_index = 0;
 	gboolean has_selection = FALSE;
 //	gboolean has_marked_lines = FALSE;
+	ChaLineEnd line_ends = CHA_LINE_END_LF;
+	gboolean line_ends_are_mixed = TRUE;
 	if (editor_panel) {
 		DraEditor *editor = dra_editor_panel_get_editor(editor_panel);
 		ChaDocumentView *document_view = cha_editor_get_document_view((ChaEditor *) editor);
@@ -177,8 +181,15 @@ void dra_group_main_set_editor_panel(DraGroupMain *group_main, DraEditorPanel *e
 		ChaDocument *document = cha_document_view_get_document(document_view);
 		cha_document_add_listener(document, (ChaIDocumentListener *) group_main);
 		cha_document_get_history_info(document, &history_index, &history_size);
-//		ast_view_add_view_listener(editor_panel->ast_view, AST_IVIEW_LISTENER(group_main));
 		has_selection = cha_document_view_get_selection(document_view)!=NULL;
+
+		ChaRevisionWo *a_rev = cha_document_get_current_revision_ref(document);
+		line_ends = cha_revision_wo_get_line_ends(a_rev);
+		line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_rev);
+		priv->line_ends = line_ends;
+		priv->line_ends_are_mixed = line_ends_are_mixed;
+		cat_unref_ptr(a_rev);
+
 //		AstDocument *document = editor_panel->ast_document;
 //		if (document) {
 //			ast_document_add_listener(document, AST_IDOCUMENT_LISTENER(group_main));
@@ -193,6 +204,7 @@ void dra_group_main_set_editor_panel(DraGroupMain *group_main, DraEditorPanel *e
 
 	dra_group_edit_set_editor_panel(priv->group_edit, editor_panel);
 	dra_group_edit_set_history_info(priv->group_edit, history_index, history_size);
+	dra_group_edit_set_line_ends(priv->group_edit, line_ends, line_ends_are_mixed);
 
 	dra_group_search_set_editor_panel(priv->group_search, editor_panel);
 	dra_group_macro_set_editor_panel(priv->group_macro, editor_panel);
@@ -206,7 +218,6 @@ static void l_has_clipboard_cb(GtkClipboard *clipboard, const gchar *text, gpoin
 	gboolean has_clipboard = text!=NULL;
 	if (priv->clipboard_has_text!=has_clipboard) {
 		priv->clipboard_has_text = has_clipboard;
-//		dra_action_paste_set_has_clipboard(priv->action_mark_copy, has_clipboard);
 		dra_group_edit_set_has_clipboard(priv->group_edit, has_clipboard);
 	}
 }
@@ -241,9 +252,24 @@ static void l_on_history_modified(ChaIDocumentListener *self, int history_index,
 	dra_group_edit_set_history_info(priv->group_edit, history_index, history_length);
 }
 
+void l_on_new_revision(ChaIDocumentListener *self, ChaRevisionWo *a_new_revision) {
+	DraGroupMainPrivate *priv = dra_group_main_get_instance_private(DRA_GROUP_MAIN(self));
+
+	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_new_revision);
+	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_new_revision);
+	if (priv->line_ends==line_ends && priv->line_ends_are_mixed==line_ends_are_mixed) {
+		return;
+	}
+
+	priv->line_ends = line_ends;
+	priv->line_ends_are_mixed = line_ends_are_mixed;
+	dra_group_edit_set_line_ends(priv->group_edit, line_ends, line_ends_are_mixed);
+}
+
 
 static void l_document_listener_iface_init(ChaIDocumentListenerInterface *iface) {
 	iface->onHistoryModified = l_on_history_modified;
+	iface->onNewRevision = l_on_new_revision;
 }
 
 /********************* end ChaIDocumentListener implementation *********************/

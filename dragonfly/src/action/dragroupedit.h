@@ -63,6 +63,7 @@ void dra_group_edit_set_has_selection(DraGroupEdit *group_edit, gboolean has_sel
 void dra_group_edit_set_has_clipboard(DraGroupEdit *group_edit, gboolean has_clipboard);
 
 void dra_group_edit_set_history_info(DraGroupEdit *group_edit, int history_index, int history_length);
+void dra_group_edit_set_line_ends(DraGroupEdit *group_edit, ChaLineEnd line_ends, gboolean line_ends_are_mixed);
 
 G_END_DECLS
 

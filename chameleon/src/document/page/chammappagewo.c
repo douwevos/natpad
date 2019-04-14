@@ -216,6 +216,9 @@ static gboolean l_page_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) 
 				txt_len = cat_string_wo_length(real_text);
 				line_end = cha_line_wo_get_line_end(real_line);
 			}
+			if (line_end!=CHA_LINE_END_NONE && !write_req->line_ends_are_mixed) {
+				line_end = write_req->line_ends;
+			}
 
 
 			if (!cha_page_wo_write_single_line(page, write_req, txt_data, txt_len, line_end)) {

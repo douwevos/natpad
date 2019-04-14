@@ -50,6 +50,8 @@ struct _ChaLoadFileRequestPrivate {
 	gboolean big_file_mode;
 	CatArrayWo *lines;
 	ChaConvertRequest convert_request;
+	ChaLineEnd line_ends;
+	gboolean line_ends_are_mixed;
 
 };
 
@@ -117,7 +119,6 @@ static gboolean l_idle_clear_doc(gpointer user_data) {
 	ChaRevisionWo *e_revision = cha_document_get_editable_revision(document);
 	cha_document_set_big_file_mode(document, clr->file_length > MAX_FILE_LENGTH_FULL_MODE);
 	cha_revision_wo_clear(e_revision);
-//	cha_revision_wo_init_disc_page(e_revision, clr->file_length);
 	cha_document_anchor_document(document);
 	cat_unref_ptr(document);
 	cat_free_ptr(user_data);
@@ -129,6 +130,9 @@ struct l_set_pages {
 	CatArrayWo *disc_pages;
 	gboolean is_last;
 	ChaMMap *mmap_data;
+	ChaLineEnd line_ends;
+	gboolean line_ends_are_mixed;
+
 };
 
 static gboolean l_idle_set_loaded_pages(gpointer user_data) {
@@ -173,6 +177,8 @@ static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 	cha_revision_wo_set_load_token(e_revision, next_load_token);
 	cat_unref_ptr(next_load_token);
 
+	cha_revision_wo_set_line_ends(e_revision, set_pages->line_ends, set_pages->line_ends_are_mixed);
+
 	cha_document_anchor_document_full(document, CHA_DOCUMENT_ANCHOR_MODE_REPLACE_LAST_HISTORY);
 	cha_document_set_saved_revision(document, e_revision);
 	cat_log_debug("set_pages->is_last=%d, document=%o", set_pages->is_last, document);
@@ -194,13 +200,12 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 	ChaLoadFileRequest *load_file = (ChaLoadFileRequest *) data;
 	ChaLoadFileRequestPrivate *priv = cha_load_file_request_get_instance_private(load_file);
 
-
-
 	void *start_ptr = cha_mmap_get_data(priv->map_data);
 	char *end_ptr = (char*) (start_ptr + cha_mmap_get_length(priv->map_data));
 	gboolean is_last_line = FALSE;
 	switch(line_end) {
 		case CHA_LINE_END_NONE : is_last_line = TRUE; break;
+		case CHA_LINE_END_NL :
 		case CHA_LINE_END_LF :
 		case CHA_LINE_END_CR :
 			is_last_line = off_line_end + 1 >= end_ptr; break;
@@ -210,6 +215,14 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 			break;
 	}
 	cat_log_debug("is_last_line=%d", is_last_line);
+
+	if (line_end!=CHA_LINE_END_NONE && priv->line_ends != line_end) {
+		if (priv->line_ends == CHA_LINE_END_NONE) {
+			priv->line_ends = line_end;
+		} else {
+			priv->line_ends_are_mixed = TRUE;
+		}
+	}
 
 	if (priv->page_line_count == CHA_PAGE_SIZE_PREF || is_last_line) {
 
@@ -231,14 +244,16 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 
 		if (cat_array_wo_size(priv->unwritten_pages) > priv->flush_after || is_last_line) {
 			cat_log_error("pg_offset=%ld :: %ld", pg_offset, pg_offset / (1024 * 1024));
-			struct l_set_pages *clr = g_new(struct l_set_pages, 1);
-			clr->document = cat_ref_ptr(priv->document);
-			clr->disc_pages = priv->unwritten_pages;
-			clr->is_last = is_last_line;
-			clr->mmap_data = cat_ref_ptr(priv->map_data);
+			struct l_set_pages *set_pages = g_new(struct l_set_pages, 1);
+			set_pages->document = cat_ref_ptr(priv->document);
+			set_pages->disc_pages = priv->unwritten_pages;
+			set_pages->is_last = is_last_line;
+			set_pages->mmap_data = cat_ref_ptr(priv->map_data);
+			set_pages->line_ends = priv->line_ends;
+			set_pages->line_ends_are_mixed = priv->line_ends_are_mixed;
 			priv->unwritten_pages = cat_array_wo_new();
 
-			g_idle_add((GSourceFunc) l_idle_set_loaded_pages, clr);
+			g_idle_add((GSourceFunc) l_idle_set_loaded_pages, set_pages);
 			priv->flush_after = 50;
 		}
 
@@ -257,12 +272,21 @@ static gboolean l_scanned_line_full_mode(char *off_line_start, char *off_line_en
 	gboolean is_last_line = FALSE;
 	switch(line_end) {
 		case CHA_LINE_END_NONE : is_last_line = TRUE; break;
+		case CHA_LINE_END_NL :
 		case CHA_LINE_END_LF :
 		case CHA_LINE_END_CR :
 			is_last_line = off_line_end + 1 >= end_ptr; break;
 		case CHA_LINE_END_LFCR :
 		case CHA_LINE_END_CRLF :
 			is_last_line = off_line_end + 2 >= end_ptr; break;
+	}
+
+	if (line_end!=CHA_LINE_END_NONE && priv->line_ends != line_end) {
+		if (priv->line_ends == CHA_LINE_END_NONE) {
+			priv->line_ends = line_end;
+		} else {
+			priv->line_ends_are_mixed = TRUE;
+		}
 	}
 
 	ChaIConverter *converter = cha_document_get_input_converter(priv->document);
@@ -277,7 +301,7 @@ static gboolean l_scanned_line_full_mode(char *off_line_start, char *off_line_en
 	priv->convert_request.output = NULL;
 
 //	CatStringWo *text = (CatStringWo *) cat_string_wo_new_anchored(off_line_start, off_line_end-off_line_start);
-	cat_log_trace("line_end=%d text=%s, is_last_line=%d", line_end, text, is_last_line);
+	cat_log_error("line_end=%d text=%s, is_last_line=%d", line_end, text, is_last_line);
 	ChaLineWo *line = cha_line_wo_new_anchored(text, line_end);
 	cat_array_wo_append(priv->lines, (GObject *) line);
 
@@ -292,13 +316,15 @@ static gboolean l_scanned_line_full_mode(char *off_line_start, char *off_line_en
 		priv->page_start = off_line_start;
 
 		if (cat_array_wo_size(priv->unwritten_pages) > priv->flush_after || is_last_line) {
-			struct l_set_pages *clr = g_new(struct l_set_pages, 1);
-			clr->document = cat_ref_ptr(priv->document);
-			clr->disc_pages = priv->unwritten_pages;
-			clr->is_last = is_last_line;
-			clr->mmap_data = cat_ref_ptr(priv->map_data);
+			struct l_set_pages *set_pages = g_new(struct l_set_pages, 1);
+			set_pages->document = cat_ref_ptr(priv->document);
+			set_pages->disc_pages = priv->unwritten_pages;
+			set_pages->is_last = is_last_line;
+			set_pages->mmap_data = cat_ref_ptr(priv->map_data);
+			set_pages->line_ends = priv->line_ends;
+			set_pages->line_ends_are_mixed = priv->line_ends_are_mixed;
 			priv->unwritten_pages = cat_array_wo_new();
-			g_idle_add((GSourceFunc) l_idle_set_loaded_pages, clr);
+			g_idle_add((GSourceFunc) l_idle_set_loaded_pages, set_pages);
 			priv->flush_after = 1000;
 		}
 	}
@@ -385,6 +411,8 @@ static void l_run_request(WorRequest *request) {
 
 	cha_document_set_input_converter(priv->document, converter);
 
+	priv->line_ends = CHA_LINE_END_NONE;
+	priv->line_ends_are_mixed = FALSE;
 
 
 	if (priv->big_file_mode) {

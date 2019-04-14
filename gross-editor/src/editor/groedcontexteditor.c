@@ -314,9 +314,9 @@ static void l_enlist_content(DraIAcContentProvider *content_provider, DraAcConte
 	CatHashMapWo *nt_map = groed_parser_get_non_terminal_map(ed_parser);
 	CatIMapIterator *miter = cat_hash_map_wo_iterator(nt_map);
 	CatStringWo *sym_name = NULL;
-	while(cat_imap_iterator_next(miter, &sym_name, NULL)) {
+	while(cat_imap_iterator_next(miter, (gpointer *) &sym_name, NULL)) {
 		DraAcReplaceEntry *rep_entry = dra_ac_replace_entry_new(sym_name, sym_name);
-		dra_ac_add_entry(ac_context, rep_entry);
+		dra_ac_add_entry(ac_context, (DraAcEntry *) rep_entry);
 		cat_unref_ptr(rep_entry);
 	}
 	cat_unref_ptr(miter);
@@ -324,9 +324,9 @@ static void l_enlist_content(DraIAcContentProvider *content_provider, DraAcConte
 
 	CatHashMapWo *t_map = groed_parser_get_terminal_map(ed_parser);
 	miter = cat_hash_map_wo_iterator(t_map);
-	while(cat_imap_iterator_next(miter, &sym_name, NULL)) {
+	while(cat_imap_iterator_next(miter, (gpointer *) &sym_name, NULL)) {
 		DraAcReplaceEntry *rep_entry = dra_ac_replace_entry_new(sym_name, sym_name);
-		dra_ac_add_entry(ac_context, rep_entry);
+		dra_ac_add_entry(ac_context, (DraAcEntry *) rep_entry);
 		cat_unref_ptr(rep_entry);
 	}
 	cat_unref_ptr(miter);

@@ -44,3 +44,20 @@ void lea_iattachable_visibility_set(LeaIAttachable *self, gboolean visibility) {
 		iface->visibilitySet(self, visibility);
 	}
 }
+
+void lea_iattachable_toggability_set(LeaIAttachable *self, gboolean toggable) {
+	g_return_if_fail (LEA_IS_IATTACHABLE(self));
+	LeaIAttachableInterface *iface = LEA_IATTACHABLE_GET_INTERFACE(self);
+	if (iface->toggabilitySet) {
+		iface->toggabilitySet(self, toggable);
+	}
+}
+
+
+void lea_iattachable_toggled(LeaIAttachable *self, gboolean toggled) {
+	g_return_if_fail (LEA_IS_IATTACHABLE(self));
+	LeaIAttachableInterface *iface = LEA_IATTACHABLE_GET_INTERFACE(self);
+	if (iface->toggled) {
+		iface->toggled(self, toggled);
+	}
+}
