@@ -56,6 +56,12 @@ struct _DraPrefsEditorPanelPrivate {
 	GtkWidget *w_fb_font;
 	unsigned long s_font;
 
+	GtkWidget *w_fb_big_mode_font;
+	unsigned long s_big_mode_font;
+	GtkWidget *w_cb_big_mode_force_ascii;
+	unsigned long s_big_mode_force_ascii;
+
+
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -109,19 +115,26 @@ static gboolean l_block_selection_toggled(GtkToggleButton *toggle_button, gpoint
 static void l_tab_size_changed(GtkSpinButton *text_entry, gpointer user_data);
 static void l_font_set(GtkFontButton *font_button, gpointer user_data);
 
-//static gboolean l_font_filter(PangoFontFamily *family, PangoFontFace *face, gpointer data) {
-//	return pango_font_family_is_monospace(family);
-//	const char *facename = pango_font_face_get_face_name(face);
-//	PangoFontDescription *descr = pango_font_face_describe(face);
-//	pango_fon
-//
-//    if (strstr(facename, "Italic") || strstr(facename, "Bold") ||
-//	strstr(facename, "Oblique")) {
-//	return FALSE;
-//    } else {
+static void l_big_mode_font_set(GtkFontButton *font_button, gpointer user_data);
+static gboolean l_big_mode_force_ascii_toggled(GtkToggleButton *toggle_button, gpointer user_data);
+
+static gboolean l_font_filter(const PangoFontFamily *family, const PangoFontFace *face, gpointer data) {
+	if (!pango_font_family_is_monospace(family)) {
+		return FALSE;
+	}
+	const char *facename = pango_font_face_get_face_name((PangoFontFace *) face);
+	PangoFontDescription *descr = pango_font_face_describe((PangoFontFace *) face);
+
+	cat_log_error("facename=%s", facename);
+
+    if (strstr(facename, "Italic") || strstr(facename, "Bold") ||
+    		strstr(facename, "Oblique")) {
+    	return FALSE;
+    } else {
+    	return TRUE;
 //	return validate_single_font(family, FONT_FILTER_LATIN_MONO);
-//    }
-//}
+    }
+}
 
 DraPrefsEditorPanel *dra_prefs_editor_panel_new(CowIEntryAccessor *entry_accessor) {
 	DraPrefsEditorPanel *result = g_object_new(DRA_TYPE_PREFS_EDITOR_PANEL, NULL);
@@ -162,7 +175,13 @@ DraPrefsEditorPanel *dra_prefs_editor_panel_new(CowIEntryAccessor *entry_accesso
 	priv->w_fb_font = (GtkWidget *) gtk_builder_get_object(builder, "fb_font");
 	priv->s_font = g_signal_connect(priv->w_fb_font, "font-set", G_CALLBACK(l_font_set), result);
 
-//	gtk_font_chooser_set_filter_func((GtkFontChooser *) priv->w_fb_font, l_font_filter, NULL, NULL);
+	priv->w_fb_big_mode_font = (GtkWidget *) gtk_builder_get_object(builder, "fb_font_big_mode");
+	priv->s_big_mode_font = g_signal_connect(priv->w_fb_big_mode_font, "font-set", G_CALLBACK(l_big_mode_font_set), result);
+	priv->w_cb_big_mode_force_ascii = (GtkWidget *) gtk_builder_get_object(builder, "cb_big_mode_force_ascii");
+	priv->s_big_mode_force_ascii = g_signal_connect(priv->w_cb_big_mode_force_ascii, "toggled", G_CALLBACK(l_big_mode_force_ascii_toggled), result);
+
+
+	gtk_font_chooser_set_filter_func((GtkFontChooser *) priv->w_fb_big_mode_font, l_font_filter, NULL, NULL);
 
 	return result;
 }
@@ -248,6 +267,21 @@ static void l_font_set(GtkFontButton *font_button, gpointer user_data) {
 }
 
 
+static void l_big_mode_font_set(GtkFontButton *font_button, gpointer user_data) {
+	DraPrefsEditorPanel *panel = DRA_PREFS_EDITOR_PANEL(user_data);
+	DraPrefsEditorPanelPrivate *priv = dra_prefs_editor_panel_get_instance_private(panel);
+	const gchar *font_name = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(font_button));
+	cha_preferences_wo_set_big_mode_font_name(priv->e_ast_prefs, cat_string_wo_new_with(font_name));
+	l_notify_modification(panel);
+}
+
+static gboolean l_big_mode_force_ascii_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
+	DraPrefsEditorPanel *panel = DRA_PREFS_EDITOR_PANEL(user_data);
+	DraPrefsEditorPanelPrivate *priv = dra_prefs_editor_panel_get_instance_private(panel);
+	cha_preferences_wo_set_big_mode_force_ascii(priv->e_ast_prefs, gtk_toggle_button_get_active(toggle_button));
+	return l_notify_modification(panel);
+}
+
 static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	DraPrefsEditorPanelPrivate *priv = dra_prefs_editor_panel_get_instance_private(panel);
 
@@ -263,6 +297,8 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	g_signal_handler_block(priv->w_cb_block_selection, priv->s_block_selection);
 	g_signal_handler_block(priv->w_sb_tab_size, priv->s_tab_size);
 	g_signal_handler_block(priv->w_fb_font, priv->s_font);
+	g_signal_handler_block(priv->w_fb_big_mode_font, priv->s_big_mode_font);
+	g_signal_handler_block(priv->w_cb_big_mode_force_ascii, priv->s_big_mode_force_ascii);
 
 	gboolean has_prefs = priv->e_ast_prefs!=NULL;
 
@@ -276,6 +312,8 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	gtk_widget_set_sensitive(priv->w_cb_block_selection, has_prefs);
 	gtk_widget_set_sensitive(priv->w_sb_tab_size, has_prefs);
 	gtk_widget_set_sensitive(priv->w_fb_font, has_prefs);
+	gtk_widget_set_sensitive(priv->w_fb_big_mode_font, has_prefs);
+	gtk_widget_set_sensitive(priv->w_cb_big_mode_force_ascii, has_prefs);
 
 	if (has_prefs) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_cb_blink_cursor), cha_preferences_wo_get_blink_cursor(priv->e_ast_prefs));
@@ -291,6 +329,11 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 		if (font_name) {
 			gtk_font_chooser_set_font(GTK_FONT_CHOOSER(priv->w_fb_font), cat_string_wo_getchars(font_name));
 		}
+		font_name = cha_preferences_wo_get_big_mode_font_name(priv->e_ast_prefs);
+		if (font_name) {
+			gtk_font_chooser_set_font(GTK_FONT_CHOOSER(priv->w_fb_big_mode_font), cat_string_wo_getchars(font_name));
+		}
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_cb_big_mode_force_ascii), cha_preferences_wo_get_big_mode_force_ascii(priv->e_ast_prefs));
 	}
 
 	g_signal_handler_unblock(priv->w_cb_blink_cursor, priv->s_blink_cursor);
@@ -303,6 +346,8 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	g_signal_handler_unblock(priv->w_cb_block_selection, priv->s_block_selection);
 	g_signal_handler_unblock(priv->w_sb_tab_size, priv->s_tab_size);
 	g_signal_handler_unblock(priv->w_fb_font, priv->s_font);
+	g_signal_handler_unblock(priv->w_fb_big_mode_font, priv->s_big_mode_font);
+	g_signal_handler_unblock(priv->w_cb_big_mode_force_ascii, priv->s_big_mode_force_ascii);
 }
 
 

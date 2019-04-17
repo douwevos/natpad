@@ -72,7 +72,7 @@
 #define FORCE_FULL_PAINT 0
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_WARN
+#define CAT_LOG_LEVEL CAT_LOG_ERROR
 #define CAT_LOG_CLAZZ "ChaDocumentView"
 #include <logging/catlog.h>
 
@@ -310,6 +310,7 @@ static void l_apply_preferences(ChaDocumentView *document_view) {
 	gboolean n_show_whitespace = FALSE;
 	gboolean n_limit_cursor = TRUE;
 	gboolean n_highlight_current_line = TRUE;
+	gboolean n_force_ascii = FALSE;
 	ChaPrefsColorMapWo *n_color_map = NULL;
 
 
@@ -323,6 +324,12 @@ static void l_apply_preferences(ChaDocumentView *document_view) {
 		n_highlight_current_line = cha_preferences_wo_get_highlight_current_line(a_preferences);
 		tab_size = cha_preferences_wo_get_tab_size(a_preferences);
 		n_color_map = cha_preferences_wo_get_color_map(a_preferences);
+
+		if (cha_document_is_big_file_mode(priv->document)) {
+			n_font_name = cha_preferences_wo_get_big_mode_font_name(a_preferences);
+			n_wrap_lines = FALSE;
+			n_force_ascii = cha_preferences_wo_get_big_mode_force_ascii(a_preferences);
+		}
 	}
 	if (n_color_map==NULL) {
 		n_color_map = cha_prefs_color_map_wo_new();
@@ -330,6 +337,7 @@ static void l_apply_preferences(ChaDocumentView *document_view) {
 		cat_ref_ptr(n_color_map);
 	}
 
+	priv->ctx.force_ascii = n_force_ascii;
 	priv->ctx.wrap_lines = n_wrap_lines;
 	priv->ctx.show_line_numbers = n_show_line_numbers;
 	priv->ctx.show_whitespace = n_show_whitespace;
@@ -627,6 +635,7 @@ gboolean cha_document_view_layout_page(ChaDocumentView *document_view, ChaPageWo
 	int single_line_height = 0;
 	int char_width;
 
+	gboolean force_ascii = priv->ctx.force_ascii;
 	cha_document_view_get_values(document_view, &wrap_lines, &is_mono_space, &is_big_mode, &char_width, &single_line_height);
 
 	const ChaDocumentViewContext view_ctx = cha_document_view_get_context(document_view);
@@ -684,6 +693,21 @@ gboolean cha_document_view_layout_page(ChaDocumentView *document_view, ChaPageWo
 						line_width = out;
 						sub_line_count = 1;
 					}
+				} else if (allow_fast_track && force_ascii) {
+					int out = 0;
+					const gchar *the_text = utf8_text.text;
+					int in;
+					for(in=0; in<utf8_text.text_len; in++) {
+						gchar ch = the_text[in];
+						if (ch==0x9) {
+							out += view_ctx.tab_size;
+							out = out - (out % view_ctx.tab_size);
+						} else if ((ch & 0xc0)!=0x80) {
+							out += char_width;
+						}
+					}
+					line_width = out;
+					sub_line_count = 1;
 				} else {
 					pango_layout_set_text(pango_layout, utf8_text.text, utf8_text.text_len);
 					PangoRectangle inkt_rect;
@@ -942,7 +966,7 @@ static void l_update_text_view_width(ChaDocumentView *document_view) {
 
 	priv->ctx.text_view_width = priv->view_width - priv->ctx.line_nr_view_width - priv->ctx.line_height;
 	int new_layout_width = priv->ctx.text_view_width;
-	if (!priv->ctx.wrap_lines) {
+	if (!priv->ctx.wrap_lines || cha_document_is_big_file_mode(priv->document)) {
 		new_layout_width = -1;
 	}
 	if (priv->ctx.text_layout_width != new_layout_width) {
@@ -995,7 +1019,7 @@ void cha_document_view_mark_layout_x_cursor(ChaDocumentView *document_view, ChaR
 	ChaLineEnd line_ends = cha_revision_wo_get_line_ends(a_revision);
 	gboolean line_ends_are_mixed = cha_revision_wo_get_line_ends_are_mixed(a_revision);
 	if (is_big_mode) {
-		pango_layout = priv->ctx.wrap_lines ? priv->pango_layout_wrap : priv->pango_layout_no_wrap;
+		pango_layout = priv->pango_layout_no_wrap;
 		ChaUtf8Text utf8_text = cha_page_wo_utf8_at(a_page, page_line_idx, FALSE);
 		pango_layout_set_text(pango_layout, utf8_text.text, utf8_text.text_len);
 		cha_utf8_text_cleanup(&utf8_text);
@@ -1081,10 +1105,10 @@ ChaLineLocationWo *cha_document_view_cursor_at_marker(ChaDocumentView *document_
 			int sub_line_count = 0;
 			if (is_big_mode) {
 
-				if (!priv->ctx.wrap_lines && priv->ctx.is_mono_space) {
+				if (priv->ctx.is_mono_space) {
 					sub_line_count = 1;
 				} else {
-					PangoLayout *pango_layout = priv->ctx.wrap_lines ? priv->pango_layout_wrap : priv->pango_layout_no_wrap;
+					PangoLayout *pango_layout = priv->pango_layout_no_wrap;
 					const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(page, line_idx, FALSE);
 					pango_layout_set_text(pango_layout, utf8_text.text, utf8_text.text_len);
 					cha_utf8_text_cleanup(&utf8_text);
@@ -1134,7 +1158,7 @@ ChaLineLocationWo *cha_document_view_cursor_at_marker(ChaDocumentView *document_
 
 			PangoLayout *pango_layout = NULL;
 			if (is_big_mode) {
-				pango_layout = priv->ctx.wrap_lines ? priv->pango_layout_wrap : priv->pango_layout_no_wrap;
+				pango_layout = priv->pango_layout_no_wrap;
 				if (!valid_pango) {
 					const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(page, line_idx, FALSE);
 					pango_layout_set_text(pango_layout, utf8_text.text, utf8_text.text_len);
@@ -1256,10 +1280,10 @@ ChaCursorWo *cha_document_view_cursor_at_xy(ChaDocumentView *document_view, int 
 			gboolean valid_pango = FALSE;
 			if (is_big_mode) {
 
-				if (!priv->ctx.wrap_lines && priv->ctx.is_mono_space) {
+				if (priv->ctx.is_mono_space) {
 					sub_line_count = 1;
 				} else {
-					PangoLayout *pango_layout = priv->ctx.wrap_lines ? priv->pango_layout_wrap : priv->pango_layout_no_wrap;
+					PangoLayout *pango_layout = priv->pango_layout_no_wrap;
 					const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(page, line_idx, FALSE);
 					pango_layout_set_text(pango_layout, utf8_text.text, utf8_text.text_len);
 					cha_utf8_text_cleanup(&utf8_text);
@@ -2035,6 +2059,11 @@ static void l_invalidate_revision(ChaDocumentView *document_view, ChaRevisionWo 
 			ChaLineLayout *line_layout = cha_document_view_get_line_layout_ref(document_view, a_line);
 			cha_line_layout_lock(line_layout, TRUE);
 
+			if (cha_document_is_big_file_mode(priv->document)) {
+				ChaEnrichmentDataMapWo *data_map = cha_document_get_enrichment_data_map(priv->document);
+				cha_line_wo_enrich(a_line, data_map, cha_page_wo_get_lock(page));
+			}
+
 
 			gboolean new_text = cha_line_layout_set_text(line_layout, cha_line_wo_get_text(a_line), cha_line_wo_compute_line_end(a_line, cache_update.line_ends, cache_update.line_ends_are_mixed), priv->ctx.wrap_lines, priv->ctx.tab_size, priv->ctx.text_view_width, priv->ctx.font_version);
 
@@ -2422,10 +2451,20 @@ static void l_on_slot_registered(ChaIDocumentListener *self, ChaRevisionWo *a_re
 	l_post_layout_requests(instance, a_revision);
 }
 
+static void l_on_mode_changed(ChaIDocumentListener *self, const ChaModeInfo *mode_info) {
+	ChaDocumentView *instance = CHA_DOCUMENT_VIEW(self);
+	ChaDocumentViewPrivate *priv = cha_document_view_get_instance_private(instance);
+	if (priv->a_preferences==NULL) {
+		return;
+	}
+	l_apply_preferences((ChaDocumentView *) self);
+}
+
 
 static void l_document_listener_iface_init(ChaIDocumentListenerInterface *iface) {
 	iface->onNewRevision = l_on_new_revision;
 	iface->onSlotRegistered = l_on_slot_registered;
+	iface->onModeChanged = l_on_mode_changed;
 }
 
 /********************* end ChaIDocumentListener implementation *********************/

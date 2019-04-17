@@ -1,28 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
-  </object>
-  <object class="GtkListStore" id="liststore1">
-    <columns>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">As normal editor</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Yes</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">No</col>
-      </row>
-    </data>
   </object>
   <object class="GtkFrame" id="main_frame">
     <property name="visible">True</property>
@@ -237,39 +220,63 @@
                 <property name="top_padding">5</property>
                 <property name="left_padding">12</property>
                 <child>
-                  <object class="GtkGrid" id="grid1">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkLabel" id="label2">
+                      <object class="GtkCheckButton" id="cb_big_mode_force_ascii">
+                        <property name="label" translatable="yes">Force ASCII</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_right">10</property>
-                        <property name="label" translatable="yes">Word wrap long lines</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="use_underline">True</property>
                         <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBox" id="combobox1">
+                      <object class="GtkGrid" id="grid1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="model">liststore1</property>
-                        <property name="has_entry">True</property>
-                        <property name="entry_text_column">0</property>
-                        <property name="id_column">0</property>
-                        <child internal-child="entry">
-                          <object class="GtkEntry" id="combobox-entry">
+                        <child>
+                          <object class="GtkLabel" id="label2">
+                            <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="margin_right">35</property>
+                            <property name="label" translatable="yes">Font:</property>
+                            <property name="xalign">0</property>
                           </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkFontButton" id="fb_font_big_mode">
+                            <property name="width_request">200</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="font">Sans 12</property>
+                            <property name="preview_text">jasper is opaque cryptocrystalline quartz, typically red to brown found in the bucegi mountains</property>
+                            <property name="use_font">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">0</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
@@ -290,7 +297,6 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">1</property>
-            <property name="width">2</property>
           </packing>
         </child>
         <child>
@@ -379,7 +385,27 @@
             <property name="top_attach">0</property>
           </packing>
         </child>
+        <child>
+          <placeholder/>
+        </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="liststore1">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">As normal editor</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Yes</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">No</col>
+      </row>
+    </data>
   </object>
 </interface>

@@ -26,16 +26,24 @@
 #include <string.h>
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_WARN
+#define CAT_LOG_LEVEL CAT_LOG_ERROR
 #define CAT_LOG_CLAZZ "ChaMMapPageWo"
 #include <logging/catlog.h>
 
+enum _ChaMappedAs {
+	CHA_MAPPED_AS_RAW,
+	CHA_MAPPED_AS_LINE,
+	CHA_MAPPED_AS_MODIFIED_LINE,
+
+};
+
+typedef enum _ChaMappedAs ChaMappedAs;
 
 struct _ChaLineDescr {
-	void *start2;
+	void *mappedData;
 	int length;
 	ChaLineEnd line_end;
-	gboolean mapped;
+	ChaMappedAs mappedAs;
 };
 
 
@@ -115,8 +123,8 @@ static void l_dispose(GObject *object) {
 		int idx;
 		for(idx=priv->line_count-1; idx>=0; idx--) {
 			struct _ChaLineDescr *cld = priv->lines+idx;
-			if (!cld->mapped) {
-				cat_unref_ptr(cld->start2);
+			if (cld->mappedAs==CHA_MAPPED_AS_LINE || cld->mappedAs==CHA_MAPPED_AS_MODIFIED_LINE) {
+				cat_unref_ptr(cld->mappedData);
 			}
 		}
 		cat_free_ptr(priv->lines);
@@ -152,10 +160,10 @@ static gboolean l_scanned_line_enlist(char *off_line_start, char *off_line_end, 
 	ChaMMapPageWoPrivate *priv = (ChaMMapPageWoPrivate *) data;
 	struct _ChaLineDescr *ldscr = priv->lines+priv->lines_hold_cnt;
 //	cat_log_trace("lines_hold_cnt=%d, line_count=%d", (int) priv->lines_hold_cnt, (int) priv->line_count);
-	ldscr->start2 = off_line_start;
+	ldscr->mappedData = off_line_start;
 	ldscr->line_end = line_end;
 	ldscr->length = (off_line_end-off_line_start);
-	ldscr->mapped = TRUE;
+	ldscr->mappedAs = CHA_MAPPED_AS_RAW;
 	priv->lines_hold_cnt++;
 	return TRUE;
 }
@@ -205,12 +213,12 @@ static gboolean l_page_write_to_stream(ChaPageWo *page, ChaWriteReq *write_req) 
 		ChaLineEnd line_end;
 		for(idx=0; idx<priv->line_count; idx++) {
 			struct _ChaLineDescr *cld = priv->lines+idx;
-			if (cld->mapped) {
-				txt_data = cld->start2;
+			if (cld->mappedAs==CHA_MAPPED_AS_RAW) {
+				txt_data = cld->mappedData;
 				txt_len = cld->length;
 				line_end = cld->line_end;
 			} else {
-				ChaLineWo *real_line = (ChaLineWo *) cld->start2;
+				ChaLineWo *real_line = (ChaLineWo *) cld->mappedData;
 				CatStringWo *real_text = cha_line_wo_get_text(real_line);
 				txt_data = (char *) cat_string_wo_getchars(real_text);
 				txt_len = cat_string_wo_length(real_text);
@@ -312,12 +320,12 @@ static const ChaUtf8Text l_page_utf8_at(ChaPageWo *page, int line_index, gboolea
 		if (line_index>priv->line_count-1) {
 			cat_log_debug("line_index=%d, line-count=%d", line_index, priv->line_count);
 		}
-		if (cld->mapped) {
-			xtxt = cld->start2;
+		if (cld->mappedAs == CHA_MAPPED_AS_RAW) {
+			xtxt = cld->mappedData;
 			xlen = cld->length;
 			result.line_end = cld->line_end;
 		} else {
-			ChaLineWo *real_line = (ChaLineWo *) cld->start2;
+			ChaLineWo *real_line = (ChaLineWo *) cld->mappedData;
 			CatStringWo *real_text = cha_line_wo_get_text(real_line);
 			xtxt = (char *) cat_string_wo_getchars(real_text);
 			xlen = cat_string_wo_length(real_text);
@@ -384,11 +392,12 @@ static ChaLineWo *l_page_line_ref_at(ChaPageWo *page, int line_index) {
 	cat_lock_lock(lock);
 	if (priv->lines) {
 		struct _ChaLineDescr *cld = priv->lines+line_index;
-		if (cld->mapped) {
-			result = cha_line_wo_new_with(cat_string_wo_new_with_len(cld->start2, cld->length), cld->line_end);
-		} else {
-			result = (ChaLineWo *) cat_ref_ptr(cld->start2);
+		if (cld->mappedAs == CHA_MAPPED_AS_RAW) {
+			result = cha_line_wo_new_anchored(cat_string_wo_new_with_len(cld->mappedData, cld->length), cld->line_end);
+			cld->mappedData = result;
+			cld->mappedAs = CHA_MAPPED_AS_LINE;
 		}
+		result = (ChaLineWo *) cat_ref_ptr(cld->mappedData);
 	}
 	cat_lock_unlock(lock);
 	cat_log_on_debug({
@@ -435,22 +444,21 @@ static ChaLineWo *l_page_editable_line_at(ChaPageWo *e_page, int index) {
 	CHECK_IF_WRITABLE(NULL)
 	ChaLineWo *result = NULL;
 	struct _ChaLineDescr *cld = priv->lines+index;
-	if (cld->mapped) {
-		CatStringWo *txt = cat_string_wo_new_with_len(cld->start2, cld->length);
-		result = cha_line_wo_new_with(txt, cld->line_end);
-		cld->start2 = result;
-		cld->mapped = FALSE;
+	if (cld->mappedAs == CHA_MAPPED_AS_RAW) {
+		result = cha_line_wo_new_with(cat_string_wo_new_with_len(cld->mappedData, cld->length), cld->line_end);
+		cld->mappedData = result;
 	} else {
-		ChaLineWo *line_wo = (ChaLineWo *) cld->start2;
+		ChaLineWo *line_wo = (ChaLineWo *) cld->mappedData;
 		if (cha_line_wo_is_anchored(line_wo)) {
 			result = cha_line_wo_create_editable(line_wo);
-			cat_ref_swap(cld->start2, result);
+			cat_ref_swap(cld->mappedData, result);
 			cat_unref(result);
 		} else {
 			result = line_wo;
 		}
 	}
-	cat_log_debug("result=%o, mapped=%d, cld=%p", result, cld->mapped, cld);
+	cld->mappedAs = CHA_MAPPED_AS_MODIFIED_LINE;
+	cat_log_debug("result=%o, mapped=%p, cld=%p", result, cld->mappedData, cld);
 	return result;
 }
 
@@ -463,8 +471,8 @@ static void l_page_add_line(ChaPageWo *e_page, ChaLineWo *line) {
 	memcpy(new_lines, priv->lines, sizeof(struct _ChaLineDescr) * (priv->line_count));
 
 	struct _ChaLineDescr *cld = new_lines+priv->line_count;
-	cld->mapped = FALSE;
-	cld->start2 = cat_ref_ptr(line);
+	cld->mappedAs = CHA_MAPPED_AS_MODIFIED_LINE;
+	cld->mappedData = cat_ref_ptr(line);
 	cld->length = 0;
 	cat_free_ptr(priv->lines);
 	priv->lines = new_lines;
@@ -489,8 +497,8 @@ static void l_page_remove_range(ChaPageWo *e_page, int first, int last) {
 	int i;
 	for(i=first; i<=last; i++) {
 		struct _ChaLineDescr *cld = priv->lines+i;
-		if (!cld->mapped) {
-			cat_unref_ptr(cld->start2);
+		if (cld->mappedAs != CHA_MAPPED_AS_RAW) {
+			cat_unref_ptr(cld->mappedData);
 		}
 	}
 	last++;
@@ -521,8 +529,8 @@ static void l_page_insert_line(ChaPageWo *e_page, ChaLineWo *line, int index) {
 
 
 	struct _ChaLineDescr *cld = new_lines+index;
-	cld->mapped = FALSE;
-	cld->start2 = cat_ref_ptr(line);
+	cld->mappedAs = CHA_MAPPED_AS_MODIFIED_LINE;
+	cld->mappedData = cat_ref_ptr(line);
 	cld->length = 0;
 	cat_free_ptr(priv->lines);
 	priv->lines = new_lines;
@@ -556,8 +564,8 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 			int idx;
 			for(idx=priv->line_count-1; idx>=0; idx--) {
 				struct _ChaLineDescr *cld = priv->lines+idx;
-				if (!cld->mapped) {
-					cat_ref_ptr(cld->start2);
+				if (cld->mappedAs != CHA_MAPPED_AS_RAW) {
+					cat_ref_ptr(cld->mappedData);
 				}
 			}
 
@@ -578,22 +586,23 @@ static void l_anchor_children(CatWo *wo, int version) {
 
 	gboolean keep_hold = FALSE;
 	/* test if we really need to hold the line list */
-	if (priv->line_count == priv->map_line_count) {
-		int line_idx = 0;
-		char *last = NULL;
-		for(line_idx=0; line_idx<priv->line_count; line_idx++) {
-			struct _ChaLineDescr *cld = priv->lines+line_idx;
-			if (!cld->mapped) {
-				cld->start2 = cha_line_wo_anchor(cld->start2, version);
+	int line_idx = 0;
+	char *last = NULL;
+	for(line_idx=0; line_idx<priv->line_count; line_idx++) {
+		struct _ChaLineDescr *cld = priv->lines+line_idx;
+		if (cld->mappedAs != CHA_MAPPED_AS_RAW) {
+			cld->mappedData = cha_line_wo_anchor(cld->mappedData, version);
+			if (cld->mappedAs == CHA_MAPPED_AS_MODIFIED_LINE) {
 				keep_hold = TRUE;
-			} else {
-				if (((char *) cld->start2)<last) {
-					keep_hold = TRUE;
-				}
-				last = (char *) cld->start2;
 			}
+		} else {
+			if (((char *) cld->mappedData)<last) {
+				keep_hold = TRUE;
+			}
+			last = (char *) cld->mappedData;
 		}
-	} else {
+	}
+	if (priv->line_count != priv->map_line_count) {
 		keep_hold = TRUE;
 	}
 	priv->hold = keep_hold;

@@ -58,6 +58,7 @@ struct _ChaDocumentViewContext {
 	int tab_size;
 	PangoTabArray *tab_array;
 	gboolean is_mono_space;
+	gboolean force_ascii;
 	gboolean wrap_lines;
 	gboolean show_line_numbers;
 	gboolean show_whitespace;

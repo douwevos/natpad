@@ -67,7 +67,8 @@ gboolean cha_preferences_wo_get_escape_key(const ChaPreferencesWo *prefs);
 int cha_preferences_wo_get_tab_size(const ChaPreferencesWo *prefs);
 
 CatStringWo *cha_preferences_wo_get_font_name(const ChaPreferencesWo *prefs);
-gboolean cha_preferences_wo_get_font_is_sober(const ChaPreferencesWo *prefs);
+gboolean cha_preferences_wo_get_big_mode_force_ascii(const ChaPreferencesWo *prefs);
+CatStringWo *cha_preferences_wo_get_big_mode_font_name(const ChaPreferencesWo *prefs);
 int cha_preferences_wo_get_font_weight(const ChaPreferencesWo *prefs);
 
 ChaPrefsColorMapWo *cha_preferences_wo_get_color_map(const ChaPreferencesWo *prefs);
@@ -86,7 +87,8 @@ void cha_preferences_wo_set_deprecated_scrolling(ChaPreferencesWo *e_prefs, gboo
 void cha_preferences_wo_set_tab_size(ChaPreferencesWo *e_prefs, int tab_size);
 
 void cha_preferences_wo_set_font_name(ChaPreferencesWo *e_prefs, CatStringWo *font_name);
-void cha_preferences_wo_set_font_is_sober(ChaPreferencesWo *e_prefs, gboolean is_sober);
+void cha_preferences_wo_set_big_mode_force_ascii(ChaPreferencesWo *e_prefs, gboolean force_ascii);
+void cha_preferences_wo_set_big_mode_font_name(ChaPreferencesWo *e_prefs, CatStringWo *font_name);
 void cha_preferences_wo_set_font_weight(ChaPreferencesWo *e_prefs, int font_weight);
 
 ChaPrefsColorMapWo *cha_preferences_wo_get_editable_color_map(ChaPreferencesWo *e_prefs);
