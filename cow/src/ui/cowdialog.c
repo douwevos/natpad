@@ -116,7 +116,7 @@ CowDialog *cow_dialog_new(CowPanelModel *panel_model, CowContainer *container, C
 	priv->w_but_cancel = NULL;
 
 	gtk_window_set_modal(GTK_WINDOW(result), TRUE);
-	gtk_widget_set_size_request(GTK_WIDGET(result), 700, 500);
+	gtk_widget_set_size_request(GTK_WIDGET(result), 900, 500);
 
 	GtkWidget *vbox = gtk_dialog_get_content_area((GtkDialog *) result);
 

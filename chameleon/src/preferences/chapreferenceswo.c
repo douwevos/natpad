@@ -41,8 +41,9 @@ struct _ChaPreferencesWoPrivate {
 
 
 	CatStringWo *font_name;
+	CatStringWo *big_mode_font_name;
+	gboolean big_mode_force_ascii;
 	int font_weight;
-	gboolean font_is_sober;
 
 	ChaPrefsColorMapWo *color_map;
 
@@ -164,10 +165,16 @@ CatStringWo *cha_preferences_wo_get_font_name(const ChaPreferencesWo *prefs) {
 	return priv->font_name;
 }
 
-gboolean cha_preferences_wo_get_font_is_sober(const ChaPreferencesWo *prefs) {
+CatStringWo *cha_preferences_wo_get_big_mode_font_name(const ChaPreferencesWo *prefs) {
 	const ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private((ChaPreferencesWo *) prefs);
-	return priv->font_is_sober;
+	return priv->big_mode_font_name;
 }
+
+gboolean cha_preferences_wo_get_big_mode_force_ascii(const ChaPreferencesWo *prefs) {
+	const ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private((ChaPreferencesWo *) prefs);
+	return priv->big_mode_force_ascii;
+}
+
 
 int cha_preferences_wo_get_font_weight(const ChaPreferencesWo *prefs) {
 	const ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private((ChaPreferencesWo *) prefs);
@@ -254,11 +261,16 @@ void cha_preferences_wo_set_font_name(ChaPreferencesWo *e_prefs, CatStringWo *fo
 	cat_ref_swap(priv->font_name, font_name);
 }
 
-
-void cha_preferences_wo_set_font_is_sober(ChaPreferencesWo *e_prefs, gboolean is_sober) {
+void cha_preferences_wo_set_big_mode_force_ascii(ChaPreferencesWo *e_prefs, gboolean force_ascii) {
 	ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private(e_prefs);
 	CHECK_IF_WRITABLE();
-	priv->font_is_sober = is_sober;
+	priv->big_mode_force_ascii = force_ascii;
+}
+
+void cha_preferences_wo_set_big_mode_font_name(ChaPreferencesWo *e_prefs, CatStringWo *font_name) {
+	ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private(e_prefs);
+	CHECK_IF_WRITABLE();
+	cat_ref_swap(priv->big_mode_font_name, font_name);
 }
 
 void cha_preferences_wo_set_font_weight(ChaPreferencesWo *e_prefs, int font_weight) {
@@ -310,7 +322,8 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 
 		priv->font_name = cat_ref_ptr(rpriv->font_name);
 		priv->font_weight = rpriv->font_weight;
-		priv->font_is_sober = rpriv->font_is_sober;
+		priv->big_mode_font_name = cat_ref_ptr(rpriv->big_mode_font_name);
+		priv->big_mode_force_ascii = rpriv->big_mode_force_ascii;
 
 		priv->color_map = cat_ref_ptr(rpriv->color_map);
 
@@ -330,7 +343,8 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 
 		priv->font_name = NULL;
 		priv->font_weight = PANGO_WEIGHT_NORMAL;
-		priv->font_is_sober = FALSE;
+		priv->big_mode_font_name = NULL;
+		priv->big_mode_force_ascii = TRUE;
 
 		priv->color_map = cha_prefs_color_map_wo_new();
 
@@ -367,7 +381,8 @@ static gboolean l_equal(const CatWo *wo_a, const CatWo *wo_b) {
 			&& (priv_a->escape_key == priv_b->escape_key)
 			&& (priv_a->deprecated_scrolling == priv_b->deprecated_scrolling)
 			&& (priv_a->font_weight == priv_b->font_weight)
-			&& (priv_a->font_is_sober == priv_b->font_is_sober)
+			&& (priv_a->big_mode_force_ascii == priv_b->big_mode_force_ascii)
+			&& (cat_string_wo_equal(priv_a->big_mode_font_name, priv_b->big_mode_font_name))
 			&& (cat_string_wo_equal(priv_a->font_name, priv_b->font_name))
 			&& cha_prefs_color_map_wo_equal(priv_a->color_map, priv_b->color_map)
 			&& cat_hash_map_wo_equal(priv_a->template_map, priv_b->template_map, NULL);
@@ -394,7 +409,8 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->deprecated_scrolling = priv_src->deprecated_scrolling;
 		priv->font_name = cat_string_wo_clone(priv_src->font_name, CAT_CLONE_DEPTH_NONE);
 		priv->font_weight = priv_src->font_weight;
-		priv->font_is_sober = priv_src->font_is_sober;
+		priv->big_mode_force_ascii = priv_src->big_mode_force_ascii;
+		priv->big_mode_font_name = cat_string_wo_clone(priv_src->big_mode_font_name, CAT_CLONE_DEPTH_NONE);
 		priv->color_map = cha_prefs_color_map_wo_clone(priv_src->color_map, CAT_CLONE_DEPTH_NONE);
 		priv->template_map = cat_hash_map_wo_clone(priv_src->template_map, CAT_CLONE_DEPTH_NONE);
 	} else {
@@ -411,7 +427,8 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 
 		priv->font_name = NULL;
 		priv->font_weight = PANGO_WEIGHT_NORMAL;
-		priv->font_is_sober = FALSE;
+		priv->big_mode_force_ascii = TRUE;
+		priv->big_mode_font_name = NULL;
 
 		priv->color_map = cha_prefs_color_map_wo_new();
 

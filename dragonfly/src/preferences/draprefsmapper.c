@@ -90,6 +90,7 @@ static CatS l_s_color_map = CAT_S_DEF("color-map");
 static CatS l_s_template = CAT_S_DEF("template");
 static CatS l_s_description = CAT_S_DEF("description");
 static CatS l_s_text = CAT_S_DEF("text");
+static CatS l_s_big_mode_font_name = CAT_S_DEF("big_mode_font_name");
 
 static CatS l_s_spelling = CAT_S_DEF("spelling");
 static CatS l_s_is_enabled = CAT_S_DEF("enabled");
@@ -150,6 +151,10 @@ void dra_prefs_mapper_model_to_prefs(ShoModel *model, DraPreferencesWo *e_prefs)
 			CatStringWo *font_name = cha_preferences_wo_get_font_name(e_cprefs);
 			font_name = sho_reference_list_get_string((ShoReferenceList *) val_editor, CAT_S(l_s_font_name), font_name);
 			cha_preferences_wo_set_font_name(e_cprefs, font_name);
+
+			CatStringWo *big_mode_font_name = cha_preferences_wo_get_big_mode_font_name(e_cprefs);
+			big_mode_font_name = sho_reference_list_get_string((ShoReferenceList *) val_editor, CAT_S(l_s_big_mode_font_name), big_mode_font_name);
+			cha_preferences_wo_set_big_mode_font_name(e_cprefs, big_mode_font_name);
 
 
 			ShoReference *cmap_ref = sho_reference_list_get_first_reference_by_id((ShoReferenceList *) val_editor, CAT_S(l_s_color_map));
@@ -273,6 +278,7 @@ void dra_prefs_mapper_prefs_to_model(DraPreferencesWo *prefs, ShoModel *model) {
 			sho_reference_list_set_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_wrap_lines), cha_preferences_wo_get_wrap_lines(cprefs));
 			cat_log_debug("font=%o", cha_preferences_wo_get_font_name(cprefs));
 			sho_reference_list_set_string((ShoReferenceList *) val_editor, CAT_S(l_s_font_name), cha_preferences_wo_get_font_name(cprefs));
+			sho_reference_list_set_string((ShoReferenceList *) val_editor, CAT_S(l_s_big_mode_font_name), cha_preferences_wo_get_big_mode_font_name(cprefs));
 
 			/* color map */
 			ChaPrefsColorMapWo *cmap =  cha_preferences_wo_get_color_map(cprefs);

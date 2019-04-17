@@ -113,7 +113,6 @@ void cha_document_construct(ChaDocument *document, struct _ChaDocumentManager *d
 	cat_unref_ptr(a_rev);
 	priv->e_revision = NULL;
 	priv->listeners = cat_weak_list_new();
-	priv->big_file_mode = FALSE;
 	priv->e_revision_history = cat_linked_list_new();
 	priv->history_index = -1;
 	priv->big_file_mode = FALSE;
@@ -140,10 +139,14 @@ void cha_document_set_input_converter(ChaDocument *document, ChaIConverter *conv
 	priv->input_converter = converter;
 }
 
+static void l_notify_mode_changed(ChaDocument *document);
 
 void cha_document_set_big_file_mode(ChaDocument *document, gboolean big_file_mode) {
 	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
-	priv->big_file_mode = big_file_mode;
+	if (priv->big_file_mode != big_file_mode) {
+		priv->big_file_mode = big_file_mode;
+		l_notify_mode_changed(document);
+	}
 }
 
 gboolean cha_document_is_big_file_mode(ChaDocument *document) {
@@ -386,7 +389,6 @@ gboolean cha_document_is_saved_revision(const ChaDocument *document) {
 	return result;
 }
 
-static void l_notify_mode_changed(ChaDocument *document);
 
 void cha_document_set_read_only(ChaDocument *document, gboolean read_only) {
 	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
