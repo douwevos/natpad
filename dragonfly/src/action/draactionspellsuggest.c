@@ -59,8 +59,11 @@ static void dra_action_spell_suggest_init(DraActionSpellSuggest *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	DraActionSpellSuggest *instance = DRA_ACTION_SPELL_SUGGEST(object);
-//	DraActionSpellSuggestPrivate *priv = dra_action_spell_suggest_get_instance_private(instance);
+	DraActionSpellSuggest *instance = DRA_ACTION_SPELL_SUGGEST(object);
+	DraActionSpellSuggestPrivate *priv = dra_action_spell_suggest_get_instance_private(instance);
+	cat_unref_ptr(priv->editor_panel);
+	cat_unref_ptr(priv->spell_tag);
+	cat_unref_ptr(priv->suggest_word);
 	G_OBJECT_CLASS(dra_action_spell_suggest_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -83,7 +86,8 @@ DraActionSpellSuggest *dra_action_spell_suggest_new(DraEditorPanel *editor_panel
 	priv->suggest_word = cat_ref_ptr(suggest_word);
 	priv->spell_tag = cat_ref_ptr(spell_tag);
 
-	lea_action_construct(LEA_ACTION(result), action_text, action_text, NULL);
+	action_text = cat_string_wo_anchor(action_text, 1);
+	lea_action_construct(LEA_ACTION(result), action_text, cat_ref_ptr(action_text), NULL);
 	return result;
 }
 

@@ -63,6 +63,8 @@ struct _DraEditorPrivate {
 	int tag_timeout_tag;
 
 	CatStringWo *slot_key;
+
+	LeaMenuAction *context_menu;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -114,6 +116,12 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->tag_line_location);
 	cat_unref_ptr(priv->tag_current_line_location);
 	cat_unref_ptr(priv->tag_popup);
+	if (priv->context_menu) {
+		GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
+		gtk_widget_destroy(menu);
+	}
+	cat_unref_ptr(priv->context_menu);
+
 	G_OBJECT_CLASS(dra_editor_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -147,6 +155,7 @@ DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map,
 	priv->tag_timeout_tag = 0;
 
 	priv->slot_key = NULL;
+	priv->context_menu = NULL;
 
 	if (connector_factory) {
 		CatStringWo *a_slot_key = DRA_ICONNECTOR_REQUEST_FACTORY_GET_INTERFACE(connector_factory)->getSlotKey(connector_factory);
@@ -293,6 +302,9 @@ static void l_open_tag_popup(ChaEditor *editor, ChaLineLocationWo *location, lon
 			}
 		}
 		cha_page_wo_release_lines(page);
+		cat_unref_ptr(line_info);
+		cat_unref_ptr(a_line)
+		cat_unref_ptr(a_revision)
 	}
 
 	cat_log_debug("text=%O", text);
@@ -351,9 +363,9 @@ static void l_marker_over(ChaEditor *editor, ChaLineLocationWo *location, long l
 }
 
 static void l_marker_out(ChaEditor *editor) {
+	cat_log_debug("marker out");
 	DraEditor *instance = DRA_EDITOR(editor);
 	DraEditorPrivate *priv = dra_editor_get_instance_private(instance);
-	cat_log_debug("marker out");
 
 	cat_unref_ptr(priv->tag_popup);
 	if (priv->tag_timeout_tag) {
@@ -396,51 +408,76 @@ void dra_editor_show_auto_complete_popup(DraEditor *editor, DraAcContext *ac_con
 DraAcContext *dra_editor_create_auto_complete_context(DraEditor *editor);
 
 
+
+static l_selection_done(GtkMenu *menui, void *eev, gpointer data) {
+	DraEditorPrivate *priv = dra_editor_get_instance_private((DraEditor *) data);
+	GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
+	gtk_widget_destroy((GtkWidget *) menu);
+	cat_unref_ptr(priv->context_menu);
+
+}
+
 static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event) {
-	DraEditorPanel *editor_panel = dra_editor_get_panel(editor);
-	DraPanelOwner *panel_owner = (DraPanelOwner *) lea_panel_get_panel_owner((LeaPanel *) editor_panel);
+	DraEditorPrivate *priv = dra_editor_get_instance_private(editor);
 
-
-
-	LeaActionGroup *main_group = lea_action_group_new(cat_string_wo_new_with("blah"), cat_string_wo_new_with("blah"));
-
-	LeaActionGroup *jam_group = lea_action_group_new(cat_string_wo_new_with("jam"), cat_string_wo_new_with("jam"));
-
-	lea_action_group_add(main_group, (LeaAction *) jam_group);
-
-	LeaMenuAction *lma = lea_menu_action_new((LeaAction *) main_group, LEA_MENU_TYPE_SUB);
-
-
-	dra_panel_owner_setup_context_menu(panel_owner, jam_group, editor, cursor);
-
-
-
-
-//	LeaActionGroup *st_group = lea_action_group_new(cat_string_wo_new_with("st"), cat_string_wo_new_with("st"));
-//	lea_action_group_add(jam_group, st_group);
-
-
-	if (spell_tag) {
-		DraConnectorMap *connector_map = dra_panel_owner_get_connector_map(panel_owner);
-		DraSpellHelper *spell_helper = dra_connector_map_get_spell_helper(connector_map);
-		CatStringWo *misspelled_word = (CatStringWo *) dra_line_tag_wo_get_extra_data(spell_tag);
-		CatArrayWo *corrections = dra_spell_helper_enlist_corrections(spell_helper, misspelled_word);
-		if (corrections) {
-			CatIIterator *iter = cat_array_wo_iterator(corrections);
-			while(cat_iiterator_has_next(iter)) {
-				CatStringWo *sug = (CatStringWo *) cat_iiterator_next(iter);
-				cat_log_debug("adding action for sug : %O", sug);
-				DraActionSpellSuggest *act = dra_action_spell_suggest_new(editor_panel, sug, spell_tag);
-				lea_action_group_add(jam_group, (LeaAction *) act);
-			}
-			cat_unref_ptr(iter);
-		}
+	if (priv->context_menu) {
+		GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
+		gtk_widget_destroy((GtkWidget *) menu);
+		cat_unref_ptr(priv->context_menu);
 	}
 
+	if (priv->context_menu == NULL) {
 
-	lea_menu_action_update(lma, NULL);
+		DraEditorPanel *editor_panel = dra_editor_get_panel(editor);
+		DraPanelOwner *panel_owner = (DraPanelOwner *) lea_panel_get_panel_owner((LeaPanel *) editor_panel);
 
-	GtkMenuShell *menu = lea_menu_action_get_menu_shell(lma);
+
+		LeaActionGroup *main_group = lea_action_group_new(cat_string_wo_new_with("blah"), cat_string_wo_new_with("blah"));
+		LeaActionGroup *jam_group = lea_action_group_new(cat_string_wo_new_with("jam"), cat_string_wo_new_with("jam"));
+
+		lea_action_group_add(main_group, (LeaAction *) jam_group);
+
+		LeaMenuAction *lma = lea_menu_action_new((LeaAction *) main_group, LEA_MENU_TYPE_SUB);
+
+		dra_panel_owner_setup_context_menu(panel_owner, jam_group, editor, cursor);
+
+
+	//	LeaActionGroup *st_group = lea_action_group_new(cat_string_wo_new_with("st"), cat_string_wo_new_with("st"));
+	//	lea_action_group_add(jam_group, st_group);
+
+
+		if (spell_tag) {
+			DraConnectorMap *connector_map = dra_panel_owner_get_connector_map(panel_owner);
+			DraSpellHelper *spell_helper = dra_connector_map_get_spell_helper(connector_map);
+			CatStringWo *misspelled_word = (CatStringWo *) dra_line_tag_wo_get_extra_data(spell_tag);
+			CatArrayWo *corrections = dra_spell_helper_enlist_corrections(spell_helper, misspelled_word);
+			if (corrections) {
+				CatIIterator *iter = cat_array_wo_iterator(corrections);
+				while(cat_iiterator_has_next(iter)) {
+					CatStringWo *sug = (CatStringWo *) cat_iiterator_next(iter);
+//					cat_log_debug("adding action for sug : %O", sug);
+					DraActionSpellSuggest *act = dra_action_spell_suggest_new(editor_panel, sug, spell_tag);
+					lea_action_group_add(jam_group, (LeaAction *) act);
+					cat_unref_ptr(act);
+				}
+				cat_unref_ptr(iter);
+				cat_unref_ptr(corrections);
+			}
+		}
+
+
+		lea_menu_action_update(lma, NULL);
+		cat_unref_ptr(main_group);
+		cat_unref_ptr(jam_group);
+
+		priv->context_menu = lma;
+	}
+
+	GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
+
+	g_signal_connect(menu, "selection-done", G_CALLBACK(l_selection_done), editor);
+
+
 	gtk_widget_show_all((GtkWidget *) menu);
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), event);
 }
@@ -719,13 +756,15 @@ static gboolean l_button_press_event_cb(GtkWidget *gwidget, GdkEventButton *eev,
 					}
 					cat_unref_ptr(iter);
 				}
+				cat_unref_ptr(line_info);
 			}
-
+			cat_unref_ptr(line_wo);
 			cat_unref_ptr(a_rev);
 		}
 
 		editor_class->showContextMenu(editor, cursor, (int) eev->x, (int) eev->y, spell_tag, (GdkEvent *) eev);
-		cat_unref_ptr(spell_tag)
+		cat_unref_ptr(spell_tag);
+		cat_unref_ptr(cursor);
 		return TRUE;
 	}
 

@@ -1,1 +1,0 @@
-Linux/Unix line-end (LF) \n:Windows line-end (CR LF) \r\n:Mac-OS (CR) \r:AIX (NL) \025:Misformed line-end (LF CR) \n\r:File-end

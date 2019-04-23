@@ -684,7 +684,7 @@ void cha_revision_wo_line_multi_replace(ChaRevisionWo *e_revision, long long row
 		cat_unref_ptr(e_buf);
 	}
 	cha_utf8_text_cleanup(&utf8_text);
-
+	cat_unref_ptr(src_txt);
 }
 
 
@@ -1316,6 +1316,9 @@ gboolean cha_revision_wo_lines_remove(ChaRevisionWo *e_revision, long long first
 		cat_unref_ptr(new_cursor);
 		cat_unref_ptr(nll);
 	}
+
+	cat_unref_ptr(cursor_a);
+	cat_unref_ptr(cursor_b);
 
 	return TRUE;
 }

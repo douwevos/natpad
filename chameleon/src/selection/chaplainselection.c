@@ -425,6 +425,8 @@ static CatHashMapWo *l_selection_get_for_clipboard(ChaSelection *selection, stru
 		cat_log_debug("richt_text_buf=%o", richt_text_buf);
 		cat_hash_map_wo_put(result, (GObject *) CAT_S(cha_selection_cd_rich_text), (GObject *) richt_text_buf);
 	}
+	cat_unref_ptr(richt_text_buf);
+	cat_unref_ptr(plain_text_buf);
 	cat_unref_ptr(a_rev);
 	return result;
 }

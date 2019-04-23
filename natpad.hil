@@ -26,7 +26,7 @@ workspace {
 	module { type "PKG_CONFIG"; name "x11";              pkgName "x11"; }
 	module { type "PKG_CONFIG"; name "guess";            pkgName "libguess"; }
 	module { type "PKG_CONFIG"; name "zlib";             pkgName "zlib"; }
-	module { type "PKG_CONFIG"; name "hunspell";         pkgName "hunspell"; }
+	module { type "PKG_CONFIG"; name "hunspell";         pkgName "hunspell"; linkstatic "true"; }
 
 	module {
 		name "aspell";

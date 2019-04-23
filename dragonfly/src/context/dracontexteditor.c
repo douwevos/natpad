@@ -237,8 +237,10 @@ gboolean dra_context_editor_indent(DraContextEditor *context_editor, gboolean in
 			CatArrayWo *lines = cat_array_wo_new_size(1);
 			ChaLineWo *tab_line = cha_line_wo_new_with(cat_string_wo_new_with("\t"), CHA_LINE_END_NONE);
 			cat_array_wo_append(lines, (GObject *) tab_line);
+			cat_unref_ptr(tab_line);
 			cha_revision_wo_insert_lines(e_revision, cursor_a, lines, TRUE);
 			break_idx = -1;
+			cat_unref_ptr(lines);
 
 			if (is_on_start_cursor_line) {
 				int xb = cha_cursor_wo_get_x_cursor_bytes(start_cursor);
@@ -256,11 +258,13 @@ gboolean dra_context_editor_indent(DraContextEditor *context_editor, gboolean in
 
 		line_idx++;
 	}
+	cat_unref_ptr(line_iterator);
+	cat_unref_ptr(cursor_a);
+	cat_unref_ptr(cursor_b);
 
 	if (e_current_page) {
 		cha_page_wo_release_lines(e_current_page);
 	}
-
 
 	if (selection) {
 		cha_selection_set_start(selection, start_cursor);
@@ -280,6 +284,8 @@ gboolean dra_context_editor_indent(DraContextEditor *context_editor, gboolean in
 	if (!is_editable) {
 		cha_document_anchor_document(document);
 	}
+	cat_unref_ptr(start_cursor);
+	cat_unref_ptr(end_cursor);
 	cat_unref_ptr(ll_first);
 	cat_unref_ptr(ll_last);
 	return TRUE;

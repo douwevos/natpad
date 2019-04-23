@@ -12,7 +12,11 @@ module {
 	}
 
 	compile {
-		cc { src { path './src/c/'; } destdir './compiled/'; }
+		cc { 
+			natpad.cc.args {}
+			src { path './src/c/'; } 
+			destdir './compiled/'; 
+		}
 		
 	}
 
