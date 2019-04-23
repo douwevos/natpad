@@ -70,7 +70,6 @@ static void l_finalize(GObject *object) {
 DraBasicAugmentRequest *dra_basic_augment_request_new(ChaDocument *document, ChaRevisionWo *a_revision, CatStringWo *a_slot_key) {
 	DraBasicAugmentRequest *result = g_object_new(DRA_TYPE_BASIC_AUGMENT_REQUEST, NULL);
 	cat_ref_anounce(result);
-	DraBasicAugmentRequestPrivate *priv = dra_basic_augment_request_get_instance_private(result);
 	dra_augment_request_construct((DraAugmentRequest *) result, document, a_revision, a_slot_key);
 	return result;
 }
@@ -89,6 +88,7 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 		CatStringWo *a_text = cha_line_wo_get_text(a_raw_line);
 		dra_spell_helper_scan(spell_helper, line_tag_printer, a_text, 0, row);
 		row++;
+		cat_unref_ptr(a_raw_line);
 	}
 
 	cat_unref_ptr(line_iterator);

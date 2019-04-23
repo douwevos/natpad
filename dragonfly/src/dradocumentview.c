@@ -231,6 +231,7 @@ static CatStringWo *l_create_rich_text(ChaDocumentView *document_view, ChaPageWo
 			left = mid;
 		}
 	}
+	cat_unref_ptr(a_line_info);
 	return e_buf;
 }
 

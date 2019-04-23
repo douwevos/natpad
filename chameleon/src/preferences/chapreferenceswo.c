@@ -85,6 +85,7 @@ static void l_dispose(GObject *object) {
 	ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private(instance);
 	cat_unref_ptr(priv->color_map);
 	cat_unref_ptr(priv->font_name);
+	cat_unref_ptr(priv->big_mode_font_name);
 	cat_unref_ptr(priv->template_map);
 	G_OBJECT_CLASS(cha_preferences_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);

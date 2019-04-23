@@ -3,7 +3,7 @@ Version: [%natpad.version%]
 Architecture: [%natpad.os.arch%]
 Maintainer: Douwe Vos <dmvos2000@yahoo.com> 
 Installed-Size: 5844
-Depends: libc6 (>= 2.14), libcairo2 (>= 1.10.0), libgdk-pixbuf2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.37.3), libgtk-3-0 (>= 3.7.10), libpango-1.0-0 (>= 1.32.4), libpangocairo-1.0-0 (>= 1.14.0), libx11-6, zlib1g (>= 1:1.1.4), libhunspell
+Depends: libc6 (>= 2.14), libcairo2 (>= 1.10.0), libgdk-pixbuf2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.37.3), libgtk-3-0 (>= 3.7.10), libpango-1.0-0 (>= 1.32.4), libpangocairo-1.0-0 (>= 1.14.0), libx11-6, zlib1g (>= 1:1.1.4), hunspell
 Section: gnome
 Homepage: http://www.natpad.net/
 Priority: optional
