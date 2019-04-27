@@ -153,19 +153,20 @@ CatS ter_s_string_alt = CAT_S_DEF("StringAlt");	// TODO
 
 CatS ter_s_leading = CAT_S_DEF("leading");
 
-G_DEFINE_TYPE(TerGrammarReader, ter_grammar_reader, G_TYPE_OBJECT)
+G_DEFINE_TYPE(TerGrammarReader, ter_grammar_reader, G_TYPE_OBJECT) // @suppress("Unused static function")
 
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
 static void ter_grammar_reader_class_init(TerGrammarReaderClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
+	object_class->dispose = l_dispose;
 }
 
 static void ter_grammar_reader_init(TerGrammarReader *reader) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
+	G_OBJECT_CLASS(ter_grammar_reader_parent_class)->dispose(object);
 }
 
 
@@ -174,8 +175,6 @@ TerGrammarReader *ter_grammar_reader_new() {
 	cat_ref_anounce(result);
 	return result;
 }
-
-
 
 static void _read_line(CatUtf8InputStreamScanner *in, CatUnicharArray *buffer, CatStreamStatus *stream_status) {
 	cat_unichar_array_clear(buffer, FALSE);
@@ -198,8 +197,6 @@ static void l_parse_keyword(TerSyntax *syntax, CatUnicharArray *line, int keywor
 	TerUnicharNode *node = ter_syntax_create_keyword_end_node(syntax, line);
 	ter_unichar_node_set_keyword_ns1(node, TER_COLOR_KEYWORDS_1+keyword_nr);
 }
-
-
 
 static void l_parse_bracket_set(CatHashSet *unichar_set, CatUnicharArray *value) {
 	if (value==NULL) {
@@ -234,6 +231,7 @@ static void l_parse_bracket_set(CatHashSet *unichar_set, CatUnicharArray *value)
 		prev_ch = cur_ch;
 	}
 }
+
 static void l_parse_syntax_line(TerSyntax *syntax, CatUnicharArray *line) {
 	int idx = cat_unichar_array_uni_char_index_of(line, (gunichar) '=');
 	if (idx<=0) {
@@ -324,7 +322,6 @@ static void l_parse_syntax_line(TerSyntax *syntax, CatUnicharArray *line) {
 	cat_unref(a_key);
 }
 
-
 #define _TER_MAIN		0
 #define _TER_SYNTAX		1
 #define _TER_KEYWORDS1	2
@@ -333,7 +330,6 @@ static void l_parse_syntax_line(TerSyntax *syntax, CatUnicharArray *line) {
 #define _TER_KEYWORDS4	5
 #define _TER_KEYWORDS5	6
 #define _TER_KEYWORDS6	7
-
 
 TerSyntax *ter_grammar_reader_read(CatIInputStream *in_stream) {
 	CatUtf8InputStreamScanner *in = cat_utf8_input_stream_scanner_new(CAT_IINPUT_STREAM(in_stream));
@@ -452,8 +448,6 @@ TerSyntax *ter_grammar_reader_read(CatIInputStream *in_stream) {
 	cat_unref_ptr(buffer);
 	cat_unref_ptr(in);
 	cat_unref_ptr(in_stream);
-
-
 	cat_log_detail("done");
 	return syntax;
 }

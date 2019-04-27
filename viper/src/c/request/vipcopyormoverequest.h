@@ -27,7 +27,6 @@
 #include <caterpillar.h>
 #include <worm.h>
 
-
 G_BEGIN_DECLS
 
 #define VIP_TYPE_COPY_OR_MOVE_REQUEST              (vip_copy_or_move_request_get_type())
@@ -36,17 +35,13 @@ G_BEGIN_DECLS
 #define VIP_IS_COPY_OR_MOVE_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_COPY_OR_MOVE_REQUEST))
 #define VIP_IS_COPY_OR_MOVE_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_COPY_OR_MOVE_REQUEST))
 #define VIP_COPY_OR_MOVE_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_COPY_OR_MOVE_REQUEST, VipCopyOrMoveRequestClass))
-#define VIP_COPY_OR_MOVE_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_COPY_OR_MOVE_REQUEST, VipCopyOrMoveRequestPrivate))
-
 
 typedef struct _VipCopyOrMoveRequest               VipCopyOrMoveRequest;
 typedef struct _VipCopyOrMoveRequestPrivate        VipCopyOrMoveRequestPrivate;
 typedef struct _VipCopyOrMoveRequestClass          VipCopyOrMoveRequestClass;
 
-
 struct _VipCopyOrMoveRequest {
 	WorRequest parent;
-	VipCopyOrMoveRequestPrivate *priv;
 };
 
 struct _VipCopyOrMoveRequestClass {
@@ -61,7 +56,5 @@ GType vip_copy_or_move_request_get_type();
 VipCopyOrMoveRequest *vip_copy_or_move_request_new(struct _VipService *vip_service, CatArrayWo *source_path_list, CatReadableTreeNode *destination, gboolean is_copy);
 
 G_END_DECLS
-
-
 
 #endif /* VIPCOPYORMOVEREQUEST_H_ */

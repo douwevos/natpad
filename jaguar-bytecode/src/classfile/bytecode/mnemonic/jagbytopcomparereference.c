@@ -38,45 +38,39 @@ struct _JagBytOpCompareReferencePrivate {
 static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpCompareReference, jag_byt_op_compare_reference, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpCompareReference)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_compare_reference_class_init(JagBytOpCompareReferenceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytOpCompareReferencePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_compare_reference_init(JagBytOpCompareReference *instance) {
-	JagBytOpCompareReferencePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_COMPARE_REFERENCE, JagBytOpCompareReferencePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_compare_reference_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_compare_reference_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytOpCompareReference *jag_byt_op_compare_reference_new(JagBytOperation operation, int offset, int branch_offset, JagBytConditionType condition_type, gboolean with_zero) {
 	JagBytOpCompareReference *result = g_object_new(JAG_BYT_TYPE_OP_COMPARE_REFERENCE, NULL);
 	cat_ref_anounce(result);
-	JagBytOpCompareReferencePrivate *priv = result->priv;
+	JagBytOpCompareReferencePrivate *priv = jag_byt_op_compare_reference_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 3);
 	priv->branch_offset = branch_offset;
 	priv->condition_type = condition_type;
@@ -84,28 +78,29 @@ JagBytOpCompareReference *jag_byt_op_compare_reference_new(JagBytOperation opera
 	return result;
 }
 
-
 JagBytConditionType jag_byt_op_compare_reference_get_condition_type(JagBytOpCompareReference *compare_reference) {
-	return JAG_BYT_OP_COMPARE_REFERENCE_GET_PRIVATE(compare_reference)->condition_type;
+	JagBytOpCompareReferencePrivate *priv = jag_byt_op_compare_reference_get_instance_private(compare_reference);
+	return priv->condition_type;
 }
 
 gboolean jag_byt_op_compare_reference_is_with_zero(JagBytOpCompareReference *compare_reference) {
-	return JAG_BYT_OP_COMPARE_REFERENCE_GET_PRIVATE(compare_reference)->with_zero;
+	JagBytOpCompareReferencePrivate *priv = jag_byt_op_compare_reference_get_instance_private(compare_reference);
+	return priv->with_zero;
 }
 
 
 /********************* start JagBytIMnemonicInterface implementation *********************/
 
-
 static int l_mnemonic_get_branch_offset(JagBytIMnemonic *self) {
-	JagBytOpCompareReferencePrivate *priv = JAG_BYT_OP_COMPARE_REFERENCE_GET_PRIVATE(self);
+	JagBytOpCompareReference *instance = JAG_BYT_OP_COMPARE_REFERENCE(self);
+	JagBytOpCompareReferencePrivate *priv = jag_byt_op_compare_reference_get_instance_private(instance);
 	int offset = jag_byt_imnemonic_get_offset(self);
 	return offset+priv->branch_offset;
 }
 
-
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpCompareReferencePrivate *priv = JAG_BYT_OP_COMPARE_REFERENCE_GET_PRIVATE(self);
+	JagBytOpCompareReference *instance = JAG_BYT_OP_COMPARE_REFERENCE(self);
+	JagBytOpCompareReferencePrivate *priv = jag_byt_op_compare_reference_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new();
 	if (priv->with_zero) {
 		switch(priv->condition_type) {
@@ -147,4 +142,3 @@ static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 }
 
 /********************* end JagBytIMnemonicInterface implementation *********************/
-

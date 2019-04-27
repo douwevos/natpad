@@ -41,49 +41,43 @@ struct _ShoScannerPrivate {
 static void l_scanner_iface_init(ShoIScannerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(ShoScanner, sho_scanner, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(ShoScanner)
 		G_IMPLEMENT_INTERFACE(SHO_TYPE_ISCANNER, l_scanner_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_advance(ShoScanner *scanner);
 
 static void sho_scanner_class_init(ShoScannerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ShoScannerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void sho_scanner_init(ShoScanner *instance) {
-	ShoScannerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, SHO_TYPE_SCANNER, ShoScannerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ShoScanner *instance = SHO_SCANNER(object);
-	ShoScannerPrivate *priv = instance->priv;
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(instance);
 	cat_unref_ptr(priv->stream_in);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(sho_scanner_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(sho_scanner_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ShoScanner *sho_scanner_new(CatIInputStream *stream_in) {
 	ShoScanner *result = g_object_new(SHO_TYPE_SCANNER, NULL);
 	cat_ref_anounce(result);
-	ShoScannerPrivate *priv = result->priv;
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(result);
 	priv->stream_in = cat_ref_ptr(stream_in);
 	priv->column = -1;
 	priv->row = 0;
@@ -92,16 +86,12 @@ ShoScanner *sho_scanner_new(CatIInputStream *stream_in) {
 	return result;
 }
 
-
-
-
 ShoToken *l_scanner_create_token(ShoIScanner *self, int symbol, int parse_state, gboolean is_terminal, gboolean is_error, gboolean used_by_parser, int left, int left_row, int right, int right_row, GObject *val) {
 	return sho_token_new_full_ext(symbol, parse_state, is_terminal, is_error, used_by_parser, left, left_row, right, right_row, val);
 }
 
-
 static void l_advance(ShoScanner *scanner) {
-	ShoScannerPrivate *priv = SHO_SCANNER_GET_PRIVATE(scanner);
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(scanner);
 	if ((priv->last_char=='\r') || (priv->last_char=='\n')) {
 		priv->column = -1;
 		priv->row++;
@@ -112,7 +102,7 @@ static void l_advance(ShoScanner *scanner) {
 
 
 static ShoToken * l_read_string(ShoScanner *scanner) {
-	ShoScannerPrivate *priv = SHO_SCANNER_GET_PRIVATE(scanner);
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(scanner);
 	char mark = priv->last_char;
 	gboolean escaped = FALSE;
 	l_advance(scanner);
@@ -169,7 +159,7 @@ static ShoToken * l_read_string(ShoScanner *scanner) {
 
 
 static ShoToken *l_read_asign_value_new_line(ShoScanner *scanner) {
-	ShoScannerPrivate *priv = SHO_SCANNER_GET_PRIVATE(scanner);
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(scanner);
 	l_advance(scanner);
 	CatStringWo *e_buf = cat_string_wo_new();
 	gboolean keep_running = TRUE;
@@ -196,7 +186,7 @@ static ShoToken *l_read_asign_value_new_line(ShoScanner *scanner) {
 
 
 static gboolean l_read_digits(ShoScanner *scanner, CatStringWo *e_buf) {
-	ShoScannerPrivate *priv = SHO_SCANNER_GET_PRIVATE(scanner);
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(scanner);
 	gboolean result = FALSE;
 	while(TRUE) {
 		if ((priv->last_char>='0') && (priv->last_char<='9')) {
@@ -217,7 +207,7 @@ enum NumberScanState {
 };
 
 static ShoToken *l_read_number(ShoScanner *scanner) {
-	ShoScannerPrivate *priv = SHO_SCANNER_GET_PRIVATE(scanner);
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(scanner);
 	CatStringWo *e_buf = cat_string_wo_new();
 	l_read_digits(scanner, e_buf);
 	enum NumberScanState state;
@@ -267,7 +257,7 @@ static ShoToken *l_read_number(ShoScanner *scanner) {
 static CatS sho_s_nil = CAT_S_DEF("nil");
 
 static ShoToken *l_read_identifier(ShoScanner *scanner) {
-	ShoScannerPrivate *priv = SHO_SCANNER_GET_PRIVATE(scanner);
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(scanner);
 	CatStringWo *e_buf = cat_string_wo_new();
 	cat_string_wo_append_char(e_buf, (char) priv->last_char);
 	l_advance(scanner);
@@ -299,7 +289,7 @@ static ShoToken *l_read_identifier(ShoScanner *scanner) {
 
 ShoToken *l_scanner_next_token(ShoIScanner *self) {
 	ShoScanner *scanner = SHO_SCANNER(self);
-	ShoScannerPrivate *priv = SHO_SCANNER_GET_PRIVATE(self);
+	ShoScannerPrivate *priv = sho_scanner_get_instance_private(scanner);
 
 	ShoToken *result = NULL;
 
@@ -354,9 +344,7 @@ ShoToken *l_scanner_next_token(ShoIScanner *self) {
 	return result;
 }
 
-
 static void l_scanner_iface_init(ShoIScannerInterface *iface) {
 	iface->createToken = l_scanner_create_token;
 	iface->next_token = l_scanner_next_token;
 }
-

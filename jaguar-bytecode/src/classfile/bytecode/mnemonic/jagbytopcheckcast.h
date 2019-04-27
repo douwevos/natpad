@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_CHECK_CAST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_CHECK_CAST))
 #define JAG_BYT_IS_OP_CHECK_CAST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_CHECK_CAST))
 #define JAG_BYT_OP_CHECK_CAST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_CHECK_CAST, JagBytOpCheckCastClass))
-#define JAG_BYT_OP_CHECK_CAST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_CHECK_CAST, JagBytOpCheckCastPrivate))
 
 typedef struct _JagBytOpCheckCast               JagBytOpCheckCast;
 typedef struct _JagBytOpCheckCastPrivate        JagBytOpCheckCastPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytOpCheckCastClass          JagBytOpCheckCastClass;
 
 struct _JagBytOpCheckCast {
 	JagBytAbstractMnemonic parent;
-	JagBytOpCheckCastPrivate *priv;
 };
 
 struct _JagBytOpCheckCastClass {

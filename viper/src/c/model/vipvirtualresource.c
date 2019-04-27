@@ -35,68 +35,58 @@ struct _VipVirtualResourcePrivate {
 static void l_resource_iface_init(VipIResourceInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipVirtualResource, vip_virtual_resource, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipVirtualResource)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IRESOURCE, l_resource_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_virtual_resource_class_init(VipVirtualResourceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipVirtualResourcePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_virtual_resource_init(VipVirtualResource *instance) {
-	VipVirtualResourcePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_VIRTUAL_RESOURCE, VipVirtualResourcePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipVirtualResource *instance = VIP_VIRTUAL_RESOURCE(object);
-	VipVirtualResourcePrivate *priv = instance->priv;
+	VipVirtualResourcePrivate *priv = vip_virtual_resource_get_instance_private(instance);
 	cat_unref_ptr(priv->name);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_virtual_resource_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_virtual_resource_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 VipVirtualResource *vip_virtual_resource_new(CatStringWo *name) {
 	VipVirtualResource *result = g_object_new(VIP_TYPE_VIRTUAL_RESOURCE, NULL);
 	cat_ref_anounce(result);
-	VipVirtualResourcePrivate *priv = result->priv;
+	VipVirtualResourcePrivate *priv = vip_virtual_resource_get_instance_private(result);
 	priv->name = cat_ref_ptr(name);
 	return result;
 }
 
 
-
-
 /********************* start VipIResource implementation *********************/
 
 static CatStringWo *l_resource_get_name(VipIResource *self) {
-	VipVirtualResourcePrivate *priv = VIP_VIRTUAL_RESOURCE_GET_PRIVATE(self);
+	VipVirtualResource *instance = VIP_VIRTUAL_RESOURCE(self);
+	VipVirtualResourcePrivate *priv = vip_virtual_resource_get_instance_private(instance);
 	return priv->name;
-
 }
 
 static long long l_resource_last_modified(VipIResource *self) {
 	return 0;
 }
-
 
 static void l_resource_iface_init(VipIResourceInterface *iface) {
 	iface->getName = l_resource_get_name;
@@ -104,5 +94,3 @@ static void l_resource_iface_init(VipIResourceInterface *iface) {
 }
 
 /********************* end VipIResource implementation *********************/
-
-

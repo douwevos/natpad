@@ -35,50 +35,43 @@ struct _JagAstTpHeaderPrivate {
 	CatArrayWo *e_interfaces;
 };
 
-G_DEFINE_TYPE (JagAstTpHeader, jag_ast_tp_header, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagAstTpHeader, jag_ast_tp_header, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_tp_header_class_init(JagAstTpHeaderClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstTpHeaderPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_tp_header_init(JagAstTpHeader *instance) {
-	JagAstTpHeaderPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_TP_HEADER, JagAstTpHeaderPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstTpHeader *instance = JAG_AST_TP_HEADER(object);
-	JagAstTpHeaderPrivate *priv = instance->priv;
+	JagAstTpHeaderPrivate *priv = jag_ast_tp_header_get_instance_private(instance);
 	cat_unref_ptr(priv->classname);
 	cat_unref_ptr(priv->e_interfaces);
 	cat_unref_ptr(priv->modifiers);
 	cat_unref_ptr(priv->supertype);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_tp_header_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_tp_header_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstTpHeader *jag_ast_tp_header_new(JagBytName *classname, JagAstModifiers *modifiers, JagBytName *supertype, CatArrayWo *e_interfaces) {
 	JagAstTpHeader *result = g_object_new(JAG_AST_TYPE_TP_HEADER, NULL);
 	cat_ref_anounce(result);
-	JagAstTpHeaderPrivate *priv = result->priv;
+	JagAstTpHeaderPrivate *priv = jag_ast_tp_header_get_instance_private(result);
 	priv->classname = cat_ref_ptr(classname);
 	priv->modifiers = cat_ref_ptr(modifiers);
 	priv->supertype = cat_ref_ptr(supertype);
@@ -89,7 +82,7 @@ JagAstTpHeader *jag_ast_tp_header_new(JagBytName *classname, JagAstModifiers *mo
 static CatS l_s_txt_java_lang_object = CAT_S_DEF("java.lang.Object");
 
 void jag_ast_tp_header_write(JagAstTpHeader *tp_header, JagAstWriter *out) {
-	JagAstTpHeaderPrivate *priv = JAG_AST_TP_HEADER_GET_PRIVATE(tp_header);
+	JagAstTpHeaderPrivate *priv = jag_ast_tp_header_get_instance_private(tp_header);
 	if (priv->modifiers!=NULL) {
 		jag_ast_writer_print(out, jag_ast_modifiers_as_text(priv->modifiers));
 	}
@@ -119,5 +112,3 @@ void jag_ast_tp_header_write(JagAstTpHeader *tp_header, JagAstWriter *out) {
 		cat_unref_ptr(iter);
 	}
 }
-
-

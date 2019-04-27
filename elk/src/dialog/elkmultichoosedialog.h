@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define ELK_IS_MULTI_CHOOSE_DIALOG(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_MULTI_CHOOSE_DIALOG))
 #define ELK_IS_MULTI_CHOOSE_DIALOG_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_MULTI_CHOOSE_DIALOG))
 #define ELK_MULTI_CHOOSE_DIALOG_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_MULTI_CHOOSE_DIALOG, ElkMultiChooseDialogClass))
-#define ELK_MULTI_CHOOSE_DIALOG_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_MULTI_CHOOSE_DIALOG, ElkMultiChooseDialogPrivate))
 
 typedef struct _ElkMultiChooseDialog               ElkMultiChooseDialog;
 typedef struct _ElkMultiChooseDialogPrivate        ElkMultiChooseDialogPrivate;
@@ -44,7 +43,6 @@ typedef struct _ElkMultiChooseDialogClass          ElkMultiChooseDialogClass;
 
 struct _ElkMultiChooseDialog {
 	GtkDialog parent;
-	ElkMultiChooseDialogPrivate *priv;
 };
 
 struct _ElkMultiChooseDialogClass {

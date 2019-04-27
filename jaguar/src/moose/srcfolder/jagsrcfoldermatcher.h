@@ -34,10 +34,8 @@ G_BEGIN_DECLS
 #define JAG_IS_SRC_FOLDER_MATCHER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SRC_FOLDER_MATCHER))
 #define JAG_SRC_FOLDER_MATCHER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SRC_FOLDER_MATCHER, JagSrcFolderMatcherClass))
 
-
 typedef struct _JagSrcFolderMatcher               JagSrcFolderMatcher;
 typedef struct _JagSrcFolderMatcherClass          JagSrcFolderMatcherClass;
-
 
 struct _JagSrcFolderMatcher {
 	GObject parent;
@@ -47,12 +45,10 @@ struct _JagSrcFolderMatcherClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_src_folder_matcher_get_type();
 
 JagSrcFolderMatcher *jag_src_folder_matcher_new();
 
 G_END_DECLS
-
 
 #endif /* JAGSRCFOLDERMATCHER_H_ */

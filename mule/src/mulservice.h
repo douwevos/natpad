@@ -36,23 +36,18 @@ G_BEGIN_DECLS
 #define MUL_IS_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MUL_TYPE_SERVICE))
 #define MUL_IS_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MUL_TYPE_SERVICE))
 #define MUL_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MUL_TYPE_SERVICE, MulServiceClass))
-#define MUL_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MUL_TYPE_SERVICE, MulServicePrivate))
 
 typedef struct _MulService               MulService;
 typedef struct _MulServicePrivate        MulServicePrivate;
 typedef struct _MulServiceClass          MulServiceClass;
 
-
-
 struct _MulService {
 	GObject parent;
-	MulServicePrivate *priv;
 };
 
 struct _MulServiceClass {
 	GObjectClass parent_class;
 };
-
 
 GType mul_service_get_type();
 

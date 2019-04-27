@@ -39,6 +39,7 @@ static void l_file_iface_init(VipIFileInterface *iface);
 
 
 G_DEFINE_TYPE_WITH_CODE(JagVipJarRoot, jag_vip_jar_root, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagVipJarRoot)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IRESOURCE, l_resource_iface_init);
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IMAP, l_map_iface_init);
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IFILE, l_file_iface_init);
@@ -48,22 +49,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_vip_jar_root_class_init(JagVipJarRootClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagVipJarRootPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_vip_jar_root_init(JagVipJarRoot *instance) {
-	JagVipJarRootPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_VIP_JAR_ROOT, JagVipJarRootPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagVipJarRoot *instance = JAG_VIP_JAR_ROOT(object);
-	JagVipJarRootPrivate *priv = instance->priv;
+	JagVipJarRootPrivate *priv = jag_vip_jar_root_get_instance_private(instance);
 	cat_unref_ptr(priv->jar_file);
 	G_OBJECT_CLASS(jag_vip_jar_root_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -76,11 +73,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JagVipJarRoot *jag_vip_jar_root_new(VipIFile *jar_file) {
 	JagVipJarRoot *result = g_object_new(JAG_TYPE_VIP_JAR_ROOT, NULL);
 	cat_ref_anounce(result);
-	JagVipJarRootPrivate *priv = result->priv;
+	JagVipJarRootPrivate *priv = jag_vip_jar_root_get_instance_private(result);
 	priv->jar_file = cat_ref_ptr(jar_file);
 	return result;
 }
@@ -89,15 +85,16 @@ JagVipJarRoot *jag_vip_jar_root_new(VipIFile *jar_file) {
 /********************* begin VipIResource implementation *********************/
 
 static CatStringWo *l_resource_get_name(VipIResource *self) {
-	JagVipJarRootPrivate *priv = JAG_VIP_JAR_ROOT_GET_PRIVATE(self);
+	JagVipJarRoot *instance = JAG_VIP_JAR_ROOT(self);
+	JagVipJarRootPrivate *priv = jag_vip_jar_root_get_instance_private(instance);
 	return vip_iresource_get_name((VipIResource *) priv->jar_file);
 }
 
 static long long l_resource_last_modified(VipIResource *self) {
-	JagVipJarRootPrivate *priv = JAG_VIP_JAR_ROOT_GET_PRIVATE(self);
+	JagVipJarRoot *instance = JAG_VIP_JAR_ROOT(self);
+	JagVipJarRootPrivate *priv = jag_vip_jar_root_get_instance_private(instance);
 	return VIP_IRESOURCE_GET_INTERFACE(priv->jar_file)->lastModified((VipIResource *) priv->jar_file);
 }
-
 
 static void l_resource_iface_init(VipIResourceInterface *iface) {
 	iface->getName = l_resource_get_name;
@@ -109,15 +106,16 @@ static void l_resource_iface_init(VipIResourceInterface *iface) {
 /********************* begin VipIFile implementation *********************/
 
 static long long l_file_length(VipIFile *self) {
-	JagVipJarRootPrivate *priv = JAG_VIP_JAR_ROOT_GET_PRIVATE(self);
+	JagVipJarRoot *instance = JAG_VIP_JAR_ROOT(self);
+	JagVipJarRootPrivate *priv = jag_vip_jar_root_get_instance_private(instance);
 	return VIP_IFILE_GET_INTERFACE(priv->jar_file)->length(priv->jar_file);
 }
 
 static CatIInputStream *l_file_open_input_stream(VipIFile *self) {
-	JagVipJarRootPrivate *priv = JAG_VIP_JAR_ROOT_GET_PRIVATE(self);
+	JagVipJarRoot *instance = JAG_VIP_JAR_ROOT(self);
+	JagVipJarRootPrivate *priv = jag_vip_jar_root_get_instance_private(instance);
 	return VIP_IFILE_GET_INTERFACE(priv->jar_file)->openInputStream(priv->jar_file);
 }
-
 
 static void l_file_iface_init(VipIFileInterface *iface) {
 	iface->length = l_file_length;
@@ -126,14 +124,14 @@ static void l_file_iface_init(VipIFileInterface *iface) {
 
 /********************* end VipIFile implementation *********************/
 
-
 /********************* begin VipIMap implementation *********************/
 
 CatS l_s_jag_root = CAT_S_DEF("<root>");
 
 static CatArrayWo *l_map_enlist(VipIMap *self) {
 	cat_log_debug("enlisting:%o", self);
-	JagVipJarRootPrivate *priv = JAG_VIP_JAR_ROOT_GET_PRIVATE(self);
+	JagVipJarRoot *instance = JAG_VIP_JAR_ROOT(self);
+	JagVipJarRootPrivate *priv = jag_vip_jar_root_get_instance_private(instance);
 	CatArrayWo *e_result = cat_array_wo_new();
 
 	JagJarNameAndType *root = jag_jar_name_and_type_new(CAT_S(l_s_jag_root), TRUE);
@@ -197,7 +195,6 @@ static CatArrayWo *l_map_enlist(VipIMap *self) {
 	cat_unref_ptr(root);
 	return e_result;
 }
-
 
 static void l_map_iface_init(VipIMapInterface *iface) {
 	iface->enlist = l_map_enlist;

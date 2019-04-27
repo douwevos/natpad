@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "viprefreshnoderequest.h"
 #include "../vipservice.h"
 #include "../model/scanner/vipnodescanner.h"
@@ -37,15 +36,13 @@ struct _VipRefreshNodeRequestPrivate {
 	CatReadableTreeNode *node_to_refresh;
 };
 
-G_DEFINE_TYPE(VipRefreshNodeRequest, vip_refresh_node_request, WOR_TYPE_REQUEST); // @suppress("Unused static function")
+G_DEFINE_TYPE_WITH_PRIVATE(VipRefreshNodeRequest, vip_refresh_node_request, WOR_TYPE_REQUEST); // @suppress("Unused static function")
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void vip_refresh_node_request_class_init(VipRefreshNodeRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipRefreshNodeRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -55,14 +52,12 @@ static void vip_refresh_node_request_class_init(VipRefreshNodeRequestClass *claz
 }
 
 static void vip_refresh_node_request_init(VipRefreshNodeRequest *instance) {
-	VipRefreshNodeRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_REFRESH_NODE_REQUEST, VipRefreshNodeRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipRefreshNodeRequest *instance = VIP_REFRESH_NODE_REQUEST(object);
-	VipRefreshNodeRequestPrivate *priv = instance->priv;
+	VipRefreshNodeRequestPrivate *priv = vip_refresh_node_request_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_service);
 	cat_unref_ptr(priv->node_to_refresh);
 	G_OBJECT_CLASS(vip_refresh_node_request_parent_class)->dispose(object);
@@ -80,17 +75,16 @@ static void l_finalize(GObject *object) {
 VipRefreshNodeRequest *vip_refresh_node_request_new(struct _VipService *vip_service, CatReadableTreeNode *node_to_refresh) {
 	VipRefreshNodeRequest *result = g_object_new(VIP_TYPE_REFRESH_NODE_REQUEST, NULL);
 	cat_ref_anounce(result);
-	VipRefreshNodeRequestPrivate *priv = result->priv;
+	VipRefreshNodeRequestPrivate *priv = vip_refresh_node_request_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->node_to_refresh = cat_ref_ptr(node_to_refresh);
 	wor_request_construct((WorRequest *) result);
 	return result;
 }
 
-
-
 static void l_run_request(WorRequest *self) {
-	VipRefreshNodeRequestPrivate *priv = VIP_REFRESH_NODE_REQUEST_GET_PRIVATE(self);
+	VipRefreshNodeRequest *instance = VIP_REFRESH_NODE_REQUEST(self);
+	VipRefreshNodeRequestPrivate *priv = vip_refresh_node_request_get_instance_private(instance);
 
 	CatTree *tree = vip_service_get_tree(priv->vip_service);
 	CatWritableTreeNode *writable_root_node = cat_tree_get_writable_root_node(tree);

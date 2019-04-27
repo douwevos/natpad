@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "jagastblock.h"
 #include "jagastreturnstatement.h"
 
@@ -39,46 +37,40 @@ struct _JagAstBlockPrivate {
 static void l_statement_iface_init(JagAstIStatementInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstBlock, jag_ast_block, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstBlock)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_ISTATEMENT, l_statement_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_block_class_init(JagAstBlockClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstBlockPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_block_init(JagAstBlock *instance) {
-	JagAstBlockPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_BLOCK, JagAstBlockPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstBlock *instance = JAG_AST_BLOCK(object);
-	JagAstBlockPrivate *priv = instance->priv;
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(instance);
 	cat_unref_ptr(priv->e_statement_list);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_block_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_block_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 void jag_ast_block_construct(JagAstBlock *block) {
-	JagAstBlockPrivate *priv = JAG_AST_BLOCK_GET_PRIVATE(block);
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(block);
 	priv->e_statement_list = cat_array_wo_new();
 	priv->statement_line_nr = -1;
 }
@@ -92,14 +84,14 @@ JagAstBlock *jag_ast_block_new() {
 }
 
 void jag_ast_block_append_statement(JagAstBlock *block, JagAstIStatement *statement) {
-	JagAstBlockPrivate *priv = JAG_AST_BLOCK_GET_PRIVATE(block);
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(block);
 	cat_array_wo_append(priv->e_statement_list, (GObject *) statement);
 }
 
 
 
 void jag_ast_block_remove_last_return(JagAstBlock *block) {
-	JagAstBlockPrivate *priv = JAG_AST_BLOCK_GET_PRIVATE(block);
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(block);
 	if (cat_array_wo_size(priv->e_statement_list)==0) {
 		return;
 	}
@@ -112,27 +104,28 @@ void jag_ast_block_remove_last_return(JagAstBlock *block) {
 }
 
 int jag_ast_block_get_statement_line_nr(JagAstBlock *block) {
-	return JAG_AST_BLOCK_GET_PRIVATE(block)->statement_line_nr;
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(block);
+	return priv->statement_line_nr;
 }
 
 JagAstIStatement *jag_ast_block_get_statement_at(JagAstBlock *block, int index) {
-	return (JagAstIStatement *) cat_array_wo_get(JAG_AST_BLOCK_GET_PRIVATE(block)->e_statement_list, index);
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(block);
+	return (JagAstIStatement *) cat_array_wo_get(priv->e_statement_list, index);
 }
-
 
 
 /********************* start JagAstIStatement implementation *********************/
 
-
 static void l_statement_set_at_least_line_nr(JagAstIStatement *self, int at_least_line_nr) {
-	JagAstBlockPrivate *priv = JAG_AST_BLOCK_GET_PRIVATE(self);
+	JagAstBlock *instance = JAG_AST_BLOCK(self);
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(instance);
 	priv->statement_line_nr = at_least_line_nr;
 }
 
-
-
 static void l_statement_write_statement(JagAstIStatement *self, JagAstWriter *out) {
-	JagAstBlockPrivate *priv = JAG_AST_BLOCK_GET_PRIVATE(self);
+	JagAstBlock *instance = JAG_AST_BLOCK(self);
+	JagAstBlockPrivate *priv = jag_ast_block_get_instance_private(instance);
+
 	jag_ast_writer_set_at_least_line_nr(out, priv->statement_line_nr);
 
 	jag_ast_writer_print(out, cat_string_wo_new_with("{\n"));
@@ -153,4 +146,3 @@ static void l_statement_iface_init(JagAstIStatementInterface *iface) {
 }
 
 /********************* end JagAstIStatement implementation *********************/
-

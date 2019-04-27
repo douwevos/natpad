@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef TERSYNTAXRESOURCE_H_
 #define TERSYNTAXRESOURCE_H_
 
@@ -37,22 +36,18 @@ G_BEGIN_DECLS
 #define TER_IS_SYNTAX_RESOURCE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TER_TYPE_SYNTAX_RESOURCE))
 #define TER_IS_SYNTAX_RESOURCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_SYNTAX_RESOURCE))
 #define TER_SYNTAX_RESOURCE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_SYNTAX_RESOURCE, TerSyntaxResourceClass))
-#define TER_SYNTAX_RESOURCE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TER_TYPE_SYNTAX_RESOURCE, TerSyntaxResourcePrivate))
 
 typedef struct _TerSyntaxResource               TerSyntaxResource;
 typedef struct _TerSyntaxResourcePrivate        TerSyntaxResourcePrivate;
 typedef struct _TerSyntaxResourceClass          TerSyntaxResourceClass;
 
-
 struct _TerSyntaxResource {
 	GObject parent;
-	TerSyntaxResourcePrivate *priv;
 };
 
 struct _TerSyntaxResourceClass {
 	GObjectClass parent_class;
 };
-
 
 GType ter_syntax_resource_get_type();
 

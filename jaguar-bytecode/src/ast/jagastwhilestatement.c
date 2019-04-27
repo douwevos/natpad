@@ -38,49 +38,43 @@ struct _JagAstWhileStatementPrivate {
 static void l_statement_iface_init(JagAstIStatementInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstWhileStatement, jag_ast_while_statement, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstWhileStatement)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_ISTATEMENT, l_statement_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_while_statement_class_init(JagAstWhileStatementClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstWhileStatementPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_while_statement_init(JagAstWhileStatement *instance) {
-	JagAstWhileStatementPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_WHILE_STATEMENT, JagAstWhileStatementPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstWhileStatement *instance = JAG_AST_WHILE_STATEMENT(object);
-	JagAstWhileStatementPrivate *priv = instance->priv;
+	JagAstWhileStatementPrivate *priv = jag_ast_while_statement_get_instance_private(instance);
 	cat_unref_ptr(priv->body);
 	cat_unref_ptr(priv->conditional_expression);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_while_statement_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_while_statement_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstWhileStatement *jag_ast_while_statement_new(JagAstBlock *body) {
 	JagAstWhileStatement *result = g_object_new(JAG_AST_TYPE_WHILE_STATEMENT, NULL);
 	cat_ref_anounce(result);
-	JagAstWhileStatementPrivate *priv = result->priv;
+	JagAstWhileStatementPrivate *priv = jag_ast_while_statement_get_instance_private(result);
 	priv->body = cat_ref_ptr(body);
 	priv->statement_line_nr = -1;
 	priv->conditional_expression = NULL;
@@ -88,25 +82,22 @@ JagAstWhileStatement *jag_ast_while_statement_new(JagAstBlock *body) {
 }
 
 void jag_ast_while_statement_set_conditional_expression(JagAstWhileStatement *while_statement, JagAstIConditionalExpression *conditional_expression) {
-	JagAstWhileStatementPrivate *priv = JAG_AST_WHILE_STATEMENT_GET_PRIVATE(while_statement);
+	JagAstWhileStatementPrivate *priv = jag_ast_while_statement_get_instance_private(while_statement);
 	cat_ref_swap(priv->conditional_expression, conditional_expression);
 }
 
 
-
-
 /********************* start JagAstIStatementInterface implementation *********************/
 
-
 static void l_statement_set_at_least_line_nr(JagAstIStatement *self, int at_least_line_nr) {
-	JagAstWhileStatementPrivate *priv = JAG_AST_WHILE_STATEMENT_GET_PRIVATE(self);
+	JagAstWhileStatement *instance = JAG_AST_WHILE_STATEMENT(self);
+	JagAstWhileStatementPrivate *priv = jag_ast_while_statement_get_instance_private(instance);
 	priv->statement_line_nr = at_least_line_nr;
 }
 
-
-
 static void l_statement_write_statement(JagAstIStatement *self, JagAstWriter *out) {
-	JagAstWhileStatementPrivate *priv = JAG_AST_WHILE_STATEMENT_GET_PRIVATE(self);
+	JagAstWhileStatement *instance = JAG_AST_WHILE_STATEMENT(self);
+	JagAstWhileStatementPrivate *priv = jag_ast_while_statement_get_instance_private(instance);
 	jag_ast_writer_set_at_least_line_nr(out, priv->statement_line_nr);
 
 	jag_ast_writer_print(out, cat_string_wo_new_with("while("));
@@ -129,6 +120,4 @@ static void l_statement_iface_init(JagAstIStatementInterface *iface) {
 	iface->writeStatement = l_statement_write_statement;
 }
 
-
 /********************* end JagAstIStatementInterface implementation *********************/
-

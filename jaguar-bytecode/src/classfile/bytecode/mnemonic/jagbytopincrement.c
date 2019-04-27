@@ -38,45 +38,39 @@ struct _JagBytOpIncrementPrivate {
 static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpIncrement, jag_byt_op_increment, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpIncrement)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_increment_class_init(JagBytOpIncrementClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytOpIncrementPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_increment_init(JagBytOpIncrement *instance) {
-	JagBytOpIncrementPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_INCREMENT, JagBytOpIncrementPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_increment_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_increment_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytOpIncrement *jag_byt_op_increment_new(int offset, int index, int constant, gboolean is_wide) {
 	JagBytOpIncrement *result = g_object_new(JAG_BYT_TYPE_OP_INCREMENT, NULL);
 	cat_ref_anounce(result);
-	JagBytOpIncrementPrivate *priv = result->priv;
+	JagBytOpIncrementPrivate *priv = jag_byt_op_increment_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, OP_IINC, offset, is_wide ? 5 : 3);
 	priv->index = index;
 	priv->constant = constant;
@@ -85,18 +79,22 @@ JagBytOpIncrement *jag_byt_op_increment_new(int offset, int index, int constant,
 }
 
 int jag_byt_op_increment_get_frame_index(JagBytOpIncrement *op_increment) {
-	return JAG_BYT_OP_INCREMENT_GET_PRIVATE(op_increment)->index;
+	JagBytOpIncrementPrivate *priv = jag_byt_op_increment_get_instance_private(op_increment);
+	return priv->index;
 }
 
 int jag_byt_op_increment_get_increment_value(JagBytOpIncrement *op_increment) {
-	return JAG_BYT_OP_INCREMENT_GET_PRIVATE(op_increment)->constant;
+	JagBytOpIncrementPrivate *priv = jag_byt_op_increment_get_instance_private(op_increment);
+	return priv->constant;
 }
 
 
 /********************* start JagBytIMnemonicInterface implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpIncrementPrivate *priv = JAG_BYT_OP_INCREMENT_GET_PRIVATE(self);
+	JagBytOpIncrement *instance = JAG_BYT_OP_INCREMENT(self);
+	JagBytOpIncrementPrivate *priv = jag_byt_op_increment_get_instance_private(instance);
+
 	CatStringWo *result = cat_string_wo_new_with("inc ");
 	int offset = jag_byt_imnemonic_get_offset(self);
 	cat_string_wo_append_decimal(result, priv->index);

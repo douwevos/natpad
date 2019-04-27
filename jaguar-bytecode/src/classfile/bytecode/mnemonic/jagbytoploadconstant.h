@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_LOAD_CONSTANT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_LOAD_CONSTANT))
 #define JAG_BYT_IS_OP_LOAD_CONSTANT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_LOAD_CONSTANT))
 #define JAG_BYT_OP_LOAD_CONSTANT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_LOAD_CONSTANT, JagBytOpLoadConstantClass))
-#define JAG_BYT_OP_LOAD_CONSTANT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_LOAD_CONSTANT, JagBytOpLoadConstantPrivate))
 
 typedef struct _JagBytOpLoadConstant               JagBytOpLoadConstant;
 typedef struct _JagBytOpLoadConstantPrivate        JagBytOpLoadConstantPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpLoadConstantClass          JagBytOpLoadConstantClass;
 
 struct _JagBytOpLoadConstant {
 	JagBytAbstractMnemonic parent;
-	JagBytOpLoadConstantPrivate *priv;
 };
 
 struct _JagBytOpLoadConstantClass {

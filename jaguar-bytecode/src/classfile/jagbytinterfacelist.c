@@ -32,65 +32,55 @@ struct _JagBytInterfaceListPrivate {
 	CatArrayWo *e_list;
 };
 
-G_DEFINE_TYPE (JagBytInterfaceList, jag_byt_interface_list, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytInterfaceList, jag_byt_interface_list, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_interface_list_class_init(JagBytInterfaceListClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytInterfaceListPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_interface_list_init(JagBytInterfaceList *instance) {
-	JagBytInterfaceListPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_INTERFACE_LIST, JagBytInterfaceListPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytInterfaceList *instance = JAG_BYT_INTERFACE_LIST(object);
-	JagBytInterfaceListPrivate *priv = instance->priv;
+	JagBytInterfaceListPrivate *priv = jag_byt_interface_list_get_instance_private(instance);
 	cat_unref_ptr(priv->e_list);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_interface_list_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_interface_list_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytInterfaceList *jag_byt_interface_list_new() {
 	JagBytInterfaceList *result = g_object_new(JAG_BYT_TYPE_INTERFACE_LIST, NULL);
 	cat_ref_anounce(result);
-	JagBytInterfaceListPrivate *priv = result->priv;
+	JagBytInterfaceListPrivate *priv = jag_byt_interface_list_get_instance_private(result);
 	priv->e_list = cat_array_wo_new();
 	return result;
 }
 
-
 void jag_byt_interface_list_add(JagBytInterfaceList *interface_list, JagAstDeclarationType *iface_type) {
-	JagBytInterfaceListPrivate *priv = JAG_BYT_INTERFACE_LIST_GET_PRIVATE(interface_list);
+	JagBytInterfaceListPrivate *priv = jag_byt_interface_list_get_instance_private(interface_list);
 	cat_array_wo_append(priv->e_list, (GObject *) iface_type);
 }
 
 int jag_byt_interface_list_count(JagBytInterfaceList *interface_list) {
-	JagBytInterfaceListPrivate *priv = JAG_BYT_INTERFACE_LIST_GET_PRIVATE(interface_list);
+	JagBytInterfaceListPrivate *priv = jag_byt_interface_list_get_instance_private(interface_list);
 	return cat_array_wo_size(priv->e_list);
 }
 
-
 JagAstDeclarationType *jag_byt_interface_list_get(JagBytInterfaceList *interface_list, int index) {
-	JagBytInterfaceListPrivate *priv = JAG_BYT_INTERFACE_LIST_GET_PRIVATE(interface_list);
+	JagBytInterfaceListPrivate *priv = jag_byt_interface_list_get_instance_private(interface_list);
 	return (JagAstDeclarationType *) cat_array_wo_get(priv->e_list, index);
 }
-

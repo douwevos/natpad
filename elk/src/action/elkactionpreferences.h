@@ -36,14 +36,13 @@ G_BEGIN_DECLS
 #define ELK_IS_ACTION_PREFERENCES_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_ACTION_PREFERENCES))
 #define ELK_ACTION_PREFERENCES_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_ACTION_PREFERENCES, ElkActionPreferencesClass))
 
-
 typedef struct _ElkActionPreferences	   		ElkActionPreferences;
+typedef struct _ElkActionPreferencesPrivate	    ElkActionPreferencesPrivate;
 typedef struct _ElkActionPreferencesClass	  	ElkActionPreferencesClass;
 
 
 struct _ElkActionPreferences {
 	LeaAction parent;
-	ElkIService *service;
 };
 
 struct _ElkActionPreferencesClass {

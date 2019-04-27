@@ -39,53 +39,44 @@ struct _JagPackageUpdaterPrivate {
 	MooIdPath *package_path;
 };
 
-
-G_DEFINE_TYPE(JagPackageUpdater, jag_package_updater, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagPackageUpdater, jag_package_updater, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_package_updater_class_init(JagPackageUpdaterClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagPackageUpdaterPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_package_updater_init(JagPackageUpdater *instance) {
-	JagPackageUpdaterPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_PACKAGE_UPDATER, JagPackageUpdaterPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagPackageUpdater *instance = JAG_PACKAGE_UPDATER(object);
-	JagPackageUpdaterPrivate *priv = instance->priv;
+	JagPackageUpdaterPrivate *priv = jag_package_updater_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_id_sequence);
 	cat_unref_ptr(priv->editable_src_folder);
 	cat_unref_ptr(priv->res_node);
 	cat_unref_ptr(priv->editable_package);
 	cat_unref_ptr(priv->package_path);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_package_updater_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_package_updater_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagPackageUpdater *jag_package_updater_new(VipISequence *moo_id_sequence, MooNodeWo *editable_src_folder, MooNodeWo *res_node, MooNodeWo *editable_package, MooIdPath *package_path) {
 	JagPackageUpdater *result = g_object_new(JAG_TYPE_PACKAGE_UPDATER, NULL);
 	cat_ref_anounce(result);
-	JagPackageUpdaterPrivate *priv = result->priv;
+	JagPackageUpdaterPrivate *priv = jag_package_updater_get_instance_private(result);
 	priv->moo_id_sequence = cat_ref_ptr(moo_id_sequence);
 	priv->editable_src_folder = cat_ref_ptr(editable_src_folder);
 	priv->res_node = cat_ref_ptr(res_node);
@@ -94,9 +85,8 @@ JagPackageUpdater *jag_package_updater_new(VipISequence *moo_id_sequence, MooNod
 	return result;
 }
 
-
 void jag_package_updater_run(JagPackageUpdater *updater) {
-	JagPackageUpdaterPrivate *priv = JAG_PACKAGE_UPDATER_GET_PRIVATE(updater);
+	JagPackageUpdaterPrivate *priv = jag_package_updater_get_instance_private(updater);
 	/* scan for new packages and update existing */
 	JagPackageMatcher *package_matcher = jag_package_matcher_new();
 	JagSrcfileMatcher *classfile_matcher = jag_srcfile_matcher_new();
@@ -189,6 +179,4 @@ void jag_package_updater_run(JagPackageUpdater *updater) {
 	}
 	cat_unref_ptr(package_matcher);
 	cat_unref_ptr(classfile_matcher);
-
 }
-

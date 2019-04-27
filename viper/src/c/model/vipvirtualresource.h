@@ -33,17 +33,13 @@ G_BEGIN_DECLS
 #define VIP_IS_VIRTUAL_RESOURCE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_VIRTUAL_RESOURCE))
 #define VIP_IS_VIRTUAL_RESOURCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_VIRTUAL_RESOURCE))
 #define VIP_VIRTUAL_RESOURCE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_VIRTUAL_RESOURCE, VipVirtualResourceClass))
-#define VIP_VIRTUAL_RESOURCE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_VIRTUAL_RESOURCE, VipVirtualResourcePrivate))
-
 
 typedef struct _VipVirtualResource               VipVirtualResource;
 typedef struct _VipVirtualResourcePrivate        VipVirtualResourcePrivate;
 typedef struct _VipVirtualResourceClass          VipVirtualResourceClass;
 
-
 struct _VipVirtualResource {
 	GObject parent;
-	VipVirtualResourcePrivate *priv;
 };
 
 struct _VipVirtualResourceClass {

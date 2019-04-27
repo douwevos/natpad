@@ -20,10 +20,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGMODULECONTENTWO_H_
 #define JAGMODULECONTENTWO_H_
-
 
 #include "jagmodulesettingswo.h"
 #include "../srcfolder/jagsrcfolderpathwo.h"
@@ -43,8 +41,6 @@ G_BEGIN_DECLS
 #define JAG_IS_MODULE_CONTENT_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_MODULE_CONTENT_WO))
 #define JAG_IS_MODULE_CONTENT_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_MODULE_CONTENT_WO))
 #define JAG_MODULE_CONTENT_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_MODULE_CONTENT_WO, JagModuleContentWoClass))
-//#define JAG_MODULE_CONTENT_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_MODULE_CONTENT_WO, JagModuleContentWoPrivate))
-
 
 typedef struct _JagModuleContentWo               JagModuleContentWo;
 typedef struct _JagModuleContentWoPrivate        JagModuleContentWoPrivate;
@@ -53,7 +49,6 @@ typedef struct _JagModuleContentWoClass          JagModuleContentWoClass;
 
 struct _JagModuleContentWo {
 	GObject parent;
-//	JagModuleContentWoPrivate *priv;
 };
 
 struct _JagModuleContentWoClass {

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "vipsubmitrequest.h"
 #include "../vipservice.h"
 #include "../model/vipsnapshot.h"
@@ -34,15 +33,13 @@ struct _VipSubmitRequestPrivate {
 	VipService *vip_service;
 };
 
-G_DEFINE_TYPE(VipSubmitRequest, vip_submit_request, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE_WITH_PRIVATE(VipSubmitRequest, vip_submit_request, WOR_TYPE_REQUEST);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void vip_submit_request_class_init(VipSubmitRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipSubmitRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -52,14 +49,12 @@ static void vip_submit_request_class_init(VipSubmitRequestClass *clazz) {
 }
 
 static void vip_submit_request_init(VipSubmitRequest *instance) {
-	VipSubmitRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_SUBMIT_REQUEST, VipSubmitRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipSubmitRequest *instance = VIP_SUBMIT_REQUEST(object);
-	VipSubmitRequestPrivate *priv = instance->priv;
+	VipSubmitRequestPrivate *priv = vip_submit_request_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_service);
 	G_OBJECT_CLASS(vip_submit_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -72,11 +67,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 VipSubmitRequest *vip_submit_request_new(struct _VipService *vip_service) {
 	VipSubmitRequest *result = g_object_new(VIP_TYPE_SUBMIT_REQUEST, NULL);
 	cat_ref_anounce(result);
-	VipSubmitRequestPrivate *priv = result->priv;
+	VipSubmitRequestPrivate *priv = vip_submit_request_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	wor_request_construct((WorRequest *) result);
 	return result;
@@ -84,7 +78,8 @@ VipSubmitRequest *vip_submit_request_new(struct _VipService *vip_service) {
 
 
 static void l_run_request(WorRequest *self) {
-	VipSubmitRequestPrivate *priv = VIP_SUBMIT_REQUEST_GET_PRIVATE(self);
+	VipSubmitRequest *instance = VIP_SUBMIT_REQUEST(self);
+	VipSubmitRequestPrivate *priv = vip_submit_request_get_instance_private(instance);
 
 	CatTree *tree = vip_service_get_tree(priv->vip_service);
 	CatReadableTreeNode *submit = cat_tree_submit(tree, FALSE);
@@ -98,4 +93,3 @@ static void l_run_request(WorRequest *self) {
 		cat_unref_ptr(submit);
 	}
 }
-

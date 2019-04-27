@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ACTION_DELETE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ACTION_DELETE))
 #define MOO_IS_ACTION_DELETE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ACTION_DELETE))
 #define MOO_ACTION_DELETE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ACTION_DELETE, MooActionDeleteClass))
-#define MOO_ACTION_DELETE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ACTION_DELETE, MooActionDeletePrivate))
-
 
 typedef struct _MooActionDelete               MooActionDelete;
 typedef struct _MooActionDeletePrivate        MooActionDeletePrivate;
 typedef struct _MooActionDeleteClass          MooActionDeleteClass;
 
-
 struct _MooActionDelete {
 	LeaAction parent;
-	MooActionDeletePrivate *priv;
 };
 
 struct _MooActionDeleteClass {
 	LeaActionClass parent_class;
 };
-
 
 GType moo_action_delete_get_type();
 

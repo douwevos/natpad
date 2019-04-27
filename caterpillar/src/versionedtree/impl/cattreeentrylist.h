@@ -34,23 +34,18 @@ G_BEGIN_DECLS
 #define CAT_IS_TREE_ENTRY_LIST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_TREE_ENTRY_LIST))
 #define CAT_IS_TREE_ENTRY_LIST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_TREE_ENTRY_LIST))
 #define CAT_TREE_ENTRY_LIST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_TREE_ENTRY_LIST, CatTreeEntryListClass))
-#define CAT_TREE_ENTRY_LIST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_TREE_ENTRY_LIST, CatTreeEntryListPrivate))
-
 
 typedef struct _CatTreeEntryList               CatTreeEntryList;
 typedef struct _CatTreeEntryListPrivate        CatTreeEntryListPrivate;
 typedef struct _CatTreeEntryListClass          CatTreeEntryListClass;
 
-
 struct _CatTreeEntryList {
 	GObject parent;
-	CatTreeEntryListPrivate *priv;
 };
 
 struct _CatTreeEntryListClass {
 	GObjectClass parent_class;
 };
-
 
 GType cat_tree_entry_list_get_type();
 
@@ -72,7 +67,6 @@ CatTreeEntry *cat_tree_entry_list_get_entry(CatTreeEntryList *entry_list, int en
 CatTreeEntry *cat_tree_entry_list_get_writable_entry(CatTreeEntryList *entry_list, int entry_location);
 
 int cat_tree_entry_list_find_location(CatTreeEntryList *entry_list, CatIMatcher *matcher, int guess_location);
-
 
 G_END_DECLS
 

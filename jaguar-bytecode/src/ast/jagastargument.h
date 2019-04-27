@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTARGUMENT_H_
 #define JAGBYTARGUMENT_H_
-
 
 #include "jagastdeclarationtype.h"
 #include "jagastmodifiers.h"
@@ -38,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_ARGUMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_ARGUMENT))
 #define JAG_AST_IS_ARGUMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_ARGUMENT))
 #define JAG_AST_ARGUMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_ARGUMENT, JagAstArgumentClass))
-#define JAG_AST_ARGUMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_ARGUMENT, JagAstArgumentPrivate))
 
 typedef struct _JagAstArgument               JagAstArgument;
 typedef struct _JagAstArgumentPrivate        JagAstArgumentPrivate;
@@ -47,7 +44,6 @@ typedef struct _JagAstArgumentClass          JagAstArgumentClass;
 
 struct _JagAstArgument {
 	GObject parent;
-	JagAstArgumentPrivate *priv;
 };
 
 struct _JagAstArgumentClass {
@@ -70,6 +66,5 @@ gboolean jag_ast_argument_equal(JagAstArgument *argument_a, JagAstArgument *argu
 CatStringWo *jag_ast_argument_as_text(JagAstArgument *argument, CatStringWo *e_dump_buffer);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTARGUMENT_H_ */

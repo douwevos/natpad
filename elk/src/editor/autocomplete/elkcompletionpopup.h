@@ -23,8 +23,6 @@
 #ifndef ELKCOMPLETIONPOPUP_H_
 #define ELKCOMPLETIONPOPUP_H_
 
-
-
 #include "elkcompletionpanel.h"
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -68,6 +66,5 @@ ElkCompletionPopup *elk_completion_popup_new(GtkWidget *widget, ElkCompletionPan
 void elk_completion_popup_show(ElkCompletionPopup *popup);
 
 G_END_DECLS
-
 
 #endif /* ELKCOMPLETIONPOPUP_H_ */

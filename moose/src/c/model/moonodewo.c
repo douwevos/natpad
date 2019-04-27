@@ -51,19 +51,15 @@ struct _MooNodeWoPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooNodeWo, moo_node_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooNodeWo)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static MooNodeWo *l_clone(MooNodeWo *to_clone);
 
 static void moo_node_wo_class_init(MooNodeWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooNodeWoPrivate));
-
 	clazz->clone = l_clone;
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -72,14 +68,12 @@ static void moo_node_wo_class_init(MooNodeWoClass *clazz) {
 }
 
 static void moo_node_wo_init(MooNodeWo *instance) {
-	MooNodeWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_NODE_WO, MooNodeWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooNodeWo *instance = MOO_NODE_WO(object);
-	MooNodeWoPrivate *priv = instance->priv;
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(instance);
 	cat_unref_ptr(priv->node_expander);
 	cat_unref_ptr(priv->children);
 	cat_unref_ptr(priv->name);
@@ -89,19 +83,19 @@ static void l_dispose(GObject *object) {
 		cat_unref_ptr(priv->wo_info->editing_parent_ref);
 		cat_free_ptr(priv->wo_info);
 	}
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_node_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_node_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 void moo_node_wo_construct(MooNodeWo *node, long long uniqueId, CatStringWo *c_name, MooNodeListWo *children, MooContentMapWo *content_map, int zorder) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	priv->wo_info = g_new0(WoInfo, 1);
 	priv->wo_info->editing_parent_ref = NULL;
 	priv->wo_info->original = NULL;
@@ -124,8 +118,8 @@ MooNodeWo *moo_node_wo_new(long long uniqueId, CatStringWo *c_name, MooNodeListW
 
 
 void moo_node_wo_clone_values(MooNodeWo *node, MooNodeWo *node_cloned) {
-	MooNodeWoPrivate *spriv = MOO_NODE_WO_GET_PRIVATE(node);
-	MooNodeWoPrivate *dpriv = MOO_NODE_WO_GET_PRIVATE(node_cloned);
+	MooNodeWoPrivate *spriv = moo_node_wo_get_instance_private(node);
+	MooNodeWoPrivate *dpriv = moo_node_wo_get_instance_private(node_cloned);
 	dpriv->unique_id = spriv->unique_id;
 	dpriv->version = spriv->version;
 	dpriv->name = cat_ref_ptr(spriv->name);
@@ -162,10 +156,10 @@ MooNodeWo *moo_node_wo_clone(MooNodeWo *to_clone) {
 
 
 MooNodeWo *moo_node_wo_ensure_editable(MooNodeWo *node, MooNodeWo *editing_parent) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	if (priv->wo_info==NULL) {
 		MooNodeWo *new_node = MOO_NODE_WO_GET_CLASS(node)->clone(node);
-		priv = MOO_NODE_WO_GET_PRIVATE(new_node);
+		priv = moo_node_wo_get_instance_private(new_node);
 		priv->version++;
 		priv->wo_info->editing_parent_ref = cat_weak_reference_new((GObject *) editing_parent);
 		return new_node;
@@ -174,7 +168,7 @@ MooNodeWo *moo_node_wo_ensure_editable(MooNodeWo *node, MooNodeWo *editing_paren
 }
 
 MooNodeWo *moo_node_wo_get_original(MooNodeWo *node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	if (priv->wo_info) {
 		if (priv->wo_info->original) {
 			return priv->wo_info->original;
@@ -184,7 +178,7 @@ MooNodeWo *moo_node_wo_get_original(MooNodeWo *node) {
 }
 
 MooNodeWo *moo_node_wo_get_parent_node_ref(MooNodeWo *e_node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(e_node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(e_node);
 	if (priv->wo_info && priv->wo_info->editing_parent_ref) {
 		return (MooNodeWo *) cat_weak_reference_get(priv->wo_info->editing_parent_ref);
 	}
@@ -194,12 +188,12 @@ MooNodeWo *moo_node_wo_get_parent_node_ref(MooNodeWo *e_node) {
 
 
 gboolean moo_node_wo_is_fixed(MooNodeWo *node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	return priv->wo_info == NULL;
 }
 
 MooNodeWo *moo_node_wo_anchor(MooNodeWo *node, int version) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	cat_log_debug("anchoring node:%o", node);
 	if (priv->wo_info == NULL) {
 		cat_log_debug("wo_info was NULL");
@@ -210,7 +204,7 @@ MooNodeWo *moo_node_wo_anchor(MooNodeWo *node, int version) {
 	priv->content_map = moo_content_map_wo_anchor(priv->content_map, version);
 	gboolean was_modified = TRUE;
 	if (priv->wo_info->original) {
-		MooNodeWoPrivate *opriv = MOO_NODE_WO_GET_PRIVATE(priv->wo_info->original);
+		MooNodeWoPrivate *opriv = moo_node_wo_get_instance_private(priv->wo_info->original);
 
 		was_modified = !(cat_string_wo_equal(priv->name, opriv->name)
 				&& (priv->zorder == opriv->zorder)
@@ -244,8 +238,8 @@ gboolean moo_node_wo_equal(MooNodeWo *node_a, MooNodeWo *node_b) {
 	if (node_a==NULL || node_b==NULL) {
 		return FALSE;
 	}
-	MooNodeWoPrivate *priv_a = MOO_NODE_WO_GET_PRIVATE(node_a);
-	MooNodeWoPrivate *priv_b = MOO_NODE_WO_GET_PRIVATE(node_b);
+	MooNodeWoPrivate *priv_a = moo_node_wo_get_instance_private(node_a);
+	MooNodeWoPrivate *priv_b = moo_node_wo_get_instance_private(node_b);
 	if ((priv_a->unique_id==priv_b->unique_id)
 			&& (cat_string_wo_equal(priv_a->name, priv_b->name))
 			&& moo_node_list_wo_equal(priv_a->children, priv_b->children)
@@ -258,36 +252,37 @@ gboolean moo_node_wo_equal(MooNodeWo *node_a, MooNodeWo *node_b) {
 
 
 MooINodeExpander *moo_node_wo_get_expander(MooNodeWo *node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	return priv->node_expander;
 }
 
 
 void moo_node_wo_set_expander(MooNodeWo *node, MooINodeExpander *expander) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE()
 	cat_ref_swap(priv->node_expander, expander);
 }
 
 
 void moo_node_wo_set_children(MooNodeWo *node, MooNodeListWo *new_children) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE()
 	cat_ref_swap(priv->children, new_children);
 }
 
 MooContentMapWo *moo_node_wo_get_content_map(MooNodeWo *node) {
-	return MOO_NODE_WO_GET_PRIVATE(node)->content_map;
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
+	return priv->content_map;
 }
 
 MooIContent *moo_node_wo_get_content(MooNodeWo *node, CatStringWo *key) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	return moo_content_map_wo_get(priv->content_map, key);
 }
 
 
 gboolean moo_node_wo_set_content(MooNodeWo *node, MooIContent *new_content) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE(FALSE)
 
 	CatStringWo *key = moo_icontent_get_key(new_content);
@@ -308,7 +303,7 @@ gboolean moo_node_wo_set_content(MooNodeWo *node, MooIContent *new_content) {
 
 
 MooNodeWo *moo_node_wo_get_editable_child_at(MooNodeWo *node, int index) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE(NULL)
 	if (moo_node_list_wo_is_fixed(priv->children)) {
 		MooNodeListWo *wchildren = moo_node_list_wo_ensure_editable(priv->children);
@@ -327,7 +322,7 @@ MooNodeWo *moo_node_wo_get_editable_child_at(MooNodeWo *node, int index) {
 }
 
 void moo_node_wo_insert_child_at(MooNodeWo *node, int index, MooNodeWo *child) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE()
 	if (moo_node_list_wo_is_fixed(priv->children)) {
 		MooNodeListWo *wchildren = moo_node_list_wo_ensure_editable(priv->children);
@@ -336,7 +331,7 @@ void moo_node_wo_insert_child_at(MooNodeWo *node, int index, MooNodeWo *child) {
 	}
 
 	moo_node_list_wo_insert(priv->children, index, child);
-	MooNodeWoPrivate *cpriv = MOO_NODE_WO_GET_PRIVATE(child);
+	MooNodeWoPrivate *cpriv = moo_node_wo_get_instance_private(child);
 	if (cpriv->wo_info) {
 		CatWeakReference *new_ref = cat_weak_reference_new((GObject *) node);
 		cat_ref_swap(cpriv->wo_info->editing_parent_ref, new_ref);
@@ -346,7 +341,7 @@ void moo_node_wo_insert_child_at(MooNodeWo *node, int index, MooNodeWo *child) {
 
 
 void moo_node_wo_append_child(MooNodeWo *node, MooNodeWo *child) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE()
 	if (moo_node_list_wo_is_fixed(priv->children)) {
 		MooNodeListWo *wchildren = moo_node_list_wo_ensure_editable(priv->children);
@@ -355,7 +350,7 @@ void moo_node_wo_append_child(MooNodeWo *node, MooNodeWo *child) {
 	}
 
 	moo_node_list_wo_append(priv->children, child);
-	MooNodeWoPrivate *cpriv = MOO_NODE_WO_GET_PRIVATE(child);
+	MooNodeWoPrivate *cpriv = moo_node_wo_get_instance_private(child);
 	if (cpriv->wo_info) {
 		CatWeakReference *new_ref = cat_weak_reference_new((GObject *) node);
 		cat_ref_swap(cpriv->wo_info->editing_parent_ref, new_ref);
@@ -365,7 +360,7 @@ void moo_node_wo_append_child(MooNodeWo *node, MooNodeWo *child) {
 
 
 MooNodeListWo *moo_node_wo_get_editable_children(MooNodeWo *node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE(NULL)
 	if (moo_node_list_wo_is_fixed(priv->children)) {
 		MooNodeListWo *wchildren = moo_node_list_wo_ensure_editable(priv->children);
@@ -377,19 +372,19 @@ MooNodeListWo *moo_node_wo_get_editable_children(MooNodeWo *node) {
 
 
 MooNodeListWo *moo_node_wo_get_children(MooNodeWo *node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	return priv->children;
 }
 
 
 CatArrayWo *moo_node_wo_enlist_children(MooNodeWo *node, CatArrayWo *e_children) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	return moo_node_list_wo_enlist(priv->children, e_children);
 }
 
 
 int moo_node_wo_child_count(MooNodeWo *node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	if (priv->children) {
 		return moo_node_list_wo_count(priv->children);
 	}
@@ -397,7 +392,7 @@ int moo_node_wo_child_count(MooNodeWo *node) {
 }
 
 MooNodeWo *moo_node_wo_child_at(MooNodeWo *node, int index) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	if (priv->children) {
 		return moo_node_list_wo_get_at(priv->children, index);
 	}
@@ -405,7 +400,7 @@ MooNodeWo *moo_node_wo_child_at(MooNodeWo *node, int index) {
 }
 
 int moo_node_wo_find_index(MooNodeWo *node, MooINodeMatcher *nodeMatcher, gpointer userdata, int cache_index) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	int result = -1;
 	if (priv->children) {
 		int idx;
@@ -474,32 +469,35 @@ struct _MooIdPath *moo_node_wo_find_path(MooNodeWo *node, long long unique_id) {
 
 
 long long moo_node_wo_get_unique_id(MooNodeWo *node) {
-	return MOO_NODE_WO_GET_PRIVATE(node)->unique_id;
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
+	return priv->unique_id;
 }
 
 
 int moo_node_wo_get_z_order(MooNodeWo *node) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	return priv->zorder;
 }
 
 void moo_node_wo_set_z_order(MooNodeWo *node, int new_z) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	CHECK_IF_WRITABLE()
 	priv->zorder = new_z;
 }
 
 
 int moo_node_wo_get_version(MooNodeWo *node) {
-	return MOO_NODE_WO_GET_PRIVATE(node)->version;
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
+	return priv->version;
 }
 
 CatStringWo *moo_node_wo_get_name(MooNodeWo *node) {
-	return MOO_NODE_WO_GET_PRIVATE(node)->name;
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
+	return priv->name;
 }
 
 gboolean moo_node_wo_set_name(MooNodeWo *node, CatStringWo *new_name) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(node);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(node);
 	if (priv->wo_info==NULL) {
 		cat_log_error("Object is read only:%o", node);
 		return FALSE;
@@ -543,11 +541,11 @@ void moo_node_wo_print(MooNodeWo *node, CatStringWo *buf) {
 }
 
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MooNodeWoPrivate *priv = MOO_NODE_WO_GET_PRIVATE(self);
+	MooNodeWo *instance = MOO_NODE_WO(self);
+	MooNodeWoPrivate *priv = moo_node_wo_get_instance_private(instance);
 	MooNodeWo *node_wo = MOO_NODE_WO(self);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:version=%d,id=%ld, name=%o,count=%d, content-map=%o, %s]", iname, self, priv->version, moo_node_wo_get_unique_id(node_wo), moo_node_wo_get_name(node_wo), moo_node_wo_child_count(node_wo), priv->content_map, priv->wo_info ? "editable" : "anchored");

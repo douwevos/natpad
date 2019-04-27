@@ -37,47 +37,39 @@ struct _CatFloatPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatFloat, cat_float, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CatFloat)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_float_class_init(CatFloatClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CatFloatPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_float_init(CatFloat *instance) {
-	CatFloatPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_FLOAT, CatFloatPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	CatFloat *instance = CAT_FLOAT(object);
-//	CatFloatPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(cat_float_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(cat_float_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 CatFloat *cat_float_new(float value) {
 	CatFloat *result = g_object_new(CAT_TYPE_FLOAT, NULL);
 	cat_ref_anounce(result);
-	CatFloatPrivate *priv = result->priv;
+	CatFloatPrivate *priv = cat_float_get_instance_private(result);
 	priv->value = value;
 	return result;
 }
@@ -88,11 +80,13 @@ CatFloat *cat_float_new(float value) {
 
 
 float cat_float_value(CatFloat *fobj) {
-	return CAT_FLOAT_GET_PRIVATE(fobj)->value;
+	CatFloatPrivate *priv = cat_float_get_instance_private(fobj);
+	return priv->value;
 }
 
 int cat_float_hash(CatFloat *fobj) {
-	return (int) (CAT_FLOAT_GET_PRIVATE(fobj)->value);
+	CatFloatPrivate *priv = cat_float_get_instance_private(fobj);
+	return (int) priv->value;
 }
 
 gboolean cat_float_equal(CatFloat *fobj_a, CatFloat *fobj_b) {
@@ -102,12 +96,12 @@ gboolean cat_float_equal(CatFloat *fobj_a, CatFloat *fobj_b) {
 	if (fobj_a==NULL || fobj_b==NULL) {
 		return FALSE;
 	}
-
-	float val_a = CAT_FLOAT_GET_PRIVATE(fobj_a)->value;
-	float val_b = CAT_FLOAT_GET_PRIVATE(fobj_b)->value;
+	CatFloatPrivate *priv_a = cat_float_get_instance_private(fobj_a);
+	CatFloatPrivate *priv_b = cat_float_get_instance_private(fobj_b);
+	float val_a = priv_a->value;
+	float val_b = priv_b->value;
 	return val_a==val_b;
 }
-
 
 
 int cat_float_compare(CatFloat *fobj_a, CatFloat *fobj_b) {
@@ -121,18 +115,18 @@ int cat_float_compare(CatFloat *fobj_a, CatFloat *fobj_b) {
 		return 1;
 	}
 
-	float val_a = CAT_FLOAT_GET_PRIVATE(fobj_a)->value;
-	float val_b = CAT_FLOAT_GET_PRIVATE(fobj_b)->value;
+	CatFloatPrivate *priv_a = cat_float_get_instance_private(fobj_a);
+	CatFloatPrivate *priv_b = cat_float_get_instance_private(fobj_b);
+	float val_a = priv_a->value;
+	float val_b = priv_b->value;
 	return val_a==val_b ? 0 : (val_a<val_b ? -1 : 1);
 }
-
-
 
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	CatFloatPrivate *fobj = CAT_FLOAT_GET_PRIVATE(self);
+	CatFloatPrivate *fobj = cat_float_get_instance_private(CAT_FLOAT(self));
 	char buf[100];
 	sprintf(buf, "%f", fobj->value);
 	cat_string_wo_append_chars(append_to, buf);
@@ -143,10 +137,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-
-
-
-
-
-

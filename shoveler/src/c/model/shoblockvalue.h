@@ -63,25 +63,3 @@ void sho_block_value_set_template_call(ShoBlockValue *block, ShoTemplateCall *te
 G_END_DECLS
 
 #endif /* SHOBLOCKVALUE_H_ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

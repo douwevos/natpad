@@ -36,26 +36,20 @@ struct _VipSimpleFileMapperPrivate {
 static void l_mapper_iface_init(VipIMapperInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipSimpleFileMapper, vip_simple_file_mapper, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipSimpleFileMapper)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IMAPPER, l_mapper_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_simple_file_mapper_class_init(VipSimpleFileMapperClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipSimpleFileMapperPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_simple_file_mapper_init(VipSimpleFileMapper *instance) {
-	VipSimpleFileMapperPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_SIMPLE_FILE_MAPPER, VipSimpleFileMapperPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -63,14 +57,14 @@ static void l_dispose(GObject *object) {
 //	VipSimpleFileMapper *instance = VIP_SIMPLE_FILE_MAPPER(object);
 //	VipSimpleFileMapperPrivate *priv = instance->priv;
 //	cat_unref_ptr(priv->sequence);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_simple_file_mapper_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_simple_file_mapper_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -78,7 +72,7 @@ static void l_finalize(GObject *object) {
 VipSimpleFileMapper *vip_simple_file_mapper_new(VipISequence *sequence) {
 	VipSimpleFileMapper *result = g_object_new(VIP_TYPE_SIMPLE_FILE_MAPPER, NULL);
 	cat_ref_anounce(result);
-	VipSimpleFileMapperPrivate *priv = result->priv;
+	VipSimpleFileMapperPrivate *priv = vip_simple_file_mapper_get_instance_private(result);
 	priv->sequence = sequence;
 	return result;
 }
@@ -87,7 +81,8 @@ VipSimpleFileMapper *vip_simple_file_mapper_new(VipISequence *sequence) {
 /********************* start VipIMapper implementation *********************/
 
 static VipIScanWork *l_mapper_create_work_for_node(VipIMapper *self, CatWritableTreeNode *node, gboolean recursive_from_parent, gboolean validated_by_parent) {
-	VipSimpleFileMapperPrivate *priv = VIP_SIMPLE_FILE_MAPPER_GET_PRIVATE(self);
+	VipSimpleFileMapper *instance = VIP_SIMPLE_FILE_MAPPER(self);
+	VipSimpleFileMapperPrivate *priv = vip_simple_file_mapper_get_instance_private(instance);
 	return (VipIScanWork *) vip_fs_scan_work_new(priv->sequence, node, recursive_from_parent, validated_by_parent);
 }
 

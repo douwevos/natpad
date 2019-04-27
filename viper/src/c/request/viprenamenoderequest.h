@@ -34,19 +34,15 @@ G_BEGIN_DECLS
 #define VIP_IS_RENAME_NODE_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_RENAME_NODE_REQUEST))
 #define VIP_IS_RENAME_NODE_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_RENAME_NODE_REQUEST))
 #define VIP_RENAME_NODE_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_RENAME_NODE_REQUEST, VipRenameNodeRequestClass))
-#define VIP_RENAME_NODE_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_RENAME_NODE_REQUEST, VipRenameNodeRequestPrivate))
-
 
 typedef struct _VipRenameNodeRequest               VipRenameNodeRequest;
 typedef struct _VipRenameNodeRequestPrivate        VipRenameNodeRequestPrivate;
 typedef struct _VipRenameNodeRequestClass          VipRenameNodeRequestClass;
 
-
 struct _VipService;
 
 struct _VipRenameNodeRequest {
 	WorRequest parent;
-	VipRenameNodeRequestPrivate *priv;
 };
 
 struct _VipRenameNodeRequestClass {

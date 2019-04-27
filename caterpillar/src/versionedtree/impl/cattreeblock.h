@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 #define CAT_IS_TREE_BLOCK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_TREE_BLOCK))
 #define CAT_IS_TREE_BLOCK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_TREE_BLOCK))
 #define CAT_TREE_BLOCK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_TREE_BLOCK, CatTreeBlockClass))
-#define CAT_TREE_BLOCK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_TREE_BLOCK, CatTreeBlockPrivate))
 
 
 typedef struct _CatTreeBlock               CatTreeBlock;
@@ -47,7 +46,6 @@ typedef struct _CatTreeBlockClass          CatTreeBlockClass;
 
 struct _CatTreeBlock {
 	GObject parent;
-	CatTreeBlockPrivate *priv;
 };
 
 struct _CatTreeBlockClass {

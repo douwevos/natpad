@@ -44,41 +44,33 @@ struct _JagSrcfileContentWoPrivate {
 	WoInfo *wo_info;
 };
 
-
 static CatS jag_s_srcfile_content_key = CAT_S_DEF("JagSrcfileContentWo");
 
 static void l_content_iface_init(MooIContentInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagSrcfileContentWo, jag_srcfile_content_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagSrcfileContentWo)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ICONTENT, l_content_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_srcfile_content_wo_class_init(JagSrcfileContentWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagSrcfileContentWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_srcfile_content_wo_init(JagSrcfileContentWo *instance) {
-	JagSrcfileContentWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_SRCFILE_CONTENT_WO, JagSrcfileContentWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagSrcfileContentWo *instance = JAG_SRCFILE_CONTENT_WO(object);
-	JagSrcfileContentWoPrivate *priv = instance->priv;
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(instance);
 	cat_unref_ptr(priv->srcfilePath);
 	cat_unref_ptr(priv->linked_file);
 	cat_unref_ptr(priv->index_source_content);
@@ -86,14 +78,14 @@ static void l_dispose(GObject *object) {
 		cat_unref_ptr(priv->wo_info->original);
 		cat_free_ptr(priv->wo_info);
 	}
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_srcfile_content_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_srcfile_content_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -101,7 +93,7 @@ static void l_finalize(GObject *object) {
 JagSrcfileContentWo *jag_srcfile_content_wo_new(MooIdPath *classfilePath, VipIFile *linked_file) {
 	JagSrcfileContentWo *result = g_object_new(JAG_TYPE_SRCFILE_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-	JagSrcfileContentWoPrivate *priv = result->priv;
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(result);
 	priv->version = 1;
 	priv->srcfilePath = cat_ref_sink_ptr(classfilePath);
 	priv->linked_file = cat_ref_ptr(linked_file);
@@ -113,17 +105,15 @@ JagSrcfileContentWo *jag_srcfile_content_wo_new(MooIdPath *classfilePath, VipIFi
 	return result;
 }
 
-
-
 JagSrcfileContentWo *jag_srcfile_content_wo_ensure_editable(JagSrcfileContentWo *content) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(content);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(content);
 	if (priv->wo_info) {
 		return cat_ref_ptr(content);
 	}
 
 	JagSrcfileContentWo *result = g_object_new(JAG_TYPE_SRCFILE_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-	JagSrcfileContentWoPrivate *dpriv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(result);
+	JagSrcfileContentWoPrivate *dpriv = jag_srcfile_content_wo_get_instance_private(result);
 	dpriv->srcfilePath = cat_ref_ptr(priv->srcfilePath);
 	dpriv->linked_file = cat_ref_ptr(priv->linked_file);
 	dpriv->index_source_content = cat_ref_ptr(priv->index_source_content);
@@ -134,26 +124,24 @@ JagSrcfileContentWo *jag_srcfile_content_wo_ensure_editable(JagSrcfileContentWo 
 	return result;
 }
 
-
-
 gboolean jag_srcfile_content_wo_is_fixed(JagSrcfileContentWo *content) {
-	return JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(content)->wo_info==NULL;
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(content);
+	return priv->wo_info==NULL;
 }
-
 
 int jag_srcfile_content_wo_get_version(JagSrcfileContentWo *content) {
-	return JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(content)->version;
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(content);
+	return priv->version;
 }
 
-
 JagSrcfileContentWo *jag_srcfile_content_wo_anchor(JagSrcfileContentWo *content, int version) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(content);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(content);
 	if (priv->wo_info==NULL) {
 		return content;
 	}
 	gboolean was_modified = TRUE;
 	if (priv->wo_info->original) {
-		JagSrcfileContentWoPrivate *opriv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(priv->wo_info->original);
+		JagSrcfileContentWoPrivate *opriv = jag_srcfile_content_wo_get_instance_private(priv->wo_info->original);
 		was_modified = priv->wo_info->marked
 				|| priv->linked_file != opriv->linked_file;
 	}
@@ -180,7 +168,7 @@ JagSrcfileContentWo *jag_srcfile_content_wo_anchor(JagSrcfileContentWo *content,
 		} \
 
 void jag_srcfile_content_wo_mark(JagSrcfileContentWo *e_content) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(e_content);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(e_content);
 	CHECK_IF_WRITABLE()
 	priv->wo_info->marked = TRUE;
 }
@@ -189,36 +177,32 @@ void jag_srcfile_content_wo_mark(JagSrcfileContentWo *e_content) {
 
 
 MooIdPath *jag_srcfile_content_wo_get_file_path(JagSrcfileContentWo *content) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(content);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(content);
 	return priv->srcfilePath;
 }
 
 VipIFile *jag_srcfile_content_wo_get_file(JagSrcfileContentWo *content) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(content);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(content);
 	return priv->linked_file;
 }
 
 void jag_srcfile_content_wo_set_file(JagSrcfileContentWo *e_content, VipIFile *file) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(e_content);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(e_content);
 	CHECK_IF_WRITABLE()
 	cat_ref_swap(priv->linked_file, file);
 
 }
 
-
 JagIndexSourceContent *jag_srcfile_content_wo_get_index_context(JagSrcfileContentWo *content) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(content);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(content);
 	return priv->index_source_content;
 }
-
 
 CatStringWo *jag_srcfile_content_wo_key() {
 	return CAT_S(jag_s_srcfile_content_key);
 }
 
-
 /********************* start MooIContent implementation *********************/
-
 
 static CatStringWo *l_content_get_key(MooIContent *self) {
 	return jag_srcfile_content_wo_key();
@@ -228,8 +212,6 @@ static MooIContent *l_content_anchor(MooIContent *self, int version) {
 	return (MooIContent *) jag_srcfile_content_wo_anchor((JagSrcfileContentWo *) self, version);
 }
 
-
-
 static void l_content_iface_init(MooIContentInterface *iface) {
 	iface->getKey = l_content_get_key;
 	iface->anchor = l_content_anchor;
@@ -237,12 +219,11 @@ static void l_content_iface_init(MooIContentInterface *iface) {
 
 /********************* end MooIContent implementation *********************/
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagSrcfileContentWoPrivate *priv = JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(self);
+	JagSrcfileContentWo *instance = JAG_SRCFILE_CONTENT_WO(self);
+	JagSrcfileContentWoPrivate *priv = jag_srcfile_content_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:version=%d,linked-file=%p, %s]", iname, self, priv->version, priv->linked_file, priv->wo_info ? "editable" : "anchored");
 }

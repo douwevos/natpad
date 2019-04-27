@@ -32,58 +32,49 @@ struct _JagAstModifiersPrivate {
 	int modifiers;
 };
 
-G_DEFINE_TYPE (JagAstModifiers, jag_ast_modifiers, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagAstModifiers, jag_ast_modifiers, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_modifiers_class_init(JagAstModifiersClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstModifiersPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_modifiers_init(JagAstModifiers *instance) {
-	JagAstModifiersPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_MODIFIERS, JagAstModifiersPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagAstModifiers *instance = JAG_AST_MODIFIERS(object);
-//	JagAstModifiersPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_modifiers_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_modifiers_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstModifiers *jag_ast_modifiers_new(short modifiers) {
 	JagAstModifiers *result = g_object_new(JAG_AST_TYPE_MODIFIERS, NULL);
 	cat_ref_anounce(result);
-	JagAstModifiersPrivate *priv = result->priv;
+	JagAstModifiersPrivate *priv = jag_ast_modifiers_get_instance_private(result);
 	priv->modifiers = modifiers;
 	return result;
 }
 
 void jag_ast_modifiers_set(JagAstModifiers *modifiers, JagAstModifier modifier) {
-	JagAstModifiersPrivate *priv = JAG_AST_MODIFIERS_GET_PRIVATE(modifiers);
+	JagAstModifiersPrivate *priv = jag_ast_modifiers_get_instance_private(modifiers);
 	priv->modifiers |= modifier;
 }
 
 
 CatStringWo *jag_ast_modifiers_as_text(JagAstModifiers *modifiers) {
-	JagAstModifiersPrivate *priv = JAG_AST_MODIFIERS_GET_PRIVATE(modifiers);
+	JagAstModifiersPrivate *priv = jag_ast_modifiers_get_instance_private(modifiers);
 	int mods = priv->modifiers;
 	CatStringWo *e_result = cat_string_wo_clone(CAT_S(cat_s_empty_string), CAT_CLONE_DEPTH_MAIN);
 
@@ -122,7 +113,7 @@ CatStringWo *jag_ast_modifiers_as_text(JagAstModifiers *modifiers) {
 
 
 gboolean jag_ast_modifiers_is_static(JagAstModifiers *modifiers) {
-	JagAstModifiersPrivate *priv = JAG_AST_MODIFIERS_GET_PRIVATE(modifiers);
+	JagAstModifiersPrivate *priv = jag_ast_modifiers_get_instance_private(modifiers);
 	return ((priv->modifiers & JAG_AST_MODIFIER_STATIC)!=0);
 }
 
@@ -133,7 +124,9 @@ gboolean jag_ast_modifiers_equal(JagAstModifiers *modifiers_a, JagAstModifiers *
 	if (modifiers_a==NULL || modifiers_b==NULL) {
 		return FALSE;
 	}
-	return JAG_AST_MODIFIERS_GET_PRIVATE(modifiers_a)->modifiers==JAG_AST_MODIFIERS_GET_PRIVATE(modifiers_b)->modifiers;
+	JagAstModifiersPrivate *priv_a = jag_ast_modifiers_get_instance_private(modifiers_a);
+	JagAstModifiersPrivate *priv_b = jag_ast_modifiers_get_instance_private(modifiers_b);
+	return priv_a->modifiers==priv_b->modifiers;
 }
 
 
@@ -152,4 +145,3 @@ const char *jag_ast_modifier_as_text(JagAstModifier modifier) {
 	}
 	return "???";
 }
-

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOPANELOWNER_H_
 #define MOOPANELOWNER_H_
 
@@ -37,17 +36,13 @@ G_BEGIN_DECLS
 #define MOO_IS_PANEL_OWNER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_PANEL_OWNER))
 #define MOO_IS_PANEL_OWNER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_PANEL_OWNER))
 #define MOO_PANEL_OWNER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_PANEL_OWNER, MooPanelOwnerClass))
-#define MOO_PANEL_OWNER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_PANEL_OWNER, MooPanelOwnerPrivate))
-
 
 typedef struct _MooPanelOwner               MooPanelOwner;
 typedef struct _MooPanelOwnerPrivate        MooPanelOwnerPrivate;
 typedef struct _MooPanelOwnerClass          MooPanelOwnerClass;
 
-
 struct _MooPanelOwner {
 	GObject parent;
-	MooPanelOwnerPrivate *priv;
 };
 
 struct _MooPanelOwnerClass {
@@ -62,9 +57,6 @@ MooNodeRenderRegistry *moo_panel_owner_get_render_registry(MooPanelOwner *panel_
 
 void moo_panel_owner_update_selection(MooPanelOwner *panel_owner);
 
-
 G_END_DECLS
-
-
 
 #endif /* MOOPANELOWNER_H_ */

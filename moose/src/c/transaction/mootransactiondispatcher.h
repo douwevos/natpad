@@ -34,28 +34,22 @@ G_BEGIN_DECLS
 #define MOO_IS_TRANSACTION_DISPATCHER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_TRANSACTION_DISPATCHER))
 #define MOO_IS_TRANSACTION_DISPATCHER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_TRANSACTION_DISPATCHER))
 #define MOO_TRANSACTION_DISPATCHER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_TRANSACTION_DISPATCHER, MooTransactionDispatcherClass))
-#define MOO_TRANSACTION_DISPATCHER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_TRANSACTION_DISPATCHER, MooTransactionDispatcherPrivate))
-
 
 typedef struct _MooTransactionDispatcher               MooTransactionDispatcher;
 typedef struct _MooTransactionDispatcherPrivate        MooTransactionDispatcherPrivate;
 typedef struct _MooTransactionDispatcherClass          MooTransactionDispatcherClass;
 
-
 struct _MooTransactionDispatcher {
 	GObject parent;
-	MooTransactionDispatcherPrivate *priv;
 };
 
 struct _MooTransactionDispatcherClass {
 	GObjectClass parent_class;
 };
 
-
 GType moo_transaction_dispatcher_get_type();
 
 MooTransactionDispatcher *moo_transaction_dispatcher_new();
-
 
 CatIIterator *moo_transaction_dispatcher_get_listeners_iter(MooTransactionDispatcher *dispatcher);
 

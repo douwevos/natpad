@@ -20,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "vipfsscanwork.h"
 #include "../scanner/vipmapperregistry.h"
 #include "../scanner/vipiscanwork.h"
@@ -40,40 +38,33 @@ struct _VipFSScanWorkPrivate {
 	gboolean validated_by_parent;
 	VipNode *main_node;
 	CatArrayWo *child_work;	// <VipIScanWork>
-
 };
 
 static void l_scan_work_iface_init(VipIScanWorkInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipFSScanWork, vip_fs_scan_work, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipFSScanWork)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_ISCAN_WORK, l_scan_work_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_fs_scan_work_class_init(VipFSScanWorkClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipFSScanWorkPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_fs_scan_work_init(VipFSScanWork *instance) {
-	VipFSScanWorkPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_FS_SCAN_WORK, VipFSScanWorkPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipFSScanWork *instance = VIP_FS_SCAN_WORK(object);
-	VipFSScanWorkPrivate *priv = instance->priv;
+	VipFSScanWorkPrivate *priv = vip_fs_scan_work_get_instance_private(instance);
 	cat_unref_ptr(priv->sequence);
 	cat_log_detail("dispose:%p main_node", object);
 	cat_unref_ptr(priv->main_node);
@@ -83,14 +74,14 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->node);
 
 	cat_log_detail("dispose:%p parent", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_fs_scan_work_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_fs_scan_work_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -98,7 +89,7 @@ static void l_finalize(GObject *object) {
 VipFSScanWork *vip_fs_scan_work_new(VipISequence *sequence, CatWritableTreeNode *node, gboolean recursive_from_parent, gboolean validated_by_parent) {
 	VipFSScanWork *result = g_object_new(VIP_TYPE_FS_SCAN_WORK, NULL);
 	cat_ref_anounce(result);
-	VipFSScanWorkPrivate *priv = result->priv;
+	VipFSScanWorkPrivate *priv = vip_fs_scan_work_get_instance_private(result);
 
 	priv->sequence = cat_ref_ptr(sequence);
 	priv->node = cat_ref_ptr(node);
@@ -110,13 +101,11 @@ VipFSScanWork *vip_fs_scan_work_new(VipISequence *sequence, CatWritableTreeNode 
 }
 
 
-
-
-
 /********************* start VipIScanWork implementation *********************/
 
 static void l_initialize_work_for_map(VipFSScanWork *scan_work, VipMapperRegistry *mapper_registry, VipIMap *map) {
-	VipFSScanWorkPrivate *priv = VIP_FS_SCAN_WORK_GET_PRIVATE(scan_work);
+	VipFSScanWork *instance = VIP_FS_SCAN_WORK(scan_work);
+	VipFSScanWorkPrivate *priv = vip_fs_scan_work_get_instance_private(instance);
 	CatArrayWo *workList = cat_array_wo_new();	// <VipIScanWork>
 	CatHashSet *namesAdded = cat_hash_set_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);	// <CatStringWo>
 	gboolean parent_recursive = priv->recursive_from_parent || vip_node_should_scan_recursive(priv->main_node);
@@ -204,10 +193,9 @@ static void l_initialize_work_for_map(VipFSScanWork *scan_work, VipMapperRegistr
 	cat_unref_ptr(namesAdded);
 }
 
-
-
 static CatArrayWo *l_scan_work_init_child_work(VipIScanWork *self, struct _VipMapperRegistry *mapper_registry) {
-	VipFSScanWorkPrivate *priv = VIP_FS_SCAN_WORK_GET_PRIVATE(self);
+	VipFSScanWork *instance = VIP_FS_SCAN_WORK(self);
+	VipFSScanWorkPrivate *priv = vip_fs_scan_work_get_instance_private(instance);
 	if (priv->child_work==NULL) {
 		VipIResource *content = vip_node_get_content(priv->main_node);
 		if (VIP_IS_IMAP(content)) {
@@ -233,8 +221,8 @@ static CatArrayWo *l_scan_work_init_child_work(VipIScanWork *self, struct _VipMa
 }
 
 static void l_scan_work_run_scan(VipIScanWork *self) {
-	VipFSScanWorkPrivate *priv = VIP_FS_SCAN_WORK_GET_PRIVATE(self);
-
+	VipFSScanWork *instance = VIP_FS_SCAN_WORK(self);
+	VipFSScanWorkPrivate *priv = vip_fs_scan_work_get_instance_private(instance);
 	VipNode *vip_node = (VipNode *) cat_tree_node_get_content((CatTreeNode *) priv->node);
 
 	gboolean hold = (priv->recursive_from_parent && priv->validated_by_parent)
@@ -248,7 +236,6 @@ static void l_scan_work_run_scan(VipIScanWork *self) {
 			cat_unref_ptr(parent_node);
 		}
 	}
-
 }
 
 
@@ -257,17 +244,15 @@ static void l_scan_work_iface_init(VipIScanWorkInterface *iface) {
 	iface->runScan = l_scan_work_run_scan;
 }
 
-
 /********************* end VipIScanWork implementation *********************/
 
-
 static void l_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	VipFSScanWorkPrivate *priv = VIP_FS_SCAN_WORK_GET_PRIVATE(self);
+	VipFSScanWork *instance = VIP_FS_SCAN_WORK(self);
+	VipFSScanWorkPrivate *priv = vip_fs_scan_work_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:main-node=%o, rec-from-par=%d, val-by-par=%d]", iname, self, priv->main_node,
 			priv->recursive_from_parent, priv->validated_by_parent);
 }
-
 
 static void l_stringable_iface_init(CatIStringableInterface *iface) {
 	iface->print = l_print;

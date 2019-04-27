@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTWHILESTATEMENT_H_
 #define JAGASTWHILESTATEMENT_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_WHILE_STATEMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_WHILE_STATEMENT))
 #define JAG_AST_IS_WHILE_STATEMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_WHILE_STATEMENT))
 #define JAG_AST_WHILE_STATEMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_WHILE_STATEMENT, JagAstWhileStatementClass))
-#define JAG_AST_WHILE_STATEMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_WHILE_STATEMENT, JagAstWhileStatementPrivate))
 
 typedef struct _JagAstWhileStatement               JagAstWhileStatement;
 typedef struct _JagAstWhileStatementPrivate        JagAstWhileStatementPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstWhileStatementClass          JagAstWhileStatementClass;
 
 struct _JagAstWhileStatement {
 	GObject parent;
-	JagAstWhileStatementPrivate *priv;
 };
 
 struct _JagAstWhileStatementClass {
@@ -61,6 +58,5 @@ JagAstWhileStatement *jag_ast_while_statement_new(JagAstBlock *body);
 void jag_ast_while_statement_set_conditional_expression(JagAstWhileStatement *while_statement, JagAstIConditionalExpression *conditional_expression);
 
 G_END_DECLS
-
 
 #endif /* JAGASTWHILESTATEMENT_H_ */

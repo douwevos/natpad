@@ -42,31 +42,24 @@ struct _MooTransactionPrivate {
 	int64_t start_ts;
 };
 
-G_DEFINE_TYPE (MooTransaction, moo_transaction, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooTransaction, moo_transaction, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_transaction_class_init(MooTransactionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooTransactionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_transaction_init(MooTransaction *instance) {
-	MooTransactionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_TRANSACTION, MooTransactionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooTransaction *instance = MOO_TRANSACTION(object);
-	MooTransactionPrivate *priv = instance->priv;
+	MooTransactionPrivate *priv = moo_transaction_get_instance_private(instance);
 	cat_unref_ptr(priv->root);
 	cat_unref_ptr(priv->commited_root);
 	cat_unref_ptr(priv->root_ref);
@@ -74,14 +67,14 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->unique_id_counter);
 	cat_unref_ptr(priv->version_counter);
 	cat_unref_ptr(priv->owner);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_transaction_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_transaction_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -89,7 +82,7 @@ static void l_finalize(GObject *object) {
 MooTransaction *moo_transaction_new(GObject *owner, MooTransactionDispatcher *transaction_dispatcher, CatAtomicLong *unique_id_counter, CatAtomicInteger *version_counter, CatAtomicReference *root_ref) {
 	MooTransaction *result = g_object_new(MOO_TYPE_TRANSACTION, NULL);
 	cat_ref_anounce(result);
-	MooTransactionPrivate *priv = result->priv;
+	MooTransactionPrivate *priv = moo_transaction_get_instance_private(result);
 	priv->transaction_dispatcher = cat_ref_ptr(transaction_dispatcher);
 	priv->unique_id_counter = cat_ref_ptr(unique_id_counter);
 	priv->version_counter = cat_ref_ptr(version_counter);
@@ -103,7 +96,7 @@ MooTransaction *moo_transaction_new(GObject *owner, MooTransactionDispatcher *tr
 
 
 void moo_transaction_begin(MooTransaction *transaction) {
-	MooTransactionPrivate *priv = MOO_TRANSACTION_GET_PRIVATE(transaction);
+	MooTransactionPrivate *priv = moo_transaction_get_instance_private(transaction);
 	cat_unref_ptr(priv->root);
 	priv->root = (MooNodeWo *) cat_atomic_reference_get(priv->root_ref);
 	cat_log_debug("%o >> start: root=%o", priv->owner, priv->root);
@@ -119,7 +112,7 @@ void moo_transaction_begin(MooTransaction *transaction) {
 //}
 
 gboolean moo_transaction_commit(MooTransaction *transaction, MooNodeWo *e_new_root) {
-	MooTransactionPrivate *priv = MOO_TRANSACTION_GET_PRIVATE(transaction);
+	MooTransactionPrivate *priv = moo_transaction_get_instance_private(transaction);
 	cat_unref_ptr(priv->commited_root);
 	priv->commited_root = moo_node_wo_anchor(e_new_root, cat_atomic_integer_increment(priv->version_counter));
 	if (priv->root == priv->commited_root) {
@@ -175,17 +168,17 @@ gboolean moo_transaction_commit(MooTransaction *transaction, MooNodeWo *e_new_ro
 
 
 MooNodeWo *moo_transaction_get_tx_root_node(MooTransaction *transaction) {
-	MooTransactionPrivate *priv = MOO_TRANSACTION_GET_PRIVATE(transaction);
+	MooTransactionPrivate *priv = moo_transaction_get_instance_private(transaction);
 	return priv->root;
 }
 
 MooNodeWo *moo_transaction_get_commited_root_node(MooTransaction *transaction) {
-	MooTransactionPrivate *priv = MOO_TRANSACTION_GET_PRIVATE(transaction);
+	MooTransactionPrivate *priv = moo_transaction_get_instance_private(transaction);
 	return priv->commited_root;
 }
 
 gboolean moo_transaction_retry(MooTransaction *transaction) {
-	MooTransactionPrivate *priv = MOO_TRANSACTION_GET_PRIVATE(transaction);
+	MooTransactionPrivate *priv = moo_transaction_get_instance_private(transaction);
 	priv->retry_count++;
 	if (priv->retry_count>50) {
 		cat_log_error("transaction could not be committed:%o", priv->owner);

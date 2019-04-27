@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_NAME(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_NAME))
 #define JAG_BYT_IS_NAME_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_NAME))
 #define JAG_BYT_NAME_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_NAME, JagBytNameClass))
-#define JAG_BYT_NAME_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_NAME, JagBytNamePrivate))
 
 typedef struct _JagBytName               JagBytName;
 typedef struct _JagBytNamePrivate        JagBytNamePrivate;
@@ -43,7 +42,6 @@ typedef struct _JagBytNameClass          JagBytNameClass;
 
 struct _JagBytName {
 	GObject parent;
-	JagBytNamePrivate *priv;
 };
 
 struct _JagBytNameClass {
@@ -54,8 +52,6 @@ struct _JagBytNameClass {
 GType jag_byt_name_get_type();
 
 JagBytName *jag_byt_name_new(CatStringWo *a_full_name, gboolean from_pool);
-
-
 
 int jag_byt_name_count(JagBytName *name);
 

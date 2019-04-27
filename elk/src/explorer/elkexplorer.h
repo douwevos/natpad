@@ -46,7 +46,6 @@ typedef struct _ElkExplorerClass          ElkExplorerClass;
 
 struct _ElkExplorer {
 	MooExplorer parent;
-	ElkExplorerPrivate *priv;
 };
 
 struct _ElkExplorerClass {
@@ -59,7 +58,5 @@ GType elk_explorer_get_type();
 ElkExplorer *elk_explorer_new(ElkIService *elk_service, MooService *moo_service, MooNodeRenderRegistry *render_registry);
 
 G_END_DECLS
-
-
 
 #endif /* ELKEXPLORER_H_ */

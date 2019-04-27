@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define ELK_IS_ACTION_CLOSE_ALL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_ACTION_CLOSE_ALL))
 #define ELK_IS_ACTION_CLOSE_ALL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_ACTION_CLOSE_ALL))
 #define ELK_ACTION_CLOSE_ALL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_ACTION_CLOSE_ALL, ElkActionCloseAllClass))
-#define ELK_ACTION_CLOSE_ALL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_ACTION_CLOSE_ALL, ElkActionCloseAllPrivate))
 
 typedef struct _ElkActionCloseAll               ElkActionCloseAll;
 typedef struct _ElkActionCloseAllPrivate        ElkActionCloseAllPrivate;
@@ -45,7 +44,6 @@ typedef struct _ElkActionCloseAllClass          ElkActionCloseAllClass;
 
 struct _ElkActionCloseAll {
 	LeaAction parent;
-	ElkActionCloseAllPrivate *priv;
 };
 
 struct _ElkActionCloseAllClass {

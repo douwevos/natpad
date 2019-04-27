@@ -38,7 +38,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_FIELDREF(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_FIELDREF))
 #define JAG_BYT_IS_CONSTANT_FIELDREF_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_FIELDREF))
 #define JAG_BYT_CONSTANT_FIELDREF_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_FIELDREF, JagBytConstantFieldrefClass))
-#define JAG_BYT_CONSTANT_FIELDREF_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_FIELDREF, JagBytConstantFieldrefPrivate))
 
 typedef struct _JagBytConstantFieldref               JagBytConstantFieldref;
 typedef struct _JagBytConstantFieldrefPrivate        JagBytConstantFieldrefPrivate;
@@ -47,7 +46,6 @@ typedef struct _JagBytConstantFieldrefClass          JagBytConstantFieldrefClass
 
 struct _JagBytConstantFieldref {
 	GObject parent;
-	JagBytConstantFieldrefPrivate *priv;
 };
 
 struct _JagBytConstantFieldrefClass {

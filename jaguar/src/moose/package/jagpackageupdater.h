@@ -35,17 +35,13 @@ G_BEGIN_DECLS
 #define JAG_IS_PACKAGE_UPDATER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_PACKAGE_UPDATER))
 #define JAG_IS_PACKAGE_UPDATER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_PACKAGE_UPDATER))
 #define JAG_PACKAGE_UPDATER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_PACKAGE_UPDATER, JagPackageUpdaterClass))
-#define JAG_PACKAGE_UPDATER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_PACKAGE_UPDATER, JagPackageUpdaterPrivate))
-
 
 typedef struct _JagPackageUpdater               JagPackageUpdater;
 typedef struct _JagPackageUpdaterPrivate        JagPackageUpdaterPrivate;
 typedef struct _JagPackageUpdaterClass          JagPackageUpdaterClass;
 
-
 struct _JagPackageUpdater {
 	GObject parent;
-	JagPackageUpdaterPrivate *priv;
 };
 
 struct _JagPackageUpdaterClass {

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "moopanel.h"
 #include "moopanelowner.h"
 #include "mooexplorer.h"
@@ -42,33 +41,27 @@ struct _MooPanelPrivate {
 static void l_layout_model_listener_iface_init(MooILayoutModelListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooPanel, moo_panel, LEA_TYPE_PANEL, {
+		G_ADD_PRIVATE(MooPanel)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ILAYOUT_MODEL_LISTENER, l_layout_model_listener_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_panel_class_init(MooPanelClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooPanelPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_panel_init(MooPanel *instance) {
-	MooPanelPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_PANEL, MooPanelPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooPanel *instance = MOO_PANEL(object);
-	MooPanelPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	MooPanelPrivate *priv = moo_panel_get_instance_private(instance);
+	G_OBJECT_CLASS(moo_panel_parent_class)->dispose(object);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->explorer);
 	cat_unref_ptr(priv->selection);
@@ -80,19 +73,20 @@ static void l_dispose(GObject *object) {
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_panel_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 
 static void l_explorer_destroy(GtkWidget *widget, gpointer data) {
-	MooPanelPrivate *priv = MOO_PANEL_GET_PRIVATE(data);
+	MooPanel *instance = MOO_PANEL(data);
+	MooPanelPrivate *priv = moo_panel_get_instance_private(instance);
 	cat_log_detail("unreffing explorer:%o", priv->explorer);
 	cat_unref_ptr(priv->explorer);
 }
 
 static void l_initialize_widget(MooPanel *panel, MooPanelOwner *panel_owner, MooExplorer *explorer) {
-	MooPanelPrivate *priv = MOO_PANEL_GET_PRIVATE(panel);
+	MooPanelPrivate *priv = moo_panel_get_instance_private(panel);
 	MooNodeRenderRegistry *registry = moo_panel_owner_get_render_registry(panel_owner);
 	if (explorer) {
 		priv->explorer = cat_ref_ptr(explorer);
@@ -116,7 +110,7 @@ static void l_initialize_widget(MooPanel *panel, MooPanelOwner *panel_owner, Moo
 MooPanel *moo_panel_new(LeaIPanelOwner *panel_owner, LeaFrame *frame, MooService *moo_service, MooExplorer *explorer) {
 	MooPanel *result = g_object_new(MOO_TYPE_PANEL, NULL);
 	cat_ref_anounce(result);
-	MooPanelPrivate *priv = result->priv;
+	MooPanelPrivate *priv = moo_panel_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->selection = NULL;
 	priv->vip_snaphot = NULL;
@@ -127,26 +121,25 @@ MooPanel *moo_panel_new(LeaIPanelOwner *panel_owner, LeaFrame *frame, MooService
 
 	MooLayoutModel *layout_model = moo_explorer_get_layout_model(explorer);
 	moo_layout_model_add_listener(layout_model, (MooILayoutModelListener *) result);
-
 	return result;
 }
 
-
-
-
 CatArrayWo *moo_panel_get_selection(MooPanel *panel) {
-	return MOO_PANEL_GET_PRIVATE(panel)->selection;
+	MooPanelPrivate *priv = moo_panel_get_instance_private(panel);
+	return priv->selection;
 }
 
 VipSnapshot *moo_panel_get_vip_snapshot(MooPanel *panel) {
-	return MOO_PANEL_GET_PRIVATE(panel)->vip_snaphot;
+	MooPanelPrivate *priv = moo_panel_get_instance_private(panel);
+	return priv->vip_snaphot;
 }
 
 
 /********************* begin MooILayoutModelListener implementation *********************/
 
 static void l_layout_model_selection_set(MooILayoutModelListener *self, CatArrayWo *new_selection) {
-	MooPanelPrivate *priv = MOO_PANEL_GET_PRIVATE(self);
+	MooPanel *instance = MOO_PANEL(self);
+	MooPanelPrivate *priv = moo_panel_get_instance_private(instance);
 	cat_ref_swap(priv->selection, new_selection);
 	if (priv->moo_service==NULL) {
 		return;
@@ -163,7 +156,6 @@ static void l_layout_model_selection_set(MooILayoutModelListener *self, CatArray
 	MooPanelOwner *moo_panel_owner = (MooPanelOwner *) lea_panel_get_panel_owner((LeaPanel *) self);
 	moo_panel_owner_update_selection(moo_panel_owner);
 }
-
 
 static void l_layout_model_listener_iface_init(MooILayoutModelListenerInterface *iface) {
 	iface->selectionSet = l_layout_model_selection_set;

@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_STORE_INDEX(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_STORE_INDEX))
 #define JAG_BYT_IS_OP_STORE_INDEX_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_STORE_INDEX))
 #define JAG_BYT_OP_STORE_INDEX_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_STORE_INDEX, JagBytOpStoreIndexClass))
-#define JAG_BYT_OP_STORE_INDEX_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_STORE_INDEX, JagBytOpStoreIndexPrivate))
 
 typedef struct _JagBytOpStoreIndex               JagBytOpStoreIndex;
 typedef struct _JagBytOpStoreIndexPrivate        JagBytOpStoreIndexPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpStoreIndexClass          JagBytOpStoreIndexClass;
 
 struct _JagBytOpStoreIndex {
 	JagBytAbstractMnemonic parent;
-	JagBytOpStoreIndexPrivate *priv;
 };
 
 struct _JagBytOpStoreIndexClass {

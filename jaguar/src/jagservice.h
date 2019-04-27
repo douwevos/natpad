@@ -38,17 +38,13 @@ G_BEGIN_DECLS
 #define JAG_IS_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_SERVICE))
 #define JAG_IS_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SERVICE))
 #define JAG_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SERVICE, JagServiceClass))
-#define JAG_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_SERVICE, JagServicePrivate))
-
 
 typedef struct _JagService               JagService;
 typedef struct _JagServicePrivate        JagServicePrivate;
 typedef struct _JagServiceClass          JagServiceClass;
 
-
 struct _JagService {
 		GObject parent;
-		JagServicePrivate *priv;
 };
 
 struct _JagServiceClass {
@@ -64,7 +60,5 @@ JagService *jag_service_new(WorService *wor_service, ElkService *elk_service, Mo
 //JagIJarMap *jag_service_get_jar_map(JagService *jag_service);
 
 G_END_DECLS
-
-
 
 #endif /* JAGSERVICE_H_ */

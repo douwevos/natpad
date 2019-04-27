@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef VIPNODE_H_
 #define VIPNODE_H_
 
@@ -36,17 +35,13 @@ G_BEGIN_DECLS
 #define VIP_IS_NODE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_NODE))
 #define VIP_IS_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_NODE))
 #define VIP_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_NODE, VipNodeClass))
-#define VIP_NODE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_NODE, VipNodePrivate))
-
 
 typedef struct _VipNode               VipNode;
 typedef struct _VipNodePrivate        VipNodePrivate;
 typedef struct _VipNodeClass          VipNodeClass;
 
-
 struct _VipNode {
 	GObject parent;
-	VipNodePrivate *priv;
 };
 
 struct _VipNodeClass {

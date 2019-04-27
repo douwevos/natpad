@@ -36,23 +36,18 @@ G_BEGIN_DECLS
 #define MOO_IS_LAYOUT_MODEL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_LAYOUT_MODEL))
 #define MOO_IS_LAYOUT_MODEL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_LAYOUT_MODEL))
 #define MOO_LAYOUT_MODEL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_LAYOUT_MODEL, MooLayoutModelClass))
-#define MOO_LAYOUT_MODEL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_LAYOUT_MODEL, MooLayoutModelPrivate))
-
 
 typedef struct _MooLayoutModel               MooLayoutModel;
 typedef struct _MooLayoutModelPrivate        MooLayoutModelPrivate;
 typedef struct _MooLayoutModelClass          MooLayoutModelClass;
 
-
 struct _MooLayoutModel {
 	GObject parent;
-	MooLayoutModelPrivate *priv;
 };
 
 struct _MooLayoutModelClass {
 	GObjectClass parent_class;
 };
-
 
 GType moo_layout_model_get_type();
 
@@ -65,7 +60,6 @@ void moo_layout_model_get_view_size(MooLayoutModel *layout_model, int *width, in
 void moo_layout_model_add_listener(MooLayoutModel *layout_model, MooILayoutModelListener *model_listener);
 
 void moo_layout_model_remove_listener(MooLayoutModel *layout_model, MooILayoutModelListener *model_listener);
-
 
 G_END_DECLS
 

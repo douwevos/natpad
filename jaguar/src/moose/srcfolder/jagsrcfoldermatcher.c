@@ -20,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "jagsrcfoldermatcher.h"
 #include "jagsrcfoldercontentwo.h"
 #include <moose.h>
@@ -33,16 +31,14 @@
 
 static void l_node_matcher_iface_init(MooINodeMatcherInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagSrcFolderMatcher, jag_src_folder_matcher, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(JagSrcFolderMatcher, jag_src_folder_matcher, G_TYPE_OBJECT, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_MATCHER, l_node_matcher_iface_init);
 });
-
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_src_folder_matcher_class_init(JagSrcFolderMatcherClass *clazz) {
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -72,11 +68,7 @@ JagSrcFolderMatcher *jag_src_folder_matcher_new() {
 }
 
 
-
-
-
 /********************* start MooIContentMap implementation *********************/
-
 
 static gboolean l_node_matcher_matches(MooINodeMatcher *self, struct _MooNodeWo *node, gpointer userdata) {
 	JagSrcFolderContentWo *src_folder_content = (JagSrcFolderContentWo *) moo_node_wo_get_content(node, jag_src_folder_content_wo_key());
@@ -87,10 +79,8 @@ static gboolean l_node_matcher_matches(MooINodeMatcher *self, struct _MooNodeWo 
 	return result;
 }
 
-
 static void l_node_matcher_iface_init(MooINodeMatcherInterface *iface) {
 	iface->matches = l_node_matcher_matches;
 }
 
 /********************* end MooIContentMap implementation *********************/
-

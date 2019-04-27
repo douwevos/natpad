@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_CODE_EXCEPTION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_CODE_EXCEPTION))
 #define JAG_BYT_IS_ATTRIBUTE_CODE_EXCEPTION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_CODE_EXCEPTION))
 #define JAG_BYT_ATTRIBUTE_CODE_EXCEPTION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_CODE_EXCEPTION, JagBytAttributeCodeExceptionClass))
-#define JAG_BYT_ATTRIBUTE_CODE_EXCEPTION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_CODE_EXCEPTION, JagBytAttributeCodeExceptionPrivate))
 
 typedef struct _JagBytAttributeCodeException               JagBytAttributeCodeException;
 typedef struct _JagBytAttributeCodeExceptionPrivate        JagBytAttributeCodeExceptionPrivate;
@@ -43,7 +42,6 @@ typedef struct _JagBytAttributeCodeExceptionClass          JagBytAttributeCodeEx
 
 struct _JagBytAttributeCodeException {
 	GObject parent;
-	JagBytAttributeCodeExceptionPrivate *priv;
 };
 
 struct _JagBytAttributeCodeExceptionClass {

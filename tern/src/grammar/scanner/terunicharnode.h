@@ -33,22 +33,18 @@ G_BEGIN_DECLS
 #define TER_IS_UNICHAR_NODE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TER_TYPE_UNICHAR_NODE))
 #define TER_IS_UNICHAR_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_UNICHAR_NODE))
 #define TER_UNICHAR_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_UNICHAR_NODE, TerUnicharNodeClass))
-#define TER_UNICHAR_NODE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TER_TYPE_UNICHAR_NODE, TerUnicharNodePrivate))
 
 typedef struct _TerUnicharNode               TerUnicharNode;
 typedef struct _TerUnicharNodePrivate        TerUnicharNodePrivate;
 typedef struct _TerUnicharNodeClass          TerUnicharNodeClass;
 
-
 struct _TerUnicharNode {
 	GObject parent;
-	TerUnicharNodePrivate *priv;
 };
 
 struct _TerUnicharNodeClass {
 	GObjectClass parent_class;
 };
-
 
 GType ter_unichar_node_get_type();
 
@@ -67,8 +63,6 @@ gushort ter_unichar_node_get_level(TerUnicharNode *node);
 
 void ter_unichar_node_dump(TerUnicharNode *node, CatStringWo *a_indent);
 
-
 G_END_DECLS
-
 
 #endif /* TERUNICHARNODE_H_ */

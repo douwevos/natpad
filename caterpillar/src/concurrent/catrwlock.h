@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define CAT_IS_RW_LOCK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_RW_LOCK))
 #define CAT_IS_RW_LOCK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_RW_LOCK))
 #define CAT_RW_LOCK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_RW_LOCK, CatRWLockClass))
-#define CAT_RW_LOCK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_RW_LOCK, CatRWLockPrivate))
 
 typedef struct _CatRWLock               CatRWLock;
 typedef struct _CatRWLockPrivate        CatRWLockPrivate;
@@ -45,7 +44,6 @@ typedef struct _CatRWLockClass          CatRWLockClass;
 
 struct _CatRWLock {
 	GObject parent;
-	CatRWLockPrivate *priv;
 };
 
 struct _CatRWLockClass {

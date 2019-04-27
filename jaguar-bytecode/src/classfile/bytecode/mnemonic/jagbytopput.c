@@ -36,6 +36,7 @@ struct _JagBytOpPutPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpPut, jag_byt_op_put, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpPut)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -43,16 +44,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_put_class_init(JagBytOpPutClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpPutPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_put_init(JagBytOpPut *instance) {
-	JagBytOpPutPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_PUT, JagBytOpPutPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -71,14 +68,15 @@ static void l_finalize(GObject *object) {
 JagBytOpPut *jag_byt_op_put_new(JagBytOperation operation, int offset, int pool_field_reference_index) {
 	JagBytOpPut *result = g_object_new(JAG_BYT_TYPE_OP_PUT, NULL);
 	cat_ref_anounce(result);
-	JagBytOpPutPrivate *priv = result->priv;
+	JagBytOpPutPrivate *priv = jag_byt_op_put_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 3);
 	priv->pool_field_reference_index = pool_field_reference_index;
 	return result;
 }
 
 int jag_byt_op_put_get_field_reference_pool_index(JagBytOpPut *op_put) {
-	return JAG_BYT_OP_PUT_GET_PRIVATE(op_put)->pool_field_reference_index;
+	JagBytOpPutPrivate *priv = jag_byt_op_put_get_instance_private(op_put);
+	return priv->pool_field_reference_index;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
@@ -90,7 +88,8 @@ static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *la
 		case OP_PUTSTATIC : cat_string_wo_append_chars(result, "putstatic "); break;
 		case OP_PUTFIELD : cat_string_wo_append_chars(result, "putfield "); break;
 	}
-	JagBytOpPutPrivate *priv = JAG_BYT_OP_PUT_GET_PRIVATE(self);
+	JagBytOpPut *instance = JAG_BYT_OP_PUT(self);
+	JagBytOpPutPrivate *priv = jag_byt_op_put_get_instance_private(instance);
 	cat_string_wo_append_decimal(result, priv->pool_field_reference_index);
 	return result;
 }

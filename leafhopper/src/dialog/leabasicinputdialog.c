@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "leabasicinputdialog.h"
 #include <caterpillar.h>
 
@@ -29,7 +28,7 @@
 #define CAT_LOG_CLAZZ "LeaBasicInputDialog"
 #include <logging/catlog.h>
 
-G_DEFINE_TYPE (LeaBasicInputDialog, lea_basic_input_dialog, GTK_TYPE_DIALOG)
+G_DEFINE_TYPE (LeaBasicInputDialog, lea_basic_input_dialog, GTK_TYPE_DIALOG) // @suppress("Unused static function")
 
 static void lea_basic_input_dialog_class_init(LeaBasicInputDialogClass *clazz) {
 }

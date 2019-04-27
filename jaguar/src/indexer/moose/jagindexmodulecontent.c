@@ -33,12 +33,12 @@ struct _JagIndexModuleContentPrivate {
 	int jag_module_content_version;
 };
 
-
 static CatS jag_s_index_module_content_key = CAT_S_DEF("JagIndexModuleContent");
 
 static void l_content_iface_init(MooIContentInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagIndexModuleContent, jag_index_module_content, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagIndexModuleContent)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ICONTENT, l_content_iface_init);
 });
 
@@ -46,22 +46,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_index_module_content_class_init(JagIndexModuleContentClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagIndexModuleContentPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_index_module_content_init(JagIndexModuleContent *instance) {
-	JagIndexModuleContentPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_INDEX_MODULE_CONTENT_WO, JagIndexModuleContentPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagIndexModuleContent *instance = JAG_INDEX_MODULE_CONTENT_WO(object);
-	JagIndexModuleContentPrivate *priv = instance->priv;
+	JagIndexModuleContentPrivate *priv = jag_index_module_content_get_instance_private(instance);
 	cat_unref_ptr(priv->lock);
 	G_OBJECT_CLASS(jag_index_module_content_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -74,19 +70,16 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JagIndexModuleContent *jag_index_module_content_new() {
 	JagIndexModuleContent *result = g_object_new(JAG_TYPE_INDEX_MODULE_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-	JagIndexModuleContentPrivate *priv = result->priv;
+	JagIndexModuleContentPrivate *priv = jag_index_module_content_get_instance_private(result);
 	priv->lock = cat_lock_new();
 	return result;
 }
 
-
-
 gboolean jag_index_module_content_need_to_update(JagIndexModuleContent *index_module, int jag_module_content_version) {
-	JagIndexModuleContentPrivate *priv = JAG_INDEX_MODULE_CONTENT_WO_GET_PRIVATE(index_module);
+	JagIndexModuleContentPrivate *priv = jag_index_module_content_get_instance_private(index_module);
 	gboolean result = FALSE;
 	cat_lock_lock(priv->lock);
 	if (jag_module_content_version>priv->jag_module_content_version) {
@@ -97,18 +90,11 @@ gboolean jag_index_module_content_need_to_update(JagIndexModuleContent *index_mo
 	return result;
 }
 
-
-
-
-
-
 CatStringWo *jag_index_module_content_key() {
 	return CAT_S(jag_s_index_module_content_key);
 }
 
-
 /********************* start MooIContent implementation *********************/
-
 
 static CatStringWo *l_content_get_key(MooIContent *self) {
 	return jag_index_module_content_key();
@@ -117,8 +103,6 @@ static CatStringWo *l_content_get_key(MooIContent *self) {
 static MooIContent *l_content_anchor(MooIContent *self, int version) {
 	return self;
 }
-
-
 
 static void l_content_iface_init(MooIContentInterface *iface) {
 	iface->getKey = l_content_get_key;

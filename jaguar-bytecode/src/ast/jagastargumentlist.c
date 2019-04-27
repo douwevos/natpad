@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "jagastargumentlist.h"
 
 #include <logging/catlogdefs.h>
@@ -34,54 +32,47 @@ struct _JagAstArgumentListPrivate {
 	CatArrayWo *e_arguments;
 };
 
-G_DEFINE_TYPE (JagAstArgumentList, jag_ast_argument_list, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagAstArgumentList, jag_ast_argument_list, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_argument_list_class_init(JagAstArgumentListClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstArgumentListPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_argument_list_init(JagAstArgumentList *instance) {
-	JagAstArgumentListPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_ARGUMENT_LIST, JagAstArgumentListPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstArgumentList *instance = JAG_AST_ARGUMENT_LIST(object);
-	JagAstArgumentListPrivate *priv = instance->priv;
+	JagAstArgumentListPrivate *priv = jag_ast_argument_list_get_instance_private(instance);
 	cat_unref_ptr(priv->e_arguments);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_argument_list_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_argument_list_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstArgumentList *jag_ast_argument_list_new() {
 	JagAstArgumentList *result = g_object_new(JAG_AST_TYPE_ARGUMENT_LIST, NULL);
 	cat_ref_anounce(result);
-	JagAstArgumentListPrivate *priv = result->priv;
+	JagAstArgumentListPrivate *priv = jag_ast_argument_list_get_instance_private(result);
 	priv->e_arguments = cat_array_wo_new();
 	return result;
 }
 
 
 JagAstArgument *jag_ast_argument_list_get_at(JagAstArgumentList *argument_list, int index) {
-	JagAstArgumentListPrivate *priv = JAG_AST_ARGUMENT_LIST_GET_PRIVATE(argument_list);
+	JagAstArgumentListPrivate *priv = jag_ast_argument_list_get_instance_private(argument_list);
 	if (index>=0 && index<cat_array_wo_size(priv->e_arguments)) {
 		return (JagAstArgument *) cat_array_wo_get(priv->e_arguments, index);
 	}
@@ -89,12 +80,12 @@ JagAstArgument *jag_ast_argument_list_get_at(JagAstArgumentList *argument_list, 
 }
 
 void jag_ast_argument_list_add(JagAstArgumentList *argument_list, JagAstArgument *argument) {
-	JagAstArgumentListPrivate *priv = JAG_AST_ARGUMENT_LIST_GET_PRIVATE(argument_list);
+	JagAstArgumentListPrivate *priv = jag_ast_argument_list_get_instance_private(argument_list);
 	cat_array_wo_append(priv->e_arguments, (GObject *) argument);
 }
 
 int jag_ast_argument_list_count(JagAstArgumentList *argument_list) {
-	JagAstArgumentListPrivate *priv = JAG_AST_ARGUMENT_LIST_GET_PRIVATE(argument_list);
+	JagAstArgumentListPrivate *priv = jag_ast_argument_list_get_instance_private(argument_list);
 	return cat_array_wo_size(priv->e_arguments);
 }
 
@@ -106,14 +97,14 @@ gboolean jag_ast_argument_list_equal(JagAstArgumentList *argument_list_a, JagAst
 	if (argument_list_a==NULL || argument_list_b==NULL) {
 		return FALSE;
 	}
-	JagAstArgumentListPrivate *priv_a = JAG_AST_ARGUMENT_LIST_GET_PRIVATE(argument_list_a);
-	JagAstArgumentListPrivate *priv_b = JAG_AST_ARGUMENT_LIST_GET_PRIVATE(argument_list_b);
+	JagAstArgumentListPrivate *priv_a = jag_ast_argument_list_get_instance_private(argument_list_a);
+	JagAstArgumentListPrivate *priv_b = jag_ast_argument_list_get_instance_private(argument_list_b);
 	return cat_array_wo_equal(priv_a->e_arguments, priv_b->e_arguments, (GEqualFunc) jag_ast_argument_equal);
 }
 
 
 CatStringWo *jag_ast_argument_list_as_text(JagAstArgumentList *argument_list, CatStringWo *e_dump_buffer) {
-	JagAstArgumentListPrivate *priv = JAG_AST_ARGUMENT_LIST_GET_PRIVATE(argument_list);
+	JagAstArgumentListPrivate *priv = jag_ast_argument_list_get_instance_private(argument_list);
 	if (e_dump_buffer==NULL) {
 		e_dump_buffer = cat_string_wo_new();
 	}

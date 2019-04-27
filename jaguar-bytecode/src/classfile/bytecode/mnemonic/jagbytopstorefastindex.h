@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_STORE_FAST_INDEX(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_STORE_FAST_INDEX))
 #define JAG_BYT_IS_OP_STORE_FAST_INDEX_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_STORE_FAST_INDEX))
 #define JAG_BYT_OP_STORE_FAST_INDEX_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_STORE_FAST_INDEX, JagBytOpStoreFastIndexClass))
-#define JAG_BYT_OP_STORE_FAST_INDEX_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_STORE_FAST_INDEX, JagBytOpStoreFastIndexPrivate))
 
 typedef struct _JagBytOpStoreFastIndex               JagBytOpStoreFastIndex;
 typedef struct _JagBytOpStoreFastIndexPrivate        JagBytOpStoreFastIndexPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpStoreFastIndexClass          JagBytOpStoreFastIndexClass
 
 struct _JagBytOpStoreFastIndex {
 	JagBytAbstractMnemonic parent;
-	JagBytOpStoreFastIndexPrivate *priv;
 };
 
 struct _JagBytOpStoreFastIndexClass {

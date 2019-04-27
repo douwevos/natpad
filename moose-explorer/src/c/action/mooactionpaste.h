@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ACTION_PASTE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ACTION_PASTE))
 #define MOO_IS_ACTION_PASTE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ACTION_PASTE))
 #define MOO_ACTION_PASTE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ACTION_PASTE, MooActionPasteClass))
-#define MOO_ACTION_PASTE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ACTION_PASTE, MooActionPastePrivate))
-
 
 typedef struct _MooActionPaste               MooActionPaste;
 typedef struct _MooActionPastePrivate        MooActionPastePrivate;
 typedef struct _MooActionPasteClass          MooActionPasteClass;
 
-
 struct _MooActionPaste {
 	LeaAction parent;
-	MooActionPastePrivate *priv;
 };
 
 struct _MooActionPasteClass {
 	LeaActionClass parent_class;
 };
-
 
 GType moo_action_paste_get_type();
 

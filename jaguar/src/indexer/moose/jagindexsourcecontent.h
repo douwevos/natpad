@@ -33,30 +33,24 @@ G_BEGIN_DECLS
 #define JAG_IS_INDEX_SOURCE_CONTENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_INDEX_SOURCE_CONTENT))
 #define JAG_IS_INDEX_SOURCE_CONTENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_INDEX_SOURCE_CONTENT))
 #define JAG_INDEX_SOURCE_CONTENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_INDEX_SOURCE_CONTENT, JagIndexSourceContentClass))
-#define JAG_INDEX_SOURCE_CONTENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_INDEX_SOURCE_CONTENT, JagIndexSourceContentPrivate))
-
 
 typedef struct _JagIndexSourceContent               JagIndexSourceContent;
 typedef struct _JagIndexSourceContentPrivate        JagIndexSourceContentPrivate;
 typedef struct _JagIndexSourceContentClass          JagIndexSourceContentClass;
 
-
 struct _JagIndexSourceContent {
 	GObject parent;
-	JagIndexSourceContentPrivate *priv;
 };
 
 struct _JagIndexSourceContentClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_index_source_content_get_type();
 
 JagIndexSourceContent *jag_index_source_content_new();
 
 gboolean jag_index_source_content_need_to_update(JagIndexSourceContent *index_source, int jag_srcfile_content_version);
-
 
 G_END_DECLS
 

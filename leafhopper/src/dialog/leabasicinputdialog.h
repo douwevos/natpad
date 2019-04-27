@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef LEABASICINPUTDIALOG_H_
 #define LEABASICINPUTDIALOG_H_
 
@@ -38,10 +37,8 @@ G_BEGIN_DECLS
 #define LEA_IS_BASIC_INPUT_DIALOG_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_BASIC_INPUT_DIALOG))
 #define LEA_BASIC_INPUT_DIALOG_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_BASIC_INPUT_DIALOG, LeaBasicInputDialogClass))
 
-
 typedef struct _LeaBasicInputDialog	   		LeaBasicInputDialog;
 typedef struct _LeaBasicInputDialogClass	  	LeaBasicInputDialogClass;
-
 
 struct _LeaBasicInputDialog {
 	GtkDialog parent;
@@ -59,8 +56,6 @@ LeaBasicInputDialog *lea_basic_input_dialog_new(GtkWidget *owner, const gchar *l
 
 const gchar *lea_basic_input_dialog_get_entry_text(LeaBasicInputDialog *dialog);
 
-
 G_END_DECLS
-
 
 #endif /* LEABASICINPUTDIALOG_H_ */

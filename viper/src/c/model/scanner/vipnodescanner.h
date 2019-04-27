@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef VIPNODESCANNER_H_
 #define VIPNODESCANNER_H_
 
@@ -35,17 +34,13 @@ G_BEGIN_DECLS
 #define VIP_IS_NODE_SCANNER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_NODE_SCANNER))
 #define VIP_IS_NODE_SCANNER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_NODE_SCANNER))
 #define VIP_NODE_SCANNER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_NODE_SCANNER, VipNodeScannerClass))
-#define VIP_NODE_SCANNER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_NODE_SCANNER, VipNodeScannerPrivate))
-
 
 typedef struct _VipNodeScanner               VipNodeScanner;
 typedef struct _VipNodeScannerPrivate        VipNodeScannerPrivate;
 typedef struct _VipNodeScannerClass          VipNodeScannerClass;
 
-
 struct _VipNodeScanner {
 	GObject parent;
-	VipNodeScannerPrivate *priv;
 };
 
 struct _VipNodeScannerClass {
@@ -59,9 +54,6 @@ VipNodeScanner *vip_node_scanner_new(VipMapperRegistry *mapper_registry);
 
 void vip_node_scanner_scan(VipNodeScanner *scanner, CatWritableTreeNode *node, gboolean recursive_from_parent);
 
-
 G_END_DECLS
-
-
 
 #endif /* VIPNODESCANNER_H_ */

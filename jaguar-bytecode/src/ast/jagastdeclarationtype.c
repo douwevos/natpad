@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "jagastdeclarationtype.h"
 
 #include <logging/catlogdefs.h>
@@ -36,47 +34,40 @@ struct _JagAstDeclarationTypePrivate {
 	int dimCount;
 };
 
-G_DEFINE_TYPE (JagAstDeclarationType, jag_ast_declaration_type, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagAstDeclarationType, jag_ast_declaration_type, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_declaration_type_class_init(JagAstDeclarationTypeClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstDeclarationTypePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_declaration_type_init(JagAstDeclarationType *instance) {
-	JagAstDeclarationTypePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_DECLARATION_TYPE, JagAstDeclarationTypePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstDeclarationType *instance = JAG_AST_DECLARATION_TYPE(object);
-	JagAstDeclarationTypePrivate *priv = instance->priv;
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(instance);
 	cat_unref_ptr(priv->referenceTypeName);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_declaration_type_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_declaration_type_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstDeclarationType *jag_ast_declaration_type_new(JagBytType primitive_type, int dimCount) {
 	JagAstDeclarationType *result = g_object_new(JAG_AST_TYPE_DECLARATION_TYPE, NULL);
 	cat_ref_anounce(result);
-	JagAstDeclarationTypePrivate *priv = result->priv;
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(result);
 	priv->type = primitive_type;
 	priv->dimCount = dimCount;
 	priv->referenceTypeName = NULL;
@@ -86,7 +77,7 @@ JagAstDeclarationType *jag_ast_declaration_type_new(JagBytType primitive_type, i
 JagAstDeclarationType *jag_ast_declaration_type_new_reference(JagBytName *type_name, int dimCount) {
 	JagAstDeclarationType *result = g_object_new(JAG_AST_TYPE_DECLARATION_TYPE, NULL);
 	cat_ref_anounce(result);
-	JagAstDeclarationTypePrivate *priv = result->priv;
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(result);
 	priv->type = JAG_BYT_TYPE_REFERENCE;
 	priv->dimCount = dimCount;
 	priv->referenceTypeName = cat_ref_ptr(type_name);
@@ -95,12 +86,12 @@ JagAstDeclarationType *jag_ast_declaration_type_new_reference(JagBytName *type_n
 
 
 JagAstDeclarationType *jag_ast_declaration_type_set_dim_count(JagAstDeclarationType *declaration_type, int newDimCount) {
-	JagAstDeclarationTypePrivate *spriv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *spriv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	if (spriv->dimCount==newDimCount) {
 		return cat_ref_ptr(declaration_type);
 	}
 	JagAstDeclarationType *result = g_object_new(JAG_AST_TYPE_DECLARATION_TYPE, NULL);
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(result);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(result);
 	cat_ref_anounce(result);
 	priv->type = spriv->type;
 	priv->dimCount = newDimCount;
@@ -109,17 +100,17 @@ JagAstDeclarationType *jag_ast_declaration_type_set_dim_count(JagAstDeclarationT
 }
 
 int jag_ast_declaration_type_get_dim_count(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return priv->dimCount;
 }
 
 JagBytName *jag_ast_declaration_type_get_reference_type_name(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return priv->referenceTypeName;
 }
 
 JagAstDeclarationType *jag_ast_declaration_type_set_reference_type_name(JagAstDeclarationType *declaration_type, JagBytName *new_name) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	if (jag_byt_name_equal(new_name, priv->referenceTypeName)) {
 		return cat_ref_ptr(declaration_type);
 	}
@@ -127,35 +118,35 @@ JagAstDeclarationType *jag_ast_declaration_type_set_reference_type_name(JagAstDe
 }
 
 JagBytType jag_ast_declaration_type_get_primitive_type(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return priv->type;
 }
 
 
 gboolean jag_ast_declaration_type_is_reference(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return priv->type==JAG_BYT_TYPE_REFERENCE;
 }
 
 gboolean jag_ast_declaration_type_is_void(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return priv->type==JAG_BYT_TYPE_VOID;
 }
 
 gboolean jag_ast_declaration_type_is_primitive(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return priv->type!=JAG_BYT_TYPE_VOID && priv->type!=JAG_BYT_TYPE_REFERENCE;
 }
 
 
 gboolean jag_ast_declaration_type_is_category2(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return priv->type == JAG_BYT_TYPE_LONG || priv->type == JAG_BYT_TYPE_DOUBLE;
 }
 
 
 int jag_ast_declaration_type_hash_code(JagAstDeclarationType *declaration_type) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	return 13*priv->type
 				+((priv->referenceTypeName==NULL) ? 0 : jag_byt_name_hash_code(priv->referenceTypeName))
 				+priv->dimCount*101;
@@ -168,8 +159,8 @@ gboolean jag_ast_declaration_type_equal(JagAstDeclarationType *declaration_type,
 	if (other==NULL || declaration_type==NULL) {
 		return TRUE;
 	}
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
-	JagAstDeclarationTypePrivate *opriv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(other);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
+	JagAstDeclarationTypePrivate *opriv = jag_ast_declaration_type_get_instance_private(other);
 	return opriv->type==priv->type && opriv->dimCount==priv->dimCount
 					&& jag_byt_name_equal(opriv->referenceTypeName, priv->referenceTypeName);
 }
@@ -188,7 +179,7 @@ static CatS l_s_txt_short= CAT_S_DEF("short");
 static CatS l_s_txt_dims = CAT_S_DEF("[]");
 
 void jag_ast_declaration_type_write(JagAstDeclarationType *declaration_type, JagAstWriter *out) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 
 	switch(priv->type) {
 		case JAG_BYT_TYPE_VOID : { jag_ast_writer_print(out, CAT_S(l_s_txt_void)); } break;
@@ -212,7 +203,7 @@ void jag_ast_declaration_type_write(JagAstDeclarationType *declaration_type, Jag
 }
 
 CatStringWo *jag_ast_declaration_type_as_text(JagAstDeclarationType *declaration_type, CatStringWo *e_dump_buffer) {
-	JagAstDeclarationTypePrivate *priv = JAG_AST_DECLARATION_TYPE_GET_PRIVATE(declaration_type);
+	JagAstDeclarationTypePrivate *priv = jag_ast_declaration_type_get_instance_private(declaration_type);
 	if (e_dump_buffer==NULL) {
 		e_dump_buffer = cat_string_wo_new();
 	}
@@ -246,29 +237,4 @@ CatStringWo *jag_ast_declaration_type_as_text(JagAstDeclarationType *declaration
 	cat_string_wo_append_char(e_dump_buffer, ']');
 	return e_dump_buffer;
 }
-
-
-//	@Override
-//	public String toString() {
-//		StringBuilder buf = new StringBuilder("DeclarationType[");
-//		if (type==JAG_BYT_TYPE_REFERENCE) {
-//			buf.append(referenceTypeName.createFQN());
-//			if (dimCount>0) {
-//				buf.append("|"+dimCount);
-//			}
-//		} else if (type==Type.VOID) {
-//			buf.append("void");
-//		} else {
-//			buf.append(type);
-//			if (dimCount>0) {
-//				buf.append("|"+dimCount);
-//			}
-//		}
-//		buf.append("]");
-//		return buf.toString();
-//	}
-
-
-
-
 

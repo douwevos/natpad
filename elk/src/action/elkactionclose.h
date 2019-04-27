@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define ELK_IS_ACTION_CLOSE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_ACTION_CLOSE))
 #define ELK_IS_ACTION_CLOSE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_ACTION_CLOSE))
 #define ELK_ACTION_CLOSE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_ACTION_CLOSE, ElkActionCloseClass))
-#define ELK_ACTION_CLOSE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_ACTION_CLOSE, ElkActionClosePrivate))
 
 typedef struct _ElkActionClose               ElkActionClose;
 typedef struct _ElkActionClosePrivate        ElkActionClosePrivate;
@@ -45,7 +44,6 @@ typedef struct _ElkActionCloseClass          ElkActionCloseClass;
 
 struct _ElkActionClose {
 	LeaAction parent;
-	ElkActionClosePrivate *priv;
 };
 
 struct _ElkActionCloseClass {

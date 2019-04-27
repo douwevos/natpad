@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "worqueuerequestdelegate.h"
 #include "worqueueprivate.h"
 
@@ -39,6 +38,7 @@ struct _WorQueueRequestDelegatePrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(WorQueueRequestDelegate, wor_queue_request_delegate, WOR_TYPE_REQUEST, {
+		G_ADD_PRIVATE(WorQueueRequestDelegate)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -47,8 +47,6 @@ static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void wor_queue_request_delegate_class_init(WorQueueRequestDelegateClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(WorQueueRequestDelegatePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -58,14 +56,12 @@ static void wor_queue_request_delegate_class_init(WorQueueRequestDelegateClass *
 }
 
 static void wor_queue_request_delegate_init(WorQueueRequestDelegate *instance) {
-	WorQueueRequestDelegatePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_QUEUE_REQUEST_DELEGATE, WorQueueRequestDelegatePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorQueueRequestDelegate *instance = WOR_QUEUE_REQUEST_DELEGATE(object);
-	WorQueueRequestDelegatePrivate *priv = instance->priv;
+	WorQueueRequestDelegatePrivate *priv = wor_queue_request_delegate_get_instance_private(instance);
 	cat_unref_ptr(priv->request);
 	cat_unref_ptr(priv->queue);
 	G_OBJECT_CLASS(wor_queue_request_delegate_parent_class)->dispose(object);
@@ -83,7 +79,7 @@ static void l_finalize(GObject *object) {
 WorQueueRequestDelegate *wor_queue_request_delegate_new(struct _WorQueue *queue, WorRequest *request, gboolean with_timeout) {
 	WorQueueRequestDelegate *result = g_object_new(WOR_TYPE_QUEUE_REQUEST_DELEGATE, NULL);
 	cat_ref_anounce(result);
-	WorQueueRequestDelegatePrivate *priv = result->priv;
+	WorQueueRequestDelegatePrivate *priv = wor_queue_request_delegate_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	priv->queue = cat_ref_ptr(queue);
 	priv->request = cat_ref_ptr(request);
@@ -91,10 +87,9 @@ WorQueueRequestDelegate *wor_queue_request_delegate_new(struct _WorQueue *queue,
 	return result;
 }
 
-
-
 static void l_run_request(WorRequest *request) {
-	WorQueueRequestDelegatePrivate *priv = WOR_QUEUE_REQUEST_DELEGATE_GET_PRIVATE(request);
+	WorQueueRequestDelegate *instance = WOR_QUEUE_REQUEST_DELEGATE(request);
+	WorQueueRequestDelegatePrivate *priv = wor_queue_request_delegate_get_instance_private(instance);
 	cat_log_debug("request=%o, did_timeout=%d", priv->request, priv->did_timeout);
 	if (priv->did_timeout) {
 		priv->did_timeout = FALSE;
@@ -107,14 +102,11 @@ static void l_run_request(WorRequest *request) {
 }
 
 
-
-
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	WorQueueRequestDelegatePrivate *priv = WOR_QUEUE_REQUEST_DELEGATE_GET_PRIVATE(self);
+	WorQueueRequestDelegate *instance = WOR_QUEUE_REQUEST_DELEGATE(self);
+	WorQueueRequestDelegatePrivate *priv = wor_queue_request_delegate_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:timedout=%d, %o]", iname, self, priv->did_timeout, priv->request);
 }

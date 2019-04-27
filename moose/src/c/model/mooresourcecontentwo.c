@@ -53,48 +53,42 @@ static void l_services_content_iface_init(MooIServicesContentInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooResourceContentWo, moo_resource_content_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooResourceContentWo)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ICONTENT, l_content_iface_init);
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ISERVICES_CONTENT, l_services_content_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_resource_content_wo_class_init(MooResourceContentWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooResourceContentWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_resource_content_wo_init(MooResourceContentWo *instance) {
-	MooResourceContentWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_RESOURCE_CONTENT_WO, MooResourceContentWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooResourceContentWo *instance = MOO_RESOURCE_CONTENT_WO(object);
-	MooResourceContentWoPrivate *priv = instance->priv;
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(instance);
 	cat_unref_ptr(priv->node);
 	if (priv->wo_info) {
 		cat_unref_ptr(priv->wo_info->original);
 		cat_unref_ptr(priv->wo_info->resource_parent);
 		cat_free_ptr(priv->wo_info);
 	}
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_resource_content_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_resource_content_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -102,7 +96,7 @@ static void l_finalize(GObject *object) {
 MooResourceContentWo *moo_resource_content_wo_new(CatReadableTreeNode *node, MooResourceContentWo *parent_resource) {
 	MooResourceContentWo *result = g_object_new(MOO_TYPE_RESOURCE_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-	MooResourceContentWoPrivate *priv = result->priv;
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(result);
 	priv->node = cat_ref_ptr(node);
 	priv->version = 1;
 	priv->wo_info = g_new0(WoInfo, 1);
@@ -112,7 +106,7 @@ MooResourceContentWo *moo_resource_content_wo_new(CatReadableTreeNode *node, Moo
 }
 
 MooResourceContentWo *moo_resource_content_wo_ensure_editable(MooResourceContentWo *resource_content, MooResourceContentWo *parent_resource) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
 	if (priv->wo_info) {
 		return cat_ref_ptr(resource_content);
 	}
@@ -120,7 +114,7 @@ MooResourceContentWo *moo_resource_content_wo_ensure_editable(MooResourceContent
 	MooResourceContentWo *result = g_object_new(MOO_TYPE_RESOURCE_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
 
-	MooResourceContentWoPrivate *dpriv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(result);
+	MooResourceContentWoPrivate *dpriv = moo_resource_content_wo_get_instance_private(result);
 	dpriv->node = cat_ref_ptr(priv->node);
 	dpriv->version = priv->version;
 	dpriv->wo_info = g_new0(WoInfo, 1);
@@ -130,17 +124,18 @@ MooResourceContentWo *moo_resource_content_wo_ensure_editable(MooResourceContent
 }
 
 gboolean moo_resource_content_wo_is_fixed(MooResourceContentWo *resource_content) {
-	return MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content)->wo_info==NULL;
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
+	return priv->wo_info==NULL;
 }
 
 
 MooResourceContentWo *moo_resource_content_wo_anchor(MooResourceContentWo *resource_content, int version) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
 	if (priv->wo_info) {
 		priv->version = version;
 		gboolean was_modified = TRUE;
 		if (priv->wo_info->original) {
-			MooResourceContentWoPrivate *opriv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(priv->wo_info->original);
+			MooResourceContentWoPrivate *opriv = moo_resource_content_wo_get_instance_private(priv->wo_info->original);
 			was_modified = opriv->node!=priv->node || priv->wo_info->marked;
 		}
 		if (was_modified) {
@@ -167,7 +162,7 @@ MooResourceContentWo *moo_resource_content_wo_anchor(MooResourceContentWo *resou
 
 
 void moo_resource_content_wo_mark_change(MooResourceContentWo *resource_content) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
 	CHECK_IF_WRITABLE()
 	if (!priv->wo_info->marked) {
 		priv->wo_info->marked = TRUE;
@@ -178,13 +173,13 @@ void moo_resource_content_wo_mark_change(MooResourceContentWo *resource_content)
 }
 
 int moo_resource_content_wo_get_version(MooResourceContentWo *resource_content) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
 	return priv->version;
 }
 
 
 VipNode *moo_resource_content_wo_get_viper_node(MooResourceContentWo *resource_content) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
 	if (priv->node == NULL) {
 		return NULL;
 	}
@@ -192,7 +187,7 @@ VipNode *moo_resource_content_wo_get_viper_node(MooResourceContentWo *resource_c
 }
 
 void moo_resource_content_wo_set_node(MooResourceContentWo *resource_content, CatReadableTreeNode *node) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
 	if (node==priv->node) {
 		return;
 	}
@@ -207,11 +202,9 @@ void moo_resource_content_wo_set_node(MooResourceContentWo *resource_content, Ca
 }
 
 CatReadableTreeNode *moo_resource_content_wo_get_node(MooResourceContentWo *resource_content) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(resource_content);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(resource_content);
 	return priv->node;
 }
-
-
 
 CatStringWo *moo_resource_content_wo_key() {
 	return cat_ref_ptr(CAT_S(moo_s_resource_content_key));
@@ -228,8 +221,6 @@ static MooIContent *l_content_anchor(MooIContent *self, int version) {
 	return (MooIContent *) moo_resource_content_wo_anchor((MOO_RESOURCE_CONTENT_WO(self)), version);
 }
 
-
-
 static void l_content_iface_init(MooIContentInterface *iface) {
 	iface->getKey = l_content_get_key;
 	iface->anchor = l_content_anchor;
@@ -245,7 +236,8 @@ static gboolean l_services_can_refresh(MooIServicesContent *self) {
 }
 
 static void l_services_refresh(MooIServicesContent *self, struct _MooService *moo_service, struct _MooNodeWo *node) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(self);
+	MooResourceContentWo *instance = MOO_RESOURCE_CONTENT_WO(self);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(instance);
 	if (priv->node==NULL) {
 		return;
 	}
@@ -254,7 +246,8 @@ static void l_services_refresh(MooIServicesContent *self, struct _MooService *mo
 }
 
 static gboolean l_services_can_rename(MooIServicesContent *self) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(self);
+	MooResourceContentWo *instance = MOO_RESOURCE_CONTENT_WO(self);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(instance);
 	if (priv->node==NULL) {
 		return FALSE;
 	}
@@ -266,9 +259,9 @@ static gboolean l_services_can_rename(MooIServicesContent *self) {
 	return FALSE;
 }
 
-
 static gboolean l_services_rename(MooIServicesContent *self, struct _MooService *moo_service, struct _MooNodeWo *node, LeaFrame *frame) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(self);
+	MooResourceContentWo *instance = MOO_RESOURCE_CONTENT_WO(self);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(instance);
 	if (priv->node==NULL) {
 		return FALSE;
 	}
@@ -302,9 +295,9 @@ static gboolean l_services_rename(MooIServicesContent *self, struct _MooService 
 	return TRUE;
 }
 
-
 static gboolean l_services_can_delete(MooIServicesContent *self) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(self);
+	MooResourceContentWo *instance = MOO_RESOURCE_CONTENT_WO(self);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(instance);
 	if (priv->node) {
 		VipNode *vip_node = (VipNode *) cat_tree_node_get_content((CatTreeNode *) priv->node);
 		if (vip_node) {
@@ -315,9 +308,9 @@ static gboolean l_services_can_delete(MooIServicesContent *self) {
 	return FALSE;
 }
 
-
 static gboolean l_services_delete(MooIServicesContent *self, struct _MooService *moo_service, struct _MooNodeWo *node, LeaFrame *frame) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(self);
+	MooResourceContentWo *instance = MOO_RESOURCE_CONTENT_WO(self);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(instance);
 	gboolean result = FALSE;
 	if (priv->node) {
 		VipNode *vip_node = (VipNode *) cat_tree_node_get_content((CatTreeNode *) priv->node);
@@ -329,7 +322,6 @@ static gboolean l_services_delete(MooIServicesContent *self, struct _MooService 
 	}
 	return result;
 }
-
 
 static void l_services_content_iface_init(MooIServicesContentInterface *iface) {
 	iface->canRefresh = l_services_can_refresh;
@@ -346,7 +338,8 @@ static void l_services_content_iface_init(MooIServicesContentInterface *iface) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MooResourceContentWoPrivate *priv = MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(self);
+	MooResourceContentWo *instance = MOO_RESOURCE_CONTENT_WO(self);
+	MooResourceContentWoPrivate *priv = moo_resource_content_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p: node=%o, version=%d]", iname, self, priv->node ? cat_tree_node_get_content((CatTreeNode *) priv->node) : NULL, priv->version);
 }

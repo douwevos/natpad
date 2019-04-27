@@ -23,7 +23,6 @@
 #ifndef MOOACTIONPROPERTIES_H_
 #define MOOACTIONPROPERTIES_H_
 
-
 #include <leafhopper.h>
 #include <caterpillar.h>
 #include <moose.h>
@@ -36,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ACTION_PROPERTIES(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ACTION_PROPERTIES))
 #define MOO_IS_ACTION_PROPERTIES_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ACTION_PROPERTIES))
 #define MOO_ACTION_PROPERTIES_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ACTION_PROPERTIES, MooActionPropertiesClass))
-#define MOO_ACTION_PROPERTIES_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ACTION_PROPERTIES, MooActionPropertiesPrivate))
-
 
 typedef struct _MooActionProperties               MooActionProperties;
 typedef struct _MooActionPropertiesPrivate        MooActionPropertiesPrivate;
 typedef struct _MooActionPropertiesClass          MooActionPropertiesClass;
 
-
 struct _MooActionProperties {
 	LeaAction parent;
-	MooActionPropertiesPrivate *priv;
 };
 
 struct _MooActionPropertiesClass {
 	LeaActionClass parent_class;
 };
-
 
 GType moo_action_properties_get_type();
 

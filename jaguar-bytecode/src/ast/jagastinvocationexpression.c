@@ -37,50 +37,44 @@ struct _JagAstInvocationExpressionPrivate {
 static void l_expression_iface_init(JagAstIExpressionInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstInvocationExpression, jag_ast_invocation_expression, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstInvocationExpression)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_IEXPRESSION, l_expression_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_invocation_expression_class_init(JagAstInvocationExpressionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstInvocationExpressionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_invocation_expression_init(JagAstInvocationExpression *instance) {
-	JagAstInvocationExpressionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_INVOCATION_EXPRESSION, JagAstInvocationExpressionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstInvocationExpression *instance = JAG_AST_INVOCATION_EXPRESSION(object);
-	JagAstInvocationExpressionPrivate *priv = instance->priv;
+	JagAstInvocationExpressionPrivate *priv = jag_ast_invocation_expression_get_instance_private(instance);
 	cat_unref_ptr(priv->e_argument_expressions);
 	cat_unref_ptr(priv->instance_expression);
 	cat_unref_ptr(priv->method_name);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_invocation_expression_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_invocation_expression_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstInvocationExpression *jag_ast_invocation_expression_new(JagAstIExpression *instance_expression, JagAstIdentifier *method_name, CatArrayWo *e_argument_expressions) {
 	JagAstInvocationExpression *result = g_object_new(JAG_AST_TYPE_INVOCATION_EXPRESSION, NULL);
 	cat_ref_anounce(result);
-	JagAstInvocationExpressionPrivate *priv = result->priv;
+	JagAstInvocationExpressionPrivate *priv = jag_ast_invocation_expression_get_instance_private(result);
 	priv->instance_expression = cat_ref_ptr(instance_expression);
 	priv->method_name = cat_ref_ptr(method_name);
 	priv->e_argument_expressions = cat_ref_ptr(e_argument_expressions);
@@ -88,14 +82,13 @@ JagAstInvocationExpression *jag_ast_invocation_expression_new(JagAstIExpression 
 }
 
 
-
-
 /********************* start JagAstIExpression implementation *********************/
 
 static CatS l_s_txt_this = CAT_S_DEF("this");
 
 static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
-	JagAstInvocationExpressionPrivate *priv = JAG_AST_INVOCATION_EXPRESSION_GET_PRIVATE(self);
+	JagAstInvocationExpression *instance = JAG_AST_INVOCATION_EXPRESSION(self);
+	JagAstInvocationExpressionPrivate *priv = jag_ast_invocation_expression_get_instance_private(instance);
 
 	if (priv->instance_expression==NULL) {
 		cat_log_warn("instance_expression is NULL");
@@ -140,7 +133,6 @@ static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
 	}
 
 	jag_ast_writer_print(out, cat_string_wo_new_with(")"));
-
 }
 
 static gboolean l_expression_equal(JagAstIExpression *self, JagAstIExpression *other) {
@@ -150,8 +142,8 @@ static gboolean l_expression_equal(JagAstIExpression *self, JagAstIExpression *o
 	if (self==NULL || other==NULL) {
 		return FALSE;
 	}
-	JagAstInvocationExpressionPrivate *priv = JAG_AST_INVOCATION_EXPRESSION_GET_PRIVATE(self);
-	JagAstInvocationExpressionPrivate *o_priv = JAG_AST_INVOCATION_EXPRESSION_GET_PRIVATE(other);
+	JagAstInvocationExpressionPrivate *priv = jag_ast_invocation_expression_get_instance_private(JAG_AST_INVOCATION_EXPRESSION(self));
+	JagAstInvocationExpressionPrivate *o_priv = jag_ast_invocation_expression_get_instance_private(JAG_AST_INVOCATION_EXPRESSION(other));
 	if (!jag_ast_iexpression_equal((JagAstIExpression *) priv->method_name, (JagAstIExpression *) o_priv->method_name)) {
 		return FALSE;
 	}

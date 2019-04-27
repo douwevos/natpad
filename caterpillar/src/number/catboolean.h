@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef CATBOOLEAN_H_
 #define CATBOOLEAN_H_
 
@@ -35,7 +34,6 @@ G_BEGIN_DECLS
 #define CAT_IS_BOOLEAN(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_BOOLEAN))
 #define CAT_IS_BOOLEAN_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_BOOLEAN))
 #define CAT_BOOLEAN_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_BOOLEAN, CatBooleanClass))
-#define CAT_BOOLEAN_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_BOOLEAN, CatBooleanPrivate))
 
 typedef struct _CatBoolean               CatBoolean;
 typedef struct _CatBooleanPrivate        CatBooleanPrivate;
@@ -44,7 +42,6 @@ typedef struct _CatBooleanClass          CatBooleanClass;
 
 struct _CatBoolean {
 	GObject parent;
-	CatBooleanPrivate *priv;
 };
 
 struct _CatBooleanClass {
@@ -64,8 +61,6 @@ gboolean cat_boolean_equal(CatBoolean *bobj_a, CatBoolean *bobj_b);
 
 int cat_boolean_compare(CatBoolean *bobj_a, CatBoolean *bobj_b);
 
-
 G_END_DECLS
-
 
 #endif /* CATBOOLEAN_H_ */

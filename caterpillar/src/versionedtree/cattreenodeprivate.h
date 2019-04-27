@@ -35,6 +35,11 @@ struct _CatTreeNodePrivate {
 
 CatITreeEntryListProvider *cat_tree_node_get_list_provider(CatTreeNode *tree_node);
 
+CatTreeNodePrivate *cat_tree_node_get_private(CatTreeNode *tree_node);
+
 G_END_DECLS
 
 #endif /* CATTREENODEPRIVATE_H_ */
+
+
+

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "vipscanrequest.h"
 #include "../model/scanner/vipnodescanner.h"
 
@@ -33,15 +32,13 @@ struct _VipScanRequestPrivate {
 	VipService *vip_service;
 };
 
-G_DEFINE_TYPE(VipScanRequest, vip_scan_request, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE_WITH_PRIVATE(VipScanRequest, vip_scan_request, WOR_TYPE_REQUEST);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void vip_scan_request_class_init(VipScanRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipScanRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -51,14 +48,12 @@ static void vip_scan_request_class_init(VipScanRequestClass *clazz) {
 }
 
 static void vip_scan_request_init(VipScanRequest *instance) {
-	VipScanRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_SCAN_REQUEST, VipScanRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipScanRequest *instance = VIP_SCAN_REQUEST(object);
-	VipScanRequestPrivate *priv = instance->priv;
+	VipScanRequestPrivate *priv = vip_scan_request_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_service);
 	G_OBJECT_CLASS(vip_scan_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -71,20 +66,19 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 VipScanRequest *vip_scan_request_new(VipService *vip_service) {
 	VipScanRequest *result = g_object_new(VIP_TYPE_SCAN_REQUEST, NULL);
 	cat_ref_anounce(result);
-	VipScanRequestPrivate *priv = result->priv;
+	VipScanRequestPrivate *priv = vip_scan_request_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	wor_request_construct((WorRequest *) result);
 	return result;
 }
 
 
-
 static void l_run_request(WorRequest *self) {
-	VipScanRequestPrivate *priv = VIP_SCAN_REQUEST_GET_PRIVATE(self);
+	VipScanRequest *instance = VIP_SCAN_REQUEST(self);
+	VipScanRequestPrivate *priv = vip_scan_request_get_instance_private(instance);
 	VipSnapshot *snapshot = vip_service_get_snapshot(priv->vip_service);
 	VipNodeScanner *nodeScanner = vip_node_scanner_new(vip_service_get_mapper_registry(priv->vip_service));
 
@@ -104,4 +98,3 @@ static void l_run_request(WorRequest *self) {
 	cat_unref_ptr(nodeScanner);
 //	cat_unref_ptr(submit);
 }
-

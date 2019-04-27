@@ -39,7 +39,6 @@ G_BEGIN_DECLS
 #define JAG_IS_INDEXER_JRE_MAP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_INDEXER_JRE_MAP))
 #define JAG_IS_INDEXER_JRE_MAP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_INDEXER_JRE_MAP))
 #define JAG_INDEXER_JRE_MAP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_INDEXER_JRE_MAP, JagIndexerJreMapClass))
-#define JAG_INDEXER_JRE_MAP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_INDEXER_JRE_MAP, JagIndexerJreMapPrivate))
 
 
 typedef struct _JagIndexerJreMap               JagIndexerJreMap;
@@ -49,7 +48,6 @@ typedef struct _JagIndexerJreMapClass          JagIndexerJreMapClass;
 
 struct _JagIndexerJreMap {
 	GObject parent;
-	JagIndexerJreMapPrivate *priv;
 };
 
 struct _JagIndexerJreMapClass {

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOMODULEWORK_H_
 #define MOOMODULEWORK_H_
 
@@ -36,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_MODULE_WORK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_MODULE_WORK))
 #define MOO_IS_MODULE_WORK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_MODULE_WORK))
 #define MOO_MODULE_WORK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_MODULE_WORK, MooModuleWorkClass))
-#define MOO_MODULE_WORK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_MODULE_WORK, MooModuleWorkPrivate))
-
 
 typedef struct _MooModuleWork               MooModuleWork;
 typedef struct _MooModuleWorkPrivate        MooModuleWorkPrivate;
 typedef struct _MooModuleWorkClass          MooModuleWorkClass;
 
-
 struct _MooModuleWork {
 	GObject parent;
-	MooModuleWorkPrivate *priv;
 };
 
 struct _MooModuleWorkClass {
 	GObjectClass parent_class;
 };
-
 
 GType moo_module_work_get_type();
 

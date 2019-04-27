@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTLITERAL_H_
 #define JAGASTLITERAL_H_
 
@@ -35,7 +34,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_LITERAL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_LITERAL))
 #define JAG_AST_IS_LITERAL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_LITERAL))
 #define JAG_AST_LITERAL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_LITERAL, JagAstLiteralClass))
-#define JAG_AST_LITERAL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_LITERAL, JagAstLiteralPrivate))
 
 typedef struct _JagAstLiteral               JagAstLiteral;
 typedef struct _JagAstLiteralPrivate        JagAstLiteralPrivate;
@@ -44,7 +42,6 @@ typedef struct _JagAstLiteralClass          JagAstLiteralClass;
 
 struct _JagAstLiteral {
 	GObject parent;
-	JagAstLiteralPrivate *priv;
 };
 
 struct _JagAstLiteralClass {
@@ -58,8 +55,6 @@ JagAstLiteral *jag_ast_literal_new(CatIStringable *literal);
 
 CatIStringable *jag_ast_literal_get_value(JagAstLiteral *literal);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTLITERAL_H_ */

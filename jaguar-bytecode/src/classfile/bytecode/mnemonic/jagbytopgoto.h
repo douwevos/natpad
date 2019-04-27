@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_GOTO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_GOTO))
 #define JAG_BYT_IS_OP_GOTO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_GOTO))
 #define JAG_BYT_OP_GOTO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_GOTO, JagBytOpGotoClass))
-#define JAG_BYT_OP_GOTO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_GOTO, JagBytOpGotoPrivate))
 
 typedef struct _JagBytOpGoto               JagBytOpGoto;
 typedef struct _JagBytOpGotoPrivate        JagBytOpGotoPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytOpGotoClass          JagBytOpGotoClass;
 
 struct _JagBytOpGoto {
 	JagBytAbstractMnemonic parent;
-	JagBytOpGotoPrivate *priv;
 };
 
 struct _JagBytOpGotoClass {

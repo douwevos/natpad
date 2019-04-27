@@ -32,18 +32,14 @@
 
 static void l_attachable_iface_init(LeaIAttachableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(LeaActionMenuItem, lea_action_menu_item, LEA_TYPE_FULL_MENU_ITEM, {
+G_DEFINE_TYPE_WITH_CODE(LeaActionMenuItem, lea_action_menu_item, LEA_TYPE_FULL_MENU_ITEM, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(LEA_TYPE_IATTACHABLE, l_attachable_iface_init)
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 
 
 static void lea_action_menu_item_class_init(LeaActionMenuItemClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 }
@@ -56,7 +52,7 @@ static void l_dispose(GObject *object) {
 
 	if (!instance->disposed) {
 		instance->disposed = TRUE;
-		G_OBJECT_CLASS(parent_class)->dispose(object);
+		G_OBJECT_CLASS(lea_action_menu_item_parent_class)->dispose(object);
 
 		if (instance->action) {
 			LeaAction *action = instance->action;
@@ -67,8 +63,7 @@ static void l_dispose(GObject *object) {
 	}
 }
 
-
-static void _update_label(LeaActionMenuItem *menu_item) {
+static void l_update_label(LeaActionMenuItem *menu_item) {
 	GtkWidget *child = gtk_bin_get_child(GTK_BIN(menu_item));
 
 	if (GTK_IS_LABEL(child)) {
@@ -86,13 +81,12 @@ static void _update_label(LeaActionMenuItem *menu_item) {
 	lea_full_menu_item_set_key_sequence(LEA_FULL_MENU_ITEM(menu_item), key_sequence);
 }
 
-static void _activate(GtkWidget *widget, LeaActionMenuItem *menu_item) {
+static void l_activate(GtkWidget *widget, LeaActionMenuItem *menu_item) {
 	LeaAction *action = LEA_ACTION(menu_item->action);
 	LeaActionClass *action_class = LEA_ACTION_GET_CLASS(action);
 	action_class->action_run(action);
 
 }
-
 
 LeaActionMenuItem *lea_action_menu_item_new(LeaAction *action) {
 	LeaActionMenuItem *result = g_object_new(LEA_TYPE_ACTION_MENU_ITEM, NULL);
@@ -103,11 +97,11 @@ LeaActionMenuItem *lea_action_menu_item_new(LeaAction *action) {
 	lea_action_attach(action, LEA_IATTACHABLE(result));
 
 	result->action = cat_ref_ptr(action);
-	_update_label(result);
+	l_update_label(result);
 	
 	lea_full_menu_item_set_stock_id(LEA_FULL_MENU_ITEM(result), lea_action_get_stock_id(action));
 	
-	g_signal_connect(result, "activate", (GCallback) _activate, result);
+	g_signal_connect(result, "activate", (GCallback) l_activate, result);
 	return result;
 }
 

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "vipwritefilerequest.h"
 #include "../vipservice.h"
 #include "../model/vipnode.h"
@@ -45,8 +44,7 @@ struct _VipWriteFileRequestPrivate {
 	CatStringWo *e_data;
 };
 
-
-G_DEFINE_TYPE(VipWriteFileRequest, vip_write_file_request, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE_WITH_PRIVATE(VipWriteFileRequest, vip_write_file_request, WOR_TYPE_REQUEST);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -55,8 +53,6 @@ static void l_write(VipWriteFileRequest *request, CatIOutputStream *output_strea
 
 
 static void vip_write_file_request_class_init(VipWriteFileRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipWriteFileRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -68,14 +64,12 @@ static void vip_write_file_request_class_init(VipWriteFileRequestClass *clazz) {
 }
 
 static void vip_write_file_request_init(VipWriteFileRequest *instance) {
-	VipWriteFileRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_WRITE_FILE_REQUEST, VipWriteFileRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipWriteFileRequest *instance = VIP_WRITE_FILE_REQUEST(object);
-	VipWriteFileRequestPrivate *priv = instance->priv;
+	VipWriteFileRequestPrivate *priv = vip_write_file_request_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_service);
 	cat_unref_ptr(priv->tree_node);
 	G_OBJECT_CLASS(vip_write_file_request_parent_class)->dispose(object);
@@ -94,14 +88,13 @@ VipWriteFileRequest *vip_write_file_request_new_simple(struct _VipService *vip_s
 	VipWriteFileRequest *result = g_object_new(VIP_TYPE_WRITE_FILE_REQUEST, NULL);
 	cat_ref_anounce(result);
 	vip_write_file_request_construct(result, vip_service, tree_node);
-	VipWriteFileRequestPrivate *priv = VIP_WRITE_FILE_REQUEST_GET_PRIVATE(result);
+	VipWriteFileRequestPrivate *priv = vip_write_file_request_get_instance_private(result);
 	priv->e_data = cat_ref_ptr(e_data);
 	return result;
 }
 
-
 void vip_write_file_request_construct(VipWriteFileRequest *request, struct _VipService *vip_service, CatTreeNode *tree_node) {
-	VipWriteFileRequestPrivate *priv = VIP_WRITE_FILE_REQUEST_GET_PRIVATE(request);
+	VipWriteFileRequestPrivate *priv = vip_write_file_request_get_instance_private(request);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->tree_node = cat_ref_ptr(tree_node);
 	priv->lock = cat_lock_new();
@@ -111,10 +104,9 @@ void vip_write_file_request_construct(VipWriteFileRequest *request, struct _VipS
 }
 
 
-
 // TODO possible dead lock ... please add timeout
 void vip_write_file_request_wait_to_finish(VipWriteFileRequest *request) {
-	VipWriteFileRequestPrivate *priv = VIP_WRITE_FILE_REQUEST_GET_PRIVATE(request);
+	VipWriteFileRequestPrivate *priv = vip_write_file_request_get_instance_private(request);
 	cat_lock_lock(priv->lock);
 	while(!priv->did_run) {
 		cat_lock_wait(priv->lock);
@@ -123,12 +115,9 @@ void vip_write_file_request_wait_to_finish(VipWriteFileRequest *request) {
 }
 
 
-
-
-
 static void l_run_request(WorRequest *self) {
-	VipWriteFileRequestPrivate *priv = VIP_WRITE_FILE_REQUEST_GET_PRIVATE(self);
-
+	VipWriteFileRequest *instance = VIP_WRITE_FILE_REQUEST(self);
+	VipWriteFileRequestPrivate *priv = vip_write_file_request_get_instance_private(instance);
 
 	CatTreeNode *parent = cat_tree_node_get_parent_node(priv->tree_node);
 	// TODO what if parent is null
@@ -246,10 +235,8 @@ static void l_run_request(WorRequest *self) {
 	cat_lock_unlock(priv->lock);
 }
 
-
-
 static void l_write(VipWriteFileRequest *request, CatIOutputStream *output_stream) {
-	VipWriteFileRequestPrivate *priv = VIP_WRITE_FILE_REQUEST_GET_PRIVATE(request);
+	VipWriteFileRequestPrivate *priv = vip_write_file_request_get_instance_private(request);
 	if (priv->e_data) {
 		cat_ioutput_stream_write_length(output_stream, cat_string_wo_getchars(priv->e_data), cat_string_wo_length(priv->e_data));
 	}

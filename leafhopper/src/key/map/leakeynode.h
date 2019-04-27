@@ -34,8 +34,6 @@ G_BEGIN_DECLS
 #define LEA_IS_KEY_NODE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_KEY_NODE))
 #define LEA_IS_KEY_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_KEY_NODE))
 #define LEA_KEY_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_KEY_NODE, LeaKeyNodeClass))
-#define LEA_KEY_NODE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_KEY_NODE, LeaKeyNodePrivate))
-
 
 typedef struct _LeaKeyNode               LeaKeyNode;
 typedef struct _LeaKeyNodePrivate        LeaKeyNodePrivate;
@@ -44,7 +42,6 @@ typedef struct _LeaKeyNodeClass          LeaKeyNodeClass;
 
 struct _LeaKeyNode {
 	GObject parent;
-	LeaKeyNodePrivate *priv;
 };
 
 struct _LeaKeyNodeClass {
@@ -52,7 +49,6 @@ struct _LeaKeyNodeClass {
 	int (*hash)(LeaKeyNode *self);
 	gboolean (*equal)(LeaKeyNode *node_a, LeaKeyNode *node_b);
 };
-
 
 GType lea_key_node_get_type();
 

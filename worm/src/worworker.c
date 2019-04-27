@@ -37,42 +37,34 @@ struct _WorWorkerPrivate {
 	CatAtomicReference *current_request_ref;
 };
 
-G_DEFINE_TYPE (WorWorker, wor_worker, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(WorWorker, wor_worker, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 static void *l_worker_run(void *ptr_to_self);
 
-
 static void wor_worker_class_init(WorWorkerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(WorWorkerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void wor_worker_init(WorWorker *instance) {
-	WorWorkerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_WORKER, WorWorkerPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorWorker *instance = WOR_WORKER(object);
-	WorWorkerPrivate *priv = instance->priv;
+	WorWorkerPrivate *priv = wor_worker_get_instance_private(instance);
 	cat_unref_ptr(priv->current_request_ref);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(wor_worker_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(wor_worker_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -80,7 +72,7 @@ static void _finalize(GObject *object) {
 WorWorker *wor_worker_new(WorIProvider *work_provider) {
 	WorWorker *result = g_object_new(WOR_TYPE_WORKER, NULL);
 	cat_ref_anounce(result);
-	WorWorkerPrivate *priv = result->priv;
+	WorWorkerPrivate *priv = wor_worker_get_instance_private(result);
 	priv->work_provider = work_provider;
 	WOR_IPROVIDER_GET_INTERFACE(work_provider)->increaseUsage(work_provider);
 	priv->current_request_ref = cat_atomic_reference_new();
@@ -89,7 +81,7 @@ WorWorker *wor_worker_new(WorIProvider *work_provider) {
 }
 
 void wor_worker_dump_state(WorWorker *worker) {
-	WorWorkerPrivate *priv = WOR_WORKER_GET_PRIVATE(worker);
+	WorWorkerPrivate *priv = wor_worker_get_instance_private(worker);
 	WorRequest *request = (WorRequest *) cat_atomic_reference_get(priv->current_request_ref);
 	cat_log_info("### %p request=%o", worker, request);
 	cat_unref_ptr(request);
@@ -98,7 +90,7 @@ void wor_worker_dump_state(WorWorker *worker) {
 
 static void *l_worker_run(void *ptr_to_self) {
 	WorWorker *worker = WOR_WORKER(ptr_to_self);
-	WorWorkerPrivate *priv = WOR_WORKER_GET_PRIVATE(worker);
+	WorWorkerPrivate *priv = wor_worker_get_instance_private(worker);
 	WorIProviderInterface *provider_iface = WOR_IPROVIDER_GET_INTERFACE(priv->work_provider);
 	int64_t start, end;
 	int64_t runtime = 0;
@@ -125,4 +117,3 @@ static void *l_worker_run(void *ptr_to_self) {
 	cat_unref_ptr(worker);
 	return NULL;
 }
-

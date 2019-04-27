@@ -38,60 +38,49 @@ struct _TerScannerPrivate {
 	int scan_buffer_offset;
 	CatStreamStatus stream_status;
 	gunichar unichar;
-
 	int row, column;
-
-
 	gboolean test_for_keyword;
 	gboolean next_test_for_keyword;
 	gboolean leading_only_whitespaces;
 };
 
-G_DEFINE_TYPE (TerScanner, ter_scanner, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(TerScanner, ter_scanner, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void ter_scanner_class_init(TerScannerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(TerScannerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
-
 }
 
 static void ter_scanner_init(TerScanner *instance) {
-	TerScannerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, TER_TYPE_SCANNER, TerScannerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	TerScanner *instance = TER_SCANNER(object);
-	TerScannerPrivate *priv = instance->priv;
+	TerScannerPrivate *priv = ter_scanner_get_instance_private(instance);
 	cat_unref_ptr(priv->syntax);
 	cat_unref_ptr(priv->scan_buffer);
 	cat_unref_ptr(priv->scanner);
 	cat_unref_ptr(priv->token_printer);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(ter_scanner_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(ter_scanner_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 TerScanner *ter_scanner_new(TerSyntax *syntax, CatIUtf8Scanner *scanner, DraKeywordPrinter *token_printer) {
 	TerScanner *result = g_object_new(TER_TYPE_SCANNER, NULL);
 	cat_ref_anounce(result);
-	TerScannerPrivate *priv = result->priv;
+	TerScannerPrivate *priv = ter_scanner_get_instance_private(result);
 	priv->syntax = cat_ref_ptr(syntax);
 	priv->scan_buffer = cat_unichar_array_new();
 	priv->scanner = cat_ref_ptr(scanner);
@@ -104,8 +93,6 @@ TerScanner *ter_scanner_new(TerSyntax *syntax, CatIUtf8Scanner *scanner, DraKeyw
 
 	return result;
 }
-
-
 
 static void l_look_ahead(TerScannerPrivate *priv) {
 	cat_log_trace("priv->scan_buffer_offset=%d, cat_unichar_array_length(priv->scan_buffer)=%d", priv->scan_buffer_offset, cat_unichar_array_length(priv->scan_buffer));
@@ -337,7 +324,6 @@ static gboolean l_attempt_multi_line_comment(TerScannerPrivate *priv, CatUnichar
 		return FALSE;
 	}
 
-
 	gboolean result = TRUE;
 	int cnt = 0;
 	while(cnt<cat_unichar_array_length(comment_start)) {
@@ -355,7 +341,6 @@ static gboolean l_attempt_multi_line_comment(TerScannerPrivate *priv, CatUnichar
 		}
 		cnt++;
 	}
-
 
 	if (result) {
 
@@ -403,13 +388,10 @@ static gboolean l_attempt_multi_line_comment(TerScannerPrivate *priv, CatUnichar
 	return result;
 }
 
-
-
 gboolean l_attempt_string(TerScannerPrivate *priv, gunichar string_start, gunichar string_end, gunichar string_escape, int code) {
 	if (string_start==0 || string_end==0) {
 		return FALSE;
 	}
-
 
 	l_look_ahead(priv);
 	if (priv->unichar!=string_start) {
@@ -438,7 +420,7 @@ gboolean l_attempt_string(TerScannerPrivate *priv, gunichar string_start, gunich
 }
 
 void ter_scanner_run(TerScanner *lexer) {
-	TerScannerPrivate *priv = TER_SCANNER_GET_PRIVATE(lexer);
+	TerScannerPrivate *priv = ter_scanner_get_instance_private(lexer);
 	priv->next_test_for_keyword = TRUE;
 	priv->test_for_keyword = TRUE;
 	priv->leading_only_whitespaces = TRUE;
@@ -502,8 +484,6 @@ void ter_scanner_run(TerScanner *lexer) {
 			l_look_ahead_reset(priv);
 		}
 
-
-
 		l_look_ahead_and_shift(priv);
 		priv->column++;
 
@@ -530,7 +510,5 @@ void ter_scanner_run(TerScanner *lexer) {
 				priv->leading_only_whitespaces = FALSE;
 			} break;
 		}
-
 	}
 }
-

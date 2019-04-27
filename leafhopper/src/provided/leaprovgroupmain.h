@@ -34,17 +34,14 @@ G_BEGIN_DECLS
 #define LEA_IS_PROV_GROUP_MAIN(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_PROV_GROUP_MAIN))
 #define LEA_IS_PROV_GROUP_MAIN_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_PROV_GROUP_MAIN))
 #define LEA_PROV_GROUP_MAIN_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_PROV_GROUP_MAIN, LeaProvGroupMainClass))
-#define LEA_PROV_GROUP_MAIN_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_PROV_GROUP_MAIN, LeaProvGroupMainPrivate))
 
 
 typedef struct _LeaProvGroupMain               LeaProvGroupMain;
-typedef struct _LeaProvGroupMainPrivate        LeaProvGroupMainPrivate;
 typedef struct _LeaProvGroupMainClass          LeaProvGroupMainClass;
 
 
 struct _LeaProvGroupMain {
 	LeaActionGroup parent;
-	LeaProvGroupMainPrivate *priv;
 };
 
 struct _LeaProvGroupMainClass {
@@ -57,7 +54,5 @@ GType lea_prov_group_main_get_type();
 LeaProvGroupMain *lea_prov_group_main_new();
 
 G_END_DECLS
-
-
 
 #endif /* LEAPROVGROUPMAIN_H_ */

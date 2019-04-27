@@ -36,52 +36,43 @@ struct _JagBytMethodHeaderPrivate {
 	JagBytExceptions *exceptions;
 };
 
-G_DEFINE_TYPE (JagBytMethodHeader, jag_byt_method_header, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytMethodHeader, jag_byt_method_header, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_method_header_class_init(JagBytMethodHeaderClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytMethodHeaderPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_method_header_init(JagBytMethodHeader *instance) {
-	JagBytMethodHeaderPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_METHOD_HEADER, JagBytMethodHeaderPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytMethodHeader *instance = JAG_BYT_METHOD_HEADER(object);
-	JagBytMethodHeaderPrivate *priv = instance->priv;
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(instance);
 	cat_unref_ptr(priv->argument_list);
 	cat_unref_ptr(priv->exceptions);
 	cat_unref_ptr(priv->a_methodName);
 	cat_unref_ptr(priv->returnType);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_method_header_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_method_header_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
-
 
 JagBytMethodHeader *jag_byt_method_header_new_full(CatStringWo *a_method_name, gboolean is_constructor, JagAstDeclarationType *return_type, JagAstArgumentList *argument_list) {
 	JagBytMethodHeader *result = g_object_new(JAG_BYT_TYPE_METHOD_HEADER, NULL);
 	cat_ref_anounce(result);
-	JagBytMethodHeaderPrivate *priv = result->priv;
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(result);
 	priv->a_methodName = cat_ref_ptr(a_method_name);
 	priv->returnType = is_constructor ? NULL : cat_ref_ptr(return_type);
 	priv->argument_list = cat_ref_ptr(argument_list);
@@ -203,7 +194,7 @@ JagBytMethodHeader *jag_byt_method_header_new(JagBytName *class_name, CatStringW
 
 	JagBytMethodHeader *result = g_object_new(JAG_BYT_TYPE_METHOD_HEADER, NULL);
 	cat_ref_anounce(result);
-	JagBytMethodHeaderPrivate *priv = result->priv;
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(result);
 	priv->a_methodName = a_method_name;
 	priv->returnType = isConstructor ? NULL : cat_ref_ptr(returnType);
 	cat_unref_ptr(returnType);
@@ -215,37 +206,34 @@ JagBytMethodHeader *jag_byt_method_header_new(JagBytName *class_name, CatStringW
 
 
 void jag_byt_method_header_set_exceptions(JagBytMethodHeader *method_header, JagBytExceptions *excpetions) {
-	JagBytMethodHeaderPrivate *priv = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(method_header);
 	cat_ref_swap(priv->exceptions, excpetions);
 }
 
 JagBytExceptions *jag_byt_method_header_get_exceptions(JagBytMethodHeader *method_header) {
-	JagBytMethodHeaderPrivate *priv = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(method_header);
 	return priv->exceptions;
 }
 
 JagAstArgumentList *jag_byt_method_header_get_argument_list(JagBytMethodHeader *method_header) {
-	JagBytMethodHeaderPrivate *priv = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(method_header);
 	return priv->argument_list;
 }
 
-
 JagAstDeclarationType *jag_byt_method_header_get_return_type(JagBytMethodHeader *method_header) {
-	JagBytMethodHeaderPrivate *priv = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(method_header);
 	return priv->returnType;
 }
 
 CatStringWo *jag_byt_method_header_get_method_name(JagBytMethodHeader *method_header) {
-	JagBytMethodHeaderPrivate *priv = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(method_header);
 	return priv->a_methodName;
 }
 
-
 gboolean jag_byt_method_header_is_constructor(JagBytMethodHeader *method_header) {
-	JagBytMethodHeaderPrivate *priv = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(method_header);
 	return priv->isConstructor;
 }
-
 
 gboolean jag_byt_method_header_equal(JagBytMethodHeader *method_header_a, JagBytMethodHeader *method_header_b) {
 	if (method_header_a == method_header_b) {
@@ -255,8 +243,8 @@ gboolean jag_byt_method_header_equal(JagBytMethodHeader *method_header_a, JagByt
 	if (method_header_a==NULL || method_header_b==NULL) {
 		return FALSE;
 	}
-	JagBytMethodHeaderPrivate *priv_a = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header_a);
-	JagBytMethodHeaderPrivate *priv_b = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header_b);
+	JagBytMethodHeaderPrivate *priv_a = jag_byt_method_header_get_instance_private(method_header_a);
+	JagBytMethodHeaderPrivate *priv_b = jag_byt_method_header_get_instance_private(method_header_b);
 	if ((priv_a->isConstructor!=priv_b->isConstructor) ||
 			!cat_string_wo_equal(priv_a->a_methodName, priv_b->a_methodName) ||
 			!jag_ast_declaration_type_equal(priv_a->returnType, priv_b->returnType)) {
@@ -273,9 +261,8 @@ gboolean jag_byt_method_header_equal(JagBytMethodHeader *method_header_a, JagByt
 	return TRUE;
 }
 
-
 CatStringWo *jag_byt_method_header_as_text(JagBytMethodHeader *method_header, CatStringWo *e_dump_buffer) {
-	JagBytMethodHeaderPrivate *priv = JAG_BYT_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagBytMethodHeaderPrivate *priv = jag_byt_method_header_get_instance_private(method_header);
 	if (e_dump_buffer==NULL) {
 		e_dump_buffer = cat_string_wo_new();
 	}
@@ -291,26 +278,3 @@ CatStringWo *jag_byt_method_header_as_text(JagBytMethodHeader *method_header, Ca
 	cat_string_wo_append_char(e_dump_buffer, ')');
 	return e_dump_buffer;
 }
-
-
-//	@Override
-//	public String toString() {
-//		StringBuilder buf = new StringBuilder();
-//		if (!isConstructor) {
-//			buf.append(returnType).append(" ");
-//		}
-//		buf.append(methodName).append("(");
-//		boolean isFirst = true;
-//		for(Argument arg : args) {
-//			if (isFirst) {
-//				isFirst = false;
-//			} else {
-//				buf.append(", ");
-//			}
-//			buf.append(arg);
-//		}
-//		buf.append(")");
-//		return buf.toString();
-//	}
-
-

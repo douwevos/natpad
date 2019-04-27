@@ -43,7 +43,6 @@ G_BEGIN_DECLS
 #define CAT_IS_HASH_SET(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_HASH_SET))
 #define CAT_IS_HASH_SET_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_HASH_SET))
 #define CAT_HASH_SET_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_HASH_SET, CatHashSetClass))
-#define CAT_HASH_SET_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_HASH_SET, CatHashSetPrivate))
 
 
 typedef struct _CatHashSet               CatHashSet;
@@ -53,7 +52,6 @@ typedef struct _CatHashSetClass          CatHashSetClass;
 
 struct _CatHashSet {
 	GObject parent;
-	CatHashSetPrivate *priv;
 };
 
 struct _CatHashSetClass {

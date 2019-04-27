@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTINTERFACEMETHODREF_H_
 #define JAGBYTCONSTANTINTERFACEMETHODREF_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_INTERFACE_METHODREF(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_INTERFACE_METHODREF))
 #define JAG_BYT_IS_CONSTANT_INTERFACE_METHODREF_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_INTERFACE_METHODREF))
 #define JAG_BYT_CONSTANT_INTERFACE_METHODREF_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_INTERFACE_METHODREF, JagBytConstantInterfaceMethodrefClass))
-#define JAG_BYT_CONSTANT_INTERFACE_METHODREF_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_INTERFACE_METHODREF, JagBytConstantInterfaceMethodrefPrivate))
 
 typedef struct _JagBytConstantInterfaceMethodref               JagBytConstantInterfaceMethodref;
 typedef struct _JagBytConstantInterfaceMethodrefPrivate        JagBytConstantInterfaceMethodrefPrivate;
@@ -47,7 +45,6 @@ typedef struct _JagBytConstantInterfaceMethodrefClass          JagBytConstantInt
 
 struct _JagBytConstantInterfaceMethodref {
 	GObject parent;
-	JagBytConstantInterfaceMethodrefPrivate *priv;
 };
 
 struct _JagBytConstantInterfaceMethodrefClass {
@@ -60,6 +57,5 @@ GType jag_byt_constant_interface_methodref_get_type();
 JagBytConstantInterfaceMethodref *jag_byt_constant_interface_methodref_new(int class_index, int name_and_type_index);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTCONSTANTINTERFACEMETHODREF_H_ */

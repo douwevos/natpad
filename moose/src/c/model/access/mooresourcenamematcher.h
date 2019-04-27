@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOORESOURCENAMEMATCHER_H_
 #define MOORESOURCENAMEMATCHER_H_
 
@@ -35,10 +34,8 @@ G_BEGIN_DECLS
 #define MOO_IS_RESOURCE_NAME_MATCHER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_RESOURCE_NAME_MATCHER))
 #define MOO_RESOURCE_NAME_MATCHER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_RESOURCE_NAME_MATCHER, MooResourceNameMatcherClass))
 
-
 typedef struct _MooResourceNameMatcher               MooResourceNameMatcher;
 typedef struct _MooResourceNameMatcherClass          MooResourceNameMatcherClass;
-
 
 struct _MooResourceNameMatcher {
 	GObject parent;

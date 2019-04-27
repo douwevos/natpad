@@ -34,24 +34,19 @@ G_BEGIN_DECLS
 #define WOR_IS_QUEUE_REQUEST_DELEGATE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), WOR_TYPE_QUEUE_REQUEST_DELEGATE))
 #define WOR_IS_QUEUE_REQUEST_DELEGATE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), WOR_TYPE_QUEUE_REQUEST_DELEGATE))
 #define WOR_QUEUE_REQUEST_DELEGATE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), WOR_TYPE_QUEUE_REQUEST_DELEGATE, WorQueueRequestDelegateClass))
-#define WOR_QUEUE_REQUEST_DELEGATE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), WOR_TYPE_QUEUE_REQUEST_DELEGATE, WorQueueRequestDelegatePrivate))
-
 
 typedef struct _WorQueueRequestDelegate               WorQueueRequestDelegate;
 typedef struct _WorQueueRequestDelegatePrivate        WorQueueRequestDelegatePrivate;
 typedef struct _WorQueueRequestDelegateClass          WorQueueRequestDelegateClass;
 
-
 struct _WorQueue;
 struct _WorQueueRequestDelegate {
 	WorRequest parent;
-	WorQueueRequestDelegatePrivate *priv;
 };
 
 struct _WorQueueRequestDelegateClass {
 	WorRequestClass parent_class;
 };
-
 
 GType wor_queue_request_delegate_get_type();
 

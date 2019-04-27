@@ -40,44 +40,36 @@ struct _JagSrcFolderUpdaterPrivate {
 	MooIdPath *src_folder_path;
 };
 
-
-G_DEFINE_TYPE(JagSrcFolderUpdater, jag_src_folder_updater, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagSrcFolderUpdater, jag_src_folder_updater, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_src_folder_updater_class_init(JagSrcFolderUpdaterClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagSrcFolderUpdaterPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_src_folder_updater_init(JagSrcFolderUpdater *instance) {
-	JagSrcFolderUpdaterPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_SRC_FOLDER_UPDATER, JagSrcFolderUpdaterPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagSrcFolderUpdater *instance = JAG_SRC_FOLDER_UPDATER(object);
-	JagSrcFolderUpdaterPrivate *priv = instance->priv;
+	JagSrcFolderUpdaterPrivate *priv = jag_src_folder_updater_get_instance_private(instance);
 	cat_unref_ptr(priv->editable_root);
 	cat_unref_ptr(priv->editable_src_folder);
 	cat_unref_ptr(priv->moo_id_sequence);
 	cat_unref_ptr(priv->src_folder_path);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_src_folder_updater_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_src_folder_updater_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -85,7 +77,7 @@ JagSrcFolderUpdater *jag_src_folder_updater_new(VipISequence *moo_id_sequence, M
 		MooIdPath *src_folder_path) {
 	JagSrcFolderUpdater *result = g_object_new(JAG_TYPE_SRC_FOLDER_UPDATER, NULL);
 	cat_ref_anounce(result);
-	JagSrcFolderUpdaterPrivate *priv = result->priv;
+	JagSrcFolderUpdaterPrivate *priv = jag_src_folder_updater_get_instance_private(result);
 	priv->moo_id_sequence = cat_ref_ptr(moo_id_sequence);
 	priv->editable_root = cat_ref_ptr(editable_root);
 	priv->editable_src_folder = cat_ref_ptr(editable_src_folder);
@@ -94,7 +86,7 @@ JagSrcFolderUpdater *jag_src_folder_updater_new(VipISequence *moo_id_sequence, M
 }
 
 void jag_src_folder_updater_run(JagSrcFolderUpdater *updater) {
-	JagSrcFolderUpdaterPrivate *priv = JAG_SRC_FOLDER_UPDATER_GET_PRIVATE(updater);
+	JagSrcFolderUpdaterPrivate *priv = jag_src_folder_updater_get_instance_private(updater);
 	MooNodeWo *srcFolderNode = moo_id_path_create_editable_node(priv->src_folder_path, priv->editable_root);
 
 	cat_log_debug("path=%o, node=%o", priv->src_folder_path, priv->editable_root);
@@ -191,13 +183,4 @@ void jag_src_folder_updater_run(JagSrcFolderUpdater *updater) {
 	}
 	cat_unref_ptr(package_matcher);
 	cat_unref_ptr(classfile_matcher);
-
 }
-
-
-
-
-
-
-
-

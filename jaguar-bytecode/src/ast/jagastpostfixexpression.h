@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTPOSTFIXEXPRESSION_H_
 #define JAGASTPOSTFIXEXPRESSION_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_POSTFIX_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_POSTFIX_EXPRESSION))
 #define JAG_AST_IS_POSTFIX_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_POSTFIX_EXPRESSION))
 #define JAG_AST_POSTFIX_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_POSTFIX_EXPRESSION, JagAstPostfixExpressionClass))
-#define JAG_AST_POSTFIX_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_POSTFIX_EXPRESSION, JagAstPostfixExpressionPrivate))
 
 typedef struct _JagAstPostfixExpression               JagAstPostfixExpression;
 typedef struct _JagAstPostfixExpressionPrivate        JagAstPostfixExpressionPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstPostfixExpressionClass          JagAstPostfixExpressionCla
 
 struct _JagAstPostfixExpression {
 	GObject parent;
-	JagAstPostfixExpressionPrivate *priv;
 };
 
 struct _JagAstPostfixExpressionClass {
@@ -58,6 +55,5 @@ GType jag_ast_postfix_expression_get_type();
 JagAstPostfixExpression *jag_ast_postfix_expression_new(gboolean is_increment, JagAstIExpression *sub_expression);
 
 G_END_DECLS
-
 
 #endif /* JAGASTPOSTFIXEXPRESSION_H_ */

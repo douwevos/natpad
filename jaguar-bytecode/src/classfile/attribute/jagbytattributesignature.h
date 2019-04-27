@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTATTRIBUTESIGNATURE_H_
 #define JAGBYTATTRIBUTESIGNATURE_H_
-
 
 #include "jagbytattribute.h"
 #include "../constant/jagbyticonstantprovider.h"
@@ -38,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_SIGNATURE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_SIGNATURE))
 #define JAG_BYT_IS_ATTRIBUTE_SIGNATURE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_SIGNATURE))
 #define JAG_BYT_ATTRIBUTE_SIGNATURE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_SIGNATURE, JagBytAttributeSignatureClass))
-#define JAG_BYT_ATTRIBUTE_SIGNATURE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_SIGNATURE, JagBytAttributeSignaturePrivate))
 
 typedef struct _JagBytAttributeSignature               JagBytAttributeSignature;
 typedef struct _JagBytAttributeSignaturePrivate        JagBytAttributeSignaturePrivate;
@@ -47,7 +44,6 @@ typedef struct _JagBytAttributeSignatureClass          JagBytAttributeSignatureC
 
 struct _JagBytAttributeSignature {
 	JagBytAttribute parent;
-	JagBytAttributeSignaturePrivate *priv;
 };
 
 struct _JagBytAttributeSignatureClass {
@@ -64,6 +60,5 @@ JagBytAttributeSignature *jag_byt_attribute_signature_new(CatStringWo *e_attribu
 CatStringWo *jag_byt_attribute_signature_as_text(JagBytAttributeSignature *signature);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTATTRIBUTESIGNATURE_H_ */

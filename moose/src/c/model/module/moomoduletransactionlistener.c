@@ -24,64 +24,52 @@ struct _MooModuleTransactionListenerPrivate {
 static void l_transaction_listener_iface_init(MooITransactionListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooModuleTransactionListener, moo_module_transaction_listener, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooModuleTransactionListener)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ITRANSACTION_LISTENER, l_transaction_listener_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_module_transaction_listener_class_init(MooModuleTransactionListenerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooModuleTransactionListenerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_module_transaction_listener_init(MooModuleTransactionListener *instance) {
-	MooModuleTransactionListenerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_MODULE_TRANSACTION_LISTENER, MooModuleTransactionListenerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooModuleTransactionListener *instance = MOO_MODULE_TRANSACTION_LISTENER(object);
-	MooModuleTransactionListenerPrivate *priv = instance->priv;
+	MooModuleTransactionListenerPrivate *priv = moo_module_transaction_listener_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_module_transaction_listener_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_module_transaction_listener_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 MooModuleTransactionListener *moo_module_transaction_listener_new(MooService *moo_service) {
 	MooModuleTransactionListener *result = g_object_new(MOO_TYPE_MODULE_TRANSACTION_LISTENER, NULL);
 	cat_ref_anounce(result);
-	MooModuleTransactionListenerPrivate *priv = result->priv;
+	MooModuleTransactionListenerPrivate *priv = moo_module_transaction_listener_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	return result;
 }
 
 
-
-
-
 /********************* begin MooITransactionListener implementation *********************/
 
-
-
 static void l_transaction_commited(MooITransactionListener *self, struct _MooTransaction *transaction, struct _MooNodeWo *new_root) {
-	MooModuleTransactionListenerPrivate *priv = MOO_MODULE_TRANSACTION_LISTENER_GET_PRIVATE(self);
-
+	MooModuleTransactionListener *instance = MOO_MODULE_TRANSACTION_LISTENER(self);
+	MooModuleTransactionListenerPrivate *priv = moo_module_transaction_listener_get_instance_private(instance);
 
 	WorService *wor_service = moo_service_get_worm_service(priv->moo_service);
 
@@ -106,18 +94,10 @@ static void l_transaction_commited(MooITransactionListener *self, struct _MooTra
 			}
 		}
 	}
-
 }
-
 
 static void l_transaction_listener_iface_init(MooITransactionListenerInterface *iface) {
 	iface->transactionCommited = l_transaction_commited;
 }
 
-
 /********************* end MooITransactionListener implementation *********************/
-
-
-
-
-

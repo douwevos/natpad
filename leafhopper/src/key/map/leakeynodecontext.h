@@ -35,8 +35,6 @@ G_BEGIN_DECLS
 #define LEA_IS_KEY_NODE_CONTEXT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_KEY_NODE_CONTEXT))
 #define LEA_IS_KEY_NODE_CONTEXT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_KEY_NODE_CONTEXT))
 #define LEA_KEY_NODE_CONTEXT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_KEY_NODE_CONTEXT, LeaKeyNodeContextClass))
-#define LEA_KEY_NODE_CONTEXT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_KEY_NODE_CONTEXT, LeaKeyNodeContextPrivate))
-
 
 typedef struct _LeaKeyNodeContext               LeaKeyNodeContext;
 typedef struct _LeaKeyNodeContextPrivate        LeaKeyNodeContextPrivate;
@@ -45,7 +43,6 @@ typedef struct _LeaKeyNodeContextClass          LeaKeyNodeContextClass;
 
 struct _LeaKeyNodeContext {
 	LeaKeyNode parent;
-	LeaKeyNodeContextPrivate *priv;
 };
 
 struct _LeaKeyNodeContextClass {

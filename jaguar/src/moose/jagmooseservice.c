@@ -40,53 +40,45 @@ static void l_moose_tx_listener_iface_init(MooITransactionListenerInterface *ifa
 static void l_transaction_commited(MooITransactionListener *self, struct _MooTransaction *transaction, struct _MooNodeWo *new_root);
 
 G_DEFINE_TYPE_WITH_CODE(JagMooseService, jag_moose_service, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagMooseService)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ITRANSACTION_LISTENER, l_moose_tx_listener_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_moose_service_class_init(JagMooseServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagMooseServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
-
 }
 
 static void jag_moose_service_init(JagMooseService *instance) {
-	JagMooseServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_MOOSE_SERVICE, JagMooseServicePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagMooseService *instance = JAG_MOOSE_SERVICE(object);
-	JagMooseServicePrivate *priv = instance->priv;
+	JagMooseServicePrivate *priv = jag_moose_service_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->jre_map);
 	cat_unref_ptr(priv->jar_map);
 	cat_unref_ptr(priv->wor_service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_moose_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_moose_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagMooseService *jag_moose_service_new(MooService *moo_service, JagIndexerJreMap *jre_map, JagIndexerJarMap *jar_map) {
 	JagMooseService *result = g_object_new(JAG_TYPE_MOOSE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	JagMooseServicePrivate *priv = result->priv;
+	JagMooseServicePrivate *priv = jag_moose_service_get_instance_private(result);
 	priv->wor_service = cat_ref_ptr(moo_service_get_worm_service(moo_service));
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->jar_map = cat_ref_ptr(jar_map);
@@ -103,35 +95,32 @@ JagMooseService *jag_moose_service_new(MooService *moo_service, JagIndexerJreMap
 	return result;
 }
 
-
 WorService *jag_moose_service_get_worm_service(JagMooseService *moose_service) {
-	JagMooseServicePrivate *priv = JAG_MOOSE_SERVICE_GET_PRIVATE(moose_service);
+	JagMooseServicePrivate *priv = jag_moose_service_get_instance_private(moose_service);
 	return priv->wor_service;
 }
 
-
-
 MooService *jag_moose_service_get_moo_service(JagMooseService *moose_service) {
-	JagMooseServicePrivate *priv = JAG_MOOSE_SERVICE_GET_PRIVATE(moose_service);
+	JagMooseServicePrivate *priv = jag_moose_service_get_instance_private(moose_service);
 	return priv->moo_service;
 
 }
 
 JagIndexerJreMap *jag_moose_service_get_jre_map(JagMooseService *moose_service) {
-	JagMooseServicePrivate *priv = JAG_MOOSE_SERVICE_GET_PRIVATE(moose_service);
+	JagMooseServicePrivate *priv = jag_moose_service_get_instance_private(moose_service);
 	return priv->jre_map;
 }
 
-
 JagIndexerJarMap *jag_moose_service_get_jar_map(JagMooseService *moose_service) {
-	JagMooseServicePrivate *priv = JAG_MOOSE_SERVICE_GET_PRIVATE(moose_service);
+	JagMooseServicePrivate *priv = jag_moose_service_get_instance_private(moose_service);
 	return priv->jar_map;
 }
 
 /********************* begin MooITransactionListener implementation *********************/
 
 static void l_transaction_commited(MooITransactionListener *self, struct _MooTransaction *transaction, struct _MooNodeWo *new_root) {
-	JagMooseServicePrivate *priv = JAG_MOOSE_SERVICE_GET_PRIVATE(self);
+	JagMooseService *instance = JAG_MOOSE_SERVICE(self);
+	JagMooseServicePrivate *priv = jag_moose_service_get_instance_private(instance);
 
 	cat_log_debug("Transaction commited: %o", new_root);
 
@@ -142,7 +131,6 @@ static void l_transaction_commited(MooITransactionListener *self, struct _MooTra
 
 static void l_moose_tx_listener_iface_init(MooITransactionListenerInterface *iface) {
 	iface->transactionCommited = l_transaction_commited;
-
 }
 
 /********************* end MooITransactionListener implementation *********************/

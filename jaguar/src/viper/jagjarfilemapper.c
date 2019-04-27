@@ -39,66 +39,55 @@ struct _JagJarFileMapperPrivate {
 static void l_mapper_iface_init(VipIMapperInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagJarFileMapper, jag_jar_file_mapper, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagJarFileMapper)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IMAPPER, l_mapper_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_jar_file_mapper_class_init(JagJarFileMapperClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagJarFileMapperPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_jar_file_mapper_init(JagJarFileMapper *instance) {
-	JagJarFileMapperPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_JAR_FILE_MAPPER, JagJarFileMapperPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagJarFileMapper *instance = JAG_JAR_FILE_MAPPER(object);
-	JagJarFileMapperPrivate *priv = instance->priv;
+	JagJarFileMapperPrivate *priv = jag_jar_file_mapper_get_instance_private(instance);
 	cat_unref_ptr(priv->sequence);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_jar_file_mapper_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_jar_file_mapper_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagJarFileMapper *jag_jar_file_mapper_new(VipISequence *sequence) {
 	JagJarFileMapper *result = g_object_new(JAG_TYPE_JAR_FILE_MAPPER, NULL);
 	cat_ref_anounce(result);
-	JagJarFileMapperPrivate *priv = result->priv;
+	JagJarFileMapperPrivate *priv = jag_jar_file_mapper_get_instance_private(result);
 	priv->sequence = cat_ref_ptr(sequence);
 	return result;
 }
 
-
-
-
 /********************* start VipIMapper implementation *********************/
-
 
 static CatS l_s_txt_jar = CAT_S_DEF(".jar");
 static CatS l_s_txt_ear = CAT_S_DEF(".ear");
 static CatS l_s_txt_war = CAT_S_DEF(".war");
 
 static VipIScanWork *l_mapper_create_work_for_node2(VipIMapper *self, CatWritableTreeNode *tree_node, gboolean recursive_from_parent, gboolean validated_by_parent) {
-	JagJarFileMapperPrivate *priv = JAG_JAR_FILE_MAPPER_GET_PRIVATE(self);
-
+	JagJarFileMapper *instance = JAG_JAR_FILE_MAPPER(self);
+	JagJarFileMapperPrivate *priv = jag_jar_file_mapper_get_instance_private(instance);
 
 	VipNode *vip_node = (VipNode *) cat_tree_node_get_content((CatTreeNode *) tree_node);
 	VipIResource *content = vip_node_get_content(vip_node);
@@ -134,8 +123,6 @@ static VipIScanWork *l_mapper_create_work_for_node(VipIMapper *self, CatWritable
 	cat_log_debug("node=%o, result=%o", node, result);
 	return result;
 }
-
-
 
 static void l_mapper_iface_init(VipIMapperInterface *iface) {
 	iface->createWorkForNode = l_mapper_create_work_for_node;

@@ -27,11 +27,11 @@
 #define CAT_LOG_CLAZZ "ElkCompletionEntry"
 #include <logging/catlog.h>
 
-G_DEFINE_TYPE(ElkCompletionEntry, elk_completion_entry, G_TYPE_OBJECT)
+G_DEFINE_TYPE(ElkCompletionEntry, elk_completion_entry, G_TYPE_OBJECT) // @suppress("Unused static function")
 
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
-static void _run_dummy(ElkCompletionEntry *entry, LeaPanel *panel) {
+static void l_run_dummy(ElkCompletionEntry *entry, LeaPanel *panel) {
 //	AstEditor *editor = AST_EDITOR(panel);
 //	AstEditorUow *uow = (AstEditorUow *) ast_uow_insert_text_new(entry->a_text);
 //	ast_editor_run(editor, uow);
@@ -40,14 +40,14 @@ static void _run_dummy(ElkCompletionEntry *entry, LeaPanel *panel) {
 
 static void elk_completion_entry_class_init(ElkCompletionEntryClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	clazz->run = _run_dummy;
+	object_class->dispose = l_dispose;
+	clazz->run = l_run_dummy;
 }
 
 static void elk_completion_entry_init(ElkCompletionEntry *obj) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	ElkCompletionEntry *instance = ELK_COMPLETION_ENTRY(object);
 	cat_unref_ptr(instance->a_text);
 }

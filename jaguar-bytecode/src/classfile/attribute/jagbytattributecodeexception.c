@@ -35,46 +35,37 @@ struct _JagBytAttributeCodeExceptionPrivate {
 	uint16_t catchType;
 };
 
-G_DEFINE_TYPE (JagBytAttributeCodeException, jag_byt_attribute_code_exception, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytAttributeCodeException, jag_byt_attribute_code_exception, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_attribute_code_exception_class_init(JagBytAttributeCodeExceptionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAttributeCodeExceptionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_attribute_code_exception_init(JagBytAttributeCodeException *instance) {
-	JagBytAttributeCodeExceptionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ATTRIBUTE_CODE_EXCEPTION, JagBytAttributeCodeExceptionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytAttributeCodeException *instance = JAG_BYT_ATTRIBUTE_CODE_EXCEPTION(object);
-//	JagBytAttributeCodeExceptionPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_attribute_code_exception_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_attribute_code_exception_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytAttributeCodeException *jag_byt_attribute_code_exception_new(uint16_t startPc, uint16_t endPc, uint16_t handlerPc, uint16_t catchType) {
 	JagBytAttributeCodeException *result = g_object_new(JAG_BYT_TYPE_ATTRIBUTE_CODE_EXCEPTION, NULL);
 	cat_ref_anounce(result);
-	JagBytAttributeCodeExceptionPrivate *priv = result->priv;
+	JagBytAttributeCodeExceptionPrivate *priv = jag_byt_attribute_code_exception_get_instance_private(result);
 	priv->startPc = startPc;
 	priv->endPc = endPc;
 	priv->handlerPc = handlerPc;
@@ -83,24 +74,22 @@ JagBytAttributeCodeException *jag_byt_attribute_code_exception_new(uint16_t star
 }
 
 
-
 int jag_byt_attribute_code_exception_get_start_pc(JagBytAttributeCodeException *code_exception) {
-	JagBytAttributeCodeExceptionPrivate *priv = JAG_BYT_ATTRIBUTE_CODE_EXCEPTION_GET_PRIVATE(code_exception);
+	JagBytAttributeCodeExceptionPrivate *priv = jag_byt_attribute_code_exception_get_instance_private(code_exception);
 	return priv->startPc;
 }
 
 int jag_byt_attribute_code_exception_get_end_pc(JagBytAttributeCodeException *code_exception) {
-	JagBytAttributeCodeExceptionPrivate *priv = JAG_BYT_ATTRIBUTE_CODE_EXCEPTION_GET_PRIVATE(code_exception);
+	JagBytAttributeCodeExceptionPrivate *priv = jag_byt_attribute_code_exception_get_instance_private(code_exception);
 	return priv->endPc;
 }
 
 int jag_byt_attribute_code_exception_get_handler_pc(JagBytAttributeCodeException *code_exception) {
-	JagBytAttributeCodeExceptionPrivate *priv = JAG_BYT_ATTRIBUTE_CODE_EXCEPTION_GET_PRIVATE(code_exception);
+	JagBytAttributeCodeExceptionPrivate *priv = jag_byt_attribute_code_exception_get_instance_private(code_exception);
 	return priv->handlerPc;
 }
 
-
 int jag_byt_attribute_code_exception_get_catch_type(JagBytAttributeCodeException *code_exception) {
-	JagBytAttributeCodeExceptionPrivate *priv = JAG_BYT_ATTRIBUTE_CODE_EXCEPTION_GET_PRIVATE(code_exception);
+	JagBytAttributeCodeExceptionPrivate *priv = jag_byt_attribute_code_exception_get_instance_private(code_exception);
 	return priv->catchType;
 }

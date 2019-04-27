@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "leakeysequence.h"
 #include <stdarg.h>
 
@@ -37,6 +36,7 @@ struct _LeaKeySequencePrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(LeaKeySequence, lea_key_sequence, G_TYPE_INITIALLY_UNOWNED, {
+		G_ADD_PRIVATE(LeaKeySequence)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -45,22 +45,18 @@ static void l_finalize(GObject *object);
 static int l_validate_and_calculate_hashcode(LeaKeySequence *sequence);
 
 static void lea_key_sequence_class_init(LeaKeySequenceClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaKeySequencePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void lea_key_sequence_init(LeaKeySequence *instance) {
-	LeaKeySequencePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, LEA_TYPE_KEY_SEQUENCE, LeaKeySequencePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	LeaKeySequence *instance = LEA_KEY_SEQUENCE(object);
-	LeaKeySequencePrivate *priv = instance->priv;
+	LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(instance);
 	cat_unref_ptr(priv->a_sequence);
 	G_OBJECT_CLASS(lea_key_sequence_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -76,7 +72,7 @@ static void l_finalize(GObject *object) {
 LeaKeySequence *lea_key_sequence_new(LeaKey *key) {
 	LeaKeySequence *result = g_object_new(LEA_TYPE_KEY_SEQUENCE, NULL);
 	cat_ref_anounce(result);
-	LeaKeySequencePrivate *priv = result->priv;
+	LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(result);
 	priv->a_sequence = cat_array_wo_new();
 	cat_array_wo_append(priv->a_sequence, (GObject *) key);
 	priv->hash_code = l_validate_and_calculate_hashcode(result);
@@ -86,7 +82,7 @@ LeaKeySequence *lea_key_sequence_new(LeaKey *key) {
 LeaKeySequence *lea_key_sequence_new_with(LeaKey *firstKey, ...) {
 	LeaKeySequence *result = g_object_new(LEA_TYPE_KEY_SEQUENCE, NULL);
 	cat_ref_anounce(result);
-	LeaKeySequencePrivate *priv = result->priv;
+	LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(result);
 
 	CatArrayWo *keys = cat_array_wo_new();
 
@@ -130,7 +126,7 @@ LeaKeySequence *lea_key_sequence_from_string(const CatStringWo *ca_txt) {
 		if (cat_array_wo_size(seq)>0) {
 			result = g_object_new(LEA_TYPE_KEY_SEQUENCE, NULL);
 			cat_ref_anounce(result);
-			LeaKeySequencePrivate *priv = result->priv;
+			LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(result);
 			priv->a_sequence = seq;
 			priv->hash_code = l_validate_and_calculate_hashcode(result);
 		} else {
@@ -145,7 +141,7 @@ LeaKeySequence *lea_key_sequence_from_string(const CatStringWo *ca_txt) {
 
 static int l_validate_and_calculate_hashcode(LeaKeySequence *sequence) {
 	int result = 0;
-	LeaKeySequencePrivate *priv = LEA_KEY_SEQUENCE_GET_PRIVATE(sequence);
+	LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(sequence);
 	CatIIterator *iter = cat_array_wo_iterator(priv->a_sequence);
 	while(cat_iiterator_has_next(iter)) {
 		LeaKey *key = (LeaKey *) cat_iiterator_next(iter);
@@ -157,7 +153,7 @@ static int l_validate_and_calculate_hashcode(LeaKeySequence *sequence) {
 
 CatStringWo *lea_key_sequence_to_string(LeaKeySequence *sequence) {
 	CatStringWo *result = cat_string_wo_new();
-	LeaKeySequencePrivate *priv = LEA_KEY_SEQUENCE_GET_PRIVATE(sequence);
+	LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(sequence);
 	CatIIterator *iter = cat_array_wo_iterator(priv->a_sequence);
 	while(cat_iiterator_has_next(iter)) {
 		LeaKey *key = (LeaKey *) cat_iiterator_next(iter);
@@ -173,13 +169,14 @@ CatStringWo *lea_key_sequence_to_string(LeaKeySequence *sequence) {
 }
 
 CatIIterator *lea_key_sequence_iterator(LeaKeySequence *sequence) {
-	LeaKeySequencePrivate *priv = LEA_KEY_SEQUENCE_GET_PRIVATE(sequence);
+	LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(sequence);
 	return cat_array_wo_iterator(priv->a_sequence);
 }
 
 
 int lea_key_sequence_hash(LeaKeySequence *sequence) {
-	return LEA_KEY_SEQUENCE_GET_PRIVATE(sequence)->hash_code;
+	LeaKeySequencePrivate *priv = lea_key_sequence_get_instance_private(sequence);
+	return priv->hash_code;
 }
 
 gboolean lea_key_sequence_equal(LeaKeySequence *sequence_a, LeaKeySequence *sequence_b) {
@@ -190,8 +187,8 @@ gboolean lea_key_sequence_equal(LeaKeySequence *sequence_a, LeaKeySequence *sequ
 	if ((sequence_a==NULL) || (sequence_b==NULL)) {
 		return FALSE;
 	}
-	LeaKeySequencePrivate *priv_a = LEA_KEY_SEQUENCE_GET_PRIVATE(sequence_a);
-	LeaKeySequencePrivate *priv_b = LEA_KEY_SEQUENCE_GET_PRIVATE(sequence_b);
+	LeaKeySequencePrivate *priv_a = lea_key_sequence_get_instance_private(sequence_a);
+	LeaKeySequencePrivate *priv_b = lea_key_sequence_get_instance_private(sequence_b);
 
 	if ((priv_a->hash_code!=priv_b->hash_code) ||
 			cat_array_wo_size(priv_a->a_sequence)!=cat_array_wo_size(priv_b->a_sequence)) {

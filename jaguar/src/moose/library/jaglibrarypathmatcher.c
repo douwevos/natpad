@@ -36,7 +36,7 @@ struct _JagLibraryPathMatcherPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 static void l_node_matcher_iface_init(MooINodeMatcherInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagLibraryPathMatcher, jag_library_path_matcher, G_TYPE_OBJECT,
+G_DEFINE_TYPE_WITH_CODE(JagLibraryPathMatcher, jag_library_path_matcher, G_TYPE_OBJECT, // @suppress("Unused static function")
 		G_ADD_PRIVATE(JagLibraryPathMatcher)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_MATCHER, l_node_matcher_iface_init)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
@@ -113,10 +113,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-
-
-
-
-
-

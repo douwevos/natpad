@@ -34,6 +34,7 @@ struct _LeaKeyNodeKeyPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(LeaKeyNodeKey, lea_key_node_key, LEA_TYPE_KEY_NODE, {
+		G_ADD_PRIVATE(LeaKeyNodeKey)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -45,8 +46,6 @@ static gboolean l_node_equal(LeaKeyNode *node_a, LeaKeyNode *node_b);
 
 
 static void lea_key_node_key_class_init(LeaKeyNodeKeyClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaKeyNodeKeyPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -57,14 +56,12 @@ static void lea_key_node_key_class_init(LeaKeyNodeKeyClass *clazz) {
 }
 
 static void lea_key_node_key_init(LeaKeyNodeKey *instance) {
-	LeaKeyNodeKeyPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, LEA_TYPE_KEY_NODE_KEY, LeaKeyNodeKeyPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	LeaKeyNodeKey *instance = LEA_KEY_NODE_KEY(object);
-	LeaKeyNodeKeyPrivate *priv = instance->priv;
+	LeaKeyNodeKeyPrivate *priv = lea_key_node_key_get_instance_private(instance);
 	cat_unref_ptr(priv->key);
 	G_OBJECT_CLASS(lea_key_node_key_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -77,19 +74,18 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 LeaKeyNodeKey *lea_key_node_key_new(LeaKey *key) {
 	LeaKeyNodeKey *result = g_object_new(LEA_TYPE_KEY_NODE_KEY, NULL);
 	cat_ref_anounce(result);
-	LeaKeyNodeKeyPrivate *priv = result->priv;
+	LeaKeyNodeKeyPrivate *priv = lea_key_node_key_get_instance_private(result);
 	priv->key = cat_ref_ptr(key);
 	lea_key_node_construct((LeaKeyNode *) result);
 	return result;
 }
 
-
 static int l_node_hash(LeaKeyNode *self) {
-	LeaKeyNodeKeyPrivate *priv = LEA_KEY_NODE_KEY_GET_PRIVATE(self);
+	LeaKeyNodeKey *instance = LEA_KEY_NODE_KEY(self);
+	LeaKeyNodeKeyPrivate *priv = lea_key_node_key_get_instance_private(instance);
 	return lea_key_hashcode(priv->key);
 }
 
@@ -100,8 +96,8 @@ static gboolean l_node_equal(LeaKeyNode *node_a, LeaKeyNode *node_b) {
 	if (node_a==NULL || node_b==NULL) {
 		return FALSE;
 	}
-	LeaKeyNodeKeyPrivate *priv_a = LEA_KEY_NODE_KEY_GET_PRIVATE(node_a);
-	LeaKeyNodeKeyPrivate *priv_b = LEA_KEY_NODE_KEY_GET_PRIVATE(node_b);
+	LeaKeyNodeKeyPrivate *priv_a = lea_key_node_key_get_instance_private(LEA_KEY_NODE_KEY(node_a));
+	LeaKeyNodeKeyPrivate *priv_b = lea_key_node_key_get_instance_private(LEA_KEY_NODE_KEY(node_b));
 	return lea_key_equal(priv_a->key, priv_b->key);
 }
 
@@ -109,7 +105,8 @@ static gboolean l_node_equal(LeaKeyNode *node_a, LeaKeyNode *node_b) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	LeaKeyNodeKeyPrivate *priv = LEA_KEY_NODE_KEY_GET_PRIVATE(self);
+	LeaKeyNodeKey *instance = LEA_KEY_NODE_KEY(self);
+	LeaKeyNodeKeyPrivate *priv = lea_key_node_key_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%o]", iname, priv->key);
 }

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTLINENUMBERTABLEENTRY_H_
 #define JAGBYTLINENUMBERTABLEENTRY_H_
 
@@ -35,7 +34,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_LINE_NUMBER_TABLE_ENTRY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_LINE_NUMBER_TABLE_ENTRY))
 #define JAG_BYT_IS_LINE_NUMBER_TABLE_ENTRY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_LINE_NUMBER_TABLE_ENTRY))
 #define JAG_BYT_LINE_NUMBER_TABLE_ENTRY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_LINE_NUMBER_TABLE_ENTRY, JagBytLineNumberTableEntryClass))
-#define JAG_BYT_LINE_NUMBER_TABLE_ENTRY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_LINE_NUMBER_TABLE_ENTRY, JagBytLineNumberTableEntryPrivate))
 
 typedef struct _JagBytLineNumberTableEntry               JagBytLineNumberTableEntry;
 typedef struct _JagBytLineNumberTableEntryPrivate        JagBytLineNumberTableEntryPrivate;
@@ -44,7 +42,6 @@ typedef struct _JagBytLineNumberTableEntryClass          JagBytLineNumberTableEn
 
 struct _JagBytLineNumberTableEntry {
 	GObject parent;
-	JagBytLineNumberTableEntryPrivate *priv;
 };
 
 struct _JagBytLineNumberTableEntryClass {
@@ -59,7 +56,6 @@ JagBytLineNumberTableEntry *jag_byt_line_number_table_entry_new(int startPc, int
 int jag_byt_line_number_table_entry_get_start_pc(JagBytLineNumberTableEntry *entry);
 
 int jag_byt_line_number_table_entry_get_line_number(JagBytLineNumberTableEntry *entry);
-
 
 G_END_DECLS
 

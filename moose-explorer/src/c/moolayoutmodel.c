@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "moolayoutmodelprivate.h"
 #include <moose.h>
 #include <math.h>
@@ -47,32 +46,24 @@ struct _MooLayoutModelPrivate {
 	CatArrayWo *selection;
 };
 
-G_DEFINE_TYPE (MooLayoutModel, moo_layout_model, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooLayoutModel, moo_layout_model, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_layout_model_class_init(MooLayoutModelClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooLayoutModelPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_layout_model_init(MooLayoutModel *instance) {
-	MooLayoutModelPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_LAYOUT_MODEL, MooLayoutModelPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooLayoutModel *instance = MOO_LAYOUT_MODEL(object);
-	MooLayoutModelPrivate *priv = instance->priv;
-
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(instance);
 	cat_unref_ptr(priv->cursor);
 	cat_unref_ptr(priv->node);
 	cat_unref_ptr(priv->root);
@@ -81,22 +72,21 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->shift_cursor);
 	cat_unref_ptr(priv->selection);
 	cat_unref_ptr(priv->listeners);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_layout_model_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_layout_model_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 MooLayoutModel *moo_layout_model_new(MooNodeRenderRegistry *render_registry) {
 	MooLayoutModel *result = g_object_new(MOO_TYPE_LAYOUT_MODEL, NULL);
 	cat_ref_anounce(result);
-	MooLayoutModelPrivate *priv = result->priv;
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(result);
 	priv->render_registry = cat_ref_ptr(render_registry);
 	priv->listeners = cat_weak_list_new();
 
@@ -116,21 +106,18 @@ MooLayoutModel *moo_layout_model_new(MooNodeRenderRegistry *render_registry) {
 	return result;
 }
 
-
-
 void moo_layout_model_add_listener(MooLayoutModel *layout_model, MooILayoutModelListener *model_listener) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	cat_weak_list_append(priv->listeners, (GObject *) model_listener);
 }
 
 void moo_layout_model_remove_listener(MooLayoutModel *layout_model, MooILayoutModelListener *model_listener) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	cat_weak_list_remove(priv->listeners, (GObject *) model_listener);
 }
 
-
 void moo_layout_model_set_root_node(MooLayoutModel *layout_model, MooNodeWo *node) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	if (priv->node == node) {
 		return;
 	}
@@ -168,7 +155,7 @@ static gboolean l_same_node_layout(MooNodeLayout *layout_a, MooNodeLayout *layou
 }
 
 static void l_set_new_selection(MooLayoutModel *layout_model, CatArrayWo *new_selection) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	if (!cat_array_wo_equal(priv->selection, new_selection, (GEqualFunc) l_same_node_layout)) {
 		cat_ref_swap(priv->selection, new_selection);
 		cat_log_debug("setting new selection=%o", new_selection);
@@ -188,9 +175,8 @@ static void l_set_new_selection(MooLayoutModel *layout_model, CatArrayWo *new_se
 	}
 }
 
-
 static void l_rebuild_selection(MooLayoutModel *layout_model) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	CatArrayWo *selection = cat_array_wo_new();
 	CatIIterator *iter = cat_array_wo_iterator(priv->e_node_layouts);
 	while(cat_iiterator_has_next(iter)) {
@@ -204,7 +190,6 @@ static void l_rebuild_selection(MooLayoutModel *layout_model) {
 	l_set_new_selection(layout_model, selection);
 	cat_unref_ptr(selection);
 }
-
 
 static int l_calculate_entity_height(MooLayoutModelPrivate *priv, PangoContext *pango_context) {
 	PangoFontMetrics *font_metrics = pango_context_get_metrics(pango_context, NULL, NULL);
@@ -235,11 +220,10 @@ static MooNodeLayout *l_find_layout_by_moose_id(CatArrayWo *layout_children, Moo
 		}
 	}
 	return NULL;
-
 }
 
 void moo_layout_model_validate(MooLayoutModel *layout_model, cairo_t *cairo, PangoContext *pango_context) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	if (cairo==NULL) {
 		return;
 	}
@@ -274,10 +258,7 @@ void moo_layout_model_validate(MooLayoutModel *layout_model, cairo_t *cairo, Pan
 
 	CatArrayWo *e_selection = cat_array_wo_new();
 
-
 	int ifont_height = l_calculate_entity_height(priv, pango_context);
-
-
 	int ypos = 0;
 	cat_log_debug("root-node=%o", priv->node);
 	CatArrayWo /*<MooNode>*/ *e_stack = cat_array_wo_new();
@@ -304,7 +285,6 @@ void moo_layout_model_validate(MooLayoutModel *layout_model, cairo_t *cairo, Pan
 			}
 			cat_array_wo_append(priv->e_node_layouts, (GObject *) work_node_layout);
 		}
-
 
 		if (moo_node_layout_is_selected(work_node_layout)) {
 			cat_array_wo_append(e_selection, (GObject *) work_node_layout);
@@ -356,12 +336,8 @@ void moo_layout_model_validate(MooLayoutModel *layout_model, cairo_t *cairo, Pan
 	cat_log_detail("width=%d, height=%d", priv->width, priv->height);
 }
 
-
-
-
-
 void moo_layout_model_paint(MooLayoutModel *layout_model, PangoContext *pango_context, cairo_t *cairo) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	cat_log_debug("painting layout-model:nodeLayouts.size=%d" , cat_array_wo_size(priv->e_node_layouts));
 	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0);
 
@@ -379,8 +355,6 @@ void moo_layout_model_paint(MooLayoutModel *layout_model, PangoContext *pango_co
 	double font_height = ((double) (pango_font_metrics_get_ascent(font_metrics) + pango_font_metrics_get_descent(font_metrics)))/PANGO_SCALE;
 
 	int entity_height = l_calculate_entity_height(priv, pango_context);
-
-
 
 	cairo_surface_t *back_image = cairo_image_surface_create(CAIRO_FORMAT_RGB24, clip_bounds.width, entity_height);
 	cairo_t *cairo_back = cairo_create(back_image);
@@ -431,16 +405,12 @@ void moo_layout_model_paint(MooLayoutModel *layout_model, PangoContext *pango_co
 		cairo_fill(cairo);
 	}
 
-
 	cairo_destroy(cairo_back);
 	cairo_surface_destroy(back_image);
-
 }
 
-
-
 MooNodeLayout *moo_layout_model_node_at(MooLayoutModel *layout_model, int xpos, int ypos) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	MooNodeLayout *result = NULL;
 	if (cat_array_wo_size(priv->e_node_layouts)>0) {
 		MooNodeLayout *node_layout = (MooNodeLayout *) cat_array_wo_get_first(priv->e_node_layouts);
@@ -453,9 +423,8 @@ MooNodeLayout *moo_layout_model_node_at(MooLayoutModel *layout_model, int xpos, 
 	return result;
 }
 
-
 void moo_layout_model_set_selection(MooLayoutModel *layout_model, int initPos, int endPos) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	if (endPos<initPos) {
 		initPos = initPos - endPos;
 		endPos = endPos + initPos;
@@ -472,10 +441,8 @@ void moo_layout_model_set_selection(MooLayoutModel *layout_model, int initPos, i
 	}
 }
 
-
-
 gboolean moo_layout_model_select(MooLayoutModel *layout_model, MooNodeLayout *nodeAt, gboolean tryToggleFirst, gboolean ctrlPressed, gboolean shiftPressed) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	if (tryToggleFirst) {
 
 		if (moo_node_layout_is_a_map(nodeAt)) {
@@ -517,9 +484,7 @@ gboolean moo_layout_model_select(MooLayoutModel *layout_model, MooNodeLayout *no
 }
 
 void moo_layout_model_get_view_size(MooLayoutModel *layout_model, int *width, int *height) {
-	MooLayoutModelPrivate *priv = MOO_LAYOUT_MODEL_GET_PRIVATE(layout_model);
+	MooLayoutModelPrivate *priv = moo_layout_model_get_instance_private(layout_model);
 	*width = priv->width;
 	*height = priv->height;
 }
-
-

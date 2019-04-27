@@ -48,48 +48,43 @@ struct _JagBytClassfilePrivate {
 	JagBytAttributeMap *attribute_map;
 };
 
-G_DEFINE_TYPE (JagBytClassfile, jag_byt_classfile, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytClassfile, jag_byt_classfile, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_classfile_class_init(JagBytClassfileClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytClassfilePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_classfile_init(JagBytClassfile *instance) {
-	JagBytClassfilePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_CLASSFILE, JagBytClassfilePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytClassfile *instance = JAG_BYT_CLASSFILE(object);
-	JagBytClassfilePrivate *priv = instance->priv;
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(instance);
 	cat_unref_ptr(priv->main_type_name);
 	cat_unref_ptr(priv->super_type_name);
 	cat_unref_ptr(priv->modifiers);
 	cat_unref_ptr(priv->constant_pool);
-	cat_free_ptr(priv->interfaces);
 	cat_unref_ptr(priv->interface_list);
 	cat_unref_ptr(priv->fieldList);
 	cat_unref_ptr(priv->methodList);
 	cat_unref_ptr(priv->attribute_map);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_classfile_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	JagBytClassfile *instance = JAG_BYT_CLASSFILE(object);
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(instance);
+	cat_free_ptr(priv->interfaces);
+	G_OBJECT_CLASS(jag_byt_classfile_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -99,7 +94,7 @@ JagBytClassfile *jag_byt_classfile_new(uint32_t magicNr, uint16_t minorVersion, 
 			JagBytAttributeMap *attribute_map) {
 	JagBytClassfile *result = g_object_new(JAG_BYT_TYPE_CLASSFILE, NULL);
 	cat_ref_anounce(result);
-	JagBytClassfilePrivate *priv = result->priv;
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(result);
 
 	priv->magicNr = magicNr;
 	priv->minorVersion = minorVersion;
@@ -121,7 +116,7 @@ JagBytClassfile *jag_byt_classfile_new(uint32_t magicNr, uint16_t minorVersion, 
 }
 
 JagAstModifiers *jag_byt_classfile_get_modifiers(JagBytClassfile *classfile) {
-	JagBytClassfilePrivate *priv = JAG_BYT_CLASSFILE_GET_PRIVATE(classfile);
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 	if (priv->modifiers==NULL) {
 		priv->modifiers = jag_ast_modifiers_new(priv->accessFlags & 0x411);
 	}
@@ -129,28 +124,28 @@ JagAstModifiers *jag_byt_classfile_get_modifiers(JagBytClassfile *classfile) {
 }
 
 
-JagBytFieldList *jag_byt_classfile_get_field_list(JagBytClassfile *raw_classfile) {
-	return raw_classfile->priv->fieldList;
+JagBytFieldList *jag_byt_classfile_get_field_list(JagBytClassfile *classfile) {
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
+	return priv->fieldList;
 }
 
 JagBytInterfaceList *jag_byt_classfile_get_interface_list(JagBytClassfile *classfile) {
-	JagBytClassfilePrivate *priv = JAG_BYT_CLASSFILE_GET_PRIVATE(classfile);
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 	return priv->interface_list;
 }
 
 JagBytMethodList *jag_byt_classfile_get_method_list(JagBytClassfile *classfile) {
-	JagBytClassfilePrivate *priv = JAG_BYT_CLASSFILE_GET_PRIVATE(classfile);
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 	return priv->methodList;
 }
 
 JagBytConstantPool *jag_byt_classfile_get_constant_pool(JagBytClassfile *classfile) {
-	JagBytClassfilePrivate *priv = JAG_BYT_CLASSFILE_GET_PRIVATE(classfile);
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 	return priv->constant_pool;
 }
 
-
 JagBytName *jag_byt_classfile_get_main_type_name(JagBytClassfile *classfile) {
-	JagBytClassfilePrivate *priv = JAG_BYT_CLASSFILE_GET_PRIVATE(classfile);
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 	if (priv->main_type_name == NULL) {
 		JagBytConstantClazz *constant_clazz = (JagBytConstantClazz *) jag_byt_constant_pool_get_resolved(priv->constant_pool, priv->thisClass-1);
 		JagBytName *main_type_name = jag_byt_constant_clazz_get_refrence_type_name(constant_clazz);
@@ -161,10 +156,8 @@ JagBytName *jag_byt_classfile_get_main_type_name(JagBytClassfile *classfile) {
 	return priv->main_type_name;
 }
 
-
-
 JagBytName *jag_byt_classfile_get_super_type_name(JagBytClassfile *classfile) {
-	JagBytClassfilePrivate *priv = JAG_BYT_CLASSFILE_GET_PRIVATE(classfile);
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 	if (priv->super_type_name == NULL) {
 		JagBytConstantClazz *constant_clazz = (JagBytConstantClazz *) jag_byt_constant_pool_get_resolved(priv->constant_pool, priv->superClass-1);
 		JagBytName *super_type_name = jag_byt_constant_clazz_get_refrence_type_name(constant_clazz);
@@ -173,10 +166,8 @@ JagBytName *jag_byt_classfile_get_super_type_name(JagBytClassfile *classfile) {
 	return priv->super_type_name;
 }
 
-
-
-CatStringWo *jag_byt_classfile_get_fq_classname(JagBytClassfile *raw_classfile) {
-	JagBytClassfilePrivate *priv = raw_classfile->priv;
+CatStringWo *jag_byt_classfile_get_fq_classname(JagBytClassfile *classfile) {
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 
 	JagBytIConstant *constant = jag_byt_constant_pool_get_at(priv->constant_pool, priv->thisClass-1);
 	if (JAG_BYT_IS_CONSTANT_CLAZZ(constant)) {
@@ -199,12 +190,8 @@ CatStringWo *jag_byt_classfile_get_fq_classname(JagBytClassfile *raw_classfile) 
 	return NULL;
 }
 
-
-
-
-CatStringWo *jag_byt_classfile_get_fq_super_classname(JagBytClassfile *raw_classfile) {
-	JagBytClassfilePrivate *priv = raw_classfile->priv;
-
+CatStringWo *jag_byt_classfile_get_fq_super_classname(JagBytClassfile *classfile) {
+	JagBytClassfilePrivate *priv = jag_byt_classfile_get_instance_private(classfile);
 
 	JagBytIConstant *constant = jag_byt_constant_pool_get_at(priv->constant_pool, priv->superClass-1);
 	if (JAG_BYT_IS_CONSTANT_CLAZZ(constant)) {

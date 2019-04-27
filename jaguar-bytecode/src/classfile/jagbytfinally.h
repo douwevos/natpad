@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_FINALLY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_FINALLY))
 #define JAG_BYT_IS_FINALLY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_FINALLY))
 #define JAG_BYT_FINALLY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_FINALLY, JagBytFinallyClass))
-#define JAG_BYT_FINALLY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_FINALLY, JagBytFinallyPrivate))
 
 typedef struct _JagBytFinally               JagBytFinally;
 typedef struct _JagBytFinallyPrivate        JagBytFinallyPrivate;
@@ -43,7 +42,6 @@ typedef struct _JagBytFinallyClass          JagBytFinallyClass;
 
 struct _JagBytFinally {
 	GObject parent;
-	JagBytFinallyPrivate *priv;
 };
 
 struct _JagBytFinallyClass {

@@ -40,69 +40,54 @@ static void l_conditional_expression_iface_init(JagAstIConditionalExpressionInte
 static void l_expression_iface_init(JagAstIExpressionInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstLogicalExpression, jag_ast_logical_expression, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstLogicalExpression)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_IEXPRESSION, l_expression_iface_init);
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_ICONDITIONAL_EXPRESSION, l_conditional_expression_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_logical_expression_class_init(JagAstLogicalExpressionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstLogicalExpressionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_logical_expression_init(JagAstLogicalExpression *instance) {
-	JagAstLogicalExpressionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_LOGICAL_EXPRESSION, JagAstLogicalExpressionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstLogicalExpression *instance = JAG_AST_LOGICAL_EXPRESSION(object);
-	JagAstLogicalExpressionPrivate *priv = instance->priv;
+	JagAstLogicalExpressionPrivate *priv = jag_ast_logical_expression_get_instance_private(instance);
 	cat_unref_ptr(priv->e_expressions);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_logical_expression_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_logical_expression_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstLogicalExpression *jag_ast_logical_expression_new(JagBytMathOperator logical_operator, CatArrayWo *e_expressions) {
 	JagAstLogicalExpression *result = g_object_new(JAG_AST_TYPE_LOGICAL_EXPRESSION, NULL);
 	cat_ref_anounce(result);
-	JagAstLogicalExpressionPrivate *priv = result->priv;
+	JagAstLogicalExpressionPrivate *priv = jag_ast_logical_expression_get_instance_private(result);
 	priv->logical_operator = logical_operator;
 	priv->e_expressions = cat_ref_ptr(e_expressions);
 	return result;
 }
 
 
-
-
-
-
-
-
-
-
-
 /********************* start JagAstIConditionalExpression implementation *********************/
 
-
 static JagAstIConditionalExpression *l_conditional_expression_invert(JagAstIConditionalExpression *self) {
-	JagAstLogicalExpressionPrivate *priv = JAG_AST_LOGICAL_EXPRESSION_GET_PRIVATE(self);
+	JagAstLogicalExpression *instance = JAG_AST_LOGICAL_EXPRESSION(self);
+	JagAstLogicalExpressionPrivate *priv = jag_ast_logical_expression_get_instance_private(instance);
 	JagAstIConditionalExpression *result = NULL;
 	if ((priv->logical_operator==JAG_BYT_MATH_OPERATOR_LOGICAL_AND) ||
 			(priv->logical_operator==JAG_BYT_MATH_OPERATOR_LOGICAL_OR)) {
@@ -131,7 +116,6 @@ static JagAstIConditionalExpression *l_conditional_expression_invert(JagAstICond
 		result = jag_ast_unary_expression_create(self);
 	}
 
-
 	return result;
 }
 
@@ -141,7 +125,8 @@ static void l_conditional_expression_iface_init(JagAstIConditionalExpressionInte
 
 
 static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
-	JagAstLogicalExpressionPrivate *priv = JAG_AST_LOGICAL_EXPRESSION_GET_PRIVATE(self);
+	JagAstLogicalExpression *instance = JAG_AST_LOGICAL_EXPRESSION(self);
+	JagAstLogicalExpressionPrivate *priv = jag_ast_logical_expression_get_instance_private(instance);
 	CatStringWo *e_op_text = cat_string_wo_new_with(" ");
 	cat_string_wo_append_chars(e_op_text, jag_byt_math_operator_to_text(priv->logical_operator));
 	cat_string_wo_append_unichar(e_op_text, ' ');
@@ -158,8 +143,8 @@ static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
 
 static gboolean l_expression_equal(JagAstIExpression *self, JagAstIExpression *other) {
 	if (JAG_AST_IS_LOGICAL_EXPRESSION(other)) {
-		JagAstLogicalExpressionPrivate *priv = JAG_AST_LOGICAL_EXPRESSION_GET_PRIVATE(self);
-		JagAstLogicalExpressionPrivate *o_priv = JAG_AST_LOGICAL_EXPRESSION_GET_PRIVATE(other);
+		JagAstLogicalExpressionPrivate *priv = jag_ast_logical_expression_get_instance_private(JAG_AST_LOGICAL_EXPRESSION(self));
+		JagAstLogicalExpressionPrivate *o_priv = jag_ast_logical_expression_get_instance_private(JAG_AST_LOGICAL_EXPRESSION(other));
 		return (priv->logical_operator==o_priv->logical_operator) &&
 				cat_array_wo_equal(priv->e_expressions, o_priv->e_expressions, (GEqualFunc) jag_ast_iexpression_equal);
 
@@ -171,6 +156,5 @@ static void l_expression_iface_init(JagAstIExpressionInterface *iface) {
 	iface->write = l_expression_write;
 	iface->equal = l_expression_equal;
 }
-
 
 /********************* end JagAstIConditionalExpression implementation *********************/

@@ -37,6 +37,7 @@ struct _JagBytOpMultiANewArrayPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpMultiANewArray, jag_byt_op_multi_a_new_array, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpMultiANewArray)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -44,16 +45,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_multi_a_new_array_class_init(JagBytOpMultiANewArrayClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpMultiANewArrayPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_multi_a_new_array_init(JagBytOpMultiANewArray *instance) {
-	JagBytOpMultiANewArrayPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_MULTI_A_NEW_ARRAY, JagBytOpMultiANewArrayPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -72,27 +69,28 @@ static void l_finalize(GObject *object) {
 JagBytOpMultiANewArray *jag_byt_op_multi_a_new_array_new(int offset, int class_pool_index, int dim_count) {
 	JagBytOpMultiANewArray *result = g_object_new(JAG_BYT_TYPE_OP_MULTI_A_NEW_ARRAY, NULL);
 	cat_ref_anounce(result);
-	JagBytOpMultiANewArrayPrivate *priv = result->priv;
+	JagBytOpMultiANewArrayPrivate *priv = jag_byt_op_multi_a_new_array_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, OP_MULTIANEWARRAY, offset, 4);
 	priv->class_pool_index = class_pool_index;
 	priv->dim_count = dim_count;
 	return result;
 }
 
-
-
 int jag_byt_op_multi_a_new_array_get_class_info_pool_index(JagBytOpMultiANewArray *op_multi_new_array) {
-	return JAG_BYT_OP_MULTI_A_NEW_ARRAY_GET_PRIVATE(op_multi_new_array)->class_pool_index;
+	JagBytOpMultiANewArrayPrivate *priv = jag_byt_op_multi_a_new_array_get_instance_private(op_multi_new_array);
+	return priv->class_pool_index;
 }
 
 int jag_byt_op_multi_a_new_array_get_nr_of_dimensions(JagBytOpMultiANewArray *op_multi_new_array) {
-	return JAG_BYT_OP_MULTI_A_NEW_ARRAY_GET_PRIVATE(op_multi_new_array)->dim_count;
+	JagBytOpMultiANewArrayPrivate *priv = jag_byt_op_multi_a_new_array_get_instance_private(op_multi_new_array);
+	return priv->dim_count;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpMultiANewArrayPrivate *priv = JAG_BYT_OP_MULTI_A_NEW_ARRAY_GET_PRIVATE(self);
+	JagBytOpMultiANewArray *instance = JAG_BYT_OP_MULTI_A_NEW_ARRAY(self);
+	JagBytOpMultiANewArrayPrivate *priv = jag_byt_op_multi_a_new_array_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new_with("multianewarray ");
 	cat_string_wo_append_decimal(result, priv->class_pool_index);
 	cat_string_wo_append_chars(result, ", ");

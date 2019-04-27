@@ -52,33 +52,27 @@ static void l_content_iface_init(MooIContentInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooModuleContentWo, moo_module_content_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooModuleContentWo)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ICONTENT, l_content_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_module_content_wo_class_init(MooModuleContentWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooModuleContentWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_module_content_wo_init(MooModuleContentWo *instance) {
-	MooModuleContentWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_MODULE_CONTENT_WO_WO, MooModuleContentWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	MooModuleContentWo *instance = MOO_MODULE_CONTENT_WO_WO(object);
-	MooModuleContentWoPrivate *priv = instance->priv;
+	MooModuleContentWo *instance = MOO_MODULE_CONTENT_WO(object);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(instance);
 	cat_unref_ptr(priv->base_node);
 	cat_unref_ptr(priv->settings_vip_node);
 	cat_unref_ptr(priv->model);
@@ -86,24 +80,21 @@ static void l_dispose(GObject *object) {
 		cat_unref_ptr(priv->wo_info->original);
 		cat_free_ptr(priv->wo_info);
 	}
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_module_content_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_module_content_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
-
-
-
 MooModuleContentWo *moo_module_content_wo_new(CatReadableTreeNode *base_node) {
-	MooModuleContentWo *result = g_object_new(MOO_TYPE_MODULE_CONTENT_WO_WO, NULL);
+	MooModuleContentWo *result = g_object_new(MOO_TYPE_MODULE_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(result);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(result);
 	priv->refresh_viper_info = TRUE;
 	priv->base_node = cat_ref_ptr(base_node);
 	priv->model = NULL;
@@ -115,10 +106,10 @@ MooModuleContentWo *moo_module_content_wo_new(CatReadableTreeNode *base_node) {
 
 
 MooModuleContentWo *moo_module_content_wo_ensure_editable(MooModuleContentWo *module_content) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(module_content);
 	if(priv->wo_info==NULL) {
 		MooModuleContentWo *copy = moo_module_content_wo_new(priv->base_node);
-		MooModuleContentWoPrivate *opriv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(copy);
+		MooModuleContentWoPrivate *opriv = moo_module_content_wo_get_instance_private(copy);
 		opriv->refresh_viper_info = priv->refresh_viper_info;
 		opriv->settings_file_index = priv->settings_file_index;
 		opriv->settings_vip_node = cat_ref_ptr(priv->settings_vip_node);
@@ -131,13 +122,13 @@ MooModuleContentWo *moo_module_content_wo_ensure_editable(MooModuleContentWo *mo
 }
 
 MooModuleContentWo *moo_module_content_wo_anchor(MooModuleContentWo *module_content, int version) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(module_content);
 	if(priv->wo_info==NULL) {
 		return module_content;
 	}
 
 	if (priv->wo_info->original) {
-		MooModuleContentWoPrivate *opriv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(priv->wo_info->original);
+		MooModuleContentWoPrivate *opriv = moo_module_content_wo_get_instance_private(priv->wo_info->original);
 		gboolean was_modified = priv->is_model_writable
 				|| opriv->refresh_viper_info!=priv->refresh_viper_info
 				|| opriv->settings_file_index!=priv->settings_file_index
@@ -167,11 +158,12 @@ MooModuleContentWo *moo_module_content_wo_anchor(MooModuleContentWo *module_cont
 
 
 gboolean moo_module_content_wo_should_refresh_viper_info(MooModuleContentWo *module_content) {
-	return MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module_content)->refresh_viper_info;
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(module_content);
+	return priv->refresh_viper_info;
 }
 
 void moo_module_content_wo_set_refresh_viper_info(MooModuleContentWo *e_module_content, gboolean refreshViperInfo) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(e_module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(e_module_content);
 	if (refreshViperInfo == priv->refresh_viper_info) {
 		return;
 	}
@@ -180,12 +172,12 @@ void moo_module_content_wo_set_refresh_viper_info(MooModuleContentWo *e_module_c
 }
 
 CatReadableTreeNode *moo_module_content_wo_get_base_node(MooModuleContentWo *module_content) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(module_content);
 	return priv->base_node;
 }
 
 void moo_module_content_wo_set_base_node(MooModuleContentWo *e_module_content, CatReadableTreeNode *base_node) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(e_module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(e_module_content);
 	if (base_node == priv->base_node) {
 		return;
 	}
@@ -197,7 +189,7 @@ void moo_module_content_wo_set_base_node(MooModuleContentWo *e_module_content, C
 
 //@Override
 //String toString() {
-//	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module_content);
+//	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(module_content);
 //	return "MooModuleContentWo[viperBaseNode="+viperBaseNode+", refreshViperInfo="+refreshViperInfo+"]";
 //}
 
@@ -225,9 +217,10 @@ static ShoModel *l_load_settings(MooModuleContentWo *module_content, VipNode *se
 }
 
 void moo_module_content_wo_transfer_settings(MooService *moo_service, MooModuleContentWo *e_module_content, MooModuleContentWo *transfer_from) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(e_module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(e_module_content);
 
-	ShoModel *model = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(transfer_from)->model;
+	MooModuleContentWoPrivate *priv_from = moo_module_content_wo_get_instance_private(transfer_from);
+	ShoModel *model = priv_from->model;
 	cat_log_debug("transfer_model=%o, model=%o", model, priv->model);
 	if (priv->model == model) {
 		return;
@@ -241,9 +234,8 @@ void moo_module_content_wo_transfer_settings(MooService *moo_service, MooModuleC
 	moo_module_content_wo_settings_save(moo_service, e_module_content);
 }
 
-
 void moo_module_content_wo_settings_save(MooService *moo_service, MooModuleContentWo *module_content) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(module_content);
 	if (priv->model==NULL) {
 		cat_log_error("model is NULL");
 	}
@@ -275,7 +267,7 @@ void moo_module_content_wo_settings_save(MooService *moo_service, MooModuleConte
 }
 
 void moo_module_content_wo_set_settings_info(MooModuleContentWo *e_module_content, int settingsFileIndex, VipNode *settingsVipNode) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(e_module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(e_module_content);
 	if ((priv->settings_file_index == settingsFileIndex) && (settingsVipNode==priv->settings_vip_node)) {
 		return;
 	}
@@ -290,14 +282,13 @@ void moo_module_content_wo_set_settings_info(MooModuleContentWo *e_module_conten
 	}
 }
 
-
 ShoModel *moo_module_content_wo_get_model(MooModuleContentWo *module_content) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(module_content);
 	return priv->model;
 }
 
 ShoModel *moo_module_content_wo_get_writable_model(MooModuleContentWo *e_module_content) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(e_module_content);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(e_module_content);
 	CHECK_IF_WRITABLE(e_module_content, NULL)
 	if (!priv->is_model_writable) {
 		ShoModel *writable_model;
@@ -313,24 +304,12 @@ ShoModel *moo_module_content_wo_get_writable_model(MooModuleContentWo *e_module_
 	return priv->model;
 }
 
-
-//VipNodePath *moo_module_content_update_and_get_base_viper_path(MooModuleContentWo *module, VipSnapshot *snapshot) {
-//	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(module);
-//	cat_log_detail("base_path=%o", priv->viper_base_node);
-//	VipNodePath *new_snapshot = vip_node_path_update(priv->viper_base_node_path, snapshot);
-//	cat_ref_swap(priv->vip_base_node_path, new_snapshot);
-//	return new_snapshot;
-//}
-
-
 CatStringWo *moo_module_content_wo_key() {
 	return CAT_S(moo_s_module_content_key);
 }
 
 
 /********************* start MooIContent implementation *********************/
-
-
 
 static CatStringWo *l_content_get_key(MooIContent *self) {
 	return moo_module_content_wo_key();
@@ -340,8 +319,6 @@ static MooIContent *l_content_anchor(MooIContent *self, int version) {
 	return (MooIContent *) moo_module_content_wo_anchor((MooModuleContentWo *) self, version);
 }
 
-
-
 static void l_content_iface_init(MooIContentInterface *iface) {
 	iface->getKey = l_content_get_key;
 	iface->anchor = l_content_anchor;
@@ -349,11 +326,11 @@ static void l_content_iface_init(MooIContentInterface *iface) {
 
 /********************* end MooIContent implementation *********************/
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MooModuleContentWoPrivate *priv = MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(self);
+	MooModuleContentWo *instance = MOO_MODULE_CONTENT_WO(self);
+	MooModuleContentWoPrivate *priv = moo_module_content_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p: %s, %s, %s, base-node=%p, sho-model=%o]", iname, self, priv->wo_info ? "editable" : "anchored", priv->refresh_viper_info ? "needs-refresh" : "is-up-to-date", priv->is_model_writable ? "sho-writable" : "sho-readonly", priv->base_node, priv->model);
 }

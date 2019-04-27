@@ -39,83 +39,75 @@ struct _JagBytAbstractMnemonicPrivate {
 static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE(JagBytAbstractMnemonic, jag_byt_abstract_mnemonic, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagBytAbstractMnemonic)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_abstract_mnemonic_class_init(JagBytAbstractMnemonicClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAbstractMnemonicPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_abstract_mnemonic_init(JagBytAbstractMnemonic *instance) {
-	JagBytAbstractMnemonicPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, JagBytAbstractMnemonicPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_abstract_mnemonic_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_abstract_mnemonic_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 void jag_byt_abstract_mnemonic_construct(JagBytAbstractMnemonic *abstract_mnemonic, JagBytOperation operation, int offset, int length) {
-	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(abstract_mnemonic);
+	JagBytAbstractMnemonicPrivate *priv = jag_byt_abstract_mnemonic_get_instance_private(abstract_mnemonic);
 	priv->operation = operation;
 	priv->offset = offset;
 	priv->length = length;
 }
 
-
-
-
 /********************* start JagBytIMnemonicInterface implementation *********************/
 
-
-
 static JagBytOperation l_mnemonic_get_operation(JagBytIMnemonic *self) {
-	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(self);
+	JagBytAbstractMnemonic *instance = JAG_BYT_ABSTRACT_MNEMONIC(self);
+	JagBytAbstractMnemonicPrivate *priv = jag_byt_abstract_mnemonic_get_instance_private(instance);
 	return priv->operation;
 }
 
-
 static short l_mnemonic_get_opp_code(JagBytIMnemonic *self) {
-	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(self);
+	JagBytAbstractMnemonic *instance = JAG_BYT_ABSTRACT_MNEMONIC(self);
+	JagBytAbstractMnemonicPrivate *priv = jag_byt_abstract_mnemonic_get_instance_private(instance);
 	return (short) priv->operation;
 }
 
 static int l_mnemonic_get_offset(JagBytIMnemonic *self) {
-	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(self);
+	JagBytAbstractMnemonic *instance = JAG_BYT_ABSTRACT_MNEMONIC(self);
+	JagBytAbstractMnemonicPrivate *priv = jag_byt_abstract_mnemonic_get_instance_private(instance);
 	return priv->offset;
 }
 
 static int l_mnemonic_get_continues_offset(JagBytIMnemonic *self) {
-	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(self);
+	JagBytAbstractMnemonic *instance = JAG_BYT_ABSTRACT_MNEMONIC(self);
+	JagBytAbstractMnemonicPrivate *priv = jag_byt_abstract_mnemonic_get_instance_private(instance);
 	return priv->offset+priv->length;
 }
 
 static int l_mnemonic_get_branch_offset(JagBytIMnemonic *self) {
-//	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(self);
 	return -1;
 }
 
 static int l_mnemonic_get_length(JagBytIMnemonic *self) {
-	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(self);
+	JagBytAbstractMnemonic *instance = JAG_BYT_ABSTRACT_MNEMONIC(self);
+	JagBytAbstractMnemonicPrivate *priv = jag_byt_abstract_mnemonic_get_instance_private(instance);
 	return priv->length;
 }
 
@@ -126,7 +118,6 @@ static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 	iface->getContinuesOffset = l_mnemonic_get_continues_offset;
 	iface->getBranchOffset = l_mnemonic_get_branch_offset;
 	iface->getLength = l_mnemonic_get_length;
-
 }
 
 /********************* end JagBytIMnemonicInterface implementation *********************/

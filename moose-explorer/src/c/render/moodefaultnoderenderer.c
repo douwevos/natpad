@@ -32,50 +32,36 @@
 #define CAT_LOG_CLAZZ "MooDefaultNodeRenderer"
 #include <logging/catlog.h>
 
-struct _MooDefaultNodeRendererPrivate {
-	void *dummy;
-};
-
 static void l_node_renderer_iface_init(MooINodeRendererInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(MooDefaultNodeRenderer, moo_default_node_renderer, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(MooDefaultNodeRenderer, moo_default_node_renderer, G_TYPE_OBJECT, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_RENDERER, l_node_renderer_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_default_node_renderer_class_init(MooDefaultNodeRendererClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooDefaultNodeRendererPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_default_node_renderer_init(MooDefaultNodeRenderer *instance) {
-	MooDefaultNodeRendererPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_DEFAULT_NODE_RENDERER, MooDefaultNodeRendererPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	MooDefaultNodeRenderer *instance = MOO_DEFAULT_NODE_RENDERER(object);
-//	MooDefaultNodeRendererPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_default_node_renderer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_default_node_renderer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 MooDefaultNodeRenderer *moo_default_node_renderer_new() {
 	MooDefaultNodeRenderer *result = g_object_new(MOO_TYPE_DEFAULT_NODE_RENDERER, NULL);
@@ -83,13 +69,7 @@ MooDefaultNodeRenderer *moo_default_node_renderer_new() {
 	return result;
 }
 
-
-
-
-
-
 /********************* begin MooINodeRenderer implementation *********************/
-
 
 static void pixbuf_loader_size_prepared (GdkPixbufLoader *loader, int width, int height, gpointer desired_size_ptr) {
     int size, desired_size;
@@ -113,21 +93,18 @@ GdkPixbuf *eel_gdk_pixbuf_load_from_stream_at_size (GInputStream  *stream, int s
     GdkPixbuf *pixbuf;
     gboolean got_eos;
 
-
     g_return_val_if_fail (stream != NULL, NULL);
 
     got_eos = FALSE;
     loader = gdk_pixbuf_loader_new ();
 
-    if (size > 0)
-    {
+    if (size > 0) {
         g_signal_connect (loader, "size-prepared",
                           G_CALLBACK (pixbuf_loader_size_prepared),
                           GINT_TO_POINTER (size));
     }
 
-    while (1)
-    {
+    while (1) {
         bytes_read = g_input_stream_read (stream, buffer, sizeof (buffer), NULL, NULL);
 
         if (bytes_read < 0) {
@@ -156,7 +133,6 @@ GdkPixbuf *eel_gdk_pixbuf_load_from_stream_at_size (GInputStream  *stream, int s
     g_object_unref (loader);
     return pixbuf;
 }
-
 
 void l_node_renderer_update_layout(MooINodeRenderer *self, struct _MooNodeLayout *node_layout) {
 	int size = moo_node_layout_get_height(node_layout)-2;
@@ -246,7 +222,6 @@ void l_node_renderer_update_layout(MooINodeRenderer *self, struct _MooNodeLayout
 }
 
 void l_node_renderer_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNodeLayout *node_layout) {
-
 	MooNodeWo *node = moo_node_layout_get_node(node_layout);
 //	int fontHeight = moo_node_layout_get_font_height(node_layout);
 
@@ -272,20 +247,7 @@ void l_node_renderer_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNo
 			}
 		}
 	}
-//
-//
-//	AffineTransform scaleInstance = AffineTransform.getScaleInstance(fontHeight/100d, fontHeight/100d);
-//	AffineTransform translateInstance = AffineTransform.getTranslateInstance(layout_x+fontHeight, layout_y);
-//
-//	translateInstance.concatenate(scaleInstance);
-//
-//	Graphics2D g2 = (Graphics2D) g.create();
-//	AffineTransform transform = g2.getTransform();
-//	transform.concatenate(translateInstance);
-//	g2.setTransform(transform);
-//
 	if (paintMap) {
-//		drawMap(g2, isExpanded, false);
 		gboolean is_module = moo_node_wo_get_content(node, moo_module_content_wo_key())!=NULL;
 		moo_default_node_renderer_draw_map(cairo, layout_x, layout_y, size, isExpanded, is_module);
 	} else {
@@ -295,10 +257,7 @@ void l_node_renderer_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNo
 		} else {
 			moo_default_renderer_draw_file(cairo, layout_x, layout_y, size);
 		}
-//		drawFile(g2);
 	}
-//
-//	g2.dispose();
 }
 
 

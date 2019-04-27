@@ -34,19 +34,15 @@ G_BEGIN_DECLS
 #define VIP_IS_WRITE_FILE_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_WRITE_FILE_REQUEST))
 #define VIP_IS_WRITE_FILE_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_WRITE_FILE_REQUEST))
 #define VIP_WRITE_FILE_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_WRITE_FILE_REQUEST, VipWriteFileRequestClass))
-#define VIP_WRITE_FILE_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_WRITE_FILE_REQUEST, VipWriteFileRequestPrivate))
-
 
 typedef struct _VipWriteFileRequest               VipWriteFileRequest;
 typedef struct _VipWriteFileRequestPrivate        VipWriteFileRequestPrivate;
 typedef struct _VipWriteFileRequestClass          VipWriteFileRequestClass;
 
-
 struct _VipService;
 
 struct _VipWriteFileRequest {
 	WorRequest parent;
-	VipWriteFileRequestPrivate *priv;
 };
 
 struct _VipWriteFileRequestClass {

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "moocowpanelresource.h"
 #include "../moonodewo.h"
 #include "../mooresourcecontentwo.h"
@@ -50,7 +49,6 @@ static void l_finalize(GObject *object);
 static void l_panel_reconfigure(CowPanel *self, GObject *config);
 
 static void moo_cow_panel_resource_class_init(MooCowPanelResourceClass *clazz) {
-
 	CowPanelClass *panel_class = COW_PANEL_CLASS(clazz);
 	panel_class->reconfigure = l_panel_reconfigure;
 

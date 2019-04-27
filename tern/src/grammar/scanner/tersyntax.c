@@ -21,7 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "tersyntax.h"
-
 #include <caterpillar.h>
 
 #include <logging/catlogdefs.h>
@@ -40,7 +39,6 @@ struct _TerSyntaxPrivate {
 	CatUnicharArray *multi_line_comment_start;
 	CatUnicharArray *multi_line_comment_end;
 
-
 	CatUnicharArray *single_comment;
 	int single_comment_col;
 
@@ -53,31 +51,24 @@ struct _TerSyntaxPrivate {
 	gunichar string_start, string_end;
 };
 
-G_DEFINE_TYPE (TerSyntax, ter_syntax, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(TerSyntax, ter_syntax, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void ter_syntax_class_init(TerSyntaxClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(TerSyntaxPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void ter_syntax_init(TerSyntax *instance) {
-	TerSyntaxPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, TER_TYPE_SYNTAX, TerSyntaxPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	TerSyntax *instance = TER_SYNTAX(object);
-	TerSyntaxPrivate *priv = instance->priv;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(instance);
 	cat_unref_ptr(priv->keyword_node);
 	cat_unref_ptr(priv->keyword_chars);
 	cat_unref_ptr(priv->hex_prefix);
@@ -87,22 +78,21 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->single_comment_alt);
 	cat_unref_ptr(priv->bracket_set);
 	cat_unref_ptr(priv->operator_char_set);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(ter_syntax_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(ter_syntax_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 TerSyntax *ter_syntax_new() {
 	TerSyntax *result = g_object_new(TER_TYPE_SYNTAX, NULL);
 	cat_ref_anounce(result);
-	TerSyntaxPrivate *priv = result->priv;
-
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(result);
 	priv->keyword_node = ter_unichar_node_new((gunichar) 0, 0);
 	priv->keyword_chars = cat_hash_set_new((GHashFunc) cat_unichar_hash, (GEqualFunc) cat_unichar_equal);
 	priv->hex_prefix = NULL;
@@ -115,18 +105,13 @@ TerSyntax *ter_syntax_new() {
 	priv->single_comment_col_alt = 0;
 	priv->multi_line_comment_start = NULL;
 	priv->multi_line_comment_end = NULL;
-
 	priv->string_start = 0;
 	priv->string_end = 0;
 	return result;
 }
 
-
-
-
-
 TerUnicharNode *ter_syntax_create_keyword_end_node(TerSyntax *syntax, CatUnicharArray *key_array) {
-	TerSyntaxPrivate *priv = syntax->priv;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
 	int count = cat_unichar_array_length(key_array);
 	int idx;
 	TerUnicharNode *node = priv->keyword_node;
@@ -144,116 +129,134 @@ TerUnicharNode *ter_syntax_create_keyword_end_node(TerSyntax *syntax, CatUnichar
 
 
 TerUnicharNode *ter_syntax_get_keyword_node(TerSyntax *syntax) {
-	return syntax->priv->keyword_node;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->keyword_node;
 }
 
 gboolean ter_syntax_is_keyword_char(TerSyntax *syntax, CatUnichar *uchobj) {
-	return cat_hash_set_get(syntax->priv->keyword_chars, (GObject *) uchobj)!=NULL;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return cat_hash_set_get(priv->keyword_chars, (GObject *) uchobj)!=NULL;
 }
 
 
 void ter_syntax_set_mode(TerSyntax *syntax, TerSyntaxMode new_mode) {
-	syntax->priv->mode = new_mode;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	priv->mode = new_mode;
 }
 
 TerSyntaxMode ter_syntax_get_mode(TerSyntax *syntax) {
-	return syntax->priv->mode;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->mode;
 }
-
 
 CatHashSet *ter_syntax_get_bracket_set(TerSyntax *syntax) {
-	return syntax->priv->bracket_set;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->bracket_set;
 }
-
 
 gboolean ter_syntax_is_bracket_char(TerSyntax *syntax, CatUnichar *uchobj) {
-	return cat_hash_set_get(syntax->priv->bracket_set, (GObject *) uchobj)!=NULL;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return cat_hash_set_get(priv->bracket_set, (GObject *) uchobj)!=NULL;
 }
 
-
 CatHashSet *ter_syntax_get_operator_char_set(TerSyntax *syntax) {
-	return syntax->priv->operator_char_set;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->operator_char_set;
 }
 
 gboolean ter_syntax_is_operator_char(TerSyntax *syntax, CatUnichar *uchobj) {
-	return cat_hash_set_get(syntax->priv->operator_char_set, (GObject *) uchobj)!=NULL;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return cat_hash_set_get(priv->operator_char_set, (GObject *) uchobj)!=NULL;
 }
 
-
 void ter_syntax_set_hex_prefix(TerSyntax *syntax, CatUnicharArray *new_hex_prefix) {
-	cat_ref_sink_swap(syntax->priv->hex_prefix, new_hex_prefix);
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	cat_ref_sink_swap(priv->hex_prefix, new_hex_prefix);
 }
 
 CatUnicharArray *ter_syntax_get_hex_prefix(TerSyntax *syntax) {
-	return  syntax->priv->hex_prefix;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->hex_prefix;
 }
 
-
 void ter_syntax_set_single_comment(TerSyntax *syntax, CatUnicharArray *new_single_comment) {
-	cat_ref_sink_swap(syntax->priv->single_comment, new_single_comment);
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	cat_ref_sink_swap(priv->single_comment, new_single_comment);
 }
 
 CatUnicharArray *ter_syntax_get_single_comment(TerSyntax *syntax) {
-	return syntax->priv->single_comment;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->single_comment;
 }
 
 void ter_syntax_set_single_comment_column(TerSyntax *syntax, int new_column) {
-	syntax->priv->single_comment_col = new_column;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	priv->single_comment_col = new_column;
 }
 
 int ter_syntax_get_single_comment_column(TerSyntax *syntax) {
-	return syntax->priv->single_comment_col;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->single_comment_col;
 }
 
-
-
 void ter_syntax_set_single_comment_alt(TerSyntax *syntax, CatUnicharArray *new_single_comment) {
-	cat_ref_sink_swap(syntax->priv->single_comment_alt, new_single_comment);
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	cat_ref_sink_swap(priv->single_comment_alt, new_single_comment);
 }
 
 CatUnicharArray *ter_syntax_get_single_comment_alt(TerSyntax *syntax) {
-	return syntax->priv->single_comment_alt;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->single_comment_alt;
 }
 
 void ter_syntax_set_single_comment_column_alt(TerSyntax *syntax, int new_column) {
-	syntax->priv->single_comment_col_alt = new_column;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	priv->single_comment_col_alt = new_column;
 }
 
 int ter_syntax_get_single_comment_column_alt(TerSyntax *syntax) {
-	return syntax->priv->single_comment_col_alt;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->single_comment_col_alt;
 }
 
 
 void ter_syntax_set_multi_line_comment_start(TerSyntax *syntax, CatUnicharArray *new_multi_line_comment_start) {
-	cat_ref_sink_swap(syntax->priv->multi_line_comment_start, new_multi_line_comment_start);
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	cat_ref_sink_swap(priv->multi_line_comment_start, new_multi_line_comment_start);
 }
 
 CatUnicharArray *ter_syntax_get_multi_line_comment_start(TerSyntax *syntax) {
-	return syntax->priv->multi_line_comment_start;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->multi_line_comment_start;
 }
 
 void ter_syntax_set_multi_line_comment_end(TerSyntax *syntax, CatUnicharArray *new_multi_line_comment_end) {
-	cat_ref_sink_swap(syntax->priv->multi_line_comment_end, new_multi_line_comment_end);
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	cat_ref_sink_swap(priv->multi_line_comment_end, new_multi_line_comment_end);
 }
 
 CatUnicharArray *ter_syntax_get_multi_line_comment_end(TerSyntax *syntax) {
-	return syntax->priv->multi_line_comment_end;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->multi_line_comment_end;
 }
 
 
 void ter_syntax_set_string_start(TerSyntax *syntax, gunichar string_start) {
-	syntax->priv->string_start = string_start;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	priv->string_start = string_start;
 }
 
 gunichar ter_syntax_get_string_start(TerSyntax *syntax) {
-	return syntax->priv->string_start;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->string_start;
 }
 
 void ter_syntax_set_string_end(TerSyntax *syntax, gunichar string_end) {
-	syntax->priv->string_end = string_end;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	priv->string_end = string_end;
 }
 
 gunichar ter_syntax_get_string_end(TerSyntax *syntax) {
-	return syntax->priv->string_end;
+	TerSyntaxPrivate *priv = ter_syntax_get_instance_private(syntax);
+	return priv->string_end;
 }
-

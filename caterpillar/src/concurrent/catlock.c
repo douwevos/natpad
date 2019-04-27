@@ -29,33 +29,39 @@
 #define CAT_LOG_CLAZZ "CatLock"
 #include "../logging/catlog.h"
 
-G_DEFINE_TYPE(CatLock, cat_lock, G_TYPE_OBJECT)
+struct _CatLockPrivate {
+	GMutex mutex;
+	GCond condition;
+};
 
-static void _dispose(GObject *object);
+G_DEFINE_TYPE_WITH_PRIVATE(CatLock, cat_lock, G_TYPE_OBJECT)
+
+static void l_dispose(GObject *object);
 
 static void cat_lock_class_init(CatLockClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
+	object_class->dispose = l_dispose;
 }
 
 static void cat_lock_init(CatLock *instance) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatLock *instance = CAT_LOCK(object);
+	CatLockPrivate *priv = cat_lock_get_instance_private(instance);
 //	if (instance->mutex) {
 //#ifdef CAT_REF_MONITORING
 //		if (g_mutex_trylock(instance->mutex)) {
 //			cat_stacktrace_print();
 //		}
 //#endif
-		g_mutex_clear(&(instance->mutex));
+		g_mutex_clear(&(priv->mutex));
 //		instance->mutex = NULL;
 //	}
 
 //	if (instance->condition) {
-		g_cond_clear(&(instance->condition));
+		g_cond_clear(&(priv->condition));
 //	}
 	cat_log_detail("end-dispose:%p", object);
 }
@@ -64,13 +70,15 @@ static void _dispose(GObject *object) {
 CatLock *cat_lock_new() {
 	CatLock *result = g_object_new(CAT_TYPE_LOCK, NULL);
 	cat_ref_anounce(result);
-	g_mutex_init(&(result->mutex));
-	g_cond_init(&(result->condition));
+	CatLockPrivate *priv = cat_lock_get_instance_private(result);
+	g_mutex_init(&(priv->mutex));
+	g_cond_init(&(priv->condition));
 	return result;
 }
 
 
 void cat_lock_lock(CatLock *lock) {
+	CatLockPrivate *priv = cat_lock_get_instance_private(lock);
 //	int64_t start = cat_date_current_time();
 //	while(TRUE) {
 //		gboolean could_lock = g_mutex_trylock(lock->mutex);
@@ -88,28 +96,33 @@ void cat_lock_lock(CatLock *lock) {
 //		}
 //	}
 
-	g_mutex_lock(&(lock->mutex));
+	g_mutex_lock(&(priv->mutex));
 }
 
 void cat_lock_unlock(CatLock *lock) {
-	g_mutex_unlock(&(lock->mutex));
+	CatLockPrivate *priv = cat_lock_get_instance_private(lock);
+	g_mutex_unlock(&(priv->mutex));
 }
 
 void cat_lock_wait(CatLock *lock) {
-	g_cond_wait(&(lock->condition), &(lock->mutex));
+	CatLockPrivate *priv = cat_lock_get_instance_private(lock);
+	g_cond_wait(&(priv->condition), &(priv->mutex));
 }
 
 gboolean cat_lock_wait_timed(CatLock *lock, int64_t ms) {
+	CatLockPrivate *priv = cat_lock_get_instance_private(lock);
 	gint64 end_time = g_get_monotonic_time () + (ms * G_TIME_SPAN_SECOND)/1000l;
-	return g_cond_wait_until(&(lock->condition), &(lock->mutex), end_time);
+	return g_cond_wait_until(&(priv->condition), &(priv->mutex), end_time);
 }
 
 
 
 void cat_lock_notify(CatLock *lock) {
-	g_cond_signal(&(lock->condition));
+	CatLockPrivate *priv = cat_lock_get_instance_private(lock);
+	g_cond_signal(&(priv->condition));
 }
 
 void cat_lock_notify_all(CatLock *lock) {
-	g_cond_broadcast(&(lock->condition));
+	CatLockPrivate *priv = cat_lock_get_instance_private(lock);
+	g_cond_broadcast(&(priv->condition));
 }

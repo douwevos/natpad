@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_TRY_CATCH(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_TRY_CATCH))
 #define JAG_BYT_IS_TRY_CATCH_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_TRY_CATCH))
 #define JAG_BYT_TRY_CATCH_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_TRY_CATCH, JagBytTryCatchClass))
-#define JAG_BYT_TRY_CATCH_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_TRY_CATCH, JagBytTryCatchPrivate))
 
 typedef struct _JagBytTryCatch               JagBytTryCatch;
 typedef struct _JagBytTryCatchPrivate        JagBytTryCatchPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytTryCatchClass          JagBytTryCatchClass;
 
 struct _JagBytTryCatch {
 	GObject parent;
-	JagBytTryCatchPrivate *priv;
 };
 
 struct _JagBytTryCatchClass {

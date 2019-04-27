@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOONODEWO_H_
 #define MOONODEWO_H_
 
@@ -39,8 +38,6 @@ G_BEGIN_DECLS
 #define MOO_IS_NODE_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_NODE_WO))
 #define MOO_IS_NODE_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_NODE_WO))
 #define MOO_NODE_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_NODE_WO, MooNodeWoClass))
-#define MOO_NODE_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_NODE_WO, MooNodeWoPrivate))
-
 
 typedef struct _MooNodeWo               MooNodeWo;
 typedef struct _MooNodeWoPrivate        MooNodeWoPrivate;
@@ -50,7 +47,6 @@ struct _MooIdPath;
 
 struct _MooNodeWo {
 	GObject parent;
-	MooNodeWoPrivate *priv;
 };
 
 struct _MooNodeWoClass {
@@ -73,11 +69,8 @@ gboolean moo_node_wo_is_fixed(MooNodeWo *node);
 MooNodeWo *moo_node_wo_anchor(MooNodeWo *node, int version);
 gboolean moo_node_wo_equal(MooNodeWo *node_a, MooNodeWo *node_b);
 
-
-
 MooINodeExpander *moo_node_wo_get_expander(MooNodeWo *node);
 void moo_node_wo_set_expander(MooNodeWo *node, MooINodeExpander *expander);
-
 
 MooNodeWo *moo_node_wo_get_parent_node_ref(MooNodeWo *e_node);
 
@@ -101,7 +94,6 @@ void moo_node_wo_insert_child_at(MooNodeWo *e_node, int index, MooNodeWo *child)
 void moo_node_wo_append_child(MooNodeWo *e_node, MooNodeWo *child);
 MooNodeWo *moo_node_wo_get_editable_child_at(MooNodeWo *node, int index);
 MooNodeListWo *moo_node_wo_get_editable_children(MooNodeWo *node);
-
 
 int moo_node_wo_find_index(MooNodeWo *node, MooINodeMatcher *nodeMatcher, gpointer userdata, int cache_index);
 struct _MooIdPath *moo_node_wo_find_path(MooNodeWo *node, long long unique_id);

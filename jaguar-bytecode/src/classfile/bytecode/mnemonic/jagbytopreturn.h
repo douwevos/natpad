@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_RETURN(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_RETURN))
 #define JAG_BYT_IS_OP_RETURN_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_RETURN))
 #define JAG_BYT_OP_RETURN_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_RETURN, JagBytOpReturnClass))
-#define JAG_BYT_OP_RETURN_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_RETURN, JagBytOpReturnPrivate))
 
 typedef struct _JagBytOpReturn               JagBytOpReturn;
 typedef struct _JagBytOpReturnPrivate        JagBytOpReturnPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpReturnClass          JagBytOpReturnClass;
 
 struct _JagBytOpReturn {
 	JagBytAbstractMnemonic parent;
-	JagBytOpReturnPrivate *priv;
 };
 
 struct _JagBytOpReturnClass {

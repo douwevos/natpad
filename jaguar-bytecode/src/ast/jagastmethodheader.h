@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTMETHODHEADER_H_
 #define JAGASTMETHODHEADER_H_
 
@@ -40,7 +39,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_METHOD_HEADER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_METHOD_HEADER))
 #define JAG_AST_IS_METHOD_HEADER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_METHOD_HEADER))
 #define JAG_AST_METHOD_HEADER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_METHOD_HEADER, JagAstMethodHeaderClass))
-#define JAG_AST_METHOD_HEADER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_METHOD_HEADER, JagAstMethodHeaderPrivate))
 
 typedef struct _JagAstMethodHeader               JagAstMethodHeader;
 typedef struct _JagAstMethodHeaderPrivate        JagAstMethodHeaderPrivate;
@@ -49,7 +47,6 @@ typedef struct _JagAstMethodHeaderClass          JagAstMethodHeaderClass;
 
 struct _JagAstMethodHeader {
 	GObject parent;
-	JagAstMethodHeaderPrivate *priv;
 };
 
 struct _JagAstMethodHeaderClass {
@@ -65,8 +62,6 @@ void jag_ast_method_header_write(JagAstMethodHeader *method_header, JagAstWriter
 
 JagAstDeclarationType *jag_ast_method_header_get_return_type(JagAstMethodHeader *method_header);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTMETHODHEADER_H_ */

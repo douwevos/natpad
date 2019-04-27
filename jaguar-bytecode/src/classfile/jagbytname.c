@@ -33,47 +33,40 @@ struct _JagBytNamePrivate {
 	int hashCode;
 };
 
-G_DEFINE_TYPE (JagBytName, jag_byt_name, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytName, jag_byt_name, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_name_class_init(JagBytNameClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytNamePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_name_init(JagBytName *instance) {
-	JagBytNamePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_NAME, JagBytNamePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytName *instance = JAG_BYT_NAME(object);
-	JagBytNamePrivate *priv = instance->priv;
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(instance);
 	cat_unref_ptr(priv->a_parts);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_name_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_name_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytName *jag_byt_name_new(CatStringWo *a_full_name, gboolean from_pool) {
 	JagBytName *result = g_object_new(JAG_BYT_TYPE_NAME, NULL);
 	cat_ref_anounce(result);
-	JagBytNamePrivate *priv = result->priv;
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(result);
 
 	char sep = from_pool ? '/' : '.';
 	int idxa = 0;
@@ -99,12 +92,10 @@ JagBytName *jag_byt_name_new(CatStringWo *a_full_name, gboolean from_pool) {
 	return result;
 }
 
-
-
 static JagBytName *jag_byt_name_new_fast(CatArrayWo *a_direct) {
 	JagBytName *result = g_object_new(JAG_BYT_TYPE_NAME, NULL);
 	cat_ref_anounce(result);
-	JagBytNamePrivate *priv = result->priv;
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(result);
 	priv->a_parts = cat_ref_ptr(a_direct);
 	int hashCode = 0;
 	CatIIterator *iter = cat_array_wo_iterator(a_direct);
@@ -118,12 +109,12 @@ static JagBytName *jag_byt_name_new_fast(CatArrayWo *a_direct) {
 }
 
 int jag_byt_name_count(JagBytName *name) {
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
 	return cat_array_wo_size(priv->a_parts);
 }
 
 CatStringWo *jag_byt_name_get(JagBytName *name, int index) {
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
 	int parts_length = cat_array_wo_size(priv->a_parts);
 	if (index>=0 && index<parts_length) {
 		return CAT_STRING_WO(cat_array_wo_get(priv->a_parts, index));
@@ -131,16 +122,14 @@ CatStringWo *jag_byt_name_get(JagBytName *name, int index) {
 	return NULL;
 }
 
-
 CatStringWo *jag_byt_name_get_short_type_name(JagBytName *name) {
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
 	int parts_length = cat_array_wo_size(priv->a_parts);
 	return parts_length>0 ? CAT_STRING_WO(cat_array_wo_get_last(priv->a_parts)) : CAT_S(cat_s_empty_string);
 }
 
-
 JagBytName *jag_byt_name_create_package_name(JagBytName *name) {
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
 	int parts_length = cat_array_wo_size(priv->a_parts);
 	if (parts_length>0) {
 		CatArrayWo *new_parts = cat_array_wo_new_sub(priv->a_parts, 0, parts_length-1);
@@ -149,9 +138,8 @@ JagBytName *jag_byt_name_create_package_name(JagBytName *name) {
 	return jag_byt_name_new_fast(cat_array_wo_new());
 }
 
-
 CatStringWo *jag_byt_name_create_fqn(JagBytName *name) {
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
 	CatStringWo *e_buf = cat_string_wo_new();
 	CatIIterator *iter = cat_array_wo_iterator(priv->a_parts);
 	while(cat_iiterator_has_next(iter)) {
@@ -167,7 +155,8 @@ CatStringWo *jag_byt_name_create_fqn(JagBytName *name) {
 
 
 int jag_byt_name_hash_code(JagBytName *name) {
-	return JAG_BYT_NAME_GET_PRIVATE(name)->hashCode;
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
+	return priv->hashCode;
 }
 
 int jag_byt_name_equal(JagBytName *name, JagBytName *other) {
@@ -177,8 +166,8 @@ int jag_byt_name_equal(JagBytName *name, JagBytName *other) {
 	if (other==NULL || name==NULL) {
 		return  FALSE;
 	}
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
-	JagBytNamePrivate *opriv = JAG_BYT_NAME_GET_PRIVATE(other);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
+	JagBytNamePrivate *opriv = jag_byt_name_get_instance_private(other);
 	if (cat_array_wo_size(priv->a_parts)!=cat_array_wo_size(opriv->a_parts)) {
 		return FALSE;
 	}
@@ -202,8 +191,8 @@ int jag_byt_name_compare(JagBytName *name, JagBytName *other) {
 		return 1;
 	}
 
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
-	JagBytNamePrivate *opriv = JAG_BYT_NAME_GET_PRIVATE(other);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
+	JagBytNamePrivate *opriv = jag_byt_name_get_instance_private(other);
 
 	int count = cat_array_wo_size(priv->a_parts);
 	int ocount = cat_array_wo_size(opriv->a_parts);
@@ -226,10 +215,9 @@ int jag_byt_name_compare(JagBytName *name, JagBytName *other) {
 	return result;
 }
 
-
 gboolean jag_byt_name_starts_with(JagBytName *name, JagBytName *other) {
-	JagBytNamePrivate *priv = JAG_BYT_NAME_GET_PRIVATE(name);
-	JagBytNamePrivate *opriv = JAG_BYT_NAME_GET_PRIVATE(other);
+	JagBytNamePrivate *priv = jag_byt_name_get_instance_private(name);
+	JagBytNamePrivate *opriv = jag_byt_name_get_instance_private(other);
 	int length = cat_array_wo_size(priv->a_parts);
 	int olength = cat_array_wo_size(opriv->a_parts);
 
@@ -246,5 +234,3 @@ gboolean jag_byt_name_starts_with(JagBytName *name, JagBytName *other) {
 	}
 	return TRUE;
 }
-
-

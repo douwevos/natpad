@@ -38,49 +38,42 @@ struct _JagClassEditorFactoryPrivate {
 //	JagIndexer *indexer;
 };
 
-
 static void l_resource_factory_iface_init(ElkIResourceEditorFactoryInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagClassEditorFactory, jag_class_editor_factory, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagClassEditorFactory)
 		G_IMPLEMENT_INTERFACE(ELK_TYPE_IRESOURCE_EDITOR_FACTORY, l_resource_factory_iface_init)
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_class_editor_factory_class_init(JagClassEditorFactoryClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagClassEditorFactoryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_class_editor_factory_init(JagClassEditorFactory *instance) {
-	JagClassEditorFactoryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_CLASS_EDITOR_FACTORY, JagClassEditorFactoryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagClassEditorFactory *instance = JAG_CLASS_EDITOR_FACTORY(object);
-	JagClassEditorFactoryPrivate *priv = instance->priv;
+	JagClassEditorFactoryPrivate *priv = jag_class_editor_factory_get_instance_private(instance);
 	cat_unref_ptr(priv->panel_owner);
 	cat_unref_ptr(priv->connector);
 	cat_unref_ptr(priv->document_io);
 	cat_unref_ptr(priv->document_file);
 //	cat_unref_ptr(priv->indexer);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_class_editor_factory_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_class_editor_factory_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -88,7 +81,7 @@ static void l_finalize(GObject *object) {
 JagClassEditorFactory *jag_class_editor_factory_new(LeaIPanelOwner *panel_owner, JagEditorConnector *connector, ElkDocumentIO *document_io, VipIFile *document_file/*, JagIndexer *indexer*/) {
 	JagClassEditorFactory *result = g_object_new(JAG_TYPE_CLASS_EDITOR_FACTORY, NULL);
 	cat_ref_anounce(result);
-	JagClassEditorFactoryPrivate *priv = result->priv;
+	JagClassEditorFactoryPrivate *priv = jag_class_editor_factory_get_instance_private(result);
 	priv->panel_owner = cat_ref_ptr(panel_owner);
 	priv->connector = cat_ref_ptr(connector);
 	priv->document_io = cat_ref_ptr(document_io);
@@ -151,8 +144,8 @@ static ChaDocument *l_create_document_for_class(ChaDocumentManager *document_man
 
 
 static GtkWidget *l_create_editor(ElkIResourceEditorFactory *self, MooNodeWo *moo_node) {
-	JagClassEditorFactoryPrivate *priv = JAG_CLASS_EDITOR_FACTORY_GET_PRIVATE(self);
-
+	JagClassEditorFactory *instance = JAG_CLASS_EDITOR_FACTORY(self);
+	JagClassEditorFactoryPrivate *priv = jag_class_editor_factory_get_instance_private(instance);
 	cat_log_debug("node=%o", moo_node);
 
 	ElkDocumentBin *document_bin = elk_document_io_open_document_for_file(priv->document_io, priv->document_file);

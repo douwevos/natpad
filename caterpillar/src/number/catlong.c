@@ -21,9 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
-
 #include "catlong.h"
 #include "../catistringable.h"
 #include "../woo/catstringwo.h"
@@ -40,58 +37,51 @@ struct _CatLongPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatLong, cat_long, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CatLong)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_long_class_init(CatLongClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CatLongPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
-
-//	GObjectClass *sub_clazz = G_OBJECT_CLASS(clazz);
 }
 
 static void cat_long_init(CatLong *instance) {
-	CatLongPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_LONG, CatLongPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(cat_long_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(cat_long_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 CatLong *cat_long_new(int64_t value) {
 	CatLong *result = g_object_new(CAT_TYPE_LONG, NULL);
 	cat_ref_anounce(result);
-	CatLongPrivate *priv = result->priv;
+	CatLongPrivate *priv = cat_long_get_instance_private(result);
 	priv->value = value;
 	return result;
 }
 
 
 int64_t cat_long_value(CatLong *lobj) {
-	return CAT_LONG_GET_PRIVATE(lobj)->value;
+	CatLongPrivate *priv = cat_long_get_instance_private(lobj);
+	return priv->value;
 }
 
 int cat_long_hash(CatLong *lobj) {
-	CatLongPrivate *priv = CAT_LONG_GET_PRIVATE(lobj);
+	CatLongPrivate *priv = cat_long_get_instance_private(lobj);
 	int p1 = (int) priv->value;
 	int p2 = (int) (priv->value>>32);
 	return p1+p2;
@@ -104,9 +94,10 @@ gboolean cat_long_equal(CatLong *lobj_a, CatLong *lobj_b) {
 	if (lobj_a==NULL || lobj_b==NULL) {
 		return FALSE;
 	}
-
-	int64_t val_a = CAT_LONG_GET_PRIVATE(lobj_a)->value;
-	int64_t val_b = CAT_LONG_GET_PRIVATE(lobj_b)->value;
+	CatLongPrivate *priv_a = cat_long_get_instance_private(lobj_a);
+	CatLongPrivate *priv_b = cat_long_get_instance_private(lobj_b);
+	int64_t val_a = priv_a->value;
+	int64_t val_b = priv_b->value;
 	return val_a==val_b;
 
 }
@@ -122,8 +113,10 @@ int cat_long_compare(CatLong *lobj_a, CatLong *lobj_b) {
 		return 1;
 	}
 
-	int64_t val_a = CAT_LONG_GET_PRIVATE(lobj_a)->value;
-	int64_t val_b = CAT_LONG_GET_PRIVATE(lobj_b)->value;
+	CatLongPrivate *priv_a = cat_long_get_instance_private(lobj_a);
+	CatLongPrivate *priv_b = cat_long_get_instance_private(lobj_b);
+	int64_t val_a = priv_a->value;
+	int64_t val_b = priv_b->value;
 	return val_a==val_b ? 0 : (val_a<val_b ? -1 : 1);
 }
 
@@ -131,7 +124,7 @@ int cat_long_compare(CatLong *lobj_a, CatLong *lobj_b) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	CatLongPrivate *lobj = CAT_LONG_GET_PRIVATE(self);
+	CatLongPrivate *lobj = cat_long_get_instance_private(CAT_LONG(self));
 	cat_string_wo_append_decimal(append_to, lobj->value);
 }
 

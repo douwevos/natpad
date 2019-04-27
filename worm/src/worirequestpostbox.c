@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "worirequestpostbox.h"
 
 static void wor_irequest_post_box_interface_init(gpointer klass) {

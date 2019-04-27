@@ -40,43 +40,37 @@ struct _MooModuleWorkPrivate {
 static void l_node_work_iface_init(MooINodeWorkInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooModuleWork, moo_module_work, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooModuleWork)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_WORK, l_node_work_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_module_work_class_init(MooModuleWorkClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooModuleWorkPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_module_work_init(MooModuleWork *instance) {
-	MooModuleWorkPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_MODULE_WORK, MooModuleWorkPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooModuleWork *instance = MOO_MODULE_WORK(object);
-	MooModuleWorkPrivate *priv = instance->priv;
+	MooModuleWorkPrivate *priv = moo_module_work_get_instance_private(instance);
 	cat_unref_ptr(priv->moose_sequence);
 	cat_unref_ptr(priv->new_node);
 	cat_unref_ptr(priv->editableNode);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_module_work_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_module_work_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -84,7 +78,7 @@ static void l_finalize(GObject *object) {
 MooModuleWork *moo_module_work_new(VipISequence *moose_sequence, CatReadableTreeNode *new_node, MooNodeWo *editableNode) {
 	MooModuleWork *result = g_object_new(MOO_TYPE_MODULE_WORK, NULL);
 	cat_ref_anounce(result);
-	MooModuleWorkPrivate *priv = result->priv;
+	MooModuleWorkPrivate *priv = moo_module_work_get_instance_private(result);
 	priv->moose_sequence = cat_ref_ptr(moose_sequence);
 	priv->new_node = cat_ref_ptr(new_node);
 	priv->editableNode = cat_ref_ptr(editableNode);
@@ -116,14 +110,11 @@ MooModuleWork *moo_module_work_new(VipISequence *moose_sequence, CatReadableTree
 /********************* begin MooINodeWork implementation *********************/
 
 static void l_do_work(MooINodeWork *self, CatArrayWo /*<MooINodeWork>*/ *e_work_list) {
-	MooModuleWorkPrivate *priv = MOO_MODULE_WORK_GET_PRIVATE(self);
-
+	MooModuleWork *instance = MOO_MODULE_WORK(self);
+	MooModuleWorkPrivate *priv = moo_module_work_get_instance_private(instance);
 
 	MooResourceContentWo *parent_resource_content = (MooResourceContentWo *)  moo_node_wo_get_content(priv->editableNode, moo_resource_content_wo_key());
-
-
 	CatHashSet/*<Long>*/ *vipNodesAdded = cat_hash_set_new((GHashFunc) cat_long_hash, (GEqualFunc) cat_long_equal);
-
 	MooNodeListWo *eChildren = moo_node_wo_get_editable_children(priv->editableNode);
 
 	int en_count = moo_node_list_wo_count(eChildren);
@@ -207,8 +198,6 @@ static void l_do_work(MooINodeWork *self, CatArrayWo /*<MooINodeWork>*/ *e_work_
 	}
 	cat_unref_ptr(vipNodesAdded);
 }
-
-
 
 static void l_node_work_iface_init(MooINodeWorkInterface *iface) {
 	iface->doWork = l_do_work;

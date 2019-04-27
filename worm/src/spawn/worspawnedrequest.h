@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef WORSPAWNEDREQUEST_H_
 #define WORSPAWNEDREQUEST_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define WOR_IS_SPAWNED_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), WOR_TYPE_SPAWNED_REQUEST))
 #define WOR_IS_SPAWNED_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), WOR_TYPE_SPAWNED_REQUEST))
 #define WOR_SPAWNED_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), WOR_TYPE_SPAWNED_REQUEST, WorSpawnedRequestClass))
-#define WOR_SPAWNED_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), WOR_TYPE_SPAWNED_REQUEST, WorSpawnedRequestPrivate))
 
 typedef struct _WorSpawnedRequest               WorSpawnedRequest;
 typedef struct _WorSpawnedRequestPrivate        WorSpawnedRequestPrivate;
@@ -46,7 +44,6 @@ typedef struct _WorSpawnedRequestClass          WorSpawnedRequestClass;
 
 struct _WorSpawnedRequest {
 	WorRequest parent;
-	WorSpawnedRequestPrivate *priv;
 };
 
 struct _WorSpawnedRequestClass {
@@ -66,6 +63,5 @@ gboolean wor_spawned_request_get_is_finished(WorSpawnedRequest *spawned_request)
 WorRequest *wor_spawned_request_get_delegate(WorSpawnedRequest *spawned_request);
 
 G_END_DECLS
-
 
 #endif /* WORSPAWNEDREQUEST_H_ */

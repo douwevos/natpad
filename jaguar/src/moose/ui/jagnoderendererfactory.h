@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGNODERENDERERFACTORY_H_
 #define JAGNODERENDERERFACTORY_H_
 
@@ -34,29 +33,23 @@ G_BEGIN_DECLS
 #define JAG_IS_NODE_RENDERER_FACTORY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_NODE_RENDERER_FACTORY))
 #define JAG_IS_NODE_RENDERER_FACTORY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_NODE_RENDERER_FACTORY))
 #define JAG_NODE_RENDERER_FACTORY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_NODE_RENDERER_FACTORY, JagNodeRendererFactoryClass))
-#define JAG_NODE_RENDERER_FACTORY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_NODE_RENDERER_FACTORY, JagNodeRendererFactoryPrivate))
-
 
 typedef struct _JagNodeRendererFactory               JagNodeRendererFactory;
 typedef struct _JagNodeRendererFactoryPrivate        JagNodeRendererFactoryPrivate;
 typedef struct _JagNodeRendererFactoryClass          JagNodeRendererFactoryClass;
 
-
 struct _JagNodeRendererFactory {
 	GObject parent;
-	JagNodeRendererFactoryPrivate *priv;
 };
 
 struct _JagNodeRendererFactoryClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_node_renderer_factory_get_type();
 
 JagNodeRendererFactory *jag_node_renderer_factory_new();
 
 G_END_DECLS
-
 
 #endif /* JAGNODERENDERERFACTORY_H_ */

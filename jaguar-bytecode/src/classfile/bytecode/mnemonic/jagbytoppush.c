@@ -36,6 +36,7 @@ struct _JagBytOpPushPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpPush, jag_byt_op_push, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpPush)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -43,16 +44,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_push_class_init(JagBytOpPushClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpPushPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_push_init(JagBytOpPush *instance) {
-	JagBytOpPushPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_PUSH, JagBytOpPushPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -71,7 +68,7 @@ static void l_finalize(GObject *object) {
 JagBytOpPush *jag_byt_op_push_new_byte(int offset, int value) {
 	JagBytOpPush *result = g_object_new(JAG_BYT_TYPE_OP_PUSH, NULL);
 	cat_ref_anounce(result);
-	JagBytOpPushPrivate *priv = result->priv;
+	JagBytOpPushPrivate *priv = jag_byt_op_push_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, OP_BIPUSH, offset, 2);
 	priv->value = value;
 	return result;
@@ -80,14 +77,14 @@ JagBytOpPush *jag_byt_op_push_new_byte(int offset, int value) {
 JagBytOpPush *jag_byt_op_push_new_short(int offset, int value) {
 	JagBytOpPush *result = g_object_new(JAG_BYT_TYPE_OP_PUSH, NULL);
 	cat_ref_anounce(result);
-	JagBytOpPushPrivate *priv = result->priv;
+	JagBytOpPushPrivate *priv = jag_byt_op_push_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, OP_SIPUSH, offset, 3);
 	priv->value = value;
 	return result;
 }
 
 int jag_byt_op_push_get_value(JagBytOpPush *op_push) {
-	JagBytOpPushPrivate *priv = JAG_BYT_OP_PUSH_GET_PRIVATE(op_push);
+	JagBytOpPushPrivate *priv = jag_byt_op_push_get_instance_private(op_push);
 	return priv->value;
 }
 
@@ -100,7 +97,9 @@ static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *la
 		case OP_BIPUSH : cat_string_wo_append_chars(result, "bipush "); break;
 		case OP_SIPUSH : cat_string_wo_append_chars(result, "sipush "); break;
 	}
-	JagBytOpPushPrivate *priv = JAG_BYT_OP_PUSH_GET_PRIVATE(self);
+	JagBytOpPush *instance = JAG_BYT_OP_PUSH(self);
+	JagBytOpPushPrivate *priv = jag_byt_op_push_get_instance_private(instance);
+
 	cat_string_wo_append_decimal(result, priv->value);
 	return result;
 }

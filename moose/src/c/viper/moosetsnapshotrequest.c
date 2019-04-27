@@ -45,19 +45,15 @@ static CatAtomicLong *l_info_count_gen;
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooSetSnapshotRequest, moo_set_snapshot_request, WOR_TYPE_REQUEST, {
-	G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
+		G_ADD_PRIVATE(MooSetSnapshotRequest)
+		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void moo_set_snapshot_request_class_init(MooSetSnapshotRequestClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooSetSnapshotRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -69,25 +65,23 @@ static void moo_set_snapshot_request_class_init(MooSetSnapshotRequestClass *claz
 }
 
 static void moo_set_snapshot_request_init(MooSetSnapshotRequest *instance) {
-	MooSetSnapshotRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_SET_SNAPSHOT_REQUEST, MooSetSnapshotRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooSetSnapshotRequest *instance = MOO_SET_SNAPSHOT_REQUEST(object);
-	MooSetSnapshotRequestPrivate *priv = instance->priv;
+	MooSetSnapshotRequestPrivate *priv = moo_set_snapshot_request_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->vip_snapshot_ref);
 	cat_unref_ptr(priv->snapshot);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_set_snapshot_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_set_snapshot_request_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -95,7 +89,7 @@ static void l_finalize(GObject *object) {
 MooSetSnapshotRequest *moo_set_snapshot_request_new(MooService *moo_service, CatAtomicReference *vip_snapshot_ref, VipSnapshot *snapshot) {
 	MooSetSnapshotRequest *result = g_object_new(MOO_TYPE_SET_SNAPSHOT_REQUEST, NULL);
 	cat_ref_anounce(result);
-	MooSetSnapshotRequestPrivate *priv = result->priv;
+	MooSetSnapshotRequestPrivate *priv = moo_set_snapshot_request_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->vip_snapshot_ref = cat_ref_ptr(vip_snapshot_ref);
 	priv->snapshot = cat_ref_ptr(snapshot);
@@ -107,11 +101,10 @@ MooSetSnapshotRequest *moo_set_snapshot_request_new(MooService *moo_service, Cat
 
 static void l_dispatch_refresh_requests(MooSetSnapshotRequestPrivate *priv, CatHashSet *nodesWhichNeedRefresh);
 
-
-
 static void l_run_request(WorRequest *request) {
 	cat_log_debug("starting:%o", request);
-	MooSetSnapshotRequestPrivate *priv = MOO_SET_SNAPSHOT_REQUEST_GET_PRIVATE(request);
+	MooSetSnapshotRequest *instance = MOO_SET_SNAPSHOT_REQUEST(request);
+	MooSetSnapshotRequestPrivate *priv = moo_set_snapshot_request_get_instance_private(instance);
 	MooTransaction *transaction = moo_service_create_transaction((GObject *) request, priv->moo_service);
 	int  retryCnt = 0;
 	CatHashSet *nodes_which_need_refresh = cat_hash_set_new((GHashFunc) moo_node_wo_hash_code, (GEqualFunc) moo_node_wo_equals);
@@ -167,32 +160,12 @@ static void l_run_request(WorRequest *request) {
 				}
 			}
 
-
-
-//
-//			CatArrayWo *e_work_list = cat_array_wo_new();	// <MooINodeWork>
-//			MooSnapshotWork *snapshot_work = moo_snapshot_work_new((VipISequence *) priv->moo_service, priv->snapshot, editable_root_node);
-//			cat_array_wo_append(e_work_list, (GObject *) snapshot_work);
-//			cat_unref_ptr(snapshot_work);
-//			while(cat_array_wo_size(work_list)>0) {
-//				MooINodeWork *work = NULL;
-//				cat_array_wo_remove_last(e_work_list, (GObject **) (&work));
-//				cat_log_detail("doing work:%o",work);
-//				moo_inode_work_do_work(work, work_list);
-//			}
-
-
 			gboolean commit_ok = moo_transaction_commit(transaction, e_root_node);
 			if (commit_ok) {
 				l_dispatch_refresh_requests(priv, nodes_which_need_refresh);
 				break;
 			} else {
 				cat_log_error("%ld >> failed set", priv->infoCount);
-//				try {
-//					Thread.sleep(100+retryCnt*200);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
 			}
 		} else {
 			cat_unref_ptr(currentSnapshot);
@@ -220,12 +193,11 @@ static void l_dispatch_refresh_requests(MooSetSnapshotRequestPrivate *priv, CatH
 }
 
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MooSetSnapshotRequestPrivate *priv = MOO_SET_SNAPSHOT_REQUEST_GET_PRIVATE(self);
+	MooSetSnapshotRequest *instance = MOO_SET_SNAPSHOT_REQUEST(self);
+	MooSetSnapshotRequestPrivate *priv = moo_set_snapshot_request_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p: snapshot=%o]", iname, self, priv->snapshot);
 }
@@ -235,4 +207,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

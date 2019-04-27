@@ -37,54 +37,42 @@ struct _JagBytConstantDoublePrivate {
 static void l_constant_iface_init(JagBytIConstantInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytConstantDouble, jag_byt_constant_double, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagBytConstantDouble)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_ICONSTANT, l_constant_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_constant_double_class_init(JagBytConstantDoubleClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytConstantDoublePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_constant_double_init(JagBytConstantDouble *instance) {
-	JagBytConstantDoublePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_CONSTANT_DOUBLE, JagBytConstantDoublePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytConstantDouble *instance = JAG_BYT_CONSTANT_DOUBLE(object);
-//	JagBytConstantDoublePrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_constant_double_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_constant_double_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytConstantDouble *jag_byt_constant_double_new(int64_t value) {
 	JagBytConstantDouble *result = g_object_new(JAG_BYT_TYPE_CONSTANT_DOUBLE, NULL);
 	cat_ref_anounce(result);
-	JagBytConstantDoublePrivate *priv = result->priv;
+	JagBytConstantDoublePrivate *priv = jag_byt_constant_double_get_instance_private(result);
 	priv->value = value;
 	return result;
 }
-
-
-
-
 
 
 /********************* start JagBytIConstantInterface implementation *********************/
@@ -96,7 +84,6 @@ static gboolean l_constant_is_resolved(JagBytIConstant *self) {
 static gboolean l_constant_try_resolve(JagBytIConstant *self, struct _JagBytConstantPool *constantPool, CatArrayWo *e_resolveStack) {
 	return TRUE;
 }
-
 
 static void l_constant_iface_init(JagBytIConstantInterface *iface) {
 	iface->isResolved = l_constant_is_resolved;

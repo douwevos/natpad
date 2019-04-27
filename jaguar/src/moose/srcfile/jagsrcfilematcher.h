@@ -23,7 +23,6 @@
 #ifndef JAGCLASSFILEMATCHER_H_
 #define JAGCLASSFILEMATCHER_H_
 
-
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -34,23 +33,18 @@ G_BEGIN_DECLS
 #define JAG_IS_SRCFILE_MATCHER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_SRCFILE_MATCHER))
 #define JAG_IS_SRCFILE_MATCHER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SRCFILE_MATCHER))
 #define JAG_SRCFILE_MATCHER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SRCFILE_MATCHER, JagSrcfileMatcherClass))
-#define JAG_SRCFILE_MATCHER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_SRCFILE_MATCHER, JagSrcfileMatcherPrivate))
-
 
 typedef struct _JagSrcfileMatcher               JagSrcfileMatcher;
 typedef struct _JagSrcfileMatcherPrivate        JagSrcfileMatcherPrivate;
 typedef struct _JagSrcfileMatcherClass          JagSrcfileMatcherClass;
 
-
 struct _JagSrcfileMatcher {
 	GObject parent;
-	JagSrcfileMatcherPrivate *priv;
 };
 
 struct _JagSrcfileMatcherClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_srcfile_matcher_get_type();
 

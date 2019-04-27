@@ -36,50 +36,43 @@ struct _JagAstMethodHeaderPrivate {
 	CatArrayWo *e_exceptions;
 };
 
-G_DEFINE_TYPE (JagAstMethodHeader, jag_ast_method_header, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagAstMethodHeader, jag_ast_method_header, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_method_header_class_init(JagAstMethodHeaderClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstMethodHeaderPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_method_header_init(JagAstMethodHeader *instance) {
-	JagAstMethodHeaderPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_METHOD_HEADER, JagAstMethodHeaderPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstMethodHeader *instance = JAG_AST_METHOD_HEADER(object);
-	JagAstMethodHeaderPrivate *priv = instance->priv;
+	JagAstMethodHeaderPrivate *priv = jag_ast_method_header_get_instance_private(instance);
 	cat_unref_ptr(priv->e_args);
 	cat_unref_ptr(priv->e_exceptions);
 	cat_unref_ptr(priv->method_name);
 	cat_unref_ptr(priv->return_type);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_method_header_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_method_header_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstMethodHeader *jag_ast_method_header_new(JagAstIdentifier *method_name, gboolean is_constructor, JagAstDeclarationType *return_type, CatArrayWo *e_args, CatArrayWo *e_exceptions) {
 	JagAstMethodHeader *result = g_object_new(JAG_AST_TYPE_METHOD_HEADER, NULL);
 	cat_ref_anounce(result);
-	JagAstMethodHeaderPrivate *priv = result->priv;
+	JagAstMethodHeaderPrivate *priv = jag_ast_method_header_get_instance_private(result);
 	priv->method_name = cat_ref_ptr(method_name);
 	priv->is_constructor = is_constructor;
 	priv->return_type = cat_ref_ptr(return_type);
@@ -89,13 +82,13 @@ JagAstMethodHeader *jag_ast_method_header_new(JagAstIdentifier *method_name, gbo
 }
 
 
-
 JagAstDeclarationType *jag_ast_method_header_get_return_type(JagAstMethodHeader *method_header) {
-	return JAG_AST_METHOD_HEADER_GET_PRIVATE(method_header)->return_type;
+	JagAstMethodHeaderPrivate *priv = jag_ast_method_header_get_instance_private(method_header);
+	return priv->return_type;
 }
 
 void jag_ast_method_header_write(JagAstMethodHeader *method_header, JagAstWriter *out) {
-	JagAstMethodHeaderPrivate *priv = JAG_AST_METHOD_HEADER_GET_PRIVATE(method_header);
+	JagAstMethodHeaderPrivate *priv = jag_ast_method_header_get_instance_private(method_header);
 	if (!priv->is_constructor) {
 		jag_ast_declaration_type_write(priv->return_type, out);
 		jag_ast_writer_print(out, cat_string_wo_new_with(" "));
@@ -133,8 +126,3 @@ void jag_ast_method_header_write(JagAstMethodHeader *method_header, JagAstWriter
 		cat_unref_ptr(iter);
 	}
 }
-
-
-
-
-

@@ -43,29 +43,24 @@ struct _MooNodeListWoPrivate {
 	CatArrayWo *list;
 };
 
-
-G_DEFINE_TYPE(MooNodeListWo, moo_node_list_wo, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(MooNodeListWo, moo_node_list_wo, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_node_list_wo_class_init(MooNodeListWoClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooNodeListWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_node_list_wo_init(MooNodeListWo *instance) {
-	MooNodeListWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_NODE_LIST_WO, MooNodeListWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooNodeListWo *instance = MOO_NODE_LIST_WO(object);
-	MooNodeListWoPrivate *priv = instance->priv;
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(instance);
 	if (priv->wo_info) {
 		cat_unref_ptr(priv->wo_info->original);
 		cat_unref_ptr(priv->wo_info->original_list);
@@ -87,7 +82,7 @@ static void l_finalize(GObject *object) {
 MooNodeListWo *moo_node_list_wo_new() {
 	MooNodeListWo *result = g_object_new(MOO_TYPE_NODE_LIST_WO, NULL);
 	cat_ref_anounce(result);
-	MooNodeListWoPrivate *priv = result->priv;
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(result);
 	priv->wo_info = g_new0(WoInfo, 1);
 	priv->version = 1;
 	priv->list = cat_array_wo_new();
@@ -95,11 +90,11 @@ MooNodeListWo *moo_node_list_wo_new() {
 }
 
 MooNodeListWo *moo_node_list_wo_ensure_editable(MooNodeListWo *node_list) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	if (priv->wo_info==NULL) {
 		MooNodeListWo *result = g_object_new(MOO_TYPE_NODE_LIST_WO, NULL);
 		cat_ref_anounce(result);
-		MooNodeListWoPrivate *spriv = result->priv;
+		MooNodeListWoPrivate *spriv = moo_node_list_wo_get_instance_private(result);
 		spriv->wo_info = g_new0(WoInfo, 1);
 		spriv->wo_info->original = cat_ref_ptr(node_list);
 		spriv->wo_info->original_list = cat_ref_ptr(priv->list);
@@ -111,12 +106,12 @@ MooNodeListWo *moo_node_list_wo_ensure_editable(MooNodeListWo *node_list) {
 }
 
 gboolean moo_node_list_wo_is_fixed(MooNodeListWo *node_list) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	return priv->wo_info == NULL;
 }
 
 MooNodeListWo *moo_node_list_wo_anchor(MooNodeListWo *node_list, int version) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	if (priv->wo_info == NULL) {
 		return node_list;
 	}
@@ -173,7 +168,7 @@ gboolean moo_node_list_wo_equal(MooNodeListWo *list_a, MooNodeListWo *list_b) {
 
 
 CatArrayWo *moo_node_list_wo_enlist(MooNodeListWo *node_list, CatArrayWo *e_enlist_to) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	if (e_enlist_to==NULL) {
 		e_enlist_to = cat_array_wo_new();
 	}
@@ -182,24 +177,28 @@ CatArrayWo *moo_node_list_wo_enlist(MooNodeListWo *node_list, CatArrayWo *e_enli
 }
 
 struct _MooNodeWo *moo_node_list_wo_get_at(MooNodeListWo *node_list, int index) {
-	return (MooNodeWo *) cat_array_wo_get(MOO_NODE_LIST_WO_GET_PRIVATE(node_list)->list, index);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
+	return (MooNodeWo *) cat_array_wo_get(priv->list, index);
 }
 
 struct _MooNodeWo *moo_node_list_wo_get_first(MooNodeListWo *node_list, int index) {
-	return (MooNodeWo *) cat_array_wo_get_first(MOO_NODE_LIST_WO_GET_PRIVATE(node_list)->list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
+	return (MooNodeWo *) cat_array_wo_get_first(priv->list);
 }
 
 struct _MooNodeWo *moo_node_list_wo_get_last(MooNodeListWo *node_list, int index) {
-	return (MooNodeWo *) cat_array_wo_get_last(MOO_NODE_LIST_WO_GET_PRIVATE(node_list)->list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
+	return (MooNodeWo *) cat_array_wo_get_last(priv->list);
 }
 
 int moo_node_list_wo_count(MooNodeListWo *node_list) {
-	return cat_array_wo_size(MOO_NODE_LIST_WO_GET_PRIVATE(node_list)->list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
+	return cat_array_wo_size(priv->list);
 }
 
-
 CatIIterator *moo_node_list_wo_iterator(MooNodeListWo *node_list) {
-	return cat_array_wo_iterator(MOO_NODE_LIST_WO_GET_PRIVATE(node_list)->list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
+	return cat_array_wo_iterator(priv->list);
 }
 
 
@@ -225,33 +224,33 @@ CatIIterator *moo_node_list_wo_iterator(MooNodeListWo *node_list) {
 
 
 void moo_node_list_wo_append(MooNodeListWo *node_list, struct _MooNodeWo *node) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	CHECK_IF_WRITABLE_LIST(node_list,)
 	cat_array_wo_append(priv->list, (GObject *) node);
 }
 
 void moo_node_list_wo_insert(MooNodeListWo *node_list, int index, struct _MooNodeWo *node) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	CHECK_IF_WRITABLE_LIST(node_list,)
 	cat_array_wo_insert(priv->list, (GObject *) node, index);
 }
 
 
 void moo_node_list_wo_remove(MooNodeListWo *node_list, int index) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	CHECK_IF_WRITABLE_LIST(node_list,)
 	cat_array_wo_remove(priv->list, index, NULL);
 }
 
 void moo_node_list_wo_clear(MooNodeListWo *node_list) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(node_list);
 	CHECK_IF_WRITABLE_LIST(node_list,)
 	cat_array_wo_clear(priv->list);
 }
 
 
 gboolean moo_node_list_wo_set_at(MooNodeListWo *e_node_list, struct _MooNodeWo *node, int index) {
-	MooNodeListWoPrivate *priv = MOO_NODE_LIST_WO_GET_PRIVATE(e_node_list);
+	MooNodeListWoPrivate *priv = moo_node_list_wo_get_instance_private(e_node_list);
 	MooNodeWo *current = (MooNodeWo *) cat_array_wo_get(priv->list, index);
 	if (current==node) {
 		return FALSE;

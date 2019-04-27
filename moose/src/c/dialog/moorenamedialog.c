@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "moorenamedialog.h"
 
 #include <logging/catlogdefs.h>
@@ -37,47 +36,40 @@ struct _MooRenameDialogPrivate {
 	CatStringWo *a_initial_name;
 };
 
-G_DEFINE_TYPE (MooRenameDialog, moo_rename_dialog, GTK_TYPE_DIALOG)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooRenameDialog, moo_rename_dialog, GTK_TYPE_DIALOG)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_rename_dialog_class_init(MooRenameDialogClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooRenameDialogPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_rename_dialog_init(MooRenameDialog *instance) {
-	MooRenameDialogPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_RENAME_DIALOG, MooRenameDialogPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooRenameDialog *instance = MOO_RENAME_DIALOG(object);
-	MooRenameDialogPrivate *priv = instance->priv;
+	MooRenameDialogPrivate *priv = moo_rename_dialog_get_instance_private(instance);
 	cat_unref_ptr(priv->a_initial_name);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_rename_dialog_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_rename_dialog_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 MooRenameDialog *moo_rename_dialog_new(LeaFrame *frame) {
 	MooRenameDialog *result = g_object_new(MOO_TYPE_RENAME_DIALOG, NULL);
 	cat_ref_anounce(result);
-	MooRenameDialogPrivate *priv = result->priv;
+	MooRenameDialogPrivate *priv = moo_rename_dialog_get_instance_private(result);
 	gtk_window_set_transient_for(GTK_WINDOW(result), GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(frame))));
 	gtk_window_set_modal(GTK_WINDOW(result), TRUE);
 	gtk_widget_set_size_request(GTK_WIDGET(result), 600, 150);
@@ -119,8 +111,6 @@ MooRenameDialog *moo_rename_dialog_new(LeaFrame *frame) {
 	gtk_grid_attach((GtkGrid *) grid, entry, 1,0, 2,1);
 	gtk_widget_set_hexpand(entry, TRUE);
 
-
-
 	GtkWidget *w_message = gtk_label_new_with_mnemonic("");
 	priv->w_lab_message = w_message;
 
@@ -129,7 +119,6 @@ MooRenameDialog *moo_rename_dialog_new(LeaFrame *frame) {
 	gtk_css_provider_load_from_data(emergency_provider, ".redmsg { color: rgba(255, 0.0, 0.0, 255); }", -1, NULL);
 	gtk_style_context_add_provider(gtk_widget_get_style_context(w_message), GTK_STYLE_PROVIDER(emergency_provider),
 	                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
 
 	g_value_init( &gvalue, G_TYPE_FLOAT );
 	g_value_set_float( &gvalue, 0.0f );
@@ -141,11 +130,8 @@ MooRenameDialog *moo_rename_dialog_new(LeaFrame *frame) {
 	g_object_set_property( G_OBJECT(w_message), "yalign", &gvalue );
 	g_value_unset( &gvalue );
 
-
 //	gtk_table_attach((GtkTable *) table, w_message,0,3,1,2, GTK_FILL, GTK_FILL, 6, 0);
 	gtk_grid_attach((GtkGrid *) grid, w_message, 0,1, 3,1);
-
-
 
 	gtk_dialog_add_button((GtkDialog *) result, "Cancel", GTK_RESPONSE_CANCEL);
 	priv->w_but_ok = gtk_dialog_add_button((GtkDialog *) result, "OK", GTK_RESPONSE_OK);
@@ -156,12 +142,8 @@ MooRenameDialog *moo_rename_dialog_new(LeaFrame *frame) {
 	return result;
 }
 
-
-
-
-
 int moo_rename_dialog_run(MooRenameDialog *rename_dialog, CatStringWo *a_initial_name) {
-	MooRenameDialogPrivate *priv = MOO_RENAME_DIALOG_GET_PRIVATE(rename_dialog);
+	MooRenameDialogPrivate *priv = moo_rename_dialog_get_instance_private(rename_dialog);
 	cat_ref_swap(priv->a_initial_name, a_initial_name);
 	gtk_entry_set_text(GTK_ENTRY(priv->w_txt_name), cat_string_wo_getchars(a_initial_name));
 	gtk_widget_show_all(GTK_WIDGET(rename_dialog));
@@ -170,16 +152,14 @@ int moo_rename_dialog_run(MooRenameDialog *rename_dialog, CatStringWo *a_initial
 }
 
 
-
 CatStringWo *moo_rename_dialog_get_new_name(MooRenameDialog *rename_dialog) {
-	MooRenameDialogPrivate *priv = MOO_RENAME_DIALOG_GET_PRIVATE(rename_dialog);
+	MooRenameDialogPrivate *priv = moo_rename_dialog_get_instance_private(rename_dialog);
 	const gchar *txt_as_chars = gtk_entry_get_text(GTK_ENTRY(priv->w_txt_name));
 	return cat_string_wo_new_with(txt_as_chars);
 }
 
-
 void moo_rename_dialog_set_message(MooRenameDialog *rename_dialog, CatStringWo *a_new_message) {
-	MooRenameDialogPrivate *priv = MOO_RENAME_DIALOG_GET_PRIVATE(rename_dialog);
+	MooRenameDialogPrivate *priv = moo_rename_dialog_get_instance_private(rename_dialog);
 	if (a_new_message) {
 		gtk_label_set_text(GTK_LABEL(priv->w_lab_message), cat_string_wo_getchars(a_new_message));
 		cat_unref_ptr(a_new_message);

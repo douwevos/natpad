@@ -38,41 +38,34 @@ struct _JagBytLocalVariableTableEntryPrivate {
 	int index;
 };
 
-G_DEFINE_TYPE (JagBytLocalVariableTableEntry, jag_byt_local_variable_table_entry, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytLocalVariableTableEntry, jag_byt_local_variable_table_entry, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_local_variable_table_entry_class_init(JagBytLocalVariableTableEntryClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytLocalVariableTableEntryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_local_variable_table_entry_init(JagBytLocalVariableTableEntry *instance) {
-	JagBytLocalVariableTableEntryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_LOCAL_VARIABLE_TABLE_ENTRY, JagBytLocalVariableTableEntryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytLocalVariableTableEntry *instance = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY(object);
-	JagBytLocalVariableTableEntryPrivate *priv = instance->priv;
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(instance);
 	cat_unref_ptr(priv->declaration_type);
 	cat_unref_ptr(priv->a_name_text);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_local_variable_table_entry_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_local_variable_table_entry_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -80,7 +73,7 @@ static void l_finalize(GObject *object) {
 JagBytLocalVariableTableEntry *jag_byt_local_variable_table_entry_new(int start_pc, int length, int name_index, CatStringWo *a_name_text, int descriptor_index, JagAstDeclarationType *declaration_type, int index) {
 	JagBytLocalVariableTableEntry *result = g_object_new(JAG_BYT_TYPE_LOCAL_VARIABLE_TABLE_ENTRY, NULL);
 	cat_ref_anounce(result);
-	JagBytLocalVariableTableEntryPrivate *priv = result->priv;
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(result);
 	priv->start_pc = start_pc;
 	priv->length = length;
 	priv->name_index = name_index;
@@ -92,40 +85,36 @@ JagBytLocalVariableTableEntry *jag_byt_local_variable_table_entry_new(int start_
 }
 
 int jag_byt_local_variable_table_entry_get_start_pc(JagBytLocalVariableTableEntry *entry) {
-	JagBytLocalVariableTableEntryPrivate *priv = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(entry);
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(entry);
 	return priv->start_pc;
 }
 
 int jag_byt_local_variable_table_entry_get_length(JagBytLocalVariableTableEntry *entry) {
-	JagBytLocalVariableTableEntryPrivate *priv = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(entry);
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(entry);
 	return priv->length;
 }
 
 int jag_byt_local_variable_table_entry_get_name_index(JagBytLocalVariableTableEntry *entry) {
-	JagBytLocalVariableTableEntryPrivate *priv = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(entry);
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(entry);
 	return priv->name_index;
 }
 
 CatStringWo *jag_byt_local_variable_table_entry_get_name(JagBytLocalVariableTableEntry *entry) {
-	JagBytLocalVariableTableEntryPrivate *priv = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(entry);
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(entry);
 	return priv->a_name_text;
 }
 
 int jag_byt_local_variable_table_entry_get_descriptor_index(JagBytLocalVariableTableEntry *entry) {
-	JagBytLocalVariableTableEntryPrivate *priv = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(entry);
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(entry);
 	return priv->descriptor_index;
 }
 
 JagAstDeclarationType *jag_byt_local_variable_table_entry_get_declaration_type(JagBytLocalVariableTableEntry *entry) {
-	JagBytLocalVariableTableEntryPrivate *priv = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(entry);
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(entry);
 	return priv->declaration_type;
 }
 
 int jag_byt_local_variable_table_entry_get_index(JagBytLocalVariableTableEntry *entry) {
-	JagBytLocalVariableTableEntryPrivate *priv = JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(entry);
+	JagBytLocalVariableTableEntryPrivate *priv = jag_byt_local_variable_table_entry_get_instance_private(entry);
 	return priv->index;
 }
-
-
-
-

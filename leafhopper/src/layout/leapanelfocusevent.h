@@ -45,5 +45,4 @@ LeaPanelFocusEvent *lea_panel_focus_event_new(GtkWidget *focus_widget, struct _L
 
 G_END_DECLS
 
-
 #endif /* LEAPANELFOCUSEVENT_H_ */

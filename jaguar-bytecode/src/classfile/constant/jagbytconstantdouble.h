@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTDOUBLE_H_
 #define JAGBYTCONSTANTDOUBLE_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_DOUBLE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_DOUBLE))
 #define JAG_BYT_IS_CONSTANT_DOUBLE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_DOUBLE))
 #define JAG_BYT_CONSTANT_DOUBLE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_DOUBLE, JagBytConstantDoubleClass))
-#define JAG_BYT_CONSTANT_DOUBLE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_DOUBLE, JagBytConstantDoublePrivate))
 
 typedef struct _JagBytConstantDouble               JagBytConstantDouble;
 typedef struct _JagBytConstantDoublePrivate        JagBytConstantDoublePrivate;
@@ -46,7 +44,6 @@ typedef struct _JagBytConstantDoubleClass          JagBytConstantDoubleClass;
 
 struct _JagBytConstantDouble {
 	GObject parent;
-	JagBytConstantDoublePrivate *priv;
 };
 
 struct _JagBytConstantDoubleClass {
@@ -59,7 +56,5 @@ GType jag_byt_constant_double_get_type();
 JagBytConstantDouble *jag_byt_constant_double_new(int64_t value);
 
 G_END_DECLS
-
-
 
 #endif /* JAGBYTCONSTANTDOUBLE_H_ */

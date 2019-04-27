@@ -20,10 +20,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGJARFILEMAPPER_H_
 #define JAGJARFILEMAPPER_H_
-
 
 #include <caterpillar.h>
 #include <viper.h>
@@ -36,30 +34,23 @@ G_BEGIN_DECLS
 #define JAG_IS_JAR_FILE_MAPPER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_JAR_FILE_MAPPER))
 #define JAG_IS_JAR_FILE_MAPPER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_JAR_FILE_MAPPER))
 #define JAG_JAR_FILE_MAPPER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_JAR_FILE_MAPPER, JagJarFileMapperClass))
-#define JAG_JAR_FILE_MAPPER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_JAR_FILE_MAPPER, JagJarFileMapperPrivate))
-
 
 typedef struct _JagJarFileMapper               JagJarFileMapper;
 typedef struct _JagJarFileMapperPrivate        JagJarFileMapperPrivate;
 typedef struct _JagJarFileMapperClass          JagJarFileMapperClass;
 
-
 struct _JagJarFileMapper {
 	GObject parent;
-	JagJarFileMapperPrivate *priv;
 };
 
 struct _JagJarFileMapperClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_jar_file_mapper_get_type();
 
 JagJarFileMapper *jag_jar_file_mapper_new(VipISequence *sequence);
 
 G_END_DECLS
-
-
 
 #endif /* JAGJARFILEMAPPER_H_ */

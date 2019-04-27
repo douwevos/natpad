@@ -35,22 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ADD_PROJECT_DIALOG(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ADD_PROJECT_DIALOG))
 #define MOO_IS_ADD_PROJECT_DIALOG_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ADD_PROJECT_DIALOG))
 #define MOO_ADD_PROJECT_DIALOG_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ADD_PROJECT_DIALOG, MooAddProjectDialogClass))
-#define MOO_ADD_PROJECT_DIALOG_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ADD_PROJECT_DIALOG, MooAddProjectDialogPrivate))
 
 typedef struct _MooAddProjectDialog               MooAddProjectDialog;
 typedef struct _MooAddProjectDialogPrivate        MooAddProjectDialogPrivate;
 typedef struct _MooAddProjectDialogClass          MooAddProjectDialogClass;
 
-
 struct _MooAddProjectDialog {
 	GtkDialog parent;
-	MooAddProjectDialogPrivate *priv;
 };
 
 struct _MooAddProjectDialogClass {
 	GtkDialogClass parent_class;
 };
-
 
 GType moo_add_project_dialog_get_type();
 

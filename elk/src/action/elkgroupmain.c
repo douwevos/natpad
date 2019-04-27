@@ -43,28 +43,24 @@ struct _ElkGroupMainPrivate {
 	ElkActionPreferences *action_preferences;
 };
 
-G_DEFINE_TYPE (ElkGroupMain, elk_group_main, LEA_TYPE_ACTION_GROUP)
+G_DEFINE_TYPE_WITH_PRIVATE(ElkGroupMain, elk_group_main, LEA_TYPE_ACTION_GROUP)
 
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void elk_group_main_class_init(ElkGroupMainClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(ElkGroupMainPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void elk_group_main_init(ElkGroupMain *instance) {
-	ElkGroupMainPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_GROUP_MAIN, ElkGroupMainPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkGroupMain *instance = ELK_GROUP_MAIN(object);
-	ElkGroupMainPrivate *priv = instance->priv;
+	ElkGroupMainPrivate *priv = elk_group_main_get_instance_private(instance);
 	cat_unref_ptr(priv->service);
 	cat_unref_ptr(priv->group_file);
 	cat_unref_ptr(priv->group_help);
@@ -75,7 +71,7 @@ static void _dispose(GObject *object) {
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
 	G_OBJECT_CLASS(elk_group_main_parent_class)->finalize(object);
@@ -85,7 +81,7 @@ static void _finalize(GObject *object) {
 ElkGroupMain *elk_group_main_new(ElkIService *service, VipService *vip_service, LeaFrame *frame) {
 	ElkGroupMain *result = g_object_new(ELK_TYPE_GROUP_MAIN, NULL);
 	cat_ref_anounce(result);
-	ElkGroupMainPrivate *priv = result->priv;
+	ElkGroupMainPrivate *priv = elk_group_main_get_instance_private(result);
 	lea_action_group_construct((LeaActionGroup *) result, cat_string_wo_new_with("elk.action.group"), NULL);
 
 
@@ -114,11 +110,11 @@ ElkGroupMain *elk_group_main_new(ElkIService *service, VipService *vip_service, 
 }
 
 void elk_group_main_set_editor_panel(ElkGroupMain *group, DraEditorPanel *editor_panel) {
-	ElkGroupMainPrivate *priv = ELK_GROUP_MAIN_GET_PRIVATE(group);
+	ElkGroupMainPrivate *priv = elk_group_main_get_instance_private(group);
 	elk_group_file_set_editor_panel(priv->group_file, editor_panel);
 }
 
 void elk_group_main_set_editor_list(ElkGroupMain *group, CatArrayWo *a_editor_list) {
-	ElkGroupMainPrivate *priv = ELK_GROUP_MAIN_GET_PRIVATE(group);
+	ElkGroupMainPrivate *priv = elk_group_main_get_instance_private(group);
 	elk_group_file_set_editor_list(priv->group_file, a_editor_list);
 }

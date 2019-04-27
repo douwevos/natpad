@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTRETURNSTATEMENT_H_
 #define JAGASTRETURNSTATEMENT_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_RETURN_STATEMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_RETURN_STATEMENT))
 #define JAG_AST_IS_RETURN_STATEMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_RETURN_STATEMENT))
 #define JAG_AST_RETURN_STATEMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_RETURN_STATEMENT, JagAstReturnStatementClass))
-#define JAG_AST_RETURN_STATEMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_RETURN_STATEMENT, JagAstReturnStatementPrivate))
 
 typedef struct _JagAstReturnStatement               JagAstReturnStatement;
 typedef struct _JagAstReturnStatementPrivate        JagAstReturnStatementPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstReturnStatementClass          JagAstReturnStatementClass;
 
 struct _JagAstReturnStatement {
 	GObject parent;
-	JagAstReturnStatementPrivate *priv;
 };
 
 struct _JagAstReturnStatementClass {
@@ -60,6 +57,5 @@ JagAstReturnStatement *jag_ast_return_statement_new(JagAstIExpression *return_ex
 JagAstIExpression *jag_ast_return_statement_get_expression(JagAstReturnStatement *return_statement);
 
 G_END_DECLS
-
 
 #endif /* JAGASTRETURNSTATEMENT_H_ */

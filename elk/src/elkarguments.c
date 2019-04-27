@@ -29,19 +29,23 @@
 
 G_DEFINE_TYPE(ElkArguments, elk_arguments, G_TYPE_OBJECT)
 
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
 static void elk_arguments_class_init(ElkArgumentsClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
+	object_class->dispose = l_dispose;
 }
 
 static void elk_arguments_init(ElkArguments *obj) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
+	cat_log_detail("dispose:%o", object);
 	ElkArguments *instance = ELK_ARGUMENTS(object);
 	cat_unref_ptr(instance->documents_to_load);
+	cat_ref_denounce(object);
+	G_OBJECT_CLASS(elk_arguments_parent_class)->finalize(object);
+	cat_log_detail("disposed:%p", object);
 }
 
 
@@ -51,8 +55,6 @@ ElkArguments *elk_arguments_new() {
 	result->documents_to_load = cat_array_wo_new();
 	return result;
 }
-
-
 
 
 CatStringWo *elk_arguments_url_decode(CatStringWo *a_url_document) {
@@ -104,5 +106,3 @@ void elk_arguments_parse_and_add_document(ElkArguments *arguments, CatStringWo *
 		cat_array_wo_append(arguments->documents_to_load, G_OBJECT(a_arg));
 	}
 }
-
-

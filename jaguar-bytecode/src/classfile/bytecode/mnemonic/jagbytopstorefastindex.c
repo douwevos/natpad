@@ -37,6 +37,7 @@ struct _JagBytOpStoreFastIndexPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpStoreFastIndex, jag_byt_op_store_fast_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpStoreFastIndex)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -44,16 +45,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_store_fast_index_class_init(JagBytOpStoreFastIndexClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpStoreFastIndexPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_store_fast_index_init(JagBytOpStoreFastIndex *instance) {
-	JagBytOpStoreFastIndexPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_STORE_FAST_INDEX, JagBytOpStoreFastIndexPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -72,22 +69,23 @@ static void l_finalize(GObject *object) {
 JagBytOpStoreFastIndex *jag_byt_op_store_fast_index_new(JagBytOperation operation, int offset, JagBytType value_type, int index) {
 	JagBytOpStoreFastIndex *result = g_object_new(JAG_BYT_TYPE_OP_STORE_FAST_INDEX, NULL);
 	cat_ref_anounce(result);
-	JagBytOpStoreFastIndexPrivate *priv = result->priv;
+	JagBytOpStoreFastIndexPrivate *priv = jag_byt_op_store_fast_index_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 1);
 	priv->value_type = value_type;
 	priv->index = index;
 	return result;
 }
 
-
 int jag_byt_op_store_fast_index_get_frame_index(JagBytOpStoreFastIndex *store_fast_index) {
-	return JAG_BYT_OP_STORE_FAST_INDEX_GET_PRIVATE(store_fast_index)->index;
+	JagBytOpStoreFastIndexPrivate *priv = jag_byt_op_store_fast_index_get_instance_private(store_fast_index);
+	return priv->index;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpStoreFastIndexPrivate *priv = JAG_BYT_OP_STORE_FAST_INDEX_GET_PRIVATE(self);
+	JagBytOpStoreFastIndex *instance = JAG_BYT_OP_STORE_FAST_INDEX(self);
+	JagBytOpStoreFastIndexPrivate *priv = jag_byt_op_store_fast_index_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new();
 	short op_code = jag_byt_imnemonic_get_opp_code(self);
 	switch(priv->value_type) {

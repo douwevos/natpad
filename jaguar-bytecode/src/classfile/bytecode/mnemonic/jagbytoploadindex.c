@@ -38,24 +38,20 @@ struct _JagBytOpLoadIndexPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpLoadIndex, jag_byt_op_load_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpLoadIndex)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
-
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_load_index_class_init(JagBytOpLoadIndexClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpLoadIndexPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_load_index_init(JagBytOpLoadIndex *instance) {
-	JagBytOpLoadIndexPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_LOAD_INDEX, JagBytOpLoadIndexPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -74,7 +70,7 @@ static void l_finalize(GObject *object) {
 JagBytOpLoadIndex *jag_byt_op_load_index_new(JagBytOperation operation, int offset, JagBytType value_type, int index, gboolean is_wide) {
 	JagBytOpLoadIndex *result = g_object_new(JAG_BYT_TYPE_OP_LOAD_INDEX, NULL);
 	cat_ref_anounce(result);
-	JagBytOpLoadIndexPrivate *priv = result->priv;
+	JagBytOpLoadIndexPrivate *priv = jag_byt_op_load_index_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, is_wide ? 3 : 2);
 	priv->value_type = value_type;
 	priv->index = index;
@@ -82,7 +78,8 @@ JagBytOpLoadIndex *jag_byt_op_load_index_new(JagBytOperation operation, int offs
 }
 
 int jag_byt_op_load_index_get_frame_index(JagBytOpLoadIndex *load_index) {
-	return JAG_BYT_OP_LOAD_INDEX_GET_PRIVATE(load_index)->index;
+	JagBytOpLoadIndexPrivate *priv = jag_byt_op_load_index_get_instance_private(load_index);
+	return priv->index;
 }
 
 
@@ -100,11 +97,12 @@ static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *la
 		default :
 			break;
 	}
-	int index = JAG_BYT_OP_LOAD_INDEX_GET_PRIVATE(self)->index;
+	JagBytOpLoadIndex *instance = JAG_BYT_OP_LOAD_INDEX(self);
+	JagBytOpLoadIndexPrivate *priv = jag_byt_op_load_index_get_instance_private(instance);
+	int index = priv->index;
 	cat_string_wo_append_decimal(result, index);
 	return result;
 }
-
 
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef WORIPROVIDER_H_
 #define WORIPROVIDER_H_
 
@@ -42,7 +41,6 @@ struct _WorIProviderInterface {
 
 	WorRequest *(*next_request)(WorIProvider *self, int64_t *runtime);
 
-
 	void (*increaseUsage)(WorIProvider *self);
 	void (*decreaseUsage)(WorIProvider *self);
 	gboolean (*isActive)(WorIProvider *self);
@@ -50,7 +48,5 @@ struct _WorIProviderInterface {
 };
 
 GType wor_iprovider_get_type(void);
-
-
 
 #endif /* WORIPROVIDER_H_ */

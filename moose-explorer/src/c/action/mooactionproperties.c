@@ -34,16 +34,13 @@ struct _MooActionPropertiesPrivate {
 	CatArrayWo *selection;
 };
 
-
-G_DEFINE_TYPE(MooActionProperties, moo_action_properties, LEA_TYPE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE(MooActionProperties, moo_action_properties, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void moo_action_properties_class_init(MooActionPropertiesClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooActionPropertiesPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -53,14 +50,12 @@ static void moo_action_properties_class_init(MooActionPropertiesClass *clazz) {
 }
 
 static void moo_action_properties_init(MooActionProperties *instance) {
-	MooActionPropertiesPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ACTION_PROPERTIES, MooActionPropertiesPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooActionProperties *instance = MOO_ACTION_PROPERTIES(object);
-	MooActionPropertiesPrivate *priv = instance->priv;
+	MooActionPropertiesPrivate *priv = moo_action_properties_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->selection);
 	G_OBJECT_CLASS(moo_action_properties_parent_class)->dispose(object);
@@ -78,7 +73,7 @@ static void l_finalize(GObject *object) {
 MooActionProperties *moo_action_properties_new(MooService *moo_service) {
 	MooActionProperties *result = g_object_new(MOO_TYPE_ACTION_PROPERTIES, NULL);
 	cat_ref_anounce(result);
-	MooActionPropertiesPrivate *priv = result->priv;
+	MooActionPropertiesPrivate *priv = moo_action_properties_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->selection = NULL;
 	lea_action_construct((LeaAction *) result, cat_string_wo_new_with("moose.propeties"), cat_string_wo_new_with("P_roperties"), cat_string_wo_new_with("document-properties"));
@@ -88,7 +83,7 @@ MooActionProperties *moo_action_properties_new(MooService *moo_service) {
 }
 
 void moo_action_properties_set_selection(MooActionProperties *action_properties, CatArrayWo *selection) {
-	MooActionPropertiesPrivate *priv = MOO_ACTION_PROPERTIES_GET_PRIVATE(action_properties);
+	MooActionPropertiesPrivate *priv = moo_action_properties_get_instance_private(action_properties);
 	if (priv->selection == selection) {
 		return;
 	}
@@ -100,10 +95,9 @@ void moo_action_properties_set_selection(MooActionProperties *action_properties,
 	lea_action_set_sensitive_self(LEA_ACTION(action_properties), pd_enabled);
 }
 
-
-
 static void l_action_run(LeaAction *self) {
-	MooActionPropertiesPrivate *priv = MOO_ACTION_PROPERTIES_GET_PRIVATE(self);
+	MooActionProperties *instance = MOO_ACTION_PROPERTIES(self);
+	MooActionPropertiesPrivate *priv = moo_action_properties_get_instance_private(instance);
 	if (priv->selection!=NULL && cat_array_wo_size(priv->selection)==1) {
 		MooNodeLayout *node_layout = (MooNodeLayout *) cat_array_wo_get_first(priv->selection);
 		MooNodeWo *node = moo_node_layout_get_node(node_layout);
@@ -139,7 +133,6 @@ static void l_action_run(LeaAction *self) {
 			}
 		}
 		gtk_widget_destroy((GtkWidget *) cdialog);
-
 	}
 }
 

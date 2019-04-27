@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTTP_H_
 #define JAGASTTP_H_
 
@@ -41,7 +40,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_TP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_TP))
 #define JAG_AST_IS_TP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_TP))
 #define JAG_AST_TP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_TP, JagAstTpClass))
-#define JAG_AST_TP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_TP, JagAstTpPrivate))
 
 typedef struct _JagAstTp               JagAstTp;
 typedef struct _JagAstTpPrivate        JagAstTpPrivate;
@@ -50,7 +48,6 @@ typedef struct _JagAstTpClass          JagAstTpClass;
 
 struct _JagAstTp {
 	GObject parent;
-	JagAstTpPrivate *priv;
 };
 
 struct _JagAstTpClass {

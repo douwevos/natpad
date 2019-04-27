@@ -32,49 +32,41 @@ struct _JagPackageContentPrivate {
 	void *dummy;
 };
 
-
 static CatS jag_s_package_content_key = CAT_S_DEF("JagPackageContent");
 
 static void l_content_iface_init(MooIContentInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagPackageContent, jag_package_content, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagPackageContent)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ICONTENT, l_content_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_package_content_class_init(JagPackageContentClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagPackageContentPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_package_content_init(JagPackageContent *instance) {
-	JagPackageContentPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_PACKAGE_CONTENT, JagPackageContentPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 //	JagPackageContent *instance = JAG_PACKAGE_CONTENT(object);
 //	JagPackageContentPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_package_content_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_package_content_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagPackageContent *jag_package_content_new() {
 	JagPackageContent *result = g_object_new(JAG_TYPE_PACKAGE_CONTENT, NULL);
@@ -82,8 +74,6 @@ JagPackageContent *jag_package_content_new() {
 //	JagPackageContentPrivate *priv = result->priv;
 	return result;
 }
-
-
 
 CatStringWo *jag_package_content_key() {
 	return CAT_S(jag_s_package_content_key);
@@ -101,15 +91,9 @@ static MooIContent *l_content_anchor(MooIContent *self, int version) {
 	return self;
 }
 
-
-
 static void l_content_iface_init(MooIContentInterface *iface) {
 	iface->getKey = l_content_get_key;
 	iface->anchor = l_content_anchor;
 }
 
 /********************* end MooIContent implementation *********************/
-
-
-
-

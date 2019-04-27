@@ -76,7 +76,6 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JagRefreshLibrariesRequest *jag_refresh_libraries_request_new(MooService *moo_service, long long module_node_id, int last_known_node_idx) {
 	JagRefreshLibrariesRequest *result = g_object_new(JAG_TYPE_REFRESH_LIBRARIES_REQUEST, NULL);
 	cat_ref_anounce(result);
@@ -88,8 +87,6 @@ JagRefreshLibrariesRequest *jag_refresh_libraries_request_new(MooService *moo_se
 	priv->e_enlisted_requests = cat_array_wo_new();
 	return result;
 }
-
-
 
 static void l_run(JagRefreshLibrariesRequest *refresh_request, MooNodeWo *e_root_node, MooNodeWo *e_module_node, JagModuleContentWo *e_jag_content) {
 	JagRefreshLibrariesRequestPrivate *priv = jag_refresh_libraries_request_get_instance_private(refresh_request);
@@ -207,11 +204,6 @@ static void l_run(JagRefreshLibrariesRequest *refresh_request, MooNodeWo *e_root
 }
 
 
-
-
-
-
-
 static void l_run_request(WorRequest *request) {
 	JagRefreshLibrariesRequestPrivate *priv = jag_refresh_libraries_request_get_instance_private((JagRefreshLibrariesRequest *) request);
 	MooIdNodeMatcher *mooIdMatcher = moo_id_node_matcher_new(priv->module_node_id);
@@ -263,7 +255,6 @@ static void l_run_request(WorRequest *request) {
 }
 
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
@@ -276,10 +267,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-
-
-
-
-
-

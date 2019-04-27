@@ -40,15 +40,13 @@ struct _VipRenameNodeRequestPrivate {
 	CatLock *lock;
 };
 
-G_DEFINE_TYPE(VipRenameNodeRequest, vip_rename_node_request, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE_WITH_PRIVATE(VipRenameNodeRequest, vip_rename_node_request, WOR_TYPE_REQUEST);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void vip_rename_node_request_class_init(VipRenameNodeRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipRenameNodeRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -58,14 +56,12 @@ static void vip_rename_node_request_class_init(VipRenameNodeRequestClass *clazz)
 }
 
 static void vip_rename_node_request_init(VipRenameNodeRequest *instance) {
-	VipRenameNodeRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_RENAME_NODE_REQUEST, VipRenameNodeRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipRenameNodeRequest *instance = VIP_RENAME_NODE_REQUEST(object);
-	VipRenameNodeRequestPrivate *priv = instance->priv;
+	VipRenameNodeRequestPrivate *priv = vip_rename_node_request_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_service);
 	cat_unref_ptr(priv->node_to_rename);
 	cat_unref_ptr(priv->a_new_name);
@@ -84,7 +80,7 @@ static void l_finalize(GObject *object) {
 VipRenameNodeRequest *vip_rename_node_request_new(struct _VipService *vip_service, CatReadableTreeNode *node_to_rename, CatStringWo *a_new_name) {
 	VipRenameNodeRequest *result = g_object_new(VIP_TYPE_RENAME_NODE_REQUEST, NULL);
 	cat_ref_anounce(result);
-	VipRenameNodeRequestPrivate *priv = result->priv;
+	VipRenameNodeRequestPrivate *priv = vip_rename_node_request_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->node_to_rename = cat_ref_ptr(node_to_rename);
 	priv->a_new_name = cat_ref_ptr(a_new_name);
@@ -97,7 +93,7 @@ VipRenameNodeRequest *vip_rename_node_request_new(struct _VipService *vip_servic
 
 // TODO possible dead lock ... please add timeout
 gboolean vip_rename_node_request_wait_for_result(VipRenameNodeRequest *request) {
-	VipRenameNodeRequestPrivate *priv = VIP_RENAME_NODE_REQUEST_GET_PRIVATE(request);
+	VipRenameNodeRequestPrivate *priv = vip_rename_node_request_get_instance_private(request);
 	cat_lock_lock(priv->lock);
 	while(!priv->did_run) {
 		cat_lock_wait(priv->lock);
@@ -106,10 +102,9 @@ gboolean vip_rename_node_request_wait_for_result(VipRenameNodeRequest *request) 
 	return priv->did_rename;
 }
 
-
-
 static void l_run_request(WorRequest *self) {
-	VipRenameNodeRequestPrivate *priv = VIP_RENAME_NODE_REQUEST_GET_PRIVATE(self);
+	VipRenameNodeRequest *instance = VIP_RENAME_NODE_REQUEST(self);
+	VipRenameNodeRequestPrivate *priv = vip_rename_node_request_get_instance_private(instance);
 
 	CatTree *tree = vip_service_get_tree(priv->vip_service);
 	CatWritableTreeNode *writable_root_node = cat_tree_get_writable_root_node(tree);
@@ -150,4 +145,3 @@ static void l_run_request(WorRequest *self) {
 	cat_lock_notify_all(priv->lock);
 	cat_lock_unlock(priv->lock);
 }
-

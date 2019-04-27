@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTATTRIBUTEMAP_H_
 #define JAGBYTATTRIBUTEMAP_H_
-
 
 #include "jagbytattribute.h"
 #include "jagbytattributecode.h"
@@ -44,7 +42,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_MAP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_MAP))
 #define JAG_BYT_IS_ATTRIBUTE_MAP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_MAP))
 #define JAG_BYT_ATTRIBUTE_MAP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_MAP, JagBytAttributeMapClass))
-#define JAG_BYT_ATTRIBUTE_MAP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_MAP, JagBytAttributeMapPrivate))
 
 typedef struct _JagBytAttributeMap               JagBytAttributeMap;
 typedef struct _JagBytAttributeMapPrivate        JagBytAttributeMapPrivate;
@@ -53,7 +50,6 @@ typedef struct _JagBytAttributeMapClass          JagBytAttributeMapClass;
 
 struct _JagBytAttributeMap {
 	GObject parent;
-	JagBytAttributeMapPrivate *priv;
 };
 
 struct _JagBytAttributeMapClass {
@@ -71,8 +67,6 @@ JagBytAttributeCode *jag_byt_attribute_map_get_code(JagBytAttributeMap *attribut
 JagBytAttributeConstantValue *jag_byt_attribute_map_get_constant_value(JagBytAttributeMap *attribute_map);
 JagBytAttributeExceptions *jag_byt_attribute_map_get_exceptions(JagBytAttributeMap *attribute_map);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTATTRIBUTEMAP_H_ */

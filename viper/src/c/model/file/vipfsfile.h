@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef VIPFSFILE_H_
 #define VIPFSFILE_H_
 
@@ -36,17 +35,13 @@ G_BEGIN_DECLS
 #define VIP_IS_FS_FILE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_FS_FILE))
 #define VIP_IS_FS_FILE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_FS_FILE))
 #define VIP_FS_FILE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_FS_FILE, VipFSFileClass))
-#define VIP_FS_FILE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_FS_FILE, VipFSFilePrivate))
-
 
 typedef struct _VipFSFile               VipFSFile;
 typedef struct _VipFSFilePrivate        VipFSFilePrivate;
 typedef struct _VipFSFileClass          VipFSFileClass;
 
-
 struct _VipFSFile {
 	GObject parent;
-	VipFSFilePrivate *priv;
 };
 
 struct _VipFSFileClass {
@@ -59,7 +54,6 @@ GType vip_fs_file_get_type();
 VipFSFile *vip_fs_file_new(VipPath *path);
 
 VipFSFile *vip_fs_file_new_from_fs(VipFS *fs);
-
 
 VipPath *vip_fs_file_get_path(VipFSFile *fs_file);
 

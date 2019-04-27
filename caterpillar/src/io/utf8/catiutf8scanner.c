@@ -46,8 +46,6 @@ GType cat_iutf8_scanner_get_type (void) {
 }
 
 
-
-
 gunichar cat_iutf8_scanner_next_char(CatIUtf8Scanner *self, CatStreamStatus *status) {
 	g_return_val_if_fail(CAT_IS_IUTF8_SCANNER(self), -1);
 	return CAT_IUTF8_SCANNER_GET_INTERFACE(self)->scan_utf8_char(self, status);

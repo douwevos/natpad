@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef SHOREFERENCE_H_
 #define SHOREFERENCE_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define SHO_IS_REFERENCE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SHO_TYPE_REFERENCE))
 #define SHO_IS_REFERENCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), SHO_TYPE_REFERENCE))
 #define SHO_REFERENCE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), SHO_TYPE_REFERENCE, ShoReferenceClass))
-#define SHO_REFERENCE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), SHO_TYPE_REFERENCE, ShoReferencePrivate))
 
 typedef struct _ShoReference               ShoReference;
 typedef struct _ShoReferencePrivate        ShoReferencePrivate;
@@ -45,7 +43,6 @@ typedef struct _ShoReferenceClass          ShoReferenceClass;
 
 struct _ShoReference {
 	GObject parent;
-	ShoReferencePrivate *priv;
 };
 
 struct _ShoReferenceClass {

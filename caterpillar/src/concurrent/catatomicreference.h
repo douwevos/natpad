@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define CAT_IS_ATOMIC_REFERENCE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_ATOMIC_REFERENCE))
 #define CAT_IS_ATOMIC_REFERENCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_ATOMIC_REFERENCE))
 #define CAT_ATOMIC_REFERENCE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_ATOMIC_REFERENCE, CatAtomicReferenceClass))
-#define CAT_ATOMIC_REFERENCE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_ATOMIC_REFERENCE, CatAtomicReferencePrivate))
 
 
 typedef struct _CatAtomicReference               CatAtomicReference;
@@ -45,7 +44,6 @@ typedef struct _CatAtomicReferenceClass          CatAtomicReferenceClass;
 
 struct _CatAtomicReference {
 	GObject parent;
-	CatAtomicReferencePrivate *priv;
 };
 
 struct _CatAtomicReferenceClass {

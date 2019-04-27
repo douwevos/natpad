@@ -47,53 +47,45 @@ struct _MooNodeLayoutPrivate {
 	CatArrayWo *e_children;
 };
 
-G_DEFINE_TYPE (MooNodeLayout, moo_node_layout, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooNodeLayout, moo_node_layout, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_node_layout_class_init(MooNodeLayoutClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooNodeLayoutPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_node_layout_init(MooNodeLayout *instance) {
-	MooNodeLayoutPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_NODE_LAYOUT, MooNodeLayoutPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooNodeLayout *instance = MOO_NODE_LAYOUT(object);
-	MooNodeLayoutPrivate *priv = instance->priv;
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(instance);
 	cat_unref_ptr(priv->e_children);
 	cat_unref_ptr(priv->node);
 	cat_unref_ptr(priv->key);
 	cat_unref_ptr(priv->e_renderers);
 	cat_unref_ptr(priv->a_cached_name);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_node_layout_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_node_layout_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 MooNodeLayout *moo_node_layout_new(MooNodeWo *node, int tree_level) {
 	MooNodeLayout *result = g_object_new(MOO_TYPE_NODE_LAYOUT, NULL);
 	result->icon = NULL;
 	cat_ref_anounce(result);
-	MooNodeLayoutPrivate *priv = result->priv;
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(result);
 	priv->node = cat_ref_ptr(node);
 	if (node) {
 		long long id = moo_node_wo_get_unique_id(node);
@@ -119,10 +111,8 @@ MooNodeLayout *moo_node_layout_new(MooNodeWo *node, int tree_level) {
 	return result;
 }
 
-
-
 void moo_node_layout_set_node(MooNodeLayout *node_layout, MooNodeWo *node) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	if (priv->node!=node) {
 		cat_ref_swap(priv->node, node);
 		priv->boundaries_invalid = TRUE;
@@ -136,21 +126,15 @@ void moo_node_layout_set_node(MooNodeLayout *node_layout, MooNodeWo *node) {
 	}
 }
 
-
-
-
-
 void moo_node_layout_refresh_renderer_list(MooNodeLayout *node_layout, MooNodeRenderRegistry *render_registry) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	if (priv->e_renderers==NULL) {
 		priv->e_renderers = moo_node_render_registry_create_renderers_for_node(render_registry, priv->node);
 	}
 }
 
-
-
 void moo_node_layout_update_layout(MooNodeLayout *node_layout, cairo_t *cairo, int ypos, int node_height) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	GdkRectangle oldBound = priv->boundaries;
 
 	priv->boundaries.y = ypos;
@@ -196,7 +180,6 @@ void moo_node_layout_update_layout(MooNodeLayout *node_layout, cairo_t *cairo, i
 	priv->boundaries.width = priv->name_width;
 	priv->boundaries.width += node_height*2;
 
-
 //	int errorCount = node.getErrorCount();
 //	if (errorCount>0) {
 //
@@ -214,8 +197,6 @@ void moo_node_layout_update_layout(MooNodeLayout *node_layout, cairo_t *cairo, i
 //		errorWidth = 0;
 //	}
 
-
-
 	if (!priv->needs_repaint) {
 		if ((oldBound.x!=priv->boundaries.x) ||
 				(oldBound.y!=priv->boundaries.y) ||
@@ -229,7 +210,6 @@ void moo_node_layout_update_layout(MooNodeLayout *node_layout, cairo_t *cairo, i
 
 
 static void l_draw_expander(cairo_t *cr, gint x, gint y, double expander_size, gboolean is_expanded) {
-
 	gint line_width;
 	double vertical_overshoot;
 	int diameter;
@@ -313,9 +293,8 @@ static void l_draw_expander(cairo_t *cr, gint x, gint y, double expander_size, g
 	cairo_restore(cr);
 }
 
-
 void moo_node_layout_paint(MooNodeLayout *node_layout, PangoContext *pango_context, PangoLayout *pango_layout, double font_height, cairo_t *cairo, gboolean is_cursor) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 
 	double clip_x, clip_y, clip_width, clip_height;
 	cairo_clip_extents(cairo, &clip_x, &clip_y, &clip_width, &clip_height);
@@ -339,9 +318,6 @@ void moo_node_layout_paint(MooNodeLayout *node_layout, PangoContext *pango_conte
 		cairo_stroke(cairo);
 	}
 
-
-//		cat_log_debug("fontHeight="+fontHeight+", node.count()="+node.count());
-
 	if (priv->paint_as_map > 0)  {
 		double exp_size = priv->node_height;
 		double exp_off = (priv->node_height) * 0.5;
@@ -352,10 +328,8 @@ void moo_node_layout_paint(MooNodeLayout *node_layout, PangoContext *pango_conte
 		l_draw_expander(cairo, priv->boundaries.x+exp_off,priv->boundaries.y+exp_off, exp_size, priv->is_expanded);
 	}
 
-
 	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0);
 //		g.drawRect(boundaries.x, boundaries.y, boundaries.width, boundaries.height);
-
 
 	if (priv->e_renderers) {
 		CatIIterator *iter = cat_array_wo_iterator(priv->e_renderers);
@@ -366,9 +340,7 @@ void moo_node_layout_paint(MooNodeLayout *node_layout, PangoContext *pango_conte
 		cat_unref_ptr(iter);
 	}
 
-
 	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0);
-
 
 //	PangoLayout *pango_layout = pango_cairo_create_layout(cairo);
 
@@ -379,9 +351,6 @@ void moo_node_layout_paint(MooNodeLayout *node_layout, PangoContext *pango_conte
 
 	cairo_move_to(cairo, priv->node_height*2+priv->boundaries.x, top_margin+priv->boundaries.y);
 	pango_cairo_show_layout(cairo, pango_layout);
-
-
-
 
 //	int errorCount = node.getErrorCount();
 //	if (errorCount>0) {
@@ -403,16 +372,15 @@ void moo_node_layout_paint(MooNodeLayout *node_layout, PangoContext *pango_conte
 //	}
 
 	priv->boundaries.y = old_y;
-
 }
 
-
 gboolean moo_node_layout_is_a_map(MooNodeLayout *node_layout) {
-	return MOO_NODE_LAYOUT_GET_PRIVATE(node_layout)->paint_as_map;
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
+	return priv->paint_as_map;
 }
 
 MooNodeLayoutZone moo_node_layout_get_zone(MooNodeLayout *node_layout, int xpos, int ypos) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	xpos -= priv->boundaries.x;
 	if (xpos<0 || xpos>=priv->boundaries.width) {
 		return MOO_NODE_LAYOUT_ZONE_NONE;
@@ -429,71 +397,68 @@ MooNodeLayoutZone moo_node_layout_get_zone(MooNodeLayout *node_layout, int xpos,
 	return MOO_NODE_LAYOUT_ZONE_EXTRA;
 }
 
-
 int moo_node_layout_get_y(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->boundaries.y;
 }
 
 int moo_node_layout_get_x(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->boundaries.x;
 }
 
 int moo_node_layout_get_width(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->boundaries.width;
 }
 
 int moo_node_layout_get_height(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->boundaries.height;
 }
 
 void moo_node_layout_get_bounds(MooNodeLayout *node_layout, GdkRectangle *bounds) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	*bounds = priv->boundaries;
 }
 
 MooNodeWo *moo_node_layout_get_node(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->node;
 }
 
 int moo_node_layout_get_font_height(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->node_height;
 }
 
 gboolean moo_node_layout_is_expanded(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->is_expanded;
 }
 
 gboolean moo_node_layout_toggle_expanded(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	priv->is_expanded = !priv->is_expanded;
 	priv->needs_repaint = TRUE;
 	return priv->is_expanded;
 }
 
-
 gboolean moo_node_layout_toggle_selected(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	priv->is_selected = !priv->is_selected;
 	priv->needs_repaint = TRUE;
 	return priv->is_selected;
 }
 
 gboolean moo_node_layout_is_selected(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->is_selected;
 }
 
-
 gboolean moo_node_layout_set_selected(MooNodeLayout *node_layout, gboolean selected) {
 	gboolean result = FALSE;
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	if (priv->is_selected != selected) {
 		result = TRUE;
 		priv->is_selected = selected;
@@ -503,28 +468,27 @@ gboolean moo_node_layout_set_selected(MooNodeLayout *node_layout, gboolean selec
 }
 
 CatLong *moo_node_layout_get_node_key(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->key;
 }
 
-
 void moo_node_layout_mark_for_repaint(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	priv->needs_repaint = TRUE;
 }
 
 
 void moo_node_layout_set_children(MooNodeLayout *node_layout, CatArrayWo *new_children) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	cat_ref_swap(priv->e_children, new_children);
 }
 
 CatArrayWo *moo_node_layout_get_children(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->e_children;
 }
 
 int moo_node_layout_get_tree_level(MooNodeLayout *node_layout) {
-	MooNodeLayoutPrivate *priv = MOO_NODE_LAYOUT_GET_PRIVATE(node_layout);
+	MooNodeLayoutPrivate *priv = moo_node_layout_get_instance_private(node_layout);
 	return priv->tree_level;
 }

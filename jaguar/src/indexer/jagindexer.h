@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGINDEXER_H_
 #define JAGINDEXER_H_
-
 
 #include <caterpillar.h>
 #include <worm.h>
@@ -39,22 +37,18 @@ G_BEGIN_DECLS
 #define JAG_IS_INDEXER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_INDEXER))
 #define JAG_IS_INDEXER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_INDEXER))
 #define JAG_INDEXER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_INDEXER, JagIndexerClass))
-#define JAG_INDEXER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_INDEXER, JagIndexerPrivate))
 
 typedef struct _JagIndexer               JagIndexer;
 typedef struct _JagIndexerPrivate        JagIndexerPrivate;
 typedef struct _JagIndexerClass          JagIndexerClass;
 
-
 struct _JagIndexer {
 	GObject parent;
-	JagIndexerPrivate *priv;
 };
 
 struct _JagIndexerClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_indexer_get_type();
 

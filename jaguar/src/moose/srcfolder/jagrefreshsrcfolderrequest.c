@@ -40,6 +40,7 @@ struct _JagRefreshSrcFolderRequestPrivate {
 static void l_mergeable_request_iface_init(WorIMergeableRequestInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagRefreshSrcFolderRequest, jag_refresh_src_folder_request, WOR_TYPE_REQUEST, {
+		G_ADD_PRIVATE(JagRefreshSrcFolderRequest)
 		G_IMPLEMENT_INTERFACE(WOR_TYPE_IMERGEABLE_REQUEST, l_mergeable_request_iface_init);
 });
 
@@ -48,8 +49,6 @@ static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void jag_refresh_src_folder_request_class_init(JagRefreshSrcFolderRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagRefreshSrcFolderRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -59,15 +58,12 @@ static void jag_refresh_src_folder_request_class_init(JagRefreshSrcFolderRequest
 }
 
 static void jag_refresh_src_folder_request_init(JagRefreshSrcFolderRequest *instance) {
-	JagRefreshSrcFolderRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_REFRESH_SRC_FOLDER_REQUEST,
-	        JagRefreshSrcFolderRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagRefreshSrcFolderRequest *instance = JAG_REFRESH_SRC_FOLDER_REQUEST(object);
-	JagRefreshSrcFolderRequestPrivate *priv = instance->priv;
+	JagRefreshSrcFolderRequestPrivate *priv = jag_refresh_src_folder_request_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	G_OBJECT_CLASS(jag_refresh_src_folder_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -83,7 +79,7 @@ static void l_finalize(GObject *object) {
 JagRefreshSrcFolderRequest *jag_refresh_src_folder_request_new(MooService *moo_service, long long module_node_id, int last_known_node_idx) {
 	JagRefreshSrcFolderRequest *result = g_object_new(JAG_TYPE_REFRESH_SRC_FOLDER_REQUEST, NULL);
 	cat_ref_anounce(result);
-	JagRefreshSrcFolderRequestPrivate *priv = result->priv;
+	JagRefreshSrcFolderRequestPrivate *priv = jag_refresh_src_folder_request_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	wor_request_set_time_out((WorRequest *) result, 400);
 	priv->moo_service = cat_ref_ptr(moo_service);
@@ -94,7 +90,7 @@ JagRefreshSrcFolderRequest *jag_refresh_src_folder_request_new(MooService *moo_s
 
 static void l_run(JagRefreshSrcFolderRequest *src_folder_request, MooNodeWo *e_root_node, MooNodeWo *e_module_node,
         JagModuleContentWo *e_jag_content) {
-	JagRefreshSrcFolderRequestPrivate *priv = JAG_REFRESH_SRC_FOLDER_REQUEST_GET_PRIVATE(src_folder_request);
+	JagRefreshSrcFolderRequestPrivate *priv = jag_refresh_src_folder_request_get_instance_private(src_folder_request);
 	MooNodeListWo *e_module_children = moo_node_wo_get_editable_children(e_module_node);
 	MooIdPath *mainPath = moo_id_path_new();
 	MooIdPath *modulePath = moo_id_path_append_id(mainPath, moo_node_wo_get_unique_id(e_module_node), priv->last_known_node_idx);
@@ -194,7 +190,8 @@ static void l_run(JagRefreshSrcFolderRequest *src_folder_request, MooNodeWo *e_r
 }
 
 static void l_run_request(WorRequest *request) {
-	JagRefreshSrcFolderRequestPrivate *priv = JAG_REFRESH_SRC_FOLDER_REQUEST_GET_PRIVATE(request);
+	JagRefreshSrcFolderRequest *instance = JAG_REFRESH_SRC_FOLDER_REQUEST(request);
+	JagRefreshSrcFolderRequestPrivate *priv = jag_refresh_src_folder_request_get_instance_private(instance);
 	MooIdNodeMatcher *mooIdMatcher = moo_id_node_matcher_new(priv->module_node_id);
 
 	MooTransaction *tx = moo_service_create_transaction((GObject *) request, priv->moo_service);
@@ -236,7 +233,6 @@ static void l_run_request(WorRequest *request) {
 		} else {
 			break;
 		}
-
 	}
 
 	cat_unref_ptr(tx);
@@ -252,8 +248,6 @@ static 	WorMergeResult l_try_merge(WorIMergeableRequest *new_request, WorIMergea
 	return WOR_MERGE_FAILED;
 }
 
-
 static void l_mergeable_request_iface_init(WorIMergeableRequestInterface *iface) {
 	iface->tryMerge = l_try_merge;
 }
-

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef TERGRAMMARMAP_H_
 #define TERGRAMMARMAP_H_
 
@@ -39,16 +38,13 @@ G_BEGIN_DECLS
 #define TER_IS_GRAMMAR_MAP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TER_TYPE_GRAMMAR_MAP))
 #define TER_IS_GRAMMAR_MAP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_GRAMMAR_MAP))
 #define TER_GRAMMAR_MAP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_GRAMMAR_MAP, TerGrammarMapClass))
-#define TER_GRAMMAR_MAP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TER_TYPE_GRAMMAR_MAP, TerGrammarMapPrivate))
 
 typedef struct _TerGrammarMap               TerGrammarMap;
 typedef struct _TerGrammarMapPrivate        TerGrammarMapPrivate;
 typedef struct _TerGrammarMapClass          TerGrammarMapClass;
 
-
 struct _TerGrammarMap {
 	GObject parent;
-	TerGrammarMapPrivate *priv;
 };
 
 struct _TerGrammarMapClass {
@@ -63,6 +59,5 @@ TerGrammarMap *ter_grammar_map_new(ElkPreferencesService *preference_service, Vi
 TerSyntax *ter_grammar_map_get_syntax(TerGrammarMap *grammar_map, CatStringWo *clazz_name);
 
 G_END_DECLS
-
 
 #endif /* TERGRAMMARMAP_H_ */

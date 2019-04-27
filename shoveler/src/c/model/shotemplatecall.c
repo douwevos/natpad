@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "shotemplatecall.h"
 #include <caterpillar.h>
 
@@ -36,48 +34,41 @@ struct _ShoTemplateCallPrivate {
 	ShoListValue *argument_list;
 };
 
-G_DEFINE_TYPE (ShoTemplateCall, sho_template_call, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(ShoTemplateCall, sho_template_call, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void sho_template_call_class_init(ShoTemplateCallClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ShoTemplateCallPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void sho_template_call_init(ShoTemplateCall *instance) {
-	ShoTemplateCallPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, SHO_TYPE_TEMPLATE_CALL, ShoTemplateCallPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ShoTemplateCall *instance = SHO_TEMPLATE_CALL(object);
-	ShoTemplateCallPrivate *priv = instance->priv;
+	ShoTemplateCallPrivate *priv = sho_template_call_get_instance_private(instance);
 	cat_unref_ptr(priv->template_name);
 	cat_unref_ptr(priv->argument_list);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(sho_template_call_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(sho_template_call_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ShoTemplateCall *sho_template_call_new(CatStringWo *template_name) {
 	ShoTemplateCall *result = g_object_new(SHO_TYPE_TEMPLATE_CALL, NULL);
 	cat_ref_anounce(result);
-	ShoTemplateCallPrivate *priv = result->priv;
+	ShoTemplateCallPrivate *priv = sho_template_call_get_instance_private(result);
 	priv->template_name = cat_ref_ptr(template_name);
 	priv->argument_list = NULL;
 	return result;
@@ -86,8 +77,8 @@ ShoTemplateCall *sho_template_call_new(CatStringWo *template_name) {
 ShoTemplateCall *sho_template_call_deep_copy(ShoTemplateCall *source) {
 	ShoTemplateCall *result = g_object_new(SHO_TYPE_TEMPLATE_CALL, NULL);
 	cat_ref_anounce(result);
-	ShoTemplateCallPrivate *priv = result->priv;
-	ShoTemplateCallPrivate *spriv = SHO_TEMPLATE_CALL_GET_PRIVATE(source);
+	ShoTemplateCallPrivate *priv = sho_template_call_get_instance_private(result);
+	ShoTemplateCallPrivate *spriv = sho_template_call_get_instance_private(source);
 	priv->template_name = cat_ref_ptr(spriv->template_name);
 	priv->argument_list = NULL;
 	if (spriv->argument_list!=NULL) {
@@ -96,11 +87,7 @@ ShoTemplateCall *sho_template_call_deep_copy(ShoTemplateCall *source) {
 	return result;
 }
 
-
-
 void sho_template_call_set_argument_list(ShoTemplateCall *template_call, ShoListValue *argument_list) {
-	ShoTemplateCallPrivate *priv = SHO_TEMPLATE_CALL_GET_PRIVATE(template_call);
+	ShoTemplateCallPrivate *priv = sho_template_call_get_instance_private(template_call);
 	cat_ref_swap(priv->argument_list, argument_list);
 }
-
-

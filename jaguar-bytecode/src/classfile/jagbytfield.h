@@ -38,7 +38,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_FIELD(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_FIELD))
 #define JAG_BYT_IS_FIELD_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_FIELD))
 #define JAG_BYT_FIELD_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_FIELD, JagBytFieldClass))
-#define JAG_BYT_FIELD_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_FIELD, JagBytFieldPrivate))
 
 typedef struct _JagBytField               JagBytField;
 typedef struct _JagBytFieldPrivate        JagBytFieldPrivate;
@@ -47,7 +46,6 @@ typedef struct _JagBytFieldClass          JagBytFieldClass;
 
 struct _JagBytField {
 	GObject parent;
-	JagBytFieldPrivate *priv;
 };
 
 struct _JagBytFieldClass {

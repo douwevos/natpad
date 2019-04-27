@@ -34,23 +34,18 @@ G_BEGIN_DECLS
 #define VIP_IS_SCAN_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_SCAN_REQUEST))
 #define VIP_IS_SCAN_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_SCAN_REQUEST))
 #define VIP_SCAN_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_SCAN_REQUEST, VipScanRequestClass))
-#define VIP_SCAN_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_SCAN_REQUEST, VipScanRequestPrivate))
-
 
 typedef struct _VipScanRequest               VipScanRequest;
 typedef struct _VipScanRequestPrivate        VipScanRequestPrivate;
 typedef struct _VipScanRequestClass          VipScanRequestClass;
 
-
 struct _VipScanRequest {
 	WorRequest parent;
-	VipScanRequestPrivate *priv;
 };
 
 struct _VipScanRequestClass {
 	WorRequestClass parent_class;
 };
-
 
 GType vip_scan_request_get_type();
 

@@ -34,8 +34,6 @@ G_BEGIN_DECLS
 #define VIP_IS_DELETE_NODE_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_DELETE_NODE_REQUEST))
 #define VIP_IS_DELETE_NODE_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_DELETE_NODE_REQUEST))
 #define VIP_DELETE_NODE_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_DELETE_NODE_REQUEST, VipDeleteNodeRequestClass))
-#define VIP_DELETE_NODE_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_DELETE_NODE_REQUEST, VipDeleteNodeRequestPrivate))
-
 
 typedef struct _VipDeleteNodeRequest               VipDeleteNodeRequest;
 typedef struct _VipDeleteNodeRequestPrivate        VipDeleteNodeRequestPrivate;
@@ -45,7 +43,6 @@ struct _VipService;
 
 struct _VipDeleteNodeRequest {
 	WorRequest parent;
-	VipDeleteNodeRequestPrivate *priv;
 };
 
 struct _VipDeleteNodeRequestClass {

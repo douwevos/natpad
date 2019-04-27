@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTFINALLYBLOCK_H_
 #define JAGASTFINALLYBLOCK_H_
 
@@ -36,16 +35,13 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_FINALLY_BLOCK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_FINALLY_BLOCK))
 #define JAG_AST_IS_FINALLY_BLOCK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_FINALLY_BLOCK))
 #define JAG_AST_FINALLY_BLOCK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_FINALLY_BLOCK, JagAstFinallyBlockClass))
-#define JAG_AST_FINALLY_BLOCK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_FINALLY_BLOCK, JagAstFinallyBlockPrivate))
 
 typedef struct _JagAstFinallyBlock               JagAstFinallyBlock;
-typedef struct _JagAstFinallyBlockPrivate        JagAstFinallyBlockPrivate;
 typedef struct _JagAstFinallyBlockClass          JagAstFinallyBlockClass;
 
 
 struct _JagAstFinallyBlock {
 	JagAstBlock parent;
-	JagAstFinallyBlockPrivate *priv;
 };
 
 struct _JagAstFinallyBlockClass {
@@ -58,6 +54,5 @@ GType jag_ast_finally_block_get_type();
 JagAstFinallyBlock *jag_ast_finally_block_new();
 
 G_END_DECLS
-
 
 #endif /* JAGASTFINALLYBLOCK_H_ */

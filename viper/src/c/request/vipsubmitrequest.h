@@ -34,8 +34,6 @@ G_BEGIN_DECLS
 #define VIP_IS_SUBMIT_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_SUBMIT_REQUEST))
 #define VIP_IS_SUBMIT_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_SUBMIT_REQUEST))
 #define VIP_SUBMIT_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_SUBMIT_REQUEST, VipSubmitRequestClass))
-#define VIP_SUBMIT_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_SUBMIT_REQUEST, VipSubmitRequestPrivate))
-
 
 typedef struct _VipSubmitRequest               VipSubmitRequest;
 typedef struct _VipSubmitRequestPrivate        VipSubmitRequestPrivate;
@@ -45,7 +43,6 @@ struct _VipService;
 
 struct _VipSubmitRequest {
 	WorRequest parent;
-	VipSubmitRequestPrivate *priv;
 };
 
 struct _VipSubmitRequestClass {

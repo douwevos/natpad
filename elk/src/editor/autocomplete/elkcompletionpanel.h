@@ -76,5 +76,4 @@ void elk_completion_panel_set_selected_index(ElkCompletionPanel *panel, int inde
 
 G_END_DECLS
 
-
 #endif /* ELKCOMPLETIONPANEL_H_ */

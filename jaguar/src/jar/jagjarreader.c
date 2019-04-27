@@ -93,52 +93,23 @@ struct _JagJarReaderEntryIterClass {
 
 GType jag_jar_reader_entry_iter_get_type(void);
 
-static gboolean _iter_has_next(CatIIterator *self) {
-	JagJarReaderEntryIter *iter = JAG_JAR_READER_ENTRY_ITER(self);
-	JagJarReaderPrivate *priv = iter->jar_reader->priv;
-	return iter->offset<priv->central_dir_header_count;
-}
+static void l_iterator_interface_init(CatIIteratorInterface *iface);
 
-static gboolean _iter_is_last(CatIIterator *self) {
-	JagJarReaderEntryIter *iter = JAG_JAR_READER_ENTRY_ITER(self);
-	JagJarReaderPrivate *priv = iter->jar_reader->priv;
-	return iter->offset+1==priv->central_dir_header_count;
-}
-
-static gpointer _iter_next(CatIIterator *self) {
-	JagJarReaderEntryIter *iter = JAG_JAR_READER_ENTRY_ITER(self);
-	JagJarReaderPrivate *priv = iter->jar_reader->priv;
-	priv->iter_offset = iter->offset;
-	cat_unref_ptr(priv->e_uncompressed_data);
-	priv->uncompressed_offset = -1;
-	JagJarCentralDirHeader *header = (JagJarCentralDirHeader *) priv->central_dir_headers+iter->offset++;
-	return header;
-}
-
-
-static void _iterator_interface_init(CatIIteratorInterface *_interface) {
-	_interface->has_next = _iter_has_next;
-	_interface->next = _iter_next;
-	_interface->is_last = _iter_is_last;
-}
-
-
-G_DEFINE_TYPE_WITH_CODE(JagJarReaderEntryIter, jag_jar_reader_entry_iter, G_TYPE_OBJECT, {
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_IITERATOR, _iterator_interface_init);
+G_DEFINE_TYPE_WITH_CODE(JagJarReaderEntryIter, jag_jar_reader_entry_iter, G_TYPE_OBJECT, { // @suppress("Unused static function")
+		G_IMPLEMENT_INTERFACE(CAT_TYPE_IITERATOR, l_iterator_interface_init);
 });
 
-static void _dispose_iter(GObject *object);
-
+static void l_dispose_iter(GObject *object);
 
 static void jag_jar_reader_entry_iter_class_init(JagJarReaderEntryIterClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose_iter;
+	object_class->dispose = l_dispose_iter;
 }
 
 static void jag_jar_reader_entry_iter_init(JagJarReaderEntryIter *array_iter) {
 }
 
-static void _dispose_iter(GObject *object) {
+static void l_dispose_iter(GObject *object) {
 	JagJarReaderEntryIter *instance = JAG_JAR_READER_ENTRY_ITER(object);
 	cat_unref_ptr(instance->jar_reader);
 }
@@ -150,33 +121,27 @@ static void _dispose_iter(GObject *object) {
 static void l_input_stream_iface_init(CatIInputStreamInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagJarReader, jag_jar_reader, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagJarReader)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_IINPUT_STREAM, l_input_stream_iface_init)
 })
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 static void l_free_header(JagJarCentralDirHeader *local_header);
 
 static void jag_jar_reader_class_init(JagJarReaderClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagJarReaderPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_jar_reader_init(JagJarReader *instance) {
-	JagJarReaderPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_JAR_READER, JagJarReaderPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagJarReader *instance = JAG_JAR_READER(object);
-	JagJarReaderPrivate *priv = instance->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(instance);
 	cat_unref_ptr(priv->stream);
 
 	cat_unref_ptr(priv->path);
@@ -193,21 +158,21 @@ static void _dispose(GObject *object) {
 	priv->central_dir_header_count = 0;
 	cat_free_ptr(priv->central_dir_headers);
 
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_jar_reader_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_jar_reader_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagJarReader *jag_jar_reader_new(VipPath *path) {
 	JagJarReader *result = g_object_new(JAG_TYPE_JAR_READER, NULL);
 	cat_ref_anounce(result);
-	JagJarReaderPrivate *priv = result->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(result);
 	priv->path = cat_ref_sink_ptr(path);
 	priv->buffer = g_malloc0(BUF_SIZE+5);
 
@@ -223,7 +188,7 @@ JagJarReader *jag_jar_reader_new(VipPath *path) {
 JagJarReader *jag_jar_reader_new_from_stream(CatIInputStream *stream) {
 	JagJarReader *result = g_object_new(JAG_TYPE_JAR_READER, NULL);
 	cat_ref_anounce(result);
-	JagJarReaderPrivate *priv = result->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(result);
 	priv->path = NULL;
 	priv->buffer = g_malloc0(BUF_SIZE+5);
 
@@ -235,9 +200,9 @@ JagJarReader *jag_jar_reader_new_from_stream(CatIInputStream *stream) {
 	return result;
 }
 
-
 VipPath *jag_jar_reader_get_path(JagJarReader *jar_reader) {
-	return jar_reader->priv->path;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
+	return priv->path;
 }
 
 
@@ -255,7 +220,7 @@ static void l_free_header(JagJarCentralDirHeader *local_header) {
 
 
 static gboolean l_read_central_directory_end(JagJarReader *jar_reader, int buffer_offset) {
-	JagJarReaderPrivate *priv = jar_reader->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
 	char *buffer = priv->buffer+buffer_offset;
 	priv->central_dir_end.nrOfThisDisc = READ_SHORT(4);
 	priv->central_dir_end.nrOfStartCdDisc = READ_SHORT(6);
@@ -318,7 +283,7 @@ static gboolean l_read_all_bytes(CatIInputStream *stream, char *buffer, int coun
 }
 
 static gboolean l_read_central_directory_headers(JagJarReader *jar_reader) {
-	JagJarReaderPrivate *priv = jar_reader->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
 
 	cat_iinput_stream_seek(priv->stream, CAT_SEEK_SET, priv->central_dir_end.centralDirStartOffset);
 
@@ -395,7 +360,7 @@ static gboolean l_read_central_directory_headers(JagJarReader *jar_reader) {
 
 gboolean jag_jar_reader_init_directory(JagJarReader *jar_reader) {
 	gboolean result = FALSE;
-	JagJarReaderPrivate *priv = jar_reader->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
 	if (priv->stream != NULL) {
 		long long length = cat_iinput_stream_seek(priv->stream, CAT_SEEK_SET_FROM_END, 0);
 		cat_log_debug("length=%ld", length);
@@ -465,7 +430,7 @@ gboolean jag_jar_reader_init_directory(JagJarReader *jar_reader) {
 
 
 static gboolean l_read_local_header(JagJarReader *jar_reader, JagJarCentralDirHeader *local_header) {
-	JagJarReaderPrivate *priv = jar_reader->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
 	char *buffer = priv->buffer;
 	if (!l_read_all_bytes(priv->stream, priv->buffer, 30)) {
 		cat_log_error("was not able to read 30 bytes");
@@ -514,7 +479,7 @@ static gboolean l_read_local_header(JagJarReader *jar_reader, JagJarCentralDirHe
 }
 
 CatStringWo *jag_jar_reader_read_entry(JagJarReader *jar_reader, JagJarCentralDirHeader *entry_header, gboolean nowrap) {
-	JagJarReaderPrivate *priv = jar_reader->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
 	gboolean success = TRUE;
 	z_stream *strm = calloc(1, sizeof(z_stream));
 	int initResult = inflateInit2(strm, nowrap ? -MAX_WBITS : MAX_WBITS);
@@ -630,8 +595,6 @@ CatStringWo *jag_jar_reader_read_entry(JagJarReader *jar_reader, JagJarCentralDi
 	return NULL;
 }
 
-
-
 CatIIterator *jag_jar_reader_entry_iterator(JagJarReader *jar_reader) {
 	JagJarReaderEntryIter *result = g_object_new(JAG_TYPE_JAR_READER_ENTRY_ITER, NULL);
 	result->jar_reader  = cat_ref_ptr(jar_reader);
@@ -640,7 +603,7 @@ CatIIterator *jag_jar_reader_entry_iterator(JagJarReader *jar_reader) {
 }
 
 JagJarCentralDirHeader *jag_jar_reader_find_entry_by_path(JagJarReader *jar_reader, CatStringWo *a_entry_path) {
-	JagJarReaderPrivate *priv = JAG_JAR_READER_GET_PRIVATE(jar_reader);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
 	int offset = 0;
 	for(offset=0; offset<priv->central_dir_header_count; offset++) {
 		JagJarCentralDirHeader *entry = priv->central_dir_headers+offset;
@@ -679,7 +642,7 @@ void jag_jar_reader_dump_dir_entry(JagJarCentralDirHeader *entry_header, gboolea
 }
 
 void jag_jar_reader_dump_local_entry(JagJarReader *jar_reader, JagJarCentralDirHeader *entry_header) {
-	JagJarReaderPrivate *priv = jar_reader->priv;
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(jar_reader);
 
 //	long long length =
 			cat_iinput_stream_seek(priv->stream, CAT_SEEK_SET, entry_header->offsetLocalHeader);
@@ -693,12 +656,8 @@ void jag_jar_reader_dump_local_entry(JagJarReader *jar_reader, JagJarCentralDirH
 }
 
 
-
-
-
-
 static gboolean l_ensure_has_uncompressed(JagJarReader *reader) {
-	JagJarReaderPrivate *priv = JAG_JAR_READER_GET_PRIVATE(reader);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(reader);
 	cat_log_debug("priv->uncompressed_offset=%d", priv->uncompressed_offset);
 	if (priv->uncompressed_offset==-1) {
 		priv->uncompressed_offset = 0;
@@ -709,13 +668,12 @@ static gboolean l_ensure_has_uncompressed(JagJarReader *reader) {
 	return priv->e_uncompressed_data!=NULL;
 }
 
-
 static int l_iface_read(CatIInputStream *self) {
 	JagJarReader *reader = JAG_JAR_READER(self);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(reader);
 	int result = -1;
 	cat_log_debug("reader=%p, read", reader);
 	if (l_ensure_has_uncompressed(reader)) {
-		JagJarReaderPrivate *priv = reader->priv;
 		if (priv->uncompressed_offset<cat_string_wo_length(priv->e_uncompressed_data)) {
 			result = 0xFF & (int) cat_string_wo_char_at(priv->e_uncompressed_data, priv->uncompressed_offset++);
 		}
@@ -725,10 +683,10 @@ static int l_iface_read(CatIInputStream *self) {
 
 static int l_iface_read_length(CatIInputStream *self, char *data, int length) {
 	JagJarReader *reader = JAG_JAR_READER(self);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(reader);
 	cat_log_debug("reader=%p, data=%p, length=%d", reader, data, length);
 	int result = -1;
 	if (l_ensure_has_uncompressed(reader)) {
-		JagJarReaderPrivate *priv = reader->priv;
 		if (priv->uncompressed_offset<cat_string_wo_length(priv->e_uncompressed_data)) {
 
 
@@ -748,9 +706,9 @@ static int l_iface_read_length(CatIInputStream *self, char *data, int length) {
 
 static long long l_seek(CatIInputStream *self, CatSeekType seek_type, long long seek_offset) {
 	JagJarReader *reader = JAG_JAR_READER(self);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(reader);
 	long long result = -1;
 	if (l_ensure_has_uncompressed(reader)) {
-		JagJarReaderPrivate *priv = reader->priv;
 		int new_offset = priv->uncompressed_offset;
 		switch(seek_type) {
 			case CAT_SEEK_FORWARD : {
@@ -775,10 +733,40 @@ static long long l_seek(CatIInputStream *self, CatSeekType seek_type, long long 
 	return result;
 }
 
-
 static void l_input_stream_iface_init(CatIInputStreamInterface *iface) {
 	iface->read = l_iface_read;
 	iface->readLength = l_iface_read_length;
 	iface->seek = l_seek;
 
+}
+
+
+
+static gboolean l_iter_has_next(CatIIterator *self) {
+	JagJarReaderEntryIter *iter = JAG_JAR_READER_ENTRY_ITER(self);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(iter->jar_reader);
+	return iter->offset<priv->central_dir_header_count;
+}
+
+static gboolean l_iter_is_last(CatIIterator *self) {
+	JagJarReaderEntryIter *iter = JAG_JAR_READER_ENTRY_ITER(self);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(iter->jar_reader);
+	return iter->offset+1==priv->central_dir_header_count;
+}
+
+static gpointer l_iter_next(CatIIterator *self) {
+	JagJarReaderEntryIter *iter = JAG_JAR_READER_ENTRY_ITER(self);
+	JagJarReaderPrivate *priv = jag_jar_reader_get_instance_private(iter->jar_reader);
+	priv->iter_offset = iter->offset;
+	cat_unref_ptr(priv->e_uncompressed_data);
+	priv->uncompressed_offset = -1;
+	JagJarCentralDirHeader *header = (JagJarCentralDirHeader *) priv->central_dir_headers+iter->offset++;
+	return header;
+}
+
+
+static void l_iterator_interface_init(CatIIteratorInterface *iface) {
+	iface->has_next = l_iter_has_next;
+	iface->next = l_iter_next;
+	iface->is_last = l_iter_is_last;
 }

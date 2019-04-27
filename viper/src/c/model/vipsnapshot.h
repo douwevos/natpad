@@ -34,17 +34,13 @@ G_BEGIN_DECLS
 #define VIP_IS_SNAPSHOT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_SNAPSHOT))
 #define VIP_IS_SNAPSHOT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_SNAPSHOT))
 #define VIP_SNAPSHOT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_SNAPSHOT, VipSnapshotClass))
-#define VIP_SNAPSHOT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_SNAPSHOT, VipSnapshotPrivate))
-
 
 typedef struct _VipSnapshot               VipSnapshot;
 typedef struct _VipSnapshotPrivate        VipSnapshotPrivate;
 typedef struct _VipSnapshotClass          VipSnapshotClass;
 
-
 struct _VipSnapshot {
 	GObject parent;
-	VipSnapshotPrivate *priv;
 };
 
 struct _VipSnapshotClass {
@@ -67,6 +63,5 @@ CatTreeNode *vip_snapshot_refresh(VipSnapshot *snapshot, CatTreeNode *node);
 void vip_snapshot_print(VipSnapshot *snapshot, CatStringWo *e_buf);
 
 G_END_DECLS
-
 
 #endif /* VIPSNAPSHOT_H_ */

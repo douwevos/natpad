@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTCLAZZ_H_
 #define JAGBYTCONSTANTCLAZZ_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_CLAZZ(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_CLAZZ))
 #define JAG_BYT_IS_CONSTANT_CLAZZ_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_CLAZZ))
 #define JAG_BYT_CONSTANT_CLAZZ_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_CLAZZ, JagBytConstantClazzClass))
-#define JAG_BYT_CONSTANT_CLAZZ_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_CLAZZ, JagBytConstantClazzPrivate))
 
 typedef struct _JagBytConstantClazz               JagBytConstantClazz;
 typedef struct _JagBytConstantClazzPrivate        JagBytConstantClazzPrivate;
@@ -47,7 +45,6 @@ typedef struct _JagBytConstantClazzClass          JagBytConstantClazzClass;
 
 struct _JagBytConstantClazz {
 	GObject parent;
-	JagBytConstantClazzPrivate *priv;
 };
 
 struct _JagBytConstantClazzClass {
@@ -66,7 +63,5 @@ JagBytName *jag_byt_constant_clazz_get_refrence_type_name(JagBytConstantClazz *c
 JagAstDeclarationType *jag_byt_constant_clazz_get_parsed_descriptor(JagBytConstantClazz *constant_clazz);
 
 G_END_DECLS
-
-
 
 #endif /* JAGBYTCONSTANTCLAZZ_H_ */

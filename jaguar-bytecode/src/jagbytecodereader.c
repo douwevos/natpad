@@ -42,56 +42,47 @@ struct _JagBytecodeReaderPrivate {
 	JagJObjectInputStream *ostream;
 };
 
-G_DEFINE_TYPE (JagBytecodeReader, jag_bytecode_reader, G_TYPE_OBJECT) // @suppress("Unused static function")
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytecodeReader, jag_bytecode_reader, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_bytecode_reader_class_init(JagBytecodeReaderClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytecodeReaderPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
-
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_bytecode_reader_init(JagBytecodeReader *instance) {
-	JagBytecodeReaderPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_BYTECODE_READER, JagBytecodeReaderPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytecodeReader *instance = JAG_BYTECODE_READER(object);
-	JagBytecodeReaderPrivate *priv = instance->priv;
+	JagBytecodeReaderPrivate *priv = jag_bytecode_reader_get_instance_private(instance);
 	cat_unref_ptr(priv->ostream);
-
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_bytecode_reader_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_bytecode_reader_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytecodeReader *jag_bytecode_reader_new(CatIInputStream *bytecode_stream) {
 	JagBytecodeReader *result = g_object_new(JAG_TYPE_BYTECODE_READER, NULL);
 	cat_ref_anounce(result);
-	JagBytecodeReaderPrivate *priv = result->priv;
+	JagBytecodeReaderPrivate *priv = jag_bytecode_reader_get_instance_private(result);
 	priv->ostream = jag_jobject_input_stream_new(bytecode_stream);
 	return result;
 }
 
 
 static JagBytConstantPool *l_read_constant_pool(JagBytecodeReader *reader, int16_t pool_count) {
-	JagBytecodeReaderPrivate *priv = reader->priv;
+	JagBytecodeReaderPrivate *priv = jag_bytecode_reader_get_instance_private(reader);
 	int real_count = ((int) pool_count) & 0xFFFF;
 	cat_log_debug("real_count=%d", real_count);
 	CatArrayWo *e_pool = cat_array_wo_new();
@@ -194,7 +185,7 @@ static JagBytConstantPool *l_read_constant_pool(JagBytecodeReader *reader, int16
 
 
 static JagBytFieldList *l_read_field_list(JagBytecodeReader *reader, JagBytIConstantProvider *constant_provider, int fieldCount) {
-	JagBytecodeReaderPrivate *priv = reader->priv;
+	JagBytecodeReaderPrivate *priv = jag_bytecode_reader_get_instance_private(reader);
 	CatArrayWo *e_fields = cat_array_wo_new();
 	cat_log_debug("fieldCount:%d", fieldCount);
 
@@ -215,7 +206,7 @@ static JagBytFieldList *l_read_field_list(JagBytecodeReader *reader, JagBytICons
 }
 
 static JagBytMethodList *l_read_method_list(JagBytecodeReader *reader, JagBytName *main_type_name, JagBytIConstantProvider *constant_provider, int methodCount) {
-	JagBytecodeReaderPrivate *priv = reader->priv;
+	JagBytecodeReaderPrivate *priv = jag_bytecode_reader_get_instance_private(reader);
 	CatArrayWo *e_methods = cat_array_wo_new();
 
 	cat_log_debug("methodCount:%d", methodCount);
@@ -237,7 +228,7 @@ static JagBytMethodList *l_read_method_list(JagBytecodeReader *reader, JagBytNam
 }
 
 JagBytClassfile *jag_bytecode_reader_parse_bytecode(JagBytecodeReader *reader) {
-	JagBytecodeReaderPrivate *priv = reader->priv;
+	JagBytecodeReaderPrivate *priv = jag_bytecode_reader_get_instance_private(reader);
 	uint32_t magicNr = jag_jobject_input_stream_read_int(priv->ostream);
 	uint16_t minorVersion = jag_jobject_input_stream_read_short(priv->ostream);
 	uint16_t majorVersion = jag_jobject_input_stream_read_short(priv->ostream);
@@ -268,7 +259,6 @@ JagBytClassfile *jag_bytecode_reader_parse_bytecode(JagBytecodeReader *reader) {
 		}
 	}
 
-
 	uint16_t fieldCount = ((int) jag_jobject_input_stream_read_short(priv->ostream)) & 0xFFFF;
 	JagBytFieldList *fieldList = l_read_field_list(reader, JAG_BYT_ICONSTANT_PROVIDER(constant_pool), fieldCount);
 
@@ -288,6 +278,3 @@ JagBytClassfile *jag_bytecode_reader_parse_bytecode(JagBytecodeReader *reader) {
 
 	return result;
 }
-
-
-

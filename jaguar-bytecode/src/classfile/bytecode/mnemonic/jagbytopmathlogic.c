@@ -37,6 +37,7 @@ struct _JagBytOpMathLogicPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpMathLogic, jag_byt_op_math_logic, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpMathLogic)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -44,16 +45,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_math_logic_class_init(JagBytOpMathLogicClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpMathLogicPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_math_logic_init(JagBytOpMathLogic *instance) {
-	JagBytOpMathLogicPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_MATH_LOGIC, JagBytOpMathLogicPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -72,7 +69,7 @@ static void l_finalize(GObject *object) {
 JagBytOpMathLogic *jag_byt_op_math_logic_new(JagBytOperation operation, int offset, JagBytType math_type, JagBytMathOperator math_operator) {
 	JagBytOpMathLogic *result = g_object_new(JAG_BYT_TYPE_OP_MATH_LOGIC, NULL);
 	cat_ref_anounce(result);
-	JagBytOpMathLogicPrivate *priv = result->priv;
+	JagBytOpMathLogicPrivate *priv = jag_byt_op_math_logic_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 1);
 	priv->math_type = math_type;
 	priv->math_operator = math_operator;
@@ -80,7 +77,8 @@ JagBytOpMathLogic *jag_byt_op_math_logic_new(JagBytOperation operation, int offs
 }
 
 JagBytMathOperator jag_byt_op_math_logic_get_bitwise_operator(JagBytOpMathLogic *op_math_logic) {
-	return JAG_BYT_OP_MATH_LOGIC_GET_PRIVATE(op_math_logic)->math_operator;
+	JagBytOpMathLogicPrivate *priv = jag_byt_op_math_logic_get_instance_private(op_math_logic);
+	return priv->math_operator;
 }
 
 
@@ -88,7 +86,8 @@ JagBytMathOperator jag_byt_op_math_logic_get_bitwise_operator(JagBytOpMathLogic 
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
 	CatStringWo *result = cat_string_wo_new();
-	JagBytOpMathLogicPrivate *priv = JAG_BYT_OP_MATH_LOGIC_GET_PRIVATE(self);
+	JagBytOpMathLogic *instance = JAG_BYT_OP_MATH_LOGIC(self);
+	JagBytOpMathLogicPrivate *priv = jag_byt_op_math_logic_get_instance_private(instance);
 	switch(priv->math_type) {
 		case JAG_BYT_TYPE_INT : cat_string_wo_append_char(result, 'i'); break;
 		case JAG_BYT_TYPE_LONG : cat_string_wo_append_char(result, 'l'); break;

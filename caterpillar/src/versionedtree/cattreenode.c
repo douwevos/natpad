@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "cattreenodeprivate.h"
 #include "../catistringable.h"
 #include "../woo/catstringwo.h"
@@ -33,6 +32,7 @@
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatTreeNode, cat_tree_node, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CatTreeNode)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -40,22 +40,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_tree_node_class_init(CatTreeNodeClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatTreeNodePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_tree_node_init(CatTreeNode *instance) {
-	CatTreeNodePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_TREE_NODE, CatTreeNodePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatTreeNode *instance = CAT_TREE_NODE(object);
-	CatTreeNodePrivate *priv = instance->priv;
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(instance);
 	cat_unref_ptr(priv->list_provider);
 	G_OBJECT_CLASS(cat_tree_node_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -70,14 +66,19 @@ static void l_finalize(GObject *object) {
 
 
 void cat_tree_node_construct(CatTreeNode *node, CatITreeEntryListProvider *list_provider, int location) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
 	priv->list_provider = cat_ref_ptr(list_provider);
 	priv->location = location;
 }
 
+CatTreeNodePrivate *cat_tree_node_get_private(CatTreeNode *node) {
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
+	return priv;
+}
+
 
 CatTreeNode* cat_tree_node_refresh(CatTreeNode *node, CatITreeEntryListProvider *new_list_provider, CatIMatcher *matcher) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
 	if (new_list_provider==priv->list_provider) {
 		return cat_ref_ptr(node);
 	}
@@ -93,7 +94,7 @@ CatTreeNode* cat_tree_node_refresh(CatTreeNode *node, CatITreeEntryListProvider 
 }
 
 CatTreeNode *cat_tree_node_get_parent_node(CatTreeNode *node) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
 	CatTreeNode *result = NULL;
 	CatTreeEntry *node_entry = CAT_TREE_NODE_GET_CLASS(node)->getEntry(node);
 	int parent_location = cat_tree_entry_get_parent_location(node_entry);
@@ -106,7 +107,7 @@ CatTreeNode *cat_tree_node_get_parent_node(CatTreeNode *node) {
 
 
 CatTreeNode * cat_tree_node_child_at(CatTreeNode *node, int index) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
 	CatTreeNode *result = NULL;
 	CatTreeEntry *node_entry = CAT_TREE_NODE_GET_CLASS(node)->getEntry(node);
 	int child_location = cat_tree_entry_get_child(node_entry, index);
@@ -124,7 +125,7 @@ int cat_tree_node_child_count(CatTreeNode *node) {
 
 
 int cat_tree_node_find_child_index(CatTreeNode *node, CatIMatcher *matcher, int guess_index) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
 	CatTreeEntry *node_entry = CAT_TREE_NODE_GET_CLASS(node)->getEntry(node);
 	int entry_count = cat_tree_entry_count(node_entry);
 	if (entry_count<=0) {
@@ -163,11 +164,13 @@ GObject *cat_tree_node_get_content(CatTreeNode *node) {
 
 
 int cat_tree_node_get_location(CatTreeNode *node) {
-	return CAT_TREE_NODE_GET_PRIVATE(node)->location;
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
+	return priv->location;
 }
 
 CatITreeEntryListProvider *cat_tree_node_get_list_provider(CatTreeNode *tree_node) {
-	return CAT_TREE_NODE_GET_PRIVATE(tree_node)->list_provider;
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(tree_node);
+	return priv->list_provider;
 }
 
 
@@ -175,13 +178,13 @@ CatITreeEntryListProvider *cat_tree_node_get_list_provider(CatTreeNode *tree_nod
 /****** entry-list based methods ******/
 
 int cat_tree_node_find_location(CatTreeNode *node, CatIMatcher *matcher, int guess_location) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
 	CatTreeEntryList *entry_list = cat_itree_entry_list_provider_get_entry_list(priv->list_provider);
 	return cat_tree_entry_list_find_location(entry_list, matcher, guess_location);
 }
 
 CatTreeNode *cat_tree_node_get_node_for_location(CatTreeNode *node, int location) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(node);
 	CatTreeNode *result = NULL;
 	if (location!= -1) {
 		result = CAT_TREE_NODE_GET_CLASS(node)->createNew(priv->list_provider, location);
@@ -196,7 +199,7 @@ CatTreeNode *cat_tree_node_get_node_for_location(CatTreeNode *node, int location
 /********************* begin CatIStringable implementation *********************/
 
 static void l_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(self);
+	CatTreeNodePrivate *priv = cat_tree_node_get_instance_private(CAT_TREE_NODE(self));
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	CatTreeEntry *node_entry = CAT_TREE_NODE_GET_CLASS(self)->getEntry((CatTreeNode *) self);
 	cat_string_wo_format(append_to, "%s[%p:location=%d, entry=%o]", iname, self, priv->location, node_entry);

@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ABSTRACT_MNEMONIC(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ABSTRACT_MNEMONIC))
 #define JAG_BYT_IS_ABSTRACT_MNEMONIC_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ABSTRACT_MNEMONIC))
 #define JAG_BYT_ABSTRACT_MNEMONIC_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ABSTRACT_MNEMONIC, JagBytAbstractMnemonicClass))
-#define JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ABSTRACT_MNEMONIC, JagBytAbstractMnemonicPrivate))
 
 typedef struct _JagBytAbstractMnemonic               JagBytAbstractMnemonic;
 typedef struct _JagBytAbstractMnemonicPrivate        JagBytAbstractMnemonicPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytAbstractMnemonicClass          JagBytAbstractMnemonicClass
 
 struct _JagBytAbstractMnemonic {
 	GObject parent;
-	JagBytAbstractMnemonicPrivate *priv;
 };
 
 struct _JagBytAbstractMnemonicClass {

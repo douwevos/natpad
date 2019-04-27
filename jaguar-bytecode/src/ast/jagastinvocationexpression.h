@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTINVOCATIONEXPRESSION_H_
 #define JAGASTINVOCATIONEXPRESSION_H_
-
 
 #include "jagastiexpression.h"
 #include "jagastidentifier.h"
@@ -38,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_INVOCATION_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_INVOCATION_EXPRESSION))
 #define JAG_AST_IS_INVOCATION_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_INVOCATION_EXPRESSION))
 #define JAG_AST_INVOCATION_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_INVOCATION_EXPRESSION, JagAstInvocationExpressionClass))
-#define JAG_AST_INVOCATION_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_INVOCATION_EXPRESSION, JagAstInvocationExpressionPrivate))
 
 typedef struct _JagAstInvocationExpression               JagAstInvocationExpression;
 typedef struct _JagAstInvocationExpressionPrivate        JagAstInvocationExpressionPrivate;
@@ -47,7 +44,6 @@ typedef struct _JagAstInvocationExpressionClass          JagAstInvocationExpress
 
 struct _JagAstInvocationExpression {
 	GObject parent;
-	JagAstInvocationExpressionPrivate *priv;
 };
 
 struct _JagAstInvocationExpressionClass {
@@ -60,6 +56,5 @@ GType jag_ast_invocation_expression_get_type();
 JagAstInvocationExpression *jag_ast_invocation_expression_new(JagAstIExpression *instance_expression, JagAstIdentifier *method_name, CatArrayWo *e_argument_expressions);
 
 G_END_DECLS
-
 
 #endif /* JAGASTINVOCATIONEXPRESSION_H_ */

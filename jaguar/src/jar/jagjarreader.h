@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGJARREADER_H_
 #define JAGJARREADER_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_IS_JAR_READER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_JAR_READER))
 #define JAG_IS_JAR_READER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_JAR_READER))
 #define JAG_JAR_READER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_JAR_READER, JagJarReaderClass))
-#define JAG_JAR_READER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_JAR_READER, JagJarReaderPrivate))
 
 typedef struct _JagJarReader               JagJarReader;
 typedef struct _JagJarReaderPrivate        JagJarReaderPrivate;
@@ -45,13 +43,11 @@ typedef struct _JagJarReaderClass          JagJarReaderClass;
 
 struct _JagJarReader {
 	GObject parent;
-	JagJarReaderPrivate *priv;
 };
 
 struct _JagJarReaderClass {
 	GObjectClass parent_class;
 };
-
 
 
 typedef struct _JagJarEndOfCentralDir   JagJarEndOfCentralDir;
@@ -113,9 +109,6 @@ void jag_jar_reader_dump_dir_entry(JagJarCentralDirHeader *entry_header, gboolea
 
 void jag_jar_reader_dump_local_entry(JagJarReader *jar_reader, JagJarCentralDirHeader *entry_header);
 
-
 G_END_DECLS
-
-
 
 #endif /* JAGJARREADER_H_ */

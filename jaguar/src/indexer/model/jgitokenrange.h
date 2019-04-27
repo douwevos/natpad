@@ -34,8 +34,6 @@ G_BEGIN_DECLS
 #define JGI_IS_TOKEN_RANGE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JGI_TYPE_TOKEN_RANGE))
 #define JGI_IS_TOKEN_RANGE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JGI_TYPE_TOKEN_RANGE))
 #define JGI_TOKEN_RANGE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JGI_TYPE_TOKEN_RANGE, JgiTokenRangeClass))
-#define JGI_TOKEN_RANGE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JGI_TYPE_TOKEN_RANGE, JgiTokenRangePrivate))
-
 
 typedef struct _JgiTokenRange               JgiTokenRange;
 typedef struct _JgiTokenRangePrivate        JgiTokenRangePrivate;
@@ -44,13 +42,11 @@ typedef struct _JgiTokenRangeClass          JgiTokenRangeClass;
 
 struct _JgiTokenRange {
 	GObject parent;
-	JgiTokenRangePrivate *priv;
 };
 
 struct _JgiTokenRangeClass {
 	GObjectClass parent_class;
 };
-
 
 GType jgi_token_range_get_type();
 
@@ -67,7 +63,6 @@ CatArrayWo *e_jgi_token_range_get_raw_tokens(JgiTokenRange *token_range);
 CatIIterator *jgi_token_range_iterator(JgiTokenRange *token_range);
 
 void jgi_token_range_dump(JgiTokenRange *token_range);
-
 
 G_END_DECLS
 

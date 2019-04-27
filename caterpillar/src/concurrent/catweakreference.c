@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "catweakreference.h"
 
 #include "../logging/catlogdefs.h"
@@ -32,14 +31,12 @@ struct _CatWeakReferencePrivate {
 	GWeakRef ref;
 };
 
-G_DEFINE_TYPE(CatWeakReference, cat_weak_reference, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(CatWeakReference, cat_weak_reference, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_weak_reference_class_init(CatWeakReferenceClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatWeakReferencePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -52,7 +49,7 @@ static void cat_weak_reference_init(CatWeakReference *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatWeakReference *instance = CAT_WEAK_REFERENCE(object);
-	CatWeakReferencePrivate *priv = CAT_WEAK_REFERENCE_GET_PRIVATE(instance);
+	CatWeakReferencePrivate *priv = cat_weak_reference_get_instance_private(instance);
 	g_weak_ref_clear(&priv->ref);
 
 	G_OBJECT_CLASS(cat_weak_reference_parent_class)->dispose(object);
@@ -70,19 +67,19 @@ static void l_finalize(GObject *object) {
 CatWeakReference *cat_weak_reference_new(GObject *value) {
 	CatWeakReference *result = g_object_new(CAT_TYPE_WEAK_REFERENCE, NULL);
 	cat_ref_anounce(result);
-	CatWeakReferencePrivate *priv = CAT_WEAK_REFERENCE_GET_PRIVATE(result);
+	CatWeakReferencePrivate *priv = cat_weak_reference_get_instance_private(result);
 	g_weak_ref_init(&priv->ref, value);
 	return result;
 }
 
 GObject *cat_weak_reference_get(CatWeakReference *reference) {
-	CatWeakReferencePrivate *priv = CAT_WEAK_REFERENCE_GET_PRIVATE(reference);
+	CatWeakReferencePrivate *priv = cat_weak_reference_get_instance_private(reference);
 	GObject *result = g_weak_ref_get(&priv->ref);
 	return cat_fake_ref_ptr(result);
 }
 
 void cat_weak_reference_set(CatWeakReference *reference, GObject *new_value) {
-	CatWeakReferencePrivate *priv = CAT_WEAK_REFERENCE_GET_PRIVATE(reference);
+	CatWeakReferencePrivate *priv = cat_weak_reference_get_instance_private(reference);
 	g_weak_ref_set(&priv->ref, (gpointer) new_value);
 }
 

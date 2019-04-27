@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOORESOURCECONTENTWO_H_
 #define MOORESOURCECONTENTWO_H_
 
@@ -35,17 +34,13 @@ G_BEGIN_DECLS
 #define MOO_IS_RESOURCE_CONTENT_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_RESOURCE_CONTENT_WO))
 #define MOO_IS_RESOURCE_CONTENT_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_RESOURCE_CONTENT_WO))
 #define MOO_RESOURCE_CONTENT_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_RESOURCE_CONTENT_WO, MooResourceContentWoClass))
-#define MOO_RESOURCE_CONTENT_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_RESOURCE_CONTENT_WO, MooResourceContentWoPrivate))
-
 
 typedef struct _MooResourceContentWo               MooResourceContentWo;
 typedef struct _MooResourceContentWoPrivate        MooResourceContentWoPrivate;
 typedef struct _MooResourceContentWoClass          MooResourceContentWoClass;
 
-
 struct _MooResourceContentWo {
 	GObject parent;
-	MooResourceContentWoPrivate *priv;
 };
 
 struct _MooResourceContentWoClass {

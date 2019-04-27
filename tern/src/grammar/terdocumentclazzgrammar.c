@@ -34,71 +34,60 @@ struct _TerDocumentClazzGrammarPrivate {
 	CatLong *viper_id;
 };
 
-G_DEFINE_TYPE (TerDocumentClazzGrammar, ter_document_clazz_grammar, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(TerDocumentClazzGrammar, ter_document_clazz_grammar, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void ter_document_clazz_grammar_class_init(TerDocumentClazzGrammarClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(TerDocumentClazzGrammarPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void ter_document_clazz_grammar_init(TerDocumentClazzGrammar *instance) {
-	TerDocumentClazzGrammarPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, TER_TYPE_DOCUMENT_CLAZZ_GRAMMAR, TerDocumentClazzGrammarPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	TerDocumentClazzGrammar *instance = TER_DOCUMENT_CLAZZ_GRAMMAR(object);
-	TerDocumentClazzGrammarPrivate *priv = instance->priv;
+	TerDocumentClazzGrammarPrivate *priv = ter_document_clazz_grammar_get_instance_private(instance);
 	cat_unref_ptr(priv->a_prefs_clazz);
 	cat_unref_ptr(priv->viper_id);
-
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(ter_document_clazz_grammar_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(ter_document_clazz_grammar_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 TerDocumentClazzGrammar *ter_document_clazz_grammar_new(TerPrefsClazzWo *a_prefs_clazz, CatLong *viper_id) {
 	TerDocumentClazzGrammar *result = g_object_new(TER_TYPE_DOCUMENT_CLAZZ_GRAMMAR, NULL);
 	cat_ref_anounce(result);
-	TerDocumentClazzGrammarPrivate *priv = result->priv;
+	TerDocumentClazzGrammarPrivate *priv = ter_document_clazz_grammar_get_instance_private(result);
 
 	priv->a_prefs_clazz = cat_ref_ptr(a_prefs_clazz);
 	priv->viper_id = cat_ref_ptr(viper_id);
 	return result;
 }
 
-
-
-
 CatLong *ter_document_clazz_grammar_get_viper_id(TerDocumentClazzGrammar *document_clazz_grammar) {
-	TerDocumentClazzGrammarPrivate *priv = TER_DOCUMENT_CLAZZ_GRAMMAR_GET_PRIVATE(document_clazz_grammar);
+	TerDocumentClazzGrammarPrivate *priv = ter_document_clazz_grammar_get_instance_private(document_clazz_grammar);
 	return priv->viper_id;
 }
 
 
 CatStringWo *ter_document_clazz_grammar_get_clazz_name(TerDocumentClazzGrammar *document_clazz_grammar) {
-	TerDocumentClazzGrammarPrivate *priv = TER_DOCUMENT_CLAZZ_GRAMMAR_GET_PRIVATE(document_clazz_grammar);
+	TerDocumentClazzGrammarPrivate *priv = ter_document_clazz_grammar_get_instance_private(document_clazz_grammar);
 	return ter_prefs_clazz_wo_get_name(priv->a_prefs_clazz);
 }
 
 gboolean ter_document_clazz_update_viper_id(TerDocumentClazzGrammar *document_clazz_grammar, CatLong *new_viper_id) {
-	TerDocumentClazzGrammarPrivate *priv = TER_DOCUMENT_CLAZZ_GRAMMAR_GET_PRIVATE(document_clazz_grammar);
+	TerDocumentClazzGrammarPrivate *priv = ter_document_clazz_grammar_get_instance_private(document_clazz_grammar);
 	gboolean result = FALSE;
 	if (!cat_long_equal(priv->viper_id, new_viper_id)) {
 		result = TRUE;

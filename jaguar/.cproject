@@ -48,6 +48,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jaguar-bytecode/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jaguar-decompiler/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/moose/src/c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/moose-explorer/src/c}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/leafhopper/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/elk/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/worm/src}&quot;"/>

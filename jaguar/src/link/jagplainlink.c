@@ -43,7 +43,6 @@ static void l_link_set_value(JagLink *link, GObject *value);
 static GObject *l_link_get_value_ref(JagLink *link);
 
 static void jag_plain_link_class_init(JagPlainLinkClass *clazz) {
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;

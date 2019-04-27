@@ -33,7 +33,7 @@
 static void l_renderer_iface_init(MooINodeRendererInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagJreRenderer, jag_jre_renderer, G_TYPE_OBJECT,
+G_DEFINE_TYPE_WITH_CODE(JagJreRenderer, jag_jre_renderer, G_TYPE_OBJECT, // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_RENDERER, l_renderer_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
@@ -70,8 +70,6 @@ JagJreRenderer *jag_jre_renderer_new() {
 	return result;
 }
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
@@ -86,8 +84,6 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 
 /********************* end CatIStringable implementation *********************/
 
-
-
 static void l_draw_compiler(cairo_t *cairo, double xoffset, int yoffset, double size) {
 
 	double nn = size*0.08;
@@ -98,7 +94,6 @@ static void l_draw_compiler(cairo_t *cairo, double xoffset, int yoffset, double 
 //	double x1  = 0.5+xoffset+(size*0.15);
 //	double x2  = 0.5+xoffset+(size*0.35);
 //	double y2 = 0.5+yoffset+(size*0.10);
-
 
 	cairo_set_source_rgb(cairo, 0.4, 0.6, 0.9);
 //	cairo_move_to(cairo, 0.5+0.4364888*size, 0.5+0.9202277*size);
@@ -129,7 +124,6 @@ static void l_draw_compiler(cairo_t *cairo, double xoffset, int yoffset, double 
 //	cairo_line_to(cairo, 0.5+0.21105133*size, 0.5+0.81166273*size);
 //	cairo_line_to(cairo, 0.5+0.3117995*size, 0.5+0.7649633*size);
 //	cairo_line_to(cairo, 0.5+0.4101844*size, 0.5+0.812343*size);
-
 
 	cairo_move_to(cairo, xoffset+0.5+0.4364888*size, yoffset+0.5+0.9202277*size);
 	cairo_line_to(cairo, xoffset+0.5+0.5635112*size, yoffset+0.5+0.9202277*size);
@@ -164,17 +158,14 @@ static void l_draw_compiler(cairo_t *cairo, double xoffset, int yoffset, double 
 	cairo_line_to(cairo, xoffset+0.5+0.34264934*size, yoffset+0.5+0.78436905*size);
 	cairo_line_to(cairo, xoffset+0.5+0.4101844*size, yoffset+0.5+0.812343*size);
 
-
 	cairo_fill_preserve(cairo);
 
 	cairo_set_line_width(cairo, 1.0);
 	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0);
 	cairo_stroke(cairo);
 
-
 	double xc  = 0.5+xoffset+(size*0.5);
 	double yc = 0.5+yoffset+(size*0.5);
-
 
 	cairo_move_to(cairo, xc, yc);
 	cairo_arc(cairo, xc, yc, size*0.1, 0, 2*M_PI);
@@ -184,13 +175,9 @@ static void l_draw_compiler(cairo_t *cairo, double xoffset, int yoffset, double 
 	cairo_fill(cairo);
 }
 
-
-
 /********************* begin MooINodeRendererFactory implementation *********************/
 
-
 static void l_update_layout(MooINodeRenderer *self, struct _MooNodeLayout *node_layout) {
-
 }
 
 static void l_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNodeLayout *node_layout) {
@@ -201,8 +188,6 @@ static void l_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNodeLayou
 	layout_x += size;
 	l_draw_compiler(cairo, layout_x, layout_y, size);
 }
-
-
 
 static void l_renderer_iface_init(MooINodeRendererInterface *iface) {
 	iface->updateLayout = l_update_layout;

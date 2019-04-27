@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define CAT_IS_INTEGER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_INTEGER))
 #define CAT_IS_INTEGER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_INTEGER))
 #define CAT_INTEGER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_INTEGER, CatIntegerClass))
-#define CAT_INTEGER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_INTEGER, CatIntegerPrivate))
 
 typedef struct _CatInteger               CatInteger;
 typedef struct _CatIntegerPrivate        CatIntegerPrivate;
@@ -43,7 +42,6 @@ typedef struct _CatIntegerClass          CatIntegerClass;
 
 struct _CatInteger {
 	GObject parent;
-	CatIntegerPrivate *priv;
 };
 
 struct _CatIntegerClass {

@@ -4,7 +4,6 @@
  *  Created on: Dec 3, 2009
  */
 
-
 #include "catutf8inputstreamscanner.h"
 #include "catiutf8scanner.h"
 #include "../../catlib.h"
@@ -15,37 +14,37 @@
 #include "../../logging/catlog.h"
 
 
-static gunichar _scanner_scan_utf8_char(CatIUtf8Scanner *self, CatStreamStatus *status) {
+static gunichar l_scanner_scan_utf8_char(CatIUtf8Scanner *self, CatStreamStatus *status) {
 	CatUtf8InputStreamScanner *this = CAT_UTF8_INPUT_STREAM_SCANNER(self);
 	return cat_utf8_input_stream_scanner_read(this, status);
 }
 
-static int _scanner_scan_utf8_char_length(CatIUtf8Scanner *self, char *data, int length, CatStreamStatus *status) {
+static int l_scanner_scan_utf8_char_length(CatIUtf8Scanner *self, char *data, int length, CatStreamStatus *status) {
 	CatUtf8InputStreamScanner *this = CAT_UTF8_INPUT_STREAM_SCANNER(self);
 	return cat_utf8_input_stream_scanner_read_length(this, data, length, status);
 }
 
-static void _scanner_interface_init(CatIUtf8ScannerInterface *_iface) {
-	_iface->scan_utf8_char = _scanner_scan_utf8_char;
-	_iface->scan_utf8_char_length = _scanner_scan_utf8_char_length;
+static void l_scanner_interface_init(CatIUtf8ScannerInterface *iface) {
+	iface->scan_utf8_char = l_scanner_scan_utf8_char;
+	iface->scan_utf8_char_length = l_scanner_scan_utf8_char_length;
 
 }
 
 G_DEFINE_TYPE_WITH_CODE(CatUtf8InputStreamScanner, cat_utf8_input_stream_scanner, G_TYPE_OBJECT,{
-	G_IMPLEMENT_INTERFACE(CAT_TYPE_IUTF8_SCANNER, _scanner_interface_init)
+	G_IMPLEMENT_INTERFACE(CAT_TYPE_IUTF8_SCANNER, l_scanner_interface_init)
 })
 
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
 static void cat_utf8_input_stream_scanner_class_init(CatUtf8InputStreamScannerClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
+	object_class->dispose = l_dispose;
 }
 
 static void cat_utf8_input_stream_scanner_init(CatUtf8InputStreamScanner *node) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	CatUtf8InputStreamScanner *instance = CAT_UTF8_INPUT_STREAM_SCANNER(object);
 	cat_unref_ptr(instance->stream);
 }

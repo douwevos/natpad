@@ -37,42 +37,36 @@ static void l_expression_iface_init(JagAstIExpressionInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstLiteral, jag_ast_literal, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstLiteral)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_IEXPRESSION, l_expression_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_literal_class_init(JagAstLiteralClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstLiteralPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_literal_init(JagAstLiteral *instance) {
-	JagAstLiteralPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_LITERAL, JagAstLiteralPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstLiteral *instance = JAG_AST_LITERAL(object);
-	JagAstLiteralPrivate *priv = instance->priv;
+	JagAstLiteralPrivate *priv = jag_ast_literal_get_instance_private(instance);
 	cat_unref_ptr(priv->literal);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_literal_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_literal_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -80,7 +74,7 @@ JagAstLiteral *jag_ast_literal_new(CatIStringable *literal) {
 	JagAstLiteral *result = g_object_new(JAG_AST_TYPE_LITERAL, NULL);
 	cat_ref_anounce(result);
 //	cat_ref_ptr(result);
-	JagAstLiteralPrivate *priv = result->priv;
+	JagAstLiteralPrivate *priv = jag_ast_literal_get_instance_private(result);
 	priv->literal = cat_ref_sink_ptr(literal);
 //	cat_ref_ptr(literal);
 
@@ -96,17 +90,17 @@ JagAstLiteral *jag_ast_literal_new(CatIStringable *literal) {
 
 
 CatIStringable *jag_ast_literal_get_value(JagAstLiteral *literal) {
-	JagAstLiteralPrivate *priv = JAG_AST_LITERAL_GET_PRIVATE(literal);
+	JagAstLiteralPrivate *priv = jag_ast_literal_get_instance_private(literal);
 	return priv->literal;
 }
-
-
 
 
 /********************* start JagAstIExpression implementation *********************/
 
 static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
-	JagAstLiteralPrivate *priv = JAG_AST_LITERAL_GET_PRIVATE(self);
+	JagAstLiteral *instance = JAG_AST_LITERAL(self);
+	JagAstLiteralPrivate *priv = jag_ast_literal_get_instance_private(instance);
+
 	if (priv==NULL) {
 		char buf[500];
 		sprintf(buf, "<priv=NULL:class=%p>", self);
@@ -140,8 +134,8 @@ static gboolean l_expression_equal(JagAstIExpression *self, JagAstIExpression *o
 		return FALSE;
 	}
 	if (JAG_AST_IS_LITERAL(other)) {
-		JagAstLiteralPrivate *priv = JAG_AST_LITERAL_GET_PRIVATE(self);
-		JagAstLiteralPrivate *o_priv = JAG_AST_LITERAL_GET_PRIVATE(other);
+		JagAstLiteralPrivate *priv = jag_ast_literal_get_instance_private(JAG_AST_LITERAL(self));
+		JagAstLiteralPrivate *o_priv = jag_ast_literal_get_instance_private(JAG_AST_LITERAL(other));
 		CatIStringable *lit = priv->literal;
 		CatIStringable *o_lit = o_priv->literal;
 		if (lit==o_lit) {
@@ -183,11 +177,11 @@ static void l_expression_iface_init(JagAstIExpressionInterface *iface) {
 /********************* end JagAstIExpression implementation *********************/
 
 
-
 /********************* start CatIStringableInterface implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagAstLiteralPrivate *priv = JAG_AST_LITERAL_GET_PRIVATE(self);
+	JagAstLiteral *instance = JAG_AST_LITERAL(self);
+	JagAstLiteralPrivate *priv = jag_ast_literal_get_instance_private(instance);
 	const char *name = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%o]", name, priv->literal);
 }

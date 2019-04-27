@@ -37,55 +37,46 @@ struct _JagBytConstantFloatPrivate {
 static void l_constant_iface_init(JagBytIConstantInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytConstantFloat, jag_byt_constant_float, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagBytConstantFloat)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_ICONSTANT, l_constant_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_constant_float_class_init(JagBytConstantFloatClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytConstantFloatPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_constant_float_init(JagBytConstantFloat *instance) {
-	JagBytConstantFloatPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_CONSTANT_FLOAT, JagBytConstantFloatPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytConstantFloat *instance = JAG_BYT_CONSTANT_FLOAT(object);
-//	JagBytConstantFloatPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_constant_float_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_constant_float_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytConstantFloat *jag_byt_constant_float_new(int32_t value) {
 	JagBytConstantFloat *result = g_object_new(JAG_BYT_TYPE_CONSTANT_FLOAT, NULL);
 	cat_ref_anounce(result);
-	JagBytConstantFloatPrivate *priv = result->priv;
+	JagBytConstantFloatPrivate *priv = jag_byt_constant_float_get_instance_private(result);
 	priv->value = value;
 	return result;
 }
 
-
-
 float jag_byt_constant_float_get_value(JagBytConstantFloat *constant_float) {
-	return (float) JAG_BYT_CONSTANT_FLOAT_GET_PRIVATE(constant_float)->value;	// TODO test if cast works as expected
+	JagBytConstantFloatPrivate *priv = jag_byt_constant_float_get_instance_private(constant_float);
+	return (float) priv->value;	// TODO test if cast works as expected
 }
 
 
@@ -106,5 +97,3 @@ static void l_constant_iface_init(JagBytIConstantInterface *iface) {
 }
 
 /********************* end JagBytIConstantInterface implementation *********************/
-
-

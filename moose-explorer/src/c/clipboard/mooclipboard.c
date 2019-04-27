@@ -43,9 +43,7 @@ struct _MooClipboardPrivate {
 	CatWeakList *listeners;
 };
 
-G_DEFINE_TYPE (MooClipboard, moo_clipboard, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooClipboard, moo_clipboard, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -53,43 +51,37 @@ static void l_finalize(GObject *object);
 static gboolean l_targets_include(MooClipboard *moo_clipboard, GdkAtom *targets, gint n_targets, GdkAtom requested_target);
 
 static void moo_clipboard_class_init(MooClipboardClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooClipboardPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
-
 }
 
 static void moo_clipboard_init(MooClipboard *instance) {
-	MooClipboardPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_CLIPBOARD, MooClipboardPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooClipboard *instance = MOO_CLIPBOARD(object);
-	MooClipboardPrivate *priv = instance->priv;
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->frame);
 	cat_unref_ptr(priv->clipboard_nodes);
 	cat_unref_ptr(priv->listeners);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_clipboard_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_clipboard_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 MooClipboard *moo_clipboard_new(MooService *moo_service, LeaFrame *frame) {
 	MooClipboard *result = g_object_new(MOO_TYPE_CLIPBOARD, NULL);
 	cat_ref_anounce(result);
-	MooClipboardPrivate *priv = result->priv;
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->frame = cat_ref_ptr(frame);
 	priv->clipboard_nodes = NULL;
@@ -101,11 +93,9 @@ MooClipboard *moo_clipboard_new(MooService *moo_service, LeaFrame *frame) {
 }
 
 
-
-
-
 static void l_get_clipboard(GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info, gpointer user_data) {
-	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(user_data);
+	MooClipboard *instance = MOO_CLIPBOARD(user_data);
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(instance);
 	if (priv->clipboard_nodes == NULL) {
 		return;
 	}
@@ -198,26 +188,26 @@ static void l_get_clipboard(GtkClipboard *clipboard, GtkSelectionData *selection
 			gtk_selection_data_set_text(selection_data, cat_string_wo_getchars(buf), cat_string_wo_length(buf));
 			cat_unref_ptr(buf);
 		}
-
 	}
 	cat_unref_ptr(uris);
 }
 
 
 static void l_clear_clipboard(GtkClipboard *clipboard, gpointer user_data) {
-	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(user_data);
+	MooClipboard *instance = MOO_CLIPBOARD(user_data);
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(instance);
 	cat_unref_ptr(priv->clipboard_nodes);
 }
 
 
 GtkClipboard *moo_clipboard_get_gtk_clipboard(MooClipboard *moo_clipboard) {
-	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(moo_clipboard);
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(moo_clipboard);
 	return gtk_clipboard_get_for_display(gtk_widget_get_display(GTK_WIDGET(priv->frame)), GDK_SELECTION_CLIPBOARD);
 }
 
 void moo_clipboard_cut_or_copy(MooClipboard *moo_clipboard, CatArrayWo *selected_nodes, gboolean is_copy) {
 	cat_log_debug("clipboard_nodes=%o, is_copy=%d", selected_nodes, is_copy);
-	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(moo_clipboard);
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(moo_clipboard);
 	guint n_targets;
 	GtkTargetList *target_list = gtk_target_list_new (NULL, 0);
 	gtk_target_list_add(target_list, priv->mate_copied_files_atom, 0, 0);
@@ -242,24 +232,19 @@ struct _MooPasteInfo {
 	MooClipboard *moo_clipboard;
 	CatReadableTreeNode *destination_vip;
 };
-//
-//
-//
-//
-//
+
 static CatS l_s_txt_cut = CAT_S_DEF("cut");
 
 static void l_paste_clipboard_received(GtkClipboard *clipboard, GtkSelectionData *selection_data, gpointer data) {
 	struct _MooPasteInfo *paste_info = (struct _MooPasteInfo *) data;
 	MooClipboard *moo_clipboard = paste_info->moo_clipboard;
-	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(moo_clipboard);
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(moo_clipboard);
 	CatReadableTreeNode *destination_vip = paste_info->destination_vip;
 	VipNode *dest_vip_node = (VipNode *) cat_tree_node_get_content((CatTreeNode *) destination_vip);
 	VipIResource *dest_resource = vip_node_get_content(dest_vip_node);
 	if (VIP_IS_FS_MAP(dest_resource)) {
 
 	}
-
 
 	if (gtk_selection_data_get_length(selection_data)>0) {
 		const CatStringWo *copy_string = cat_string_wo_new_data((const gchar *) gtk_selection_data_get_data(selection_data));
@@ -291,12 +276,10 @@ static void l_paste_clipboard_received(GtkClipboard *clipboard, GtkSelectionData
 	} else {
 		cat_log_info("nothing to paste or move");
 	}
-
 }
 
 void moo_clipboard_paste_resources(MooClipboard *moo_clipboard, CatReadableTreeNode *destination_vip) {
-
-	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(moo_clipboard);
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(moo_clipboard);
 	GtkClipboard *display_clipboard = gtk_clipboard_get_for_display(gtk_widget_get_display(GTK_WIDGET(priv->frame)), GDK_SELECTION_CLIPBOARD);
 	GtkSelectionData *selection_data = gtk_clipboard_wait_for_contents(display_clipboard, gdk_atom_intern_static_string ("TARGETS"));
 	if (selection_data) {
@@ -318,12 +301,9 @@ void moo_clipboard_paste_resources(MooClipboard *moo_clipboard, CatReadableTreeN
 			cat_log_warn("no targets");
 		}
 	}
-
 }
 
-
 static gboolean l_targets_include(MooClipboard *moo_clipboard, GdkAtom *targets, gint n_targets, GdkAtom requested_target) {
-//	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(moo_clipboard);
 	g_return_val_if_fail(targets!=NULL || n_targets==0, FALSE);
 	gboolean result = FALSE;
 
@@ -334,12 +314,11 @@ static gboolean l_targets_include(MooClipboard *moo_clipboard, GdkAtom *targets,
 			break;
 		}
 	}
-
 	return result;
 }
 
 gboolean moo_clipboard_contains_resources(MooClipboard *moo_clipboard) {
-	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(moo_clipboard);
+	MooClipboardPrivate *priv = moo_clipboard_get_instance_private(moo_clipboard);
 	gboolean result = FALSE;
 	GtkClipboard *display_clipboard = gtk_clipboard_get_for_display(gtk_widget_get_display(GTK_WIDGET(priv->frame)), GDK_SELECTION_CLIPBOARD);
 	GtkSelectionData *selection_data = gtk_clipboard_wait_for_contents(display_clipboard, gdk_atom_intern_static_string ("TARGETS"));
@@ -363,9 +342,3 @@ gboolean moo_clipboard_contains_resources(MooClipboard *moo_clipboard) {
 	}
 	return result;
 }
-
-
-void moo_clipboard_set_selection(MooClipboard *moo_clipboard, CatArrayWo *selected) {
-//	MooClipboardPrivate *priv = MOO_CLIPBOARD_GET_PRIVATE(moo_clipboard);
-}
-

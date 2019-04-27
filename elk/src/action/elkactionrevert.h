@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define ELK_IS_ACTION_REVERT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_ACTION_REVERT))
 #define ELK_IS_ACTION_REVERT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_ACTION_REVERT))
 #define ELK_ACTION_REVERT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_ACTION_REVERT, ElkActionRevertClass))
-#define ELK_ACTION_REVERT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_ACTION_REVERT, ElkActionRevertPrivate))
 
 typedef struct _ElkActionRevert               ElkActionRevert;
 typedef struct _ElkActionRevertPrivate        ElkActionRevertPrivate;
@@ -45,7 +44,6 @@ typedef struct _ElkActionRevertClass          ElkActionRevertClass;
 
 struct _ElkActionRevert {
 	LeaAction parent;
-	ElkActionRevertPrivate *priv;
 };
 
 struct _ElkActionRevertClass {

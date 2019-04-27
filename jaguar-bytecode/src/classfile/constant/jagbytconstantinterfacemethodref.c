@@ -43,48 +43,42 @@ struct _JagBytConstantInterfaceMethodrefPrivate {
 static void l_constant_iface_init(JagBytIConstantInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytConstantInterfaceMethodref, jag_byt_constant_interface_methodref, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagBytConstantInterfaceMethodref)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_ICONSTANT, l_constant_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_constant_interface_methodref_class_init(JagBytConstantInterfaceMethodrefClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytConstantInterfaceMethodrefPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_constant_interface_methodref_init(JagBytConstantInterfaceMethodref *instance) {
-	JagBytConstantInterfaceMethodrefPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_CONSTANT_INTERFACE_METHODREF, JagBytConstantInterfaceMethodrefPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytConstantInterfaceMethodref *instance = JAG_BYT_CONSTANT_INTERFACE_METHODREF(object);
-	JagBytConstantInterfaceMethodrefPrivate *priv = instance->priv;
+	JagBytConstantInterfaceMethodrefPrivate *priv = jag_byt_constant_interface_methodref_get_instance_private(instance);
 	cat_unref_ptr(priv->method_header);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_constant_interface_methodref_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_constant_interface_methodref_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytConstantInterfaceMethodref *jag_byt_constant_interface_methodref_new(int class_index, int name_and_type_index) {
 	JagBytConstantInterfaceMethodref *result = g_object_new(JAG_BYT_TYPE_CONSTANT_INTERFACE_METHODREF, NULL);
 	cat_ref_anounce(result);
-	JagBytConstantInterfaceMethodrefPrivate *priv = result->priv;
+	JagBytConstantInterfaceMethodrefPrivate *priv = jag_byt_constant_interface_methodref_get_instance_private(result);
 	priv->class_index = class_index;
 	priv->name_and_type_index = name_and_type_index;
 	priv->is_resolved = FALSE;
@@ -93,17 +87,17 @@ JagBytConstantInterfaceMethodref *jag_byt_constant_interface_methodref_new(int c
 }
 
 
-
-
 /********************* start JagBytIConstantInterface implementation *********************/
 
 static gboolean l_constant_is_resolved(JagBytIConstant *self) {
-	JagBytConstantInterfaceMethodrefPrivate *priv = JAG_BYT_CONSTANT_INTERFACE_METHODREF_GET_PRIVATE(self);
+	JagBytConstantInterfaceMethodref *instance = JAG_BYT_CONSTANT_INTERFACE_METHODREF(self);
+	JagBytConstantInterfaceMethodrefPrivate *priv = jag_byt_constant_interface_methodref_get_instance_private(instance);
 	return priv->is_resolved;
 }
 
 static gboolean l_constant_try_resolve(JagBytIConstant *self, struct _JagBytConstantPool *constantPool, CatArrayWo *e_resolveStack) {
-	JagBytConstantInterfaceMethodrefPrivate *priv = JAG_BYT_CONSTANT_INTERFACE_METHODREF_GET_PRIVATE(self);
+	JagBytConstantInterfaceMethodref *instance = JAG_BYT_CONSTANT_INTERFACE_METHODREF(self);
+	JagBytConstantInterfaceMethodrefPrivate *priv = jag_byt_constant_interface_methodref_get_instance_private(instance);
 
 	JagBytConstantClazz *constant_clazz = (JagBytConstantClazz *) jag_byt_constant_pool_get_unresolved(constantPool, priv->class_index-1);
 	JagBytConstantNameAndTp *constant_name_and_type = (JagBytConstantNameAndTp *) jag_byt_constant_pool_get_unresolved(constantPool, priv->name_and_type_index-1);
@@ -147,11 +141,9 @@ static gboolean l_constant_try_resolve(JagBytIConstant *self, struct _JagBytCons
 	return result;
 }
 
-
 static void l_constant_iface_init(JagBytIConstantInterface *iface) {
 	iface->isResolved = l_constant_is_resolved;
 	iface->tryResolve = l_constant_try_resolve;
 }
-
 
 /********************* end JagBytIConstantInterface implementation *********************/

@@ -60,31 +60,24 @@ struct _ElkGroupFilePrivate {
 	ElkActionExit *action_exit;
 };
 
-G_DEFINE_TYPE (ElkGroupFile, elk_group_file, LEA_TYPE_ACTION_GROUP)
+G_DEFINE_TYPE_WITH_PRIVATE(ElkGroupFile, elk_group_file, LEA_TYPE_ACTION_GROUP)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void elk_group_file_class_init(ElkGroupFileClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ElkGroupFilePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void elk_group_file_init(ElkGroupFile *instance) {
-	ElkGroupFilePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_GROUP_FILE, ElkGroupFilePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkGroupFile *instance = ELK_GROUP_FILE(object);
-	ElkGroupFilePrivate *priv = instance->priv;
+	ElkGroupFilePrivate *priv = elk_group_file_get_instance_private(instance);
 	cat_unref_ptr(priv->focused_editor);
 	cat_unref_ptr(priv->service);
 	cat_unref_ptr(priv->action_new);
@@ -97,21 +90,21 @@ static void _dispose(GObject *object) {
 	cat_unref_ptr(priv->action_save_all);
 	cat_unref_ptr(priv->action_exit);
 
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_group_file_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(elk_group_file_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ElkGroupFile *elk_group_file_new(ElkIService *service) {
 	ElkGroupFile *result = g_object_new(ELK_TYPE_GROUP_FILE, NULL);
 	cat_ref_anounce(result);
-	ElkGroupFilePrivate *priv = result->priv;
+	ElkGroupFilePrivate *priv = elk_group_file_get_instance_private(result);
 	lea_action_group_construct((LeaActionGroup *) result, cat_ref_ptr(lea_prov_file_group_name()), cat_string_wo_new_with("_File"));
 	priv->service = cat_ref_ptr(service);
 	priv->focused_editor = NULL;
@@ -171,10 +164,8 @@ ElkGroupFile *elk_group_file_new(ElkIService *service) {
 	return result;
 }
 
-
-
 void elk_group_file_set_editor_panel(ElkGroupFile *group, DraEditorPanel *editor_panel) {
-	ElkGroupFilePrivate *priv = ELK_GROUP_FILE_GET_PRIVATE(group);
+	ElkGroupFilePrivate *priv = elk_group_file_get_instance_private(group);
 	if (priv->focused_editor == editor_panel) {
 		return;
 	}
@@ -189,7 +180,7 @@ void elk_group_file_set_editor_panel(ElkGroupFile *group, DraEditorPanel *editor
 
 
 void elk_group_file_set_editor_list(ElkGroupFile *group, CatArrayWo *a_editor_list) {
-	ElkGroupFilePrivate *priv = ELK_GROUP_FILE_GET_PRIVATE(group);
+	ElkGroupFilePrivate *priv = elk_group_file_get_instance_private(group);
 	elk_action_save_all_set_editor_list(priv->action_save_all, a_editor_list);
 	elk_action_close_all_set_editor_list(priv->action_close_all, a_editor_list);
 }

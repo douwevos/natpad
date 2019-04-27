@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "cattreeentry.h"
 #include "../../catistringable.h"
 #include "../../woo/catstringwo.h"
@@ -44,6 +43,7 @@ struct _CatTreeEntryPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatTreeEntry, cat_tree_entry, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CatTreeEntry)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -51,22 +51,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_tree_entry_class_init(CatTreeEntryClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatTreeEntryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_tree_entry_init(CatTreeEntry *instance) {
-	CatTreeEntryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_TREE_ENTRY, CatTreeEntryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatTreeEntry *instance = CAT_TREE_ENTRY(object);
-	CatTreeEntryPrivate *priv = instance->priv;
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(instance);
 	cat_free_ptr(priv->children);
 	cat_unref_ptr(priv->payload);
 	G_OBJECT_CLASS(cat_tree_entry_parent_class)->dispose(object);
@@ -84,7 +80,7 @@ static void l_finalize(GObject *object) {
 CatTreeEntry *cat_tree_entry_new() {
 	CatTreeEntry *result = g_object_new(CAT_TYPE_TREE_ENTRY, NULL);
 	cat_ref_anounce(result);
-	CatTreeEntryPrivate *priv = result->priv;
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(result);
 	priv->children = NULL;
 	priv->children_count = 0;
 	priv->payload = NULL;
@@ -95,21 +91,22 @@ CatTreeEntry *cat_tree_entry_new() {
 
 
 void cat_tree_entry_mark(CatTreeEntry *entry) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	priv->marked_fixed = TRUE;
 }
 
 gboolean cat_tree_entry_is_marked_fixed(CatTreeEntry *entry) {
-	return CAT_TREE_ENTRY_GET_PRIVATE(entry)->marked_fixed;
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
+	return priv->marked_fixed;
 }
 
 CatTreeEntry *cat_tree_entry_ensure_writable(CatTreeEntry *entry) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	if (!priv->marked_fixed) {
 		return cat_ref_ptr(entry);
 	}
 	CatTreeEntry *result = cat_tree_entry_new();
-	CatTreeEntryPrivate *rpriv = CAT_TREE_ENTRY_GET_PRIVATE(result);
+	CatTreeEntryPrivate *rpriv = cat_tree_entry_get_instance_private(result);
 	rpriv->parent_location = priv->parent_location;
 	if (priv->children!=NULL) {
 		rpriv->children = g_new(int, priv->children_count);
@@ -124,16 +121,17 @@ CatTreeEntry *cat_tree_entry_ensure_writable(CatTreeEntry *entry) {
 }
 
 void cat_tree_entry_set_parent_location(CatTreeEntry *entry, int location) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	priv->parent_location = location;
 }
 
 int cat_tree_entry_get_parent_location(CatTreeEntry *entry) {
-	return CAT_TREE_ENTRY_GET_PRIVATE(entry)->parent_location;
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
+	return priv->parent_location;
 }
 
 int cat_tree_entry_find_child_index(CatTreeEntry *entry, int location) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	if (priv->children==NULL) {
 		return -1;
 	}
@@ -148,7 +146,7 @@ int cat_tree_entry_find_child_index(CatTreeEntry *entry, int location) {
 
 
 void cat_tree_entry_add_child(CatTreeEntry *entry, int location) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	if (priv->children==NULL) {
 		priv->children = g_new(int, 1);
 		priv->children_count = 1;
@@ -164,7 +162,7 @@ void cat_tree_entry_add_child(CatTreeEntry *entry, int location) {
 }
 
 void cat_tree_entry_set_child_at(CatTreeEntry *entry, int index, int location) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	if (index>=0 && index<priv->children_count) {
 		priv->children[index] = location;
 	} else {
@@ -173,7 +171,7 @@ void cat_tree_entry_set_child_at(CatTreeEntry *entry, int index, int location) {
 }
 
 int cat_tree_entry_removed_child_at(CatTreeEntry *entry, int index) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	int result = priv->children[index];
 	if (priv->children_count==1) {
 		// TODO what if index not 0
@@ -198,28 +196,29 @@ int cat_tree_entry_removed_child_at(CatTreeEntry *entry, int index) {
 
 
 int cat_tree_entry_get_child(CatTreeEntry *entry, int index) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	return priv->children[index];
 }
 
 int cat_tree_entry_count(CatTreeEntry *entry) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	return priv->children_count;
 }
 
 
 
 void cat_tree_entry_set_payload(CatTreeEntry *entry, GObject *payload) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	cat_ref_swap(priv->payload, payload);
 }
 
 GObject *cat_tree_entry_get_payload(CatTreeEntry *entry) {
-	return CAT_TREE_ENTRY_GET_PRIVATE(entry)->payload;
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
+	return priv->payload;
 }
 
 gboolean cat_tree_entry_references_location(CatTreeEntry *entry, int location) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	if (priv->parent_location == location) {
 		return TRUE;
 	}
@@ -235,7 +234,7 @@ gboolean cat_tree_entry_references_location(CatTreeEntry *entry, int location) {
 }
 
 void cat_tree_entry_writable_move_location(CatTreeEntry *entry, int src_location, int dest_location) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(entry);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(entry);
 	if (priv->parent_location==src_location) {
 		priv->parent_location = dest_location;
 	}
@@ -251,14 +250,10 @@ void cat_tree_entry_writable_move_location(CatTreeEntry *entry, int src_location
 }
 
 
-
-
-
-
 /********************* begin CatIStringable implementation *********************/
 
 static void l_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	CatTreeEntryPrivate *priv = CAT_TREE_ENTRY_GET_PRIVATE(self);
+	CatTreeEntryPrivate *priv = cat_tree_entry_get_instance_private(CAT_TREE_ENTRY(self));
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 #if CAT_LOG_LEVEL<=CAT_LOG_DEBUG
 	cat_string_wo_format(append_to, "%s[%p:payload=%o, marked_fixed=%d, parent-loc=%d", iname, self, priv->payload, priv->marked_fixed, priv->parent_location);
@@ -285,5 +280,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 
 
 /********************* end CatIStringable implementation *********************/
-
-

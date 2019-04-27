@@ -22,7 +22,6 @@
 
 #include "jagindexsinglesource.h"
 #include "../../moose/srcfile/jagsrcfilecontentwo.h"
-#include "../source/jgiparsercontext.h"
 #include <jaguarparser.h>
 
 #include <logging/catlogdefs.h>
@@ -35,16 +34,13 @@ struct _JagIndexSingleSourcePrivate {
 	MooService *moo_service;
 };
 
-
-G_DEFINE_TYPE(JagIndexSingleSource, jag_index_single_source, WOR_TYPE_REQUEST)
+G_DEFINE_TYPE_WITH_PRIVATE(JagIndexSingleSource, jag_index_single_source, WOR_TYPE_REQUEST)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void jag_index_single_source_class_init(JagIndexSingleSourceClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagIndexSingleSourcePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -54,14 +50,12 @@ static void jag_index_single_source_class_init(JagIndexSingleSourceClass *clazz)
 }
 
 static void jag_index_single_source_init(JagIndexSingleSource *instance) {
-	JagIndexSingleSourcePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_INDEX_SINGLE_SOURCE, JagIndexSingleSourcePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagIndexSingleSource *instance = JAG_INDEX_SINGLE_SOURCE(object);
-	JagIndexSingleSourcePrivate *priv = instance->priv;
+	JagIndexSingleSourcePrivate *priv = jag_index_single_source_get_instance_private(instance);
 	cat_unref_ptr(priv->jag_source_id_path);
 	cat_unref_ptr(priv->moo_service);
 	G_OBJECT_CLASS(jag_index_single_source_parent_class)->dispose(object);
@@ -79,7 +73,7 @@ static void l_finalize(GObject *object) {
 JagIndexSingleSource *jag_index_single_source_new(MooService *moo_service, MooIdPath *jag_source_id_path) {
 	JagIndexSingleSource *result = g_object_new(JAG_TYPE_INDEX_SINGLE_SOURCE, NULL);
 	cat_ref_anounce(result);
-	JagIndexSingleSourcePrivate *priv = result->priv;
+	JagIndexSingleSourcePrivate *priv = jag_index_single_source_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->jag_source_id_path = cat_ref_sink_ptr(jag_source_id_path);
@@ -87,8 +81,7 @@ JagIndexSingleSource *jag_index_single_source_new(MooService *moo_service, MooId
 }
 
 static void l_populate_model(JagIndexSingleSource *index_ss, MooNodeWo *e_main, JagPJCCompilationUnit *compilation_unit) {
-
-	JagIndexSingleSourcePrivate *priv = JAG_INDEX_SINGLE_SOURCE_GET_PRIVATE(index_ss);
+	JagIndexSingleSourcePrivate *priv = jag_index_single_source_get_instance_private(index_ss);
 	VipISequence *moo_sequence = (VipISequence *) priv->moo_service;
 
 //	switch(JAG_TOKEN(ast_token)->sym) {
@@ -119,23 +112,18 @@ static void l_populate_model(JagIndexSingleSource *index_ss, MooNodeWo *e_main, 
 		}
 	}
 	cat_unref_ptr(defiter);
-
 }
-
-
 
 static void l_run_request(WorRequest *request) {
 	JagIndexSingleSource *index_ss = JAG_INDEX_SINGLE_SOURCE(request);
-	JagIndexSingleSourcePrivate *priv = JAG_INDEX_SINGLE_SOURCE_GET_PRIVATE(request);
+	JagIndexSingleSourcePrivate *priv = jag_index_single_source_get_instance_private(index_ss);
 	cat_log_debug("indexing source:%o", priv->jag_source_id_path);
-
 
 	MooNodeWo *root_node = moo_service_get_root_node_ref(priv->moo_service);
 
 	MooNodeWo *jag_source_node_wo = moo_id_path_get_tail(priv->jag_source_id_path, root_node);
 	if (jag_source_node_wo!=NULL) {
 		cat_log_debug("jag_source_node_wo=%o", jag_source_node_wo);
-
 
 //		MooResourceContentWo *res_content = (MooResourceContentWo *) moo_node_wo_get_content(jag_source_node_wo, moo_resource_content_wo_key());
 //		moo_resource_content_wo_get_version(res_content);
@@ -165,9 +153,6 @@ static void l_run_request(WorRequest *request) {
 //			jagp_jctree_dump((JagPJCTree *) compilation_unit, cat_string_wo_new());
 
 //			CatArrayWo *tokens = jagp_lexer_impl_get_all_tokens((JagPLexerImpl *) lexer);
-
-
-
 
 //			// TODO scanner should convert LFCRs and CRLFs to LFs otherwise rows will be calculated incorrectly
 //			JagScanner *jag_scanner =  jag_scanner_new((CatIUtf8Scanner *) scanner);
@@ -232,6 +217,4 @@ static void l_run_request(WorRequest *request) {
 		}
 	}
 	cat_unref_ptr(root_node);
-
 }
-

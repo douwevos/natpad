@@ -30,48 +30,34 @@
 #define CAT_LOG_CLAZZ "JagPackageRenderer"
 #include <logging/catlog.h>
 
-struct _JagPackageRendererPrivate {
-	void *dummy;
-};
-
-
 static void l_renderer_iface_init(MooINodeRendererInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagPackageRenderer, jag_package_renderer, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(JagPackageRenderer, jag_package_renderer, G_TYPE_OBJECT, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_RENDERER, l_renderer_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_package_renderer_class_init(JagPackageRendererClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagPackageRendererPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_package_renderer_init(JagPackageRenderer *instance) {
-	JagPackageRendererPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_PACKAGE_RENDERER, JagPackageRendererPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagPackageRenderer *instance = JAG_OBJECT(object);
-//	JagPackageRendererPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_package_renderer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_package_renderer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -79,13 +65,10 @@ static void l_finalize(GObject *object) {
 JagPackageRenderer *jag_package_renderer_new() {
 	JagPackageRenderer *result = g_object_new(JAG_TYPE_PACKAGE_RENDERER, NULL);
 	cat_ref_anounce(result);
-//	JagPackageRendererPrivate *priv = result->priv;
 	return result;
 }
 
-
 /********************* begin MooINodeRendererFactory implementation *********************/
-
 
 static void l_update_layout(MooINodeRenderer *self, struct _MooNodeLayout *node_layout) {
 
@@ -104,8 +87,6 @@ static void l_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNodeLayou
 	gboolean has_children = moo_node_wo_child_count(node)>0;
 	jag_src_folder_renderer_draw_package(cairo, layout_x, layout_y, size, has_children);
 }
-
-
 
 static void l_renderer_iface_init(MooINodeRendererInterface *iface) {
 	iface->updateLayout = l_update_layout;

@@ -78,46 +78,9 @@ struct _CatHashSetIterClass {
 
 GType cat_hash_set_iter_get_type(void);
 
-static gboolean l_iter_has_next(CatIIterator *self) {
-	CatHashSetIter *iter = CAT_HASH_SET_ITER(self);
-	return iter->next_value_valid;
-}
-
-static gboolean l_iter_is_last(CatIIterator *self) {
-	CatHashSetIter *iter = CAT_HASH_SET_ITER(self);
-	return iter->next_value_valid && !iter->ahead_value_valid;
-}
-
-static gpointer l_iter_next(CatIIterator *self) {
-	CatHashSetIter *iter = CAT_HASH_SET_ITER(self);
-	gpointer result = iter->next_value;
-
-	iter->next_value = iter->ahead_value;
-	iter->next_value_valid = iter->ahead_value_valid;
-
-	iter->ahead_value = NULL;
-	iter->ahead_value_valid = FALSE;
-	CatHashSetPrivate *priv = iter->hash_set->priv;
-
-	while(iter->bucket_idx<priv->bucket_count) {
-		CatArrayWo *e_bucket = priv->e_buckets[iter->bucket_idx];
-		if (e_bucket) {
-			if (iter->bucket_offset<cat_array_wo_size(e_bucket)) {
-				iter->ahead_value = cat_array_wo_get(e_bucket, iter->bucket_offset++);
-				iter->ahead_value_valid = TRUE;
-				break;
-			} else {
-				iter->bucket_idx++;
-				iter->bucket_offset = 0;
-			}
-		} else {
-			iter->bucket_idx++;
-			iter->bucket_offset = 0;
-		}
-	}
-	return result;
-}
-
+static gboolean l_iter_has_next(CatIIterator *self);
+static gboolean l_iter_is_last(CatIIterator *self);
+static gpointer l_iter_next(CatIIterator *self);
 
 static void l_iterator_interface_init(CatIIteratorInterface *iface) {
 	iface->has_next = l_iter_has_next;
@@ -125,8 +88,7 @@ static void l_iterator_interface_init(CatIIteratorInterface *iface) {
 	iface->is_last = l_iter_is_last;
 }
 
-
-G_DEFINE_TYPE_WITH_CODE(CatHashSetIter, cat_hash_set_iter, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(CatHashSetIter, cat_hash_set_iter, G_TYPE_OBJECT, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_IITERATOR, l_iterator_interface_init);
 });
 
@@ -153,10 +115,9 @@ static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 
 G_DEFINE_TYPE_WITH_CODE(CatHashSet, cat_hash_set, G_TYPE_OBJECT,{
+		G_ADD_PRIVATE(CatHashSet)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 })
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -165,23 +126,18 @@ static void l_destroy_buckets(CatArrayWo **e_buckets, int bucket_count);
 
 
 static void cat_hash_set_class_init(CatHashSetClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CatHashSetPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_hash_set_init(CatHashSet *instance) {
-	CatHashSetPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_HASH_SET, CatHashSetPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatHashSet *instance = CAT_HASH_SET(object);
-	CatHashSetPrivate *priv = instance->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(instance);
 	if (priv->bucket_count>0) {
 		l_destroy_buckets(priv->e_buckets, priv->bucket_count);
 		priv->e_buckets = NULL;
@@ -189,14 +145,14 @@ static void l_dispose(GObject *object) {
 	}
 	priv->total_count = 0;
 
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(cat_hash_set_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(cat_hash_set_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -204,7 +160,7 @@ static void l_finalize(GObject *object) {
 CatHashSet *cat_hash_set_new(GHashFunc hash_func, GEqualFunc equal_func) {
 	CatHashSet *result = g_object_new(CAT_TYPE_HASH_SET, NULL);
 	cat_ref_anounce(result);
-	CatHashSetPrivate *priv = result->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(result);
 	priv->hash_func = hash_func;
 	priv->equal_func = equal_func;
 	priv->e_buckets = NULL;
@@ -214,7 +170,7 @@ CatHashSet *cat_hash_set_new(GHashFunc hash_func, GEqualFunc equal_func) {
 }
 
 void cat_hash_set_clear(CatHashSet *hash_set) {
-	CatHashSetPrivate *priv = hash_set->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	l_destroy_buckets(priv->e_buckets, priv->bucket_count);
 	priv->e_buckets = NULL;
 	priv->bucket_count = 0;
@@ -222,7 +178,7 @@ void cat_hash_set_clear(CatHashSet *hash_set) {
 }
 
 int cat_hash_set_size(CatHashSet *hash_set) {
-	CatHashSetPrivate *priv = hash_set->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	return priv->total_count;
 }
 
@@ -292,7 +248,7 @@ static void l_check_rehash(CatHashSetPrivate *priv) {
 
 GObject *cat_hash_set_add(CatHashSet *hash_set, GObject *to_add) {
 	GObject *result = NULL;
-	CatHashSetPrivate *priv = hash_set->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	CatArrayWo *e_bucket = l_get_bucket(priv, to_add);
 	if (e_bucket) {
 		CatIIterator *bucket_iter = cat_array_wo_iterator(e_bucket);
@@ -328,8 +284,8 @@ GObject *cat_hash_set_add(CatHashSet *hash_set, GObject *to_add) {
 
 gboolean cat_hash_set_add_all(CatHashSet *hash_set, const CatHashSet *set_to_add) {
 	gboolean result = FALSE;
-	CatHashSetPrivate *priv = hash_set->priv;
-	CatHashSetPrivate *priv_to_add = set_to_add->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
+	CatHashSetPrivate *priv_to_add = cat_hash_set_get_instance_private((CatHashSet *) set_to_add);
 
 	cat_log_debug("hash_set=%p, set_to_add=%p", hash_set,set_to_add);
 
@@ -396,7 +352,7 @@ gboolean cat_hash_set_add_all(CatHashSet *hash_set, const CatHashSet *set_to_add
 
 GObject *cat_hash_set_get(CatHashSet *hash_set, GObject *to_get) {
 	GObject *result = NULL;
-	CatHashSetPrivate *priv = hash_set->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	CatArrayWo *e_bucket = l_get_bucket(priv, to_get);
 	if (e_bucket) {
 		CatIIterator *bucket_iter = cat_array_wo_iterator(e_bucket);
@@ -414,7 +370,7 @@ GObject *cat_hash_set_get(CatHashSet *hash_set, GObject *to_get) {
 
 GObject *cat_hash_set_remove(CatHashSet *hash_set, GObject *to_remove) {
 	GObject *result = NULL;
-	CatHashSetPrivate *priv = hash_set->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	CatArrayWo *e_bucket = l_get_bucket(priv, to_remove);
 	if (e_bucket) {
 		int idx = cat_array_wo_find_index_ext(e_bucket, to_remove, -1, priv->equal_func);
@@ -433,7 +389,7 @@ GObject *cat_hash_set_remove(CatHashSet *hash_set, GObject *to_remove) {
 
 
 CatArrayWo *cat_hash_set_enlist_all(CatHashSet *hash_set) {
-	CatHashSetPrivate *priv = hash_set->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	CatArrayWo *e_result = cat_array_wo_new();
 	int bucket_idx;
 	for(bucket_idx=0; bucket_idx<priv->bucket_count; bucket_idx++) {
@@ -448,7 +404,7 @@ CatArrayWo *cat_hash_set_enlist_all(CatHashSet *hash_set) {
 
 int cat_hash_set_add_all_from_list(CatHashSet *hash_set, CatArrayWo *list_to_add) {
 	int result = 0;
-	CatHashSetPrivate *priv = hash_set->priv;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	CatIIterator *iter = cat_array_wo_iterator(list_to_add);
 	while(cat_iiterator_has_next(iter)) {
 		GObject *to_add = cat_iiterator_next(iter);
@@ -479,7 +435,7 @@ CatIIterator *cat_hash_set_iterator(CatHashSet *hash_set) {
 
 
 gboolean cat_hash_set_intersection(CatHashSet *hash_set, CatHashSet *to_intersect_with) {
-	CatHashSetPrivate *priv = CAT_HASH_SET_GET_PRIVATE(hash_set);
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(hash_set);
 	int remove_count = 0;
 	int bucket_idx, bucket_offset;
 	for(bucket_idx=priv->bucket_count-1; bucket_idx>=0; bucket_idx--) {
@@ -516,8 +472,8 @@ gboolean cat_hash_set_equal(const CatHashSet *hash_set_a, const CatHashSet *hash
 		return FALSE;
 	}
 
-	CatHashSetPrivate *priv_a = CAT_HASH_SET_GET_PRIVATE(hash_set_a);
-	CatHashSetPrivate *priv_b = CAT_HASH_SET_GET_PRIVATE(hash_set_b);
+	CatHashSetPrivate *priv_a = cat_hash_set_get_instance_private((CatHashSet *) hash_set_a);
+	CatHashSetPrivate *priv_b = cat_hash_set_get_instance_private((CatHashSet *) hash_set_b);
 	if (priv_a->total_count!=priv_b->total_count) {
 		return FALSE;
 	}
@@ -560,7 +516,7 @@ gboolean cat_hash_set_equal(const CatHashSet *hash_set_a, const CatHashSet *hash
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	CatHashSetPrivate *priv = CAT_HASH_SET_GET_PRIVATE(self);
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private((CatHashSet *) self);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 
 	cat_string_wo_format(append_to, "%s[%p: size=%d", iname, self, priv->total_count);
@@ -584,3 +540,46 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 
 /********************* end CatIStringable implementation *********************/
 
+
+
+
+static gboolean l_iter_has_next(CatIIterator *self) {
+	CatHashSetIter *iter = CAT_HASH_SET_ITER(self);
+	return iter->next_value_valid;
+}
+
+static gboolean l_iter_is_last(CatIIterator *self) {
+	CatHashSetIter *iter = CAT_HASH_SET_ITER(self);
+	return iter->next_value_valid && !iter->ahead_value_valid;
+}
+
+static gpointer l_iter_next(CatIIterator *self) {
+	CatHashSetIter *iter = CAT_HASH_SET_ITER(self);
+	gpointer result = iter->next_value;
+
+	iter->next_value = iter->ahead_value;
+	iter->next_value_valid = iter->ahead_value_valid;
+
+	iter->ahead_value = NULL;
+	iter->ahead_value_valid = FALSE;
+	CatHashSetPrivate *priv = cat_hash_set_get_instance_private(iter->hash_set);
+
+
+	while(iter->bucket_idx<priv->bucket_count) {
+		CatArrayWo *e_bucket = priv->e_buckets[iter->bucket_idx];
+		if (e_bucket) {
+			if (iter->bucket_offset<cat_array_wo_size(e_bucket)) {
+				iter->ahead_value = cat_array_wo_get(e_bucket, iter->bucket_offset++);
+				iter->ahead_value_valid = TRUE;
+				break;
+			} else {
+				iter->bucket_idx++;
+				iter->bucket_offset = 0;
+			}
+		} else {
+			iter->bucket_idx++;
+			iter->bucket_offset = 0;
+		}
+	}
+	return result;
+}

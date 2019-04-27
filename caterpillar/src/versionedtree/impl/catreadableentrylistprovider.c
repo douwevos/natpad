@@ -36,6 +36,7 @@ struct _CatReadableEntryListProviderPrivate {
 static void l_tree_entry_list_provider_interface_init(CatITreeEntryListProviderInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatReadableEntryListProvider, cat_readable_entry_list_provider, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CatReadableEntryListProvider)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ITREE_ENTRY_LIST_PROVIDER, l_tree_entry_list_provider_interface_init);
 });
 
@@ -43,22 +44,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_readable_entry_list_provider_class_init(CatReadableEntryListProviderClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatReadableEntryListProviderPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_readable_entry_list_provider_init(CatReadableEntryListProvider *instance) {
-	CatReadableEntryListProviderPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_READABLE_ENTRY_LIST_PROVIDER, CatReadableEntryListProviderPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatReadableEntryListProvider *instance = CAT_READABLE_ENTRY_LIST_PROVIDER(object);
-	CatReadableEntryListProviderPrivate *priv = instance->priv;
+	CatReadableEntryListProviderPrivate *priv = cat_readable_entry_list_provider_get_instance_private(instance);
 	cat_unref_ptr(priv->entry_list);
 	G_OBJECT_CLASS(cat_readable_entry_list_provider_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -75,22 +72,17 @@ static void l_finalize(GObject *object) {
 CatReadableEntryListProvider *cat_readable_entry_list_provider_new(CatTreeEntryList *entry_list) {
 	CatReadableEntryListProvider *result = g_object_new(CAT_TYPE_READABLE_ENTRY_LIST_PROVIDER, NULL);
 	cat_ref_anounce(result);
-	CatReadableEntryListProviderPrivate *priv = result->priv;
+	CatReadableEntryListProviderPrivate *priv = cat_readable_entry_list_provider_get_instance_private(result);
 	priv->entry_list = cat_ref_ptr(entry_list);
 	return result;
 }
 
 
-
-
-
-
-
-
 /********************* begin CatITreeEntryListProvider implementation *********************/
 
 static CatTreeEntryList *l_get_entry_list(CatITreeEntryListProvider *self) {
-	CatReadableEntryListProviderPrivate *priv = CAT_READABLE_ENTRY_LIST_PROVIDER_GET_PRIVATE(self);
+	CatReadableEntryListProvider *instance = CAT_READABLE_ENTRY_LIST_PROVIDER(self);
+	CatReadableEntryListProviderPrivate *priv = cat_readable_entry_list_provider_get_instance_private(instance);
 	return priv->entry_list;
 }
 
@@ -102,6 +94,5 @@ static void l_tree_entry_list_provider_interface_init(CatITreeEntryListProviderI
 	iface->getEntryList = l_get_entry_list;
 	iface->getWritableEntryList = l_get_writable_entry_list;
 }
-
 
 /********************* end CatITreeEntryListProvider implementation *********************/

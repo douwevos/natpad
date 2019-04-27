@@ -42,28 +42,24 @@ struct _JgiJarEntryPrivate {
 };
 
 
-G_DEFINE_TYPE(JgiJarEntry, jgi_jar_entry, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JgiJarEntry, jgi_jar_entry, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jgi_jar_entry_class_init(JgiJarEntryClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JgiJarEntryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jgi_jar_entry_init(JgiJarEntry *instance) {
-	JgiJarEntryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JGI_TYPE_JAR_ENTRY, JgiJarEntryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JgiJarEntry *instance = JGI_JAR_ENTRY(object);
-	JgiJarEntryPrivate *priv = instance->priv;
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_sequence);
 	cat_unref_ptr(priv->vip_node_path);
 	cat_unref_ptr(priv->usage);
@@ -85,7 +81,7 @@ static void l_finalize(GObject *object) {
 JgiJarEntry *jgi_jar_entry_new(VipISequence *moo_sequence, VipNodePath *vip_node_path) {
 	JgiJarEntry *result = g_object_new(JGI_TYPE_JAR_ENTRY, NULL);
 	cat_ref_anounce(result);
-	JgiJarEntryPrivate *priv = result->priv;
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(result);
 	priv->moo_sequence = cat_ref_ptr(moo_sequence);
 	priv->vip_node_path = cat_ref_ptr(vip_node_path);
 	if (vip_node_path==NULL) {
@@ -117,28 +113,28 @@ JgiJarEntry *jgi_jar_entry_new(VipISequence *moo_sequence, VipNodePath *vip_node
 
 
 void jgi_jar_entry_usage_up(JgiJarEntry *entry) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	cat_atomic_integer_increment(priv->usage);
 }
 
 gboolean jgi_jar_entry_usage_down(JgiJarEntry *entry) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	int nv = cat_atomic_integer_decrement(priv->usage);
 	return nv == 0;
 }
 
 VipNodePath *jgi_jar_entry_get_vip_node_path(JgiJarEntry *entry) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	return priv->vip_node_path;
 }
 
 VipSnapshot *jgi_jar_entry_get_last_vip_snapshot(JgiJarEntry *entry) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	return priv->last_vip_snaphhot;
 }
 
 MooNodeWo *jgi_jar_entry_get_moo_node_ref(JgiJarEntry *entry) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	return (MooNodeWo *) jag_link_get_value_ref(priv->link_moo_node);
 }
 //
@@ -246,7 +242,7 @@ static void l_sync_viper_with_moose_nodes(JgiJarEntryPrivate *priv, CatTreeNode 
 }
 
 void jgi_jar_entry_set_vip_snapshot(JgiJarEntry *entry, VipSnapshot *snapshot) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	gboolean should_run = FALSE;
 	cat_lock_lock(priv->lock);
 	if ((snapshot==NULL) || (priv->last_vip_snaphhot==NULL) ||
@@ -294,11 +290,11 @@ void jgi_jar_entry_set_vip_snapshot(JgiJarEntry *entry, VipSnapshot *snapshot) {
 
 
 void jgi_jar_entry_add_link_listener(JgiJarEntry *entry, JagILinkListener *link_listener) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	jag_link_add_referred_by(priv->link_moo_node, (GObject *) link_listener);
 }
 
 void jgi_jar_entry_remove_link_listener(JgiJarEntry *entry, JagILinkListener *link_listener) {
-	JgiJarEntryPrivate *priv = JGI_JAR_ENTRY_GET_PRIVATE(entry);
+	JgiJarEntryPrivate *priv = jgi_jar_entry_get_instance_private(entry);
 	jag_link_remove_referred_by(priv->link_moo_node, (GObject *) link_listener);
 }

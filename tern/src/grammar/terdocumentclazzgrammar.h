@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 #define TER_IS_DOCUMENT_CLAZZ_GRAMMAR(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TER_TYPE_DOCUMENT_CLAZZ_GRAMMAR))
 #define TER_IS_DOCUMENT_CLAZZ_GRAMMAR_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_DOCUMENT_CLAZZ_GRAMMAR))
 #define TER_DOCUMENT_CLAZZ_GRAMMAR_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_DOCUMENT_CLAZZ_GRAMMAR, TerDocumentClazzGrammarClass))
-#define TER_DOCUMENT_CLAZZ_GRAMMAR_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TER_TYPE_DOCUMENT_CLAZZ_GRAMMAR, TerDocumentClazzGrammarPrivate))
 
 typedef struct _TerDocumentClazzGrammar               TerDocumentClazzGrammar;
 typedef struct _TerDocumentClazzGrammarPrivate        TerDocumentClazzGrammarPrivate;
@@ -46,13 +45,11 @@ typedef struct _TerDocumentClazzGrammarClass          TerDocumentClazzGrammarCla
 
 struct _TerDocumentClazzGrammar {
 	GObject parent;
-	TerDocumentClazzGrammarPrivate *priv;
 };
 
 struct _TerDocumentClazzGrammarClass {
 	GObjectClass parent_class;
 };
-
 
 GType ter_document_clazz_grammar_get_type();
 

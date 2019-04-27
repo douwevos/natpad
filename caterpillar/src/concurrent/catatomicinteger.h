@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define CAT_IS_ATOMIC_INTEGER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_ATOMIC_INTEGER))
 #define CAT_IS_ATOMIC_INTEGER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_ATOMIC_INTEGER))
 #define CAT_ATOMIC_INTEGER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_ATOMIC_INTEGER, CatAtomicIntegerClass))
-#define CAT_ATOMIC_INTEGER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_ATOMIC_INTEGER, CatAtomicIntegerPrivate))
 
 
 typedef struct _CatAtomicInteger               CatAtomicInteger;
@@ -44,7 +43,6 @@ typedef struct _CatAtomicIntegerClass          CatAtomicIntegerClass;
 
 struct _CatAtomicInteger {
 	GObject parent;
-	CatAtomicIntegerPrivate *priv;
 };
 
 struct _CatAtomicIntegerClass {

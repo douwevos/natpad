@@ -39,59 +39,51 @@ struct _CatStringInputStreamPrivate {
 static void l_input_stream_iface_init(CatIInputStreamInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatStringInputStream, cat_string_input_stream, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CatStringInputStream)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_IINPUT_STREAM, l_input_stream_iface_init)
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void cat_string_input_stream_class_init(CatStringInputStreamClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CatStringInputStreamPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void cat_string_input_stream_init(CatStringInputStream *instance) {
-	CatStringInputStreamPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_STRING_INPUT_STREAM, CatStringInputStreamPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatStringInputStream *instance = CAT_STRING_INPUT_STREAM(object);
-	CatStringInputStreamPrivate *priv = instance->priv;
+	CatStringInputStreamPrivate *priv = cat_string_input_stream_get_instance_private(instance);
 	cat_unref_ptr(priv->e_text);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(cat_string_input_stream_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(cat_string_input_stream_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 CatStringInputStream *cat_string_input_stream_new(const CatStringWo *e_text) {
 	CatStringInputStream *result = g_object_new(CAT_TYPE_STRING_INPUT_STREAM, NULL);
 	cat_ref_anounce(result);
-	CatStringInputStreamPrivate *priv = result->priv;
+	CatStringInputStreamPrivate *priv = cat_string_input_stream_get_instance_private(result);
 	priv->e_text = cat_ref_ptr((CatStringWo *) e_text);
 	priv->index = 0;
 	return result;
 }
 
 
-
-
 static int l_read(CatIInputStream *self) {
 	CatStringInputStream *stream = CAT_STRING_INPUT_STREAM(self);
-	CatStringInputStreamPrivate *priv = stream->priv;
+	CatStringInputStreamPrivate *priv = cat_string_input_stream_get_instance_private(stream);
 	int result = -1;
 	if (priv->index<cat_string_wo_length(priv->e_text)) {
 		result = cat_string_wo_char_at(priv->e_text, priv->index++);
@@ -101,7 +93,7 @@ static int l_read(CatIInputStream *self) {
 
 static int l_read_length(CatIInputStream *self, char *data, int length) {
 	CatStringInputStream *stream = CAT_STRING_INPUT_STREAM(self);
-	CatStringInputStreamPrivate *priv = stream->priv;
+	CatStringInputStreamPrivate *priv = cat_string_input_stream_get_instance_private(stream);
 	int avail = cat_string_wo_length(priv->e_text) - priv->index;
 	if (length > avail) {
 		length = avail;
@@ -119,7 +111,7 @@ static int l_read_length(CatIInputStream *self, char *data, int length) {
 
 static long long l_seek(CatIInputStream *self, CatSeekType seek_type, long long seek_offset) {
 	CatStringInputStream *stream = CAT_STRING_INPUT_STREAM(self);
-	CatStringInputStreamPrivate *priv = stream->priv;
+	CatStringInputStreamPrivate *priv = cat_string_input_stream_get_instance_private(stream);
 	switch(seek_type) {
 		case CAT_SEEK_SET : {
 		} break;

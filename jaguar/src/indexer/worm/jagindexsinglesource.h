@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define JAG_IS_INDEX_SINGLE_SOURCE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_INDEX_SINGLE_SOURCE))
 #define JAG_IS_INDEX_SINGLE_SOURCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_INDEX_SINGLE_SOURCE))
 #define JAG_INDEX_SINGLE_SOURCE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_INDEX_SINGLE_SOURCE, JagIndexSingleSourceClass))
-#define JAG_INDEX_SINGLE_SOURCE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_INDEX_SINGLE_SOURCE, JagIndexSingleSourcePrivate))
-
 
 typedef struct _JagIndexSingleSource               JagIndexSingleSource;
 typedef struct _JagIndexSingleSourcePrivate        JagIndexSingleSourcePrivate;
 typedef struct _JagIndexSingleSourceClass          JagIndexSingleSourceClass;
 
-
 struct _JagIndexSingleSource {
 	WorRequest parent;
-	JagIndexSingleSourcePrivate *priv;
 };
 
 struct _JagIndexSingleSourceClass {
 	WorRequestClass parent_class;
 };
-
 
 GType jag_index_single_source_get_type();
 

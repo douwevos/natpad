@@ -27,7 +27,6 @@ static void jag_ast_istatement_interface_init (gpointer klass) {
 //	JagAstIStatementInterface *iface = (JagAstIStatementInterface*) klass;
 }
 
-
 GType jag_ast_istatement_get_type (void) {
 	static volatile gsize g_define_type_id__volatile = 0;
 	if (g_once_init_enter(&g_define_type_id__volatile)) {

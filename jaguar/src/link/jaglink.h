@@ -33,8 +33,6 @@ G_BEGIN_DECLS
 #define JAG_IS_LINK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_LINK))
 #define JAG_IS_LINK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_LINK))
 #define JAG_LINK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_LINK, JagLinkClass))
-#define JAG_LINK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_LINK, JagLinkPrivate))
-
 
 typedef struct _JagLink               JagLink;
 typedef struct _JagLinkPrivate        JagLinkPrivate;
@@ -55,11 +53,9 @@ GType jag_link_get_type();
 
 void jag_link_construct(JagLink *link);
 
-
 void jag_link_add_referred_by(JagLink *link, GObject *content);
 void jag_link_remove_referred_by(JagLink *link, GObject *content);
 void jag_link_notify(JagLink *link, GObject *notify_data);
-
 
 void jag_link_set_value(JagLink *link, GObject *value);
 GObject *jag_link_get_value_ref(JagLink *link);

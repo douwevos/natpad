@@ -35,17 +35,13 @@ G_BEGIN_DECLS
 #define VIP_IS_FS_SCAN_WORK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_FS_SCAN_WORK))
 #define VIP_IS_FS_SCAN_WORK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_FS_SCAN_WORK))
 #define VIP_FS_SCAN_WORK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_FS_SCAN_WORK, VipFSScanWorkClass))
-#define VIP_FS_SCAN_WORK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_FS_SCAN_WORK, VipFSScanWorkPrivate))
-
 
 typedef struct _VipFSScanWork               VipFSScanWork;
 typedef struct _VipFSScanWorkPrivate        VipFSScanWorkPrivate;
 typedef struct _VipFSScanWorkClass          VipFSScanWorkClass;
 
-
 struct _VipFSScanWork {
 	GObject parent;
-	VipFSScanWorkPrivate *priv;
 };
 
 struct _VipFSScanWorkClass {

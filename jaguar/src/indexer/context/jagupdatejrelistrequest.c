@@ -33,16 +33,13 @@ struct _JagUpdateJreListRequestPrivate {
 	CatArrayWo *a_jre_list;
 };
 
-
-G_DEFINE_TYPE(JagUpdateJreListRequest, jag_update_jre_list_request, WOR_TYPE_REQUEST)
+G_DEFINE_TYPE_WITH_PRIVATE(JagUpdateJreListRequest, jag_update_jre_list_request, WOR_TYPE_REQUEST)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void jag_update_jre_list_request_class_init(JagUpdateJreListRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagUpdateJreListRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -52,14 +49,12 @@ static void jag_update_jre_list_request_class_init(JagUpdateJreListRequestClass 
 }
 
 static void jag_update_jre_list_request_init(JagUpdateJreListRequest *instance) {
-	JagUpdateJreListRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_UPDATE_JRE_LIST_REQUEST, JagUpdateJreListRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagUpdateJreListRequest *instance = JAG_UPDATE_JRE_LIST_REQUEST(object);
-	JagUpdateJreListRequestPrivate *priv = instance->priv;
+	JagUpdateJreListRequestPrivate *priv = jag_update_jre_list_request_get_instance_private(instance);
 	cat_unref_ptr(priv->a_jre_list);
 	cat_unref_ptr(priv->jre_map);
 	G_OBJECT_CLASS(jag_update_jre_list_request_parent_class)->dispose(object);
@@ -73,22 +68,20 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JagUpdateJreListRequest *jag_update_jre_list_request_new(JagIndexerJreMap *jre_map, CatArrayWo *a_jre_list) {
 	JagUpdateJreListRequest *result = g_object_new(JAG_TYPE_UPDATE_JRE_LIST_REQUEST, NULL);
 	cat_ref_anounce(result);
-	JagUpdateJreListRequestPrivate *priv = result->priv;
+	JagUpdateJreListRequestPrivate *priv = jag_update_jre_list_request_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	priv->a_jre_list = cat_ref_ptr(a_jre_list);
 	priv->jre_map = cat_ref_ptr(jre_map);
 	return result;
 }
 
-
-
-
 static void l_run_request(WorRequest *request) {
-	JagUpdateJreListRequestPrivate *priv = JAG_UPDATE_JRE_LIST_REQUEST_GET_PRIVATE(request);
+	JagUpdateJreListRequest *instance= JAG_UPDATE_JRE_LIST_REQUEST(request);
+	JagUpdateJreListRequestPrivate *priv = jag_update_jre_list_request_get_instance_private(instance);
+
 	jag_index_jre_map_apply_new_jre_list(priv->jre_map, priv->a_jre_list);
 //	CatIIterator *iter = cat_array_wo_iterator(a_priv->jre_list);
 //	while(cat_iiterator_has_next(iter)) {
@@ -98,5 +91,3 @@ static void l_run_request(WorRequest *request) {
 //	}
 //	cat_unref_ptr(iter);
 }
-
-

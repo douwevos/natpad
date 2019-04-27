@@ -35,47 +35,40 @@ struct _JagBytLabelPrivate {
 	JagBytLabelType type;
 };
 
-G_DEFINE_TYPE (JagBytLabel, jag_byt_label, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytLabel, jag_byt_label, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_label_class_init(JagBytLabelClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytLabelPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_label_init(JagBytLabel *instance) {
-	JagBytLabelPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_LABEL, JagBytLabelPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytLabel *instance = JAG_BYT_LABEL(object);
-	JagBytLabelPrivate *priv = instance->priv;
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(instance);
 	cat_unref_ptr(priv->a_name);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_label_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_label_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytLabel *jag_byt_label_new(JagBytLabelType type, int mnemonicIndex, int bytecodeOffset, CatStringWo *a_name) {
 	JagBytLabel *result = g_object_new(JAG_BYT_TYPE_LABEL, NULL);
 	cat_ref_anounce(result);
-	JagBytLabelPrivate *priv = result->priv;
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(result);
 	priv->mnemonicIndex = mnemonicIndex;
 	priv->bytecodeOffset = bytecodeOffset;
 	if (a_name==NULL) {
@@ -90,47 +83,24 @@ JagBytLabel *jag_byt_label_new(JagBytLabelType type, int mnemonicIndex, int byte
 }
 
 void jag_byt_label_set_name(JagBytLabel *label, CatStringWo *a_newName) {
-	JagBytLabelPrivate *priv = JAG_BYT_LABEL_GET_PRIVATE(label);
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(label);
 	cat_ref_swap(priv->a_name, a_newName);
 }
 
 CatStringWo *jag_byt_label_get_name(JagBytLabel *label) {
-	JagBytLabelPrivate *priv = JAG_BYT_LABEL_GET_PRIVATE(label);
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(label);
 	return priv->a_name;
 }
 
 void jag_byt_label_set_label_type(JagBytLabel *label, JagBytLabelType type) {
-	JagBytLabelPrivate *priv = JAG_BYT_LABEL_GET_PRIVATE(label);
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(label);
 	priv->type = type;
 }
 
 JagBytLabelType jag_byt_label_get_label_type(JagBytLabel *label) {
-	JagBytLabelPrivate *priv = JAG_BYT_LABEL_GET_PRIVATE(label);
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(label);
 	return priv->type;
 }
-
-
-//	CatStringWo *jag_byt_label_toString(JagBytLabel *label) {
-//		StringBuilder buf = new StringBuilder();
-//		buf.append(name).append(": ").append(mnemonicIndex).append(", ").append(TextUtil.hex(bytecodeOffset, 4));
-//
-////		if (callers!=null) {
-////			buf.append("     [::");
-////			boolean isFirst = true;
-////			for(Label ext : callers) {
-////				if (isFirst) {
-////					isFirst = false;
-////				} else {
-////					buf.append(", ");
-////				}
-////				buf.append(ext.mnemonicIndex);
-////			}
-////			buf.append("::]");
-////		}
-//
-//		return buf.toString();
-//	}
-
 
 gboolean jag_byt_label_equal(JagBytLabel *label, JagBytLabel *other) {
 	if (label==other) {
@@ -140,18 +110,12 @@ gboolean jag_byt_label_equal(JagBytLabel *label, JagBytLabel *other) {
 		return FALSE;
 	}
 
-	JagBytLabelPrivate *priv = JAG_BYT_LABEL_GET_PRIVATE(label);
-	JagBytLabelPrivate *opriv = JAG_BYT_LABEL_GET_PRIVATE(other);
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(label);
+	JagBytLabelPrivate *opriv = jag_byt_label_get_instance_private(other);
 	return priv->mnemonicIndex==opriv->mnemonicIndex && priv->bytecodeOffset==opriv->bytecodeOffset;
 }
 
 int jag_byt_label_hash(JagBytLabel *label) {
-	JagBytLabelPrivate *priv = JAG_BYT_LABEL_GET_PRIVATE(label);
+	JagBytLabelPrivate *priv = jag_byt_label_get_instance_private(label);
 	return priv->mnemonicIndex*15+priv->bytecodeOffset;
 }
-
-
-
-
-
-

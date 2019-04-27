@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGSRCFOLDERCONTENTWO_H_
 #define JAGSRCFOLDERCONTENTWO_H_
 
@@ -35,23 +34,18 @@ G_BEGIN_DECLS
 #define JAG_IS_SRC_FOLDER_CONTENT_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_SRC_FOLDER_CONTENT_WO))
 #define JAG_IS_SRC_FOLDER_CONTENT_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SRC_FOLDER_CONTENT_WO))
 #define JAG_SRC_FOLDER_CONTENT_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SRC_FOLDER_CONTENT_WO, JagSrcFolderContentWoClass))
-#define JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_SRC_FOLDER_CONTENT_WO, JagSrcFolderContentWoPrivate))
-
 
 typedef struct _JagSrcFolderContentWo               JagSrcFolderContentWo;
 typedef struct _JagSrcFolderContentWoPrivate        JagSrcFolderContentWoPrivate;
 typedef struct _JagSrcFolderContentWoClass          JagSrcFolderContentWoClass;
 
-
 struct _JagSrcFolderContentWo {
 	GObject parent;
-	JagSrcFolderContentWoPrivate *priv;
 };
 
 struct _JagSrcFolderContentWoClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_src_folder_content_wo_get_type();
 

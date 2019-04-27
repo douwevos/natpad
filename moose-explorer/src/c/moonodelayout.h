@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOONODELAYOUT_H_
 #define MOONODELAYOUT_H_
 
@@ -37,8 +36,6 @@ G_BEGIN_DECLS
 #define MOO_IS_NODE_LAYOUT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_NODE_LAYOUT))
 #define MOO_IS_NODE_LAYOUT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_NODE_LAYOUT))
 #define MOO_NODE_LAYOUT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_NODE_LAYOUT, MooNodeLayoutClass))
-#define MOO_NODE_LAYOUT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_NODE_LAYOUT, MooNodeLayoutPrivate))
-
 
 typedef struct _MooNodeLayout               MooNodeLayout;
 typedef struct _MooNodeLayoutPrivate        MooNodeLayoutPrivate;
@@ -54,11 +51,8 @@ enum _MooNodeLayoutZone {
 	MOO_NODE_LAYOUT_ZONE_EXTRA
 };
 
-
-
 struct _MooNodeLayout {
 	GObject parent;
-	MooNodeLayoutPrivate *priv;
 	GIcon *icon;
 	cairo_surface_t *surface;
 };
@@ -90,7 +84,6 @@ int moo_node_layout_get_width(MooNodeLayout *node_layout);
 int moo_node_layout_get_height(MooNodeLayout *node_layout);
 void moo_node_layout_get_bounds(MooNodeLayout *node_layout, GdkRectangle *bounds);
 
-
 MooNodeWo *moo_node_layout_get_node(MooNodeLayout *node_layout);
 
 int moo_node_layout_get_font_height(MooNodeLayout *node_layout);
@@ -102,7 +95,6 @@ gboolean moo_node_layout_toggle_selected(MooNodeLayout *node_layout);
 gboolean moo_node_layout_is_selected(MooNodeLayout *node_layout);
 gboolean moo_node_layout_set_selected(MooNodeLayout *node_layout, gboolean selected);
 
-
 CatLong *moo_node_layout_get_node_key(MooNodeLayout *node_layout);
 
 void moo_node_layout_mark_for_repaint(MooNodeLayout *node_layout);
@@ -112,7 +104,6 @@ void moo_node_layout_set_children(MooNodeLayout *node_layout, CatArrayWo *new_ch
 CatArrayWo *moo_node_layout_get_children(MooNodeLayout *node_layout);
 
 int moo_node_layout_get_tree_level(MooNodeLayout *node_layout);
-
 
 G_END_DECLS
 

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTATTRIBUTEEXCEPTIONS_H_
 #define JAGBYTATTRIBUTEEXCEPTIONS_H_
 
@@ -36,16 +35,13 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_EXCEPTIONS(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_EXCEPTIONS))
 #define JAG_BYT_IS_ATTRIBUTE_EXCEPTIONS_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_EXCEPTIONS))
 #define JAG_BYT_ATTRIBUTE_EXCEPTIONS_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_EXCEPTIONS, JagBytAttributeExceptionsClass))
-#define JAG_BYT_ATTRIBUTE_EXCEPTIONS_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_EXCEPTIONS, JagBytAttributeExceptionsPrivate))
 
 typedef struct _JagBytAttributeExceptions               JagBytAttributeExceptions;
 typedef struct _JagBytAttributeExceptionsPrivate        JagBytAttributeExceptionsPrivate;
 typedef struct _JagBytAttributeExceptionsClass          JagBytAttributeExceptionsClass;
 
-
 struct _JagBytAttributeExceptions {
 	JagBytAttribute parent;
-	JagBytAttributeExceptionsPrivate *priv;
 };
 
 struct _JagBytAttributeExceptionsClass {
@@ -62,8 +58,6 @@ int jag_byt_attribute_exceptions_count(JagBytAttributeExceptions *attribute_exce
 
 int jag_byt_attribute_exceptions_get(JagBytAttributeExceptions *attribute_exceptions, int index);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTATTRIBUTEEXCEPTIONS_H_ */

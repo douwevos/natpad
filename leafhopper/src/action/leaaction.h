@@ -23,7 +23,6 @@
 #ifndef LEAACTION_H_
 #define LEAACTION_H_
 
-
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <caterpillar.h>
@@ -39,7 +38,6 @@ G_BEGIN_DECLS
 #define LEA_IS_ACTION(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_ACTION))
 #define LEA_IS_ACTION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_ACTION))
 #define LEA_ACTION_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_ACTION, LeaActionClass))
-#define LEA_ACTION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_ACTION, LeaActionPrivate))
 
 typedef struct _LeaAction         LeaAction;
 typedef struct _LeaActionClass    LeaActionClass;

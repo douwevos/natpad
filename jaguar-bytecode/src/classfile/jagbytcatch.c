@@ -37,67 +37,58 @@ struct _JagBytCatchPrivate {
 static void l_catch_or_finally_iface_init(JagBytICatchOrFinallyInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytCatch, jag_byt_catch, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagBytCatch)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_ICATCH_OR_FINALLY, l_catch_or_finally_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_catch_class_init(JagBytCatchClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytCatchPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_catch_init(JagBytCatch *instance) {
-	JagBytCatchPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_CATCH, JagBytCatchPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytCatch *instance = JAG_BYT_CATCH(object);
-	JagBytCatchPrivate *priv = instance->priv;
+	JagBytCatchPrivate *priv = jag_byt_catch_get_instance_private(instance);
 	cat_unref_ptr(priv->exception_type);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_catch_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_catch_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytCatch *jag_byt_catch_new(JagAstDeclarationType *exception_type, int handle_pc) {
 	JagBytCatch *result = g_object_new(JAG_BYT_TYPE_CATCH, NULL);
 	cat_ref_anounce(result);
-	JagBytCatchPrivate *priv = result->priv;
+	JagBytCatchPrivate *priv = jag_byt_catch_get_instance_private(result);
 	priv->exception_type = cat_ref_ptr(exception_type);
 	priv->handle_pc = handle_pc;
 	return result;
 }
 
-
 JagAstDeclarationType *jag_byt_catch_get_exception_type(JagBytCatch *catch) {
-	JagBytCatchPrivate *priv = JAG_BYT_CATCH_GET_PRIVATE(catch);
+	JagBytCatchPrivate *priv = jag_byt_catch_get_instance_private(catch);
 	return priv->exception_type;
 }
-
-
-
 
 
 /********************* start JagBytIConstantInterface implementation *********************/
 
 static int l_catch_or_finally_get_handle_pc(JagBytICatchOrFinally *self) {
-	JagBytCatchPrivate *priv = JAG_BYT_CATCH_GET_PRIVATE(self);
+	JagBytCatch *instance = JAG_BYT_CATCH(self);
+	JagBytCatchPrivate *priv = jag_byt_catch_get_instance_private(instance);
 	return priv->handle_pc;
 }
 

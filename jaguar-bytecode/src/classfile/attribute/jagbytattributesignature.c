@@ -39,53 +39,45 @@ struct _JagBytAttributeSignaturePrivate {
 	CatStringWo *a_signature_text;
 };
 
-G_DEFINE_TYPE (JagBytAttributeSignature, jag_byt_attribute_signature, JAG_BYT_TYPE_ATTRIBUTE)
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytAttributeSignature, jag_byt_attribute_signature, JAG_BYT_TYPE_ATTRIBUTE)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_attribute_signature_class_init(JagBytAttributeSignatureClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAttributeSignaturePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_attribute_signature_init(JagBytAttributeSignature *instance) {
-	JagBytAttributeSignaturePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ATTRIBUTE_SIGNATURE, JagBytAttributeSignaturePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytAttributeSignature *instance = JAG_BYT_ATTRIBUTE_SIGNATURE(object);
-	JagBytAttributeSignaturePrivate *priv = instance->priv;
+	JagBytAttributeSignaturePrivate *priv = jag_byt_attribute_signature_get_instance_private(instance);
 	cat_unref_ptr(priv->e_attribute_data);
 	cat_unref_ptr(priv->constant_provider);
 	cat_unref_ptr(priv->a_signature_text);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_attribute_signature_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_attribute_signature_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytAttributeSignature *jag_byt_attribute_signature_new(CatStringWo *e_attribute_data, JagBytIConstantProvider *constant_provider) {
 	JagBytAttributeSignature *result = g_object_new(JAG_BYT_TYPE_ATTRIBUTE_SIGNATURE, NULL);
 	cat_ref_anounce(result);
-	JagBytAttributeSignaturePrivate *priv = result->priv;
+	JagBytAttributeSignaturePrivate *priv = jag_byt_attribute_signature_get_instance_private(result);
 	priv->e_attribute_data = cat_ref_ptr(e_attribute_data);
 	priv->constant_provider = cat_ref_ptr(constant_provider);
 	priv->a_signature_text = NULL;
-//	JAG_BYT_ATTRIBUTE_construct((JagBytAttribute *) result);
 
 	int sign_idx1 = cat_string_wo_char_at(e_attribute_data, 0);
 	int sign_idx2 = cat_string_wo_char_at(e_attribute_data, 1);
@@ -102,10 +94,7 @@ JagBytAttributeSignature *jag_byt_attribute_signature_new(CatStringWo *e_attribu
 	return result;
 }
 
-
 CatStringWo *jag_byt_attribute_signature_as_text(JagBytAttributeSignature *signature) {
-	JagBytAttributeSignaturePrivate *priv = JAG_BYT_ATTRIBUTE_SIGNATURE_GET_PRIVATE(signature);
+	JagBytAttributeSignaturePrivate *priv = jag_byt_attribute_signature_get_instance_private(signature);
 	return priv->a_signature_text;
 }
-
-

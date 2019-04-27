@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef CATFLOAT_H_
 #define CATFLOAT_H_
 
@@ -35,7 +34,6 @@ G_BEGIN_DECLS
 #define CAT_IS_FLOAT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_FLOAT))
 #define CAT_IS_FLOAT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_FLOAT))
 #define CAT_FLOAT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_FLOAT, CatFloatClass))
-#define CAT_FLOAT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_FLOAT, CatFloatPrivate))
 
 typedef struct _CatFloat               CatFloat;
 typedef struct _CatFloatPrivate        CatFloatPrivate;
@@ -44,7 +42,6 @@ typedef struct _CatFloatClass          CatFloatClass;
 
 struct _CatFloat {
 	GObject parent;
-	CatFloatPrivate *priv;
 };
 
 struct _CatFloatClass {
@@ -64,8 +61,6 @@ gboolean cat_float_equal(CatFloat *fobj_a, CatFloat *fobj_b);
 
 int cat_float_compare(CatFloat *fobj_a, CatFloat *fobj_b);
 
-
 G_END_DECLS
-
 
 #endif /* CATFLOAT_H_ */

@@ -42,44 +42,38 @@ static void l_map_iface_init(VipIMapInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipFSMap, vip_fs_map, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipFSMap)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IRESOURCE, l_resource_iface_init);
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IMAP, l_map_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_fs_map_class_init(VipFSMapClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipFSMapPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_fs_map_init(VipFSMap *instance) {
-	VipFSMapPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_FS_MAP, VipFSMapPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipFSMap *instance = VIP_FS_MAP(object);
-	VipFSMapPrivate *priv = instance->priv;
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	cat_unref_ptr(priv->path);
 	cat_unref_ptr(priv->fs);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_fs_map_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_fs_map_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -87,7 +81,7 @@ static void l_finalize(GObject *object) {
 VipFSMap *vip_fs_map_new(VipPath *path) {
 	VipFSMap *result = g_object_new(VIP_TYPE_FS_MAP, NULL);
 	cat_ref_anounce(result);
-	VipFSMapPrivate *priv = result->priv;
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(result);
 	priv->path = cat_ref_ptr(path);
 	priv->fs = vip_fs_new(path);
 //	cat_ref_ptr(priv->fs);
@@ -97,7 +91,7 @@ VipFSMap *vip_fs_map_new(VipPath *path) {
 VipFSMap *vip_fs_map_new_from_fs(VipFS *fs) {
 	VipFSMap *result = g_object_new(VIP_TYPE_FS_MAP, NULL);
 	cat_ref_anounce(result);
-	VipFSMapPrivate *priv = result->priv;
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(result);
 	priv->path = cat_ref_ptr(vip_fs_get_path(fs));
 	priv->fs = cat_ref_ptr(fs);
 //	cat_ref_ptr(priv->fs);
@@ -105,12 +99,12 @@ VipFSMap *vip_fs_map_new_from_fs(VipFS *fs) {
 }
 
 VipPath *vip_fs_map_get_path(VipFSMap *fs_map) {
-	return VIP_FS_MAP_GET_PRIVATE(fs_map)->path;
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(fs_map);
+	return priv->path;
 }
 
-
 void vip_fs_map_clear_cache(VipFSMap *fs_map) {
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(fs_map);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(fs_map);
 	vip_fs_clear_dir_content_cache(priv->fs);
 }
 
@@ -118,7 +112,8 @@ void vip_fs_map_clear_cache(VipFSMap *fs_map) {
 /********************* start VipIResource implementation *********************/
 
 static CatStringWo *l_resource_get_name(VipIResource *self) {
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	CatStringWo *result = vip_path_get_leaf(priv->path);
 	if (result == NULL) {
 		result = vip_path_get_drive(priv->path);
@@ -128,12 +123,14 @@ static CatStringWo *l_resource_get_name(VipIResource *self) {
 }
 
 static long long l_resource_last_modified(VipIResource *self) {
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	return vip_fs_get_last_modified(priv->fs);
 }
 
 static VipIResource *l_resource_rename(VipIResource *self, CatStringWo *new_name) {
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	CatStringWo *old_fname = vip_path_to_string(priv->path);
 	GFile *resource_file = g_file_new_for_path(cat_string_wo_getchars(old_fname));
 
@@ -172,7 +169,8 @@ static gboolean l_resource_delete(VipIResource *self) {
 	}
 	cat_unref_ptr(e_content);
 
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	if (result) {
 		CatStringWo *old_fname = vip_path_to_string(priv->path);
 		result = g_rmdir(cat_string_wo_getchars(old_fname))==0;
@@ -186,7 +184,8 @@ static gboolean l_resource_can_delete(VipIResource *self) {
 }
 
 static VipPath *l_resource_path(VipIResource *self) {
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	return priv->path;
 }
 
@@ -194,8 +193,8 @@ static gboolean l_resource_equal(VipIResource *res_a, VipIResource *res_b) {
 	if (!VIP_IS_FS_MAP(res_b)) {
 		return FALSE;
 	}
-	VipFSMapPrivate *priv_a = VIP_FS_MAP_GET_PRIVATE(res_a);
-	VipFSMapPrivate *priv_b = VIP_FS_MAP_GET_PRIVATE(res_b);
+	VipFSMapPrivate *priv_a = vip_fs_map_get_instance_private(VIP_FS_MAP(res_a));
+	VipFSMapPrivate *priv_b = vip_fs_map_get_instance_private(VIP_FS_MAP(res_b));
 	return vip_path_equal(priv_a->path, priv_b->path)
 			&& vip_fs_equal(priv_a->fs, priv_b->fs);
 }
@@ -216,10 +215,10 @@ static void l_resource_iface_init(VipIResourceInterface *iface) {
 
 /********************* start VipIMap implementation *********************/
 
-
 static CatArrayWo *l_map_enlist(VipIMap *self) {
 	cat_log_debug("enlisting:%o", self);
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	CatArrayWo *result = cat_array_wo_new();
 	// TODO next line could cause a performance penalty ... decide whether we always need to refresh or if it should be configurable (through a parameter ?)
 	vip_fs_refresh(priv->fs);
@@ -251,7 +250,8 @@ static CatArrayWo *l_map_enlist(VipIMap *self) {
 }
 
 VipIFile *l_map_create_file(VipIMap *self, CatStringWo *a_new_file_name) {
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	VipFS *child_fs = vip_fs_create_file(priv->fs, a_new_file_name);
 	VipIFile *result = NULL;
 	if (child_fs) {
@@ -261,8 +261,6 @@ VipIFile *l_map_create_file(VipIMap *self, CatStringWo *a_new_file_name) {
 
 }
 
-
-
 static void l_map_iface_init(VipIMapInterface *iface) {
 	iface->enlist = l_map_enlist;
 	iface->createFile = l_map_create_file;
@@ -271,11 +269,11 @@ static void l_map_iface_init(VipIMapInterface *iface) {
 /********************* end VipIMap implementation *********************/
 
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	VipFSMapPrivate *priv = VIP_FS_MAP_GET_PRIVATE(self);
+	VipFSMap *instance = VIP_FS_MAP(self);
+	VipFSMapPrivate *priv = vip_fs_map_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p, path=%o]", iname, self, priv->path);
 }
@@ -285,4 +283,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

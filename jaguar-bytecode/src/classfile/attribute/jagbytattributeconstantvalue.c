@@ -35,46 +35,37 @@ struct _JagBytAttributeConstantValuePrivate {
 	uint16_t constant_value_index;
 };
 
-G_DEFINE_TYPE (JagBytAttributeConstantValue, jag_byt_attribute_constant_value, JAG_BYT_TYPE_ATTRIBUTE)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytAttributeConstantValue, jag_byt_attribute_constant_value, JAG_BYT_TYPE_ATTRIBUTE)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_attribute_constant_value_class_init(JagBytAttributeConstantValueClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAttributeConstantValuePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_attribute_constant_value_init(JagBytAttributeConstantValue *instance) {
-	JagBytAttributeConstantValuePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ATTRIBUTE_CONSTANT_VALUE, JagBytAttributeConstantValuePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytAttributeConstantValue *instance = JAG_BYT_ATTRIBUTE_CONSTANT_VALUE(object);
-//	JagBytAttributeConstantValuePrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_attribute_constant_value_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_attribute_constant_value_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytAttributeConstantValue *jag_byt_attribute_constant_value_new(CatStringWo *e_attribute_data) {
 	JagBytAttributeConstantValue *result = g_object_new(JAG_BYT_TYPE_ATTRIBUTE_CONSTANT_VALUE, NULL);
 	cat_ref_anounce(result);
-	JagBytAttributeConstantValuePrivate *priv = result->priv;
+	JagBytAttributeConstantValuePrivate *priv = jag_byt_attribute_constant_value_get_instance_private(result);
 	jag_byt_attribute_construct((JagBytAttribute *) result);
 	JagJObjectInputStream *obj_istream = jag_jobject_input_stream_new_from_array(e_attribute_data);
 	priv->constant_value_index = jag_jobject_input_stream_read_short(obj_istream);
@@ -84,7 +75,6 @@ JagBytAttributeConstantValue *jag_byt_attribute_constant_value_new(CatStringWo *
 }
 
 int jag_byt_attribute_constant_value_get_index(JagBytAttributeConstantValue *constant_value) {
-	JagBytAttributeConstantValuePrivate *priv = JAG_BYT_ATTRIBUTE_CONSTANT_VALUE_GET_PRIVATE(constant_value);
+	JagBytAttributeConstantValuePrivate *priv = jag_byt_attribute_constant_value_get_instance_private(constant_value);
 	return ((int) priv->constant_value_index) & 0xFFFF;
 }
-

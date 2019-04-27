@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGSCANJARFILEWORK_H_
 #define JAGSCANJARFILEWORK_H_
 
@@ -35,30 +34,23 @@ G_BEGIN_DECLS
 #define JAG_IS_SCAN_JAR_FILE_WORK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_SCAN_JAR_FILE_WORK))
 #define JAG_IS_SCAN_JAR_FILE_WORK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SCAN_JAR_FILE_WORK))
 #define JAG_SCAN_JAR_FILE_WORK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SCAN_JAR_FILE_WORK, JagScanJarFileWorkClass))
-#define JAG_SCAN_JAR_FILE_WORK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_SCAN_JAR_FILE_WORK, JagScanJarFileWorkPrivate))
-
 
 typedef struct _JagScanJarFileWork               JagScanJarFileWork;
 typedef struct _JagScanJarFileWorkPrivate        JagScanJarFileWorkPrivate;
 typedef struct _JagScanJarFileWorkClass          JagScanJarFileWorkClass;
 
-
 struct _JagScanJarFileWork {
 	GObject parent;
-	JagScanJarFileWorkPrivate *priv;
 };
 
 struct _JagScanJarFileWorkClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_scan_jar_file_work_get_type();
 
 JagScanJarFileWork *jag_scan_jar_file_work_new(VipNode *main_node, gboolean validated_by_parent);
 
 G_END_DECLS
-
-
 
 #endif /* JAGSCANJARFILEWORK_H_ */

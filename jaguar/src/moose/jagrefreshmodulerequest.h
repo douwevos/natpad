@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGREFRESHMODULEREQUEST_H_
 #define JAGREFRESHMODULEREQUEST_H_
 
@@ -37,23 +36,18 @@ G_BEGIN_DECLS
 #define JAG_IS_REFRESH_MODULE_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_REFRESH_MODULE_REQUEST))
 #define JAG_IS_REFRESH_MODULE_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_REFRESH_MODULE_REQUEST))
 #define JAG_REFRESH_MODULE_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_REFRESH_MODULE_REQUEST, JagRefreshModuleRequestClass))
-#define JAG_REFRESH_MODULE_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_REFRESH_MODULE_REQUEST, JagRefreshModuleRequestPrivate))
-
 
 typedef struct _JagRefreshModuleRequest               JagRefreshModuleRequest;
 typedef struct _JagRefreshModuleRequestPrivate        JagRefreshModuleRequestPrivate;
 typedef struct _JagRefreshModuleRequestClass          JagRefreshModuleRequestClass;
 
-
 struct _JagRefreshModuleRequest {
 	WorRequest parent;
-	JagRefreshModuleRequestPrivate *priv;
 };
 
 struct _JagRefreshModuleRequestClass {
 	WorRequestClass parent_class;
 };
-
 
 GType jag_refresh_module_request_get_type();
 

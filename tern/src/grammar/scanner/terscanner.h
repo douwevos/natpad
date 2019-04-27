@@ -26,7 +26,6 @@
 
 #include <caterpillar.h>
 #include <dragonfly.h>
-
 #include "tersyntax.h"
 
 G_BEGIN_DECLS
@@ -37,22 +36,18 @@ G_BEGIN_DECLS
 #define TER_IS_SCANNER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TER_TYPE_SCANNER))
 #define TER_IS_SCANNER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_SCANNER))
 #define TER_SCANNER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_SCANNER, TerScannerClass))
-#define TER_SCANNER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TER_TYPE_SCANNER, TerScannerPrivate))
 
 typedef struct _TerScanner               TerScanner;
 typedef struct _TerScannerPrivate        TerScannerPrivate;
 typedef struct _TerScannerClass          TerScannerClass;
 
-
 struct _TerScanner {
 	GObject parent;
-	TerScannerPrivate *priv;
 };
 
 struct _TerScannerClass {
 	GObjectClass parent_class;
 };
-
 
 GType ter_scanner_get_type();
 

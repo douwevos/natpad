@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "vipnodepath.h"
 #include "vipnodeidmatcher.h"
 #include "../../vippathprivate.h"
@@ -38,41 +37,35 @@ struct _VipNodePathPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipNodePath, vip_node_path, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipNodePath)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_node_path_class_init(VipNodePathClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipNodePathPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_node_path_init(VipNodePath *instance) {
-	VipNodePathPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_NODE_PATH, VipNodePathPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipNodePath *instance = VIP_NODE_PATH(object);
-	VipNodePathPrivate *priv = instance->priv;
+	VipNodePathPrivate *priv = vip_node_path_get_instance_private(instance);
 	cat_unref_ptr(priv->tree_nodes);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_node_path_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_node_path_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -80,20 +73,20 @@ static void l_finalize(GObject *object) {
 VipNodePath *vip_node_path_new(CatArrayWo /*<CatTreeNode*>*/ *tree_nodes) {
 	VipNodePath *result = g_object_new(VIP_TYPE_NODE_PATH, NULL);
 	cat_ref_anounce(result);
-	VipNodePathPrivate *priv = result->priv;
+	VipNodePathPrivate *priv = vip_node_path_get_instance_private(result);
 	priv->tree_nodes = cat_ref_ptr(tree_nodes);
 	return result;
 }
 
 VipNodePath *vip_node_path_create_parent_path(VipNodePath *node_path) {
-	VipNodePathPrivate *priv = VIP_NODE_PATH_GET_PRIVATE(node_path);
+	VipNodePathPrivate *priv = vip_node_path_get_instance_private(node_path);
 	if ((priv->tree_nodes == NULL) || (cat_array_wo_size(priv->tree_nodes)==0)) {
 		return NULL;
 	}
 
 	VipNodePath *result = g_object_new(VIP_TYPE_NODE_PATH, NULL);
 	cat_ref_anounce(result);
-	VipNodePathPrivate *rpriv = result->priv;
+	VipNodePathPrivate *rpriv = vip_node_path_get_instance_private(result);
 	CatArrayWo *tree_nodes = cat_array_wo_clone(priv->tree_nodes, CAT_CLONE_DEPTH_MAIN);
 	cat_array_wo_remove_last(tree_nodes, NULL);
 	rpriv->tree_nodes = tree_nodes;
@@ -125,12 +118,12 @@ VipNode *vip_node_path_get_tail(VipNodePath *node_path) {
 
 
 CatTreeNode *vip_node_path_get_tail_node(VipNodePath *node_path) {
-	VipNodePathPrivate *priv = VIP_NODE_PATH_GET_PRIVATE(node_path);
+	VipNodePathPrivate *priv = vip_node_path_get_instance_private(node_path);
 	return priv->tree_nodes ? (CatTreeNode *) cat_array_wo_get_last(priv->tree_nodes) : NULL;
 }
 
 VipPath *vip_node_path_create_path(VipNodePath *node_path) {
-	VipNodePathPrivate *priv = VIP_NODE_PATH_GET_PRIVATE(node_path);
+	VipNodePathPrivate *priv = vip_node_path_get_instance_private(node_path);
 	if (priv->tree_nodes==NULL) {
 		return NULL;
 	}
@@ -157,7 +150,8 @@ VipPath *vip_node_path_create_path(VipNodePath *node_path) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	VipNodePathPrivate *priv = VIP_NODE_PATH_GET_PRIVATE(self);
+	VipNodePath *instance = VIP_NODE_PATH(self);
+	VipNodePathPrivate *priv = vip_node_path_get_instance_private(instance);
 
 	CatStringWo *child_text = cat_string_wo_new();
 	CatIIterator *iter = cat_array_wo_iterator(priv->tree_nodes);

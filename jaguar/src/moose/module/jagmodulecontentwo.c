@@ -71,15 +71,10 @@ G_DEFINE_TYPE_WITH_CODE(JagModuleContentWo, jag_module_content_wo, G_TYPE_OBJECT
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_module_content_wo_class_init(JagModuleContentWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-//	g_type_class_add_private(clazz, sizeof(JagModuleContentWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -89,8 +84,6 @@ static void jag_module_content_wo_class_init(JagModuleContentWoClass *clazz) {
 }
 
 static void jag_module_content_wo_init(JagModuleContentWo *instance) {
-//	JagModuleContentWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_MODULE_CONTENT_WO, JagModuleContentWoPrivate);
-//	instance->priv = priv;
 }
 
 
@@ -117,14 +110,14 @@ static void l_dispose(GObject *object) {
 	}
 	cat_unref_ptr(priv->jre_link);
 	cat_unref_ptr(priv->module_id_path);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_module_content_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_module_content_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -797,7 +790,6 @@ JagSrcFolderPathWo *jag_module_content_wo_source_path_at(JagModuleContentWo *mod
 			} \
 		} \
 
-
 JagSrcFolderPathWo *jag_module_content_wo_editable_source_path_at(JagModuleContentWo *e_module_content, int index) {
 	JagModuleContentWoPrivate *priv = jag_module_content_wo_get_instance_private(e_module_content);
 	CHECK_IF_WRITABLE(NULL)
@@ -815,8 +807,6 @@ JagSrcFolderPathWo *jag_module_content_wo_editable_source_path_at(JagModuleConte
 	}
 	return result;
 }
-
-
 
 gboolean jag_module_content_wo_set_jre_link(JagModuleContentWo *e_module_content, JagJreLink *jre_link) {
 	JagModuleContentWoPrivate *priv = jag_module_content_wo_get_instance_private(e_module_content);
@@ -841,9 +831,7 @@ JagJreLink *jag_module_content_wo_get_jre_link(JagModuleContentWo *module_conten
 }
 
 
-
 /********************* start MooIContent implementation *********************/
-
 
 static CatStringWo *l_content_get_key(MooIContent *self) {
 	return jag_module_content_wo_key();
@@ -861,8 +849,6 @@ static void l_content_iface_init(MooIContentInterface *iface) {
 }
 
 /********************* end MooIContent implementation *********************/
-
-
 
 
 /********************* start JagILinkListener implementation *********************/
@@ -890,8 +876,6 @@ static void l_link_listener_iface_init(JagILinkListenerInterface *iface) {
 }
 
 /********************* end JagILinkListener implementation *********************/
-
-
 
 
 /********************* start CatIStringable implementation *********************/
@@ -944,5 +928,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-

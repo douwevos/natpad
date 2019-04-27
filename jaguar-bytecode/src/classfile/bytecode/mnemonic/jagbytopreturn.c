@@ -36,6 +36,7 @@ struct _JagBytOpReturnPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpReturn, jag_byt_op_return, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpReturn)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -43,16 +44,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_return_class_init(JagBytOpReturnClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpReturnPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_return_init(JagBytOpReturn *instance) {
-	JagBytOpReturnPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_RETURN, JagBytOpReturnPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -71,20 +68,22 @@ static void l_finalize(GObject *object) {
 JagBytOpReturn *jag_byt_op_return_new(JagBytOperation operation, int offset, JagBytType return_type) {
 	JagBytOpReturn *result = g_object_new(JAG_BYT_TYPE_OP_RETURN, NULL);
 	cat_ref_anounce(result);
-	JagBytOpReturnPrivate *priv = result->priv;
+	JagBytOpReturnPrivate *priv = jag_byt_op_return_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 1);
 	priv->return_type = return_type;
 	return result;
 }
 
 JagBytType jag_byt_op_return_get_return_type(JagBytOpReturn *op_return) {
-	return JAG_BYT_OP_RETURN_GET_PRIVATE(op_return)->return_type;
+	JagBytOpReturnPrivate *priv = jag_byt_op_return_get_instance_private(op_return);
+	return priv->return_type;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpReturnPrivate *priv = JAG_BYT_OP_RETURN_GET_PRIVATE(self);
+	JagBytOpReturn *instance = JAG_BYT_OP_RETURN(self);
+	JagBytOpReturnPrivate *priv = jag_byt_op_return_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new();
 	short op_code = jag_byt_imnemonic_get_opp_code(self);
 	switch(priv->return_type) {

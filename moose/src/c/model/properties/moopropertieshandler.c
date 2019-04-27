@@ -36,10 +36,10 @@ struct _MooPropertiesHandlerPrivate {
 	MooService *moo_service;
 };
 
-
 static void l_properties_handler_iface_init(MooIPropertiesHandlerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooPropertiesHandler, moo_properties_handler, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooPropertiesHandler)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_IPROPERTIES_HANDLER, l_properties_handler_iface_init);
 });
 
@@ -47,22 +47,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_properties_handler_class_init(MooPropertiesHandlerClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooPropertiesHandlerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_properties_handler_init(MooPropertiesHandler *instance) {
-	MooPropertiesHandlerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_PROPERTIES_HANDLER, MooPropertiesHandlerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooPropertiesHandler *instance = MOO_PROPERTIES_HANDLER(object);
-	MooPropertiesHandlerPrivate *priv = instance->priv;
+	MooPropertiesHandlerPrivate *priv = moo_properties_handler_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	G_OBJECT_CLASS(moo_properties_handler_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -75,28 +71,24 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 MooPropertiesHandler *moo_properties_handler_new(struct _MooService *moo_service) {
 	MooPropertiesHandler *result = g_object_new(MOO_TYPE_PROPERTIES_HANDLER, NULL);
 	cat_ref_anounce(result);
-	MooPropertiesHandlerPrivate *priv = result->priv;
+	MooPropertiesHandlerPrivate *priv = moo_properties_handler_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	return result;
 }
 
 
-
-
 /********************* begin MooIPropertiesHandler implementation *********************/
 
 static void l_properties_handler_commit(MooIPropertiesHandler *self, CatIIterator *iter, struct _MooNodeWo *from_node, struct _MooNodeWo *to_node) {
-
 	cat_log_debug("before:from=%o", from_node);
 	cat_log_debug("before:to=%o", to_node);
 
 	MOO_IPROPERTIES_HANDLER_NEXT(iter, from_node, to_node);
-	MooPropertiesHandlerPrivate *priv = MOO_PROPERTIES_HANDLER_GET_PRIVATE(self);
-
+	MooPropertiesHandler *instance = MOO_PROPERTIES_HANDLER(self);
+	MooPropertiesHandlerPrivate *priv = moo_properties_handler_get_instance_private(instance);
 
 	MooModuleContentWo *from_module_content = (MooModuleContentWo *) moo_node_wo_get_content((MooNodeWo *) from_node, moo_module_content_wo_key());
 	cat_log_debug("post:from_module_content=%o", from_module_content);
@@ -133,7 +125,6 @@ static void l_properties_handler_commit(MooIPropertiesHandler *self, CatIIterato
 		} else {
 			cat_log_error("no module content in to-node: to_node=%o", to_node);
 		}
-
 	}
 }
 

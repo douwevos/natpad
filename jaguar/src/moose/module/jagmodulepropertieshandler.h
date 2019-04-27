@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define JAG_IS_MODULE_PROPERTIES_HANDLER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_MODULE_PROPERTIES_HANDLER))
 #define JAG_IS_MODULE_PROPERTIES_HANDLER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_MODULE_PROPERTIES_HANDLER))
 #define JAG_MODULE_PROPERTIES_HANDLER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_MODULE_PROPERTIES_HANDLER, JagModulePropertiesHandlerClass))
-#define JAG_MODULE_PROPERTIES_HANDLER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_MODULE_PROPERTIES_HANDLER, JagModulePropertiesHandlerPrivate))
-
 
 typedef struct _JagModulePropertiesHandler               JagModulePropertiesHandler;
 typedef struct _JagModulePropertiesHandlerPrivate        JagModulePropertiesHandlerPrivate;
 typedef struct _JagModulePropertiesHandlerClass          JagModulePropertiesHandlerClass;
 
-
 struct _JagModulePropertiesHandler {
 	GObject parent;
-	JagModulePropertiesHandlerPrivate *priv;
 };
 
 struct _JagModulePropertiesHandlerClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_module_properties_handler_get_type();
 

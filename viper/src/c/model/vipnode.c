@@ -35,25 +35,20 @@ struct _VipNodePrivate {
 
 	CatAtomicInteger *hold_counter;
 	CatAtomicInteger *recursive_counter;
-
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipNode, vip_node, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipNode)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static VipNode *l_clone(VipNode *toclone);
 
 static void vip_node_class_init(VipNodeClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipNodePrivate));
-
 	clazz->clone = l_clone;
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -62,25 +57,23 @@ static void vip_node_class_init(VipNodeClass *clazz) {
 }
 
 static void vip_node_init(VipNode *instance) {
-	VipNodePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_NODE, VipNodePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipNode *instance = VIP_NODE(object);
-	VipNodePrivate *priv = instance->priv;
+	VipNodePrivate *priv = vip_node_get_instance_private(instance);
 	cat_unref_ptr(priv->resource);
 	cat_unref_ptr(priv->hold_counter);
 	cat_unref_ptr(priv->recursive_counter);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_node_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_node_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -101,16 +94,14 @@ VipNode *vip_node_new_full(long long viper_id, VipIResource *resource, CatAtomic
 	return result;
 }
 
-
 void vip_node_construct(VipNode *node, long long viperId, VipIResource *resource, CatAtomicInteger *hold_counter, CatAtomicInteger *recursive_counter) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	priv->viper_id = viperId;
 	cat_log_detail("node=%p, viperId=%ld, resource=%o", node, viperId, resource);
 	priv->resource = cat_ref_ptr(resource);
 	priv->hold_counter = hold_counter==NULL ? cat_atomic_integer_new() : cat_ref_ptr(hold_counter);
 	priv->recursive_counter = recursive_counter==NULL ? cat_atomic_integer_new() : cat_ref_ptr(recursive_counter);
 }
-
 
 
 VipNode *vip_node_clone(VipNode *toclone) {
@@ -121,8 +112,8 @@ VipNode *vip_node_clone(VipNode *toclone) {
 static VipNode *l_clone(VipNode *toclone) {
 	VipNode *result = g_object_new(VIP_TYPE_NODE, NULL);
 	cat_ref_anounce(result);
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(result);
-	VipNodePrivate *spriv = VIP_NODE_GET_PRIVATE(toclone);
+	VipNodePrivate *priv = vip_node_get_instance_private(result);
+	VipNodePrivate *spriv = vip_node_get_instance_private(toclone);
 	priv->viper_id = spriv->viper_id;
 	priv->resource = cat_ref_ptr(spriv->resource);
 	priv->hold_counter = cat_ref_ptr(spriv->hold_counter);
@@ -131,73 +122,71 @@ static VipNode *l_clone(VipNode *toclone) {
 }
 
 long long vip_node_get_id(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	return priv->viper_id;
 }
 
-
 CatStringWo *vip_node_get_name(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	return priv->resource==NULL ? NULL : vip_iresource_get_name(priv->resource);
 }
 
 VipIResource *vip_node_get_content(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	return priv->resource;
 }
 
 VipNode *vip_node_set_resource(VipNode *node, VipIResource *new_resource) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	if (priv->resource==new_resource) {
 		return cat_ref_ptr(node);
 	}
 	VipNode *result = vip_node_clone(node);
-	VipNodePrivate *rpriv = VIP_NODE_GET_PRIVATE(result);
+	VipNodePrivate *rpriv = vip_node_get_instance_private(result);
 	cat_ref_swap(rpriv->resource, new_resource);
 	return result;
 }
 
 
 CatAtomicInteger *vip_node_get_hold_counter(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	return priv->hold_counter;
 }
 
 void vip_node_hold_down(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	cat_atomic_integer_decrement(priv->hold_counter);
 }
 
 void vip_node_hold_up(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	cat_atomic_integer_increment(priv->hold_counter);
 }
 
 gboolean vip_node_should_hold(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	return cat_atomic_integer_get(priv->hold_counter)>0;
 }
 
 CatAtomicInteger *vip_node_get_recursive_counter(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	return priv->recursive_counter;
 }
 
 void vip_node_recursive_down(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	cat_atomic_integer_decrement(priv->recursive_counter);
 }
 
 void vip_node_recursive_up(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	cat_atomic_integer_increment(priv->recursive_counter);
 }
 
 gboolean vip_node_should_scan_recursive(VipNode *node) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(node);
+	VipNodePrivate *priv = vip_node_get_instance_private(node);
 	return cat_atomic_integer_get(priv->recursive_counter)>0;
 }
-
 
 void vip_node_print(VipNode *node, CatStringWo *indent, CatStringWo *e_buf) {
 	cat_string_wo_append(e_buf, indent);
@@ -209,7 +198,8 @@ void vip_node_print(VipNode *node, CatStringWo *indent, CatStringWo *e_buf) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	VipNodePrivate *priv = VIP_NODE_GET_PRIVATE(self);
+	VipNode *instance = VIP_NODE(self);
+	VipNodePrivate *priv = vip_node_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:vip-id=%ld, content=%o, hold=%d, recursive=%d]", iname, self, priv->viper_id,
 			priv->resource, cat_atomic_integer_get(priv->hold_counter), cat_atomic_integer_get(priv->recursive_counter));
@@ -220,4 +210,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

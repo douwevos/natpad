@@ -37,9 +37,7 @@ G_BEGIN_DECLS
 #define LEA_IS_ACTION_MENU_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_ACTION_MENU_ITEM))
 #define LEA_ACTION_MENU_ITEM_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_ACTION_MENU_ITEM, LeaActionMenuItemClass))
 
-
 typedef struct _LeaActionMenuItem             LeaActionMenuItem;
-
 typedef struct _LeaActionMenuItemClass        LeaActionMenuItemClass;
 
 struct _LeaActionMenuItem {

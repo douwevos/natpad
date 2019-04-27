@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_INTERFACE_LIST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_INTERFACE_LIST))
 #define JAG_BYT_IS_INTERFACE_LIST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_INTERFACE_LIST))
 #define JAG_BYT_INTERFACE_LIST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_INTERFACE_LIST, JagBytInterfaceListClass))
-#define JAG_BYT_INTERFACE_LIST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_INTERFACE_LIST, JagBytInterfaceListPrivate))
 
 typedef struct _JagBytInterfaceList               JagBytInterfaceList;
 typedef struct _JagBytInterfaceListPrivate        JagBytInterfaceListPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytInterfaceListClass          JagBytInterfaceListClass;
 
 struct _JagBytInterfaceList {
 	GObject parent;
-	JagBytInterfaceListPrivate *priv;
 };
 
 struct _JagBytInterfaceListClass {

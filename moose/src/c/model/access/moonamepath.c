@@ -38,44 +38,38 @@ static void l_node_matcher_iface_init(MooINodeMatcherInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooNamePath, moo_name_path, G_TYPE_OBJECT,{
+		G_ADD_PRIVATE(MooNamePath)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_MATCHER, l_node_matcher_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_name_path_class_init(MooNamePathClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooNamePathPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_name_path_init(MooNamePath *instance) {
-	MooNamePathPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_NAME_PATH, MooNamePathPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooNamePath *instance = MOO_NAME_PATH(object);
-	MooNamePathPrivate *priv = instance->priv;
+	MooNamePathPrivate *priv = moo_name_path_get_instance_private(instance);
 	cat_unref_ptr(priv->entries);
 	cat_unref_ptr(priv->matcher);
 	cat_free_ptr(priv->index_cache);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_name_path_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_name_path_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -83,7 +77,7 @@ static void l_finalize(GObject *object) {
 MooNamePath *moo_name_path_new(CatArrayWo *entries, MooINodeMatcher *matcher) {
 	MooNamePath *result = g_object_new(MOO_TYPE_NAME_PATH, NULL);
 	cat_ref_anounce(result);
-	MooNamePathPrivate *priv = result->priv;
+	MooNamePathPrivate *priv = moo_name_path_get_instance_private(result);
 	priv->entries = cat_ref_ptr(entries);
 	priv->index_cache = g_malloc0(sizeof(int) * cat_array_wo_size(priv->entries));
 	priv->matcher = cat_ref_ptr(priv->matcher);
@@ -93,7 +87,7 @@ MooNamePath *moo_name_path_new(CatArrayWo *entries, MooINodeMatcher *matcher) {
 
 
 MooNodeWo *moo_name_path_get_tail(MooNamePath *path, MooNodeWo *base_node) {
-	MooNamePathPrivate *priv = MOO_NAME_PATH_GET_PRIVATE(path);
+	MooNamePathPrivate *priv = moo_name_path_get_instance_private(path);
 	int entry_idx = 0;
 
 	MooINodeMatcher *matcher = priv->matcher ? priv->matcher : (MooINodeMatcher *) path;
@@ -114,7 +108,7 @@ MooNodeWo *moo_name_path_get_tail(MooNamePath *path, MooNodeWo *base_node) {
 
 
 MooIdPath *moo_name_path_to_id_path(MooNamePath *path, MooNodeWo *base_node, MooIdPath *base_path) {
-	MooNamePathPrivate *priv = MOO_NAME_PATH_GET_PRIVATE(path);
+	MooNamePathPrivate *priv = moo_name_path_get_instance_private(path);
 	int entry_idx = 0;
 	cat_ref_ptr(base_path);
 
@@ -139,7 +133,7 @@ MooIdPath *moo_name_path_to_id_path(MooNamePath *path, MooNodeWo *base_node, Moo
 }
 
 CatStringWo *moo_name_path_create_flatten(MooNamePath *path) {
-	MooNamePathPrivate *priv = MOO_NAME_PATH_GET_PRIVATE(path);
+	MooNamePathPrivate *priv = moo_name_path_get_instance_private(path);
 	CatStringWo *flatten = cat_string_wo_new();
 	int entry_idx = 0;
 
@@ -160,8 +154,8 @@ gboolean moo_name_path_equal(const MooNamePath *path_a, const MooNamePath *path_
 	if ((path_a==NULL) || (path_b==NULL)) {
 		return FALSE;
 	}
-	MooNamePathPrivate *priv_a = MOO_NAME_PATH_GET_PRIVATE(path_a);
-	MooNamePathPrivate *priv_b = MOO_NAME_PATH_GET_PRIVATE(path_b);
+	MooNamePathPrivate *priv_a = moo_name_path_get_instance_private((MooNamePath *) path_a);
+	MooNamePathPrivate *priv_b = moo_name_path_get_instance_private((MooNamePath *) path_b);
 
 	CatArrayWo *arr_a = priv_a->entries;
 	CatArrayWo *arr_b = priv_b->entries;
@@ -181,11 +175,7 @@ gboolean moo_name_path_equal(const MooNamePath *path_a, const MooNamePath *path_
 	return TRUE;
 }
 
-
-
-
 /********************* begin MooINodeMatcher implementation *********************/
-
 
 static gboolean l_node_matcher_matches(MooINodeMatcher *self, struct _MooNodeWo *node, gpointer userdata) {
 	CatStringWo *path_entry = (CatStringWo *) userdata;
@@ -196,19 +186,18 @@ static gboolean l_node_matcher_matches(MooINodeMatcher *self, struct _MooNodeWo 
 	return FALSE;
 }
 
-
 static void l_node_matcher_iface_init(MooINodeMatcherInterface *iface) {
 	iface->matches = l_node_matcher_matches;
 }
 
 /********************* end MooINodeMatcher implementation *********************/
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MooNamePathPrivate *priv = MOO_NAME_PATH_GET_PRIVATE(self);
+	MooNamePath *instance = MOO_NAME_PATH(self);
+	MooNamePathPrivate *priv = moo_name_path_get_instance_private(instance);
+
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p: %o]", iname, self, priv->entries);
 }

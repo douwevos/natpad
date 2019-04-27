@@ -37,23 +37,18 @@ G_BEGIN_DECLS
 #define TER_IS_EDITOR_FACTORY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TER_TYPE_EDITOR_FACTORY))
 #define TER_IS_EDITOR_FACTORY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_EDITOR_FACTORY))
 #define TER_EDITOR_FACTORY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_EDITOR_FACTORY, TerEditorFactoryClass))
-#define TER_EDITOR_FACTORY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TER_TYPE_EDITOR_FACTORY, TerEditorFactoryPrivate))
-
 
 typedef struct _TerEditorFactory               TerEditorFactory;
 typedef struct _TerEditorFactoryPrivate        TerEditorFactoryPrivate;
 typedef struct _TerEditorFactoryClass          TerEditorFactoryClass;
 
-
 struct _TerEditorFactory {
 	GObject parent;
-	TerEditorFactoryPrivate *priv;
 };
 
 struct _TerEditorFactoryClass {
 	GObjectClass parent_class;
 };
-
 
 GType ter_editor_factory_get_type();
 

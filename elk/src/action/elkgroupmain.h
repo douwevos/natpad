@@ -38,7 +38,6 @@ G_BEGIN_DECLS
 #define ELK_IS_GROUP_MAIN(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_GROUP_MAIN))
 #define ELK_IS_GROUP_MAIN_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_GROUP_MAIN))
 #define ELK_GROUP_MAIN_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_GROUP_MAIN, ElkGroupMainClass))
-#define ELK_GROUP_MAIN_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_GROUP_MAIN, ElkGroupMainPrivate))
 
 typedef struct _ElkGroupMain               ElkGroupMain;
 typedef struct _ElkGroupMainPrivate        ElkGroupMainPrivate;
@@ -46,7 +45,6 @@ typedef struct _ElkGroupMainClass          ElkGroupMainClass;
 
 struct _ElkGroupMain {
 	LeaActionGroup parent;
-	ElkGroupMainPrivate *priv;
 };
 
 struct _ElkGroupMainClass {

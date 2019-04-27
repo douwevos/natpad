@@ -20,33 +20,27 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MooContentMapWo_H_
 #define MooContentMapWo_H_
 
 #include "mooicontent.h"
 #include <caterpillar.h>
 
-
 G_BEGIN_DECLS
 
 #define MOO_TYPE_CONTENT_MAP_WO              (moo_content_map_wo_get_type())
-#define moo_content_map_wo(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), moo_content_map_wo_get_type(), MooContentMapWo))
-#define moo_content_map_wo_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), MOO_TYPE_CONTENT_MAP_WO, MooContentMapWoClass))
+#define MOO_CONTENT_MAP_WO(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), moo_content_map_wo_get_type(), MooContentMapWo))
+#define MOO_CONTENT_MAP_WO_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), MOO_TYPE_CONTENT_MAP_WO, MooContentMapWoClass))
 #define MOO_IS_CONTENT_MAP_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_CONTENT_MAP_WO))
 #define MOO_IS_CONTENT_MAP_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_CONTENT_MAP_WO))
-#define moo_content_map_wo_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_CONTENT_MAP_WO, MooContentMapWoClass))
-#define MOO_CONTENT_MAP_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_CONTENT_MAP_WO, MooContentMapWoPrivate))
-
+#define MOO_CONTENT_MAP_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_CONTENT_MAP_WO, MooContentMapWoClass))
 
 typedef struct _MooContentMapWo               MooContentMapWo;
 typedef struct _MooContentMapWoPrivate        MooContentMapWoPrivate;
 typedef struct _MooContentMapWoClass          MooContentMapWoClass;
 
-
 struct _MooContentMapWo {
 	GObject parent;
-	MooContentMapWoPrivate *priv;
 };
 
 struct _MooContentMapWoClass {

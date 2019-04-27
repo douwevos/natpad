@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "vipcopyormoverequest.h"
 #include "vipcreatepathrequestprivate.h"
 #include "../vipisequence.h"
@@ -48,15 +47,13 @@ struct _VipCopyOrMoveRequestPrivate {
 	char *buf;
 };
 
-G_DEFINE_TYPE(VipCopyOrMoveRequest, vip_copy_or_move_request, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE_WITH_PRIVATE(VipCopyOrMoveRequest, vip_copy_or_move_request, WOR_TYPE_REQUEST);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void vip_copy_or_move_request_class_init(VipCopyOrMoveRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipCopyOrMoveRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -66,14 +63,12 @@ static void vip_copy_or_move_request_class_init(VipCopyOrMoveRequestClass *clazz
 }
 
 static void vip_copy_or_move_request_init(VipCopyOrMoveRequest *instance) {
-	VipCopyOrMoveRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_COPY_OR_MOVE_REQUEST, VipCopyOrMoveRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipCopyOrMoveRequest *instance = VIP_COPY_OR_MOVE_REQUEST(object);
-	VipCopyOrMoveRequestPrivate *priv = instance->priv;
+	VipCopyOrMoveRequestPrivate *priv = vip_copy_or_move_request_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_service);
 	cat_unref_ptr(priv->e_source_path_list);
 	cat_unref_ptr(priv->destination);
@@ -93,7 +88,7 @@ static void l_finalize(GObject *object) {
 VipCopyOrMoveRequest *vip_copy_or_move_request_new(struct _VipService *vip_service, CatArrayWo *source_path_list, CatReadableTreeNode *destination, gboolean is_copy) {
 	VipCopyOrMoveRequest *result = g_object_new(VIP_TYPE_COPY_OR_MOVE_REQUEST, NULL);
 	cat_ref_anounce(result);
-	VipCopyOrMoveRequestPrivate *priv = result->priv;
+	VipCopyOrMoveRequestPrivate *priv = vip_copy_or_move_request_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->e_source_path_list = cat_ref_ptr(source_path_list);
 	priv->destination = cat_ref_ptr(destination);
@@ -146,16 +141,14 @@ gboolean l_plain_old_file_copy(CatWritableTreeNode *source, CatWritableTreeNode 
 #define BUF_SIZE  0x10000
 
 gboolean l_copy_using_stream(VipCopyOrMoveRequest *request, CatWritableTreeNode *source, CatWritableTreeNode *dest_node) {
-	VipCopyOrMoveRequestPrivate *priv = VIP_COPY_OR_MOVE_REQUEST_GET_PRIVATE(request);
+	VipCopyOrMoveRequestPrivate *priv = vip_copy_or_move_request_get_instance_private(request);
 	if (priv->buf==NULL) {
 		priv->buf = g_malloc(BUF_SIZE);
 	}
 
 	gboolean result = TRUE;
 
-
 	VipNode *source_vip_node = (VipNode *) cat_tree_node_get_content((CatTreeNode *) source);
-
 
 	VipNodePath *dest_node_path = vip_node_path_from_tree_node((CatTreeNode *) dest_node);
 	VipPath *dest_path = vip_node_path_create_path(dest_node_path);
@@ -171,8 +164,6 @@ gboolean l_copy_using_stream(VipCopyOrMoveRequest *request, CatWritableTreeNode 
 	if (gtk_error) {
 		return FALSE;
 	}
-
-
 
 	VipIFile *source_resource = (VipIFile *) vip_node_get_content(source_vip_node);
 
@@ -202,15 +193,11 @@ gboolean l_copy_using_stream(VipCopyOrMoveRequest *request, CatWritableTreeNode 
 //	}
 
 	cat_unref_ptr(dest_gfile);
-
 	return result;
 }
 
-
-
-
 gboolean l_copy_stack(VipCopyOrMoveRequest *request, CatArrayWo *stack) {
-	VipCopyOrMoveRequestPrivate *priv = VIP_COPY_OR_MOVE_REQUEST_GET_PRIVATE(request);
+	VipCopyOrMoveRequestPrivate *priv = vip_copy_or_move_request_get_instance_private(request);
 	gboolean result = TRUE;
 
 	CatWritableTreeNode *dest = NULL;
@@ -267,9 +254,8 @@ gboolean l_copy_stack(VipCopyOrMoveRequest *request, CatArrayWo *stack) {
 
 
 static gboolean l_copy_resources(VipCopyOrMoveRequest *request) {
-	VipCopyOrMoveRequestPrivate *priv = VIP_COPY_OR_MOVE_REQUEST_GET_PRIVATE(request);
+	VipCopyOrMoveRequestPrivate *priv = vip_copy_or_move_request_get_instance_private(request);
 	gboolean result = TRUE;
-
 
 	VipCreatePathRequest *create_path_request = vip_create_path_request_new(priv->vip_service, NULL);
 //	VipNodePath *dest_path = vip_node_path_from_tree_node((CatTreeNode *) priv->destination);
@@ -287,8 +273,6 @@ static gboolean l_copy_resources(VipCopyOrMoveRequest *request) {
 	CatTreeNode *fresh_dest_node = cat_tree_node_refresh((CatTreeNode *) priv->destination, list_provider, (CatIMatcher *) matcher);
 	CatWritableTreeNode *writable_dest = cat_writable_tree_node_new(list_provider, cat_tree_node_get_location(fresh_dest_node));
 	cat_unref_ptr(fresh_dest_node);
-
-
 
 	CatArrayWo *stack = cat_array_wo_new();
 	CatIIterator *iter = cat_array_wo_iterator(priv->e_source_path_list);
@@ -500,10 +484,6 @@ static gboolean l_copy_resources(VipCopyOrMoveRequest *request) {
 //	cat_log_debug("done");
 	return result;
 }
-
-
-
-
 
 static void l_run_request(WorRequest *self) {
 	l_copy_resources(VIP_COPY_OR_MOVE_REQUEST(self));

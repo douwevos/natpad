@@ -28,7 +28,6 @@
 #define CAT_LOG_CLAZZ "JagSrcFolderContentWo"
 #include <logging/catlog.h>
 
-
 struct _WoInfo {
 	JagSrcFolderContentWo *original;
 //	MooNodeWo *moo_src_folder_node;
@@ -48,53 +47,46 @@ static void l_content_iface_init(MooIContentInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagSrcFolderContentWo, jag_src_folder_content_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagSrcFolderContentWo)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ICONTENT, l_content_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_src_folder_content_wo_class_init(JagSrcFolderContentWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagSrcFolderContentWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_src_folder_content_wo_init(JagSrcFolderContentWo *instance) {
-	JagSrcFolderContentWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_SRC_FOLDER_CONTENT_WO, JagSrcFolderContentWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagSrcFolderContentWo *instance = JAG_SRC_FOLDER_CONTENT_WO(object);
-	JagSrcFolderContentWoPrivate *priv = instance->priv;
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(instance);
 	if (priv->wo_info) {
 		cat_unref_ptr(priv->wo_info->original);
 		cat_free_ptr(priv->wo_info);
 	}
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_src_folder_content_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_src_folder_content_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagSrcFolderContentWo *jag_src_folder_content_wo_new() {
 	JagSrcFolderContentWo *result = g_object_new(JAG_TYPE_SRC_FOLDER_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-	JagSrcFolderContentWoPrivate *priv = result->priv;
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(result);
 	priv->version = 1;
 	priv->wo_info = g_new0(WoInfo, 1);
 //	priv->wo_info->moo_src_folder_node = NULL;
@@ -102,9 +94,8 @@ JagSrcFolderContentWo *jag_src_folder_content_wo_new() {
 	return result;
 }
 
-
 JagSrcFolderContentWo *jag_src_folder_content_wo_ensure_editable(JagSrcFolderContentWo *content, MooNodeWo *moo_src_folder_node) {
-	JagSrcFolderContentWoPrivate *priv = JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(content);
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(content);
 	if (priv->wo_info) {
 //		cat_ref_swap(priv->wo_info->moo_src_folder_node, moo_src_folder_node);
 		return cat_ref_ptr(content);
@@ -112,7 +103,7 @@ JagSrcFolderContentWo *jag_src_folder_content_wo_ensure_editable(JagSrcFolderCon
 
 	JagSrcFolderContentWo *result = g_object_new(JAG_TYPE_SRC_FOLDER_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-	JagSrcFolderContentWoPrivate *dpriv = JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(result);
+	JagSrcFolderContentWoPrivate *dpriv = jag_src_folder_content_wo_get_instance_private(result);
 	dpriv->version = priv->version;
 	dpriv->wo_info = g_new0(WoInfo, 1);
 	dpriv->wo_info->original = cat_ref_ptr(content);
@@ -120,21 +111,18 @@ JagSrcFolderContentWo *jag_src_folder_content_wo_ensure_editable(JagSrcFolderCon
 	return result;
 }
 
-
-
-
 gboolean jag_src_folder_content_wo_is_fixed(JagSrcFolderContentWo *content) {
-	return JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(content)->wo_info==NULL;
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(content);
+	return priv->wo_info==NULL;
 }
-
 
 int jag_src_folder_content_wo_get_version(JagSrcFolderContentWo *content) {
-	return JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(content)->version;
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(content);
+	return priv->version;
 }
 
-
 JagSrcFolderContentWo *jag_src_folder_content_wo_anchor(JagSrcFolderContentWo *content, int version) {
-	JagSrcFolderContentWoPrivate *priv = JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(content);
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(content);
 	if (priv->wo_info) {
 		gboolean was_modified = (priv->wo_info->original==NULL) || priv->wo_info->marked;
 
@@ -166,16 +154,10 @@ JagSrcFolderContentWo *jag_src_folder_content_wo_anchor(JagSrcFolderContentWo *c
 	return content;
 }
 
-
-
 void jag_src_folder_content_wo_mark(JagSrcFolderContentWo *e_content) {
-	JagSrcFolderContentWoPrivate *priv = JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(e_content);
-
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(e_content);
 	priv->wo_info->marked = TRUE;
 }
-
-
-
 
 CatStringWo *jag_src_folder_content_wo_key() {
 	return CAT_S(jag_s_src_folder_content_key);
@@ -206,7 +188,8 @@ static void l_content_iface_init(MooIContentInterface *iface) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagSrcFolderContentWoPrivate *priv = JAG_SRC_FOLDER_CONTENT_WO_GET_PRIVATE(self);
+	JagSrcFolderContentWo *instance = JAG_SRC_FOLDER_CONTENT_WO(self);
+	JagSrcFolderContentWoPrivate *priv = jag_src_folder_content_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p: version=%d]", iname, self, priv->version);
 }

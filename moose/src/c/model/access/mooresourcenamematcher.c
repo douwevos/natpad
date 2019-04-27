@@ -33,7 +33,7 @@
 
 static void l_node_matcher_iface_init(MooINodeMatcherInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(MooResourceNameMatcher, moo_resource_name_matcher, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(MooResourceNameMatcher, moo_resource_name_matcher, G_TYPE_OBJECT, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_MATCHER, l_node_matcher_iface_init);
 });
 
@@ -41,7 +41,6 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_resource_name_matcher_class_init(MooResourceNameMatcherClass *clazz) {
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -71,10 +70,7 @@ MooResourceNameMatcher *moo_resource_name_matcher_new() {
 }
 
 
-
-
 /********************* start MooIContentMap implementation *********************/
-
 
 static gboolean l_node_matcher_matches(MooINodeMatcher *self, struct _MooNodeWo *node, gpointer userdata) {
 	MooResourceContentWo *resource_content = (MooResourceContentWo *) moo_node_wo_get_content(node, moo_resource_content_wo_key());
@@ -89,7 +85,6 @@ static gboolean l_node_matcher_matches(MooINodeMatcher *self, struct _MooNodeWo 
 	}
 	return result;
 }
-
 
 static void l_node_matcher_iface_init(MooINodeMatcherInterface *iface) {
 	iface->matches = l_node_matcher_matches;

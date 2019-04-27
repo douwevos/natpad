@@ -39,50 +39,44 @@ struct _JagAstMethodPrivate {
 static void l_statement_iface_init(JagAstIStatementInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstMethod, jag_ast_method, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstMethod)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_ISTATEMENT, l_statement_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_method_class_init(JagAstMethodClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstMethodPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_method_init(JagAstMethod *instance) {
-	JagAstMethodPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_METHOD, JagAstMethodPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstMethod *instance = JAG_AST_METHOD(object);
-	JagAstMethodPrivate *priv = instance->priv;
+	JagAstMethodPrivate *priv = jag_ast_method_get_instance_private(instance);
 	cat_unref_ptr(priv->method_header);
 	cat_unref_ptr(priv->modifiers);
 	cat_unref_ptr(priv->statement_block);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_method_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_method_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstMethod *jag_ast_method_new(JagAstModifiers *modifiers, JagAstMethodHeader *method_header, JagAstBlock *statement_block) {
 	JagAstMethod *result = g_object_new(JAG_AST_TYPE_METHOD, NULL);
 	cat_ref_anounce(result);
-	JagAstMethodPrivate *priv = result->priv;
+	JagAstMethodPrivate *priv = jag_ast_method_get_instance_private(result);
 	priv->modifiers = cat_ref_ptr(modifiers);
 	priv->method_header = cat_ref_ptr(method_header);
 	priv->statement_block = cat_ref_ptr(statement_block);
@@ -91,16 +85,17 @@ JagAstMethod *jag_ast_method_new(JagAstModifiers *modifiers, JagAstMethodHeader 
 }
 
 
-
 /********************* start JagAstIStatement implementation *********************/
 
 static void l_statement_set_at_least_line_nr(JagAstIStatement *self, int at_least_line_nr) {
-	JagAstMethodPrivate *priv = JAG_AST_METHOD_GET_PRIVATE(self);
+	JagAstMethod *instance = JAG_AST_METHOD(self);
+	JagAstMethodPrivate *priv = jag_ast_method_get_instance_private(instance);
 	priv->statement_line_nr = at_least_line_nr;
 }
 
 static void l_statement_write_statement(JagAstIStatement *self, JagAstWriter *out) {
-	JagAstMethodPrivate *priv = JAG_AST_METHOD_GET_PRIVATE(self);
+	JagAstMethod *instance = JAG_AST_METHOD(self);
+	JagAstMethodPrivate *priv = jag_ast_method_get_instance_private(instance);
 	jag_ast_writer_set_at_least_line_nr(out, priv->statement_line_nr);
 
 	if (priv->modifiers) {
@@ -117,4 +112,3 @@ static void l_statement_iface_init(JagAstIStatementInterface *iface) {
 }
 
 /********************* end JagAstIStatement implementation *********************/
-

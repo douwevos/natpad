@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "mooactioncopy.h"
 
 #include <logging/catlogdefs.h>
@@ -34,16 +33,13 @@ struct _MooActionCopyPrivate {
 	CatArrayWo *selection;
 };
 
-
-G_DEFINE_TYPE(MooActionCopy, moo_action_copy, LEA_TYPE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE(MooActionCopy, moo_action_copy, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void moo_action_copy_class_init(MooActionCopyClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooActionCopyPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -53,14 +49,12 @@ static void moo_action_copy_class_init(MooActionCopyClass *clazz) {
 }
 
 static void moo_action_copy_init(MooActionCopy *instance) {
-	MooActionCopyPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ACTION_COPY, MooActionCopyPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooActionCopy *instance = MOO_ACTION_COPY(object);
-	MooActionCopyPrivate *priv = instance->priv;
+	MooActionCopyPrivate *priv = moo_action_copy_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_clipboard);
 	cat_unref_ptr(priv->selection);
 	G_OBJECT_CLASS(moo_action_copy_parent_class)->dispose(object);
@@ -74,11 +68,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 MooActionCopy *moo_action_copy_new(MooClipboard *moo_clipboard) {
 	MooActionCopy *result = g_object_new(MOO_TYPE_ACTION_COPY, NULL);
 	cat_ref_anounce(result);
-	MooActionCopyPrivate *priv = result->priv;
+	MooActionCopyPrivate *priv = moo_action_copy_get_instance_private(result);
 	priv->has_copyable_selection = FALSE;
 	priv->moo_clipboard = cat_ref_ptr(moo_clipboard);
 	priv->selection = NULL;
@@ -88,9 +81,8 @@ MooActionCopy *moo_action_copy_new(MooClipboard *moo_clipboard) {
 	return result;
 }
 
-
 void moo_action_copy_set_has_copyable_selection(MooActionCopy *action_copy, gboolean has_copyable_selection, CatArrayWo *selection) {
-	MooActionCopyPrivate *priv = MOO_ACTION_COPY_GET_PRIVATE(action_copy);
+	MooActionCopyPrivate *priv = moo_action_copy_get_instance_private(action_copy);
 	if (priv->has_copyable_selection == has_copyable_selection && priv->selection == selection) {
 		return;
 	}
@@ -99,15 +91,13 @@ void moo_action_copy_set_has_copyable_selection(MooActionCopy *action_copy, gboo
 	lea_action_set_sensitive_self(LEA_ACTION(action_copy), has_copyable_selection);
 }
 
-
-
 static void l_action_run(LeaAction *self) {
-	MooActionCopyPrivate *priv = MOO_ACTION_COPY_GET_PRIVATE(self);
+	MooActionCopy *instance = MOO_ACTION_COPY(self);
+	MooActionCopyPrivate *priv = moo_action_copy_get_instance_private(instance);
 	if (priv->has_copyable_selection) {
 		moo_clipboard_cut_or_copy(priv->moo_clipboard, priv->selection, TRUE);
 	} else {
 		cat_log_warn("no copyable selection");
 		lea_action_set_sensitive_self(LEA_ACTION(self), FALSE);
 	}
-
 }

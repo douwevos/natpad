@@ -38,6 +38,7 @@ struct _JagIndexerJarMapPrivate {
 static void l_viper_listener_iface_init(VipIListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagIndexerJarMap, jag_indexer_jar_map, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagIndexerJarMap)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_ILISTENER, l_viper_listener_iface_init);
 });
 
@@ -45,22 +46,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_indexer_jar_map_class_init(JagIndexerJarMapClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagIndexerJarMapPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_indexer_jar_map_init(JagIndexerJarMap *instance) {
-	JagIndexerJarMapPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_INDEXER_JAR_MAP, JagIndexerJarMapPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagIndexerJarMap *instance = JAG_INDEXER_JAR_MAP(object);
-	JagIndexerJarMapPrivate *priv = instance->priv;
+	JagIndexerJarMapPrivate *priv = jag_indexer_jar_map_get_instance_private(instance);
 	cat_unref_ptr(priv->e_map);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->vip_service);
@@ -76,11 +73,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JagIndexerJarMap *jag_indexer_jar_map_new(MooService *moo_service, VipService *vip_service) {
 	JagIndexerJarMap *result = g_object_new(JAG_TYPE_INDEXER_JAR_MAP, NULL);
 	cat_ref_anounce(result);
-	JagIndexerJarMapPrivate *priv = result->priv;
+	JagIndexerJarMapPrivate *priv = jag_indexer_jar_map_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->e_map = cat_hash_map_wo_new((GHashFunc) vip_path_hash, (GEqualFunc) vip_path_equal);
@@ -89,9 +85,8 @@ JagIndexerJarMap *jag_indexer_jar_map_new(MooService *moo_service, VipService *v
 	return result;
 }
 
-
 JgiJarEntry *jag_indexer_jar_map_attach(JagIndexerJarMap *jar_map, VipNodePath *full_jar_node_path) {
-	JagIndexerJarMapPrivate *priv = JAG_INDEXER_JAR_MAP_GET_PRIVATE(jar_map);
+	JagIndexerJarMapPrivate *priv = jag_indexer_jar_map_get_instance_private(jar_map);
 	VipPath *full_path = vip_node_path_create_path(full_jar_node_path);
 	cat_lock_lock(priv->lock);
 	JgiJarEntry *result = (JgiJarEntry *) cat_hash_map_wo_get(priv->e_map, (GObject *) full_path);
@@ -112,9 +107,8 @@ JgiJarEntry *jag_indexer_jar_map_attach(JagIndexerJarMap *jar_map, VipNodePath *
 	return result;
 }
 
-
 void jag_indexer_jar_map_detach(JagIndexerJarMap *jar_map, JgiJarEntry *entry) {
-	JagIndexerJarMapPrivate *priv = JAG_INDEXER_JAR_MAP_GET_PRIVATE(jar_map);
+	JagIndexerJarMapPrivate *priv = jag_indexer_jar_map_get_instance_private(jar_map);
 	cat_log_debug("entry=%p", entry);
 	VipNodePath *full_jar_node_path = jgi_jar_entry_get_vip_node_path(entry);
 	VipPath *full_path = vip_node_path_create_path(full_jar_node_path);
@@ -132,7 +126,8 @@ void jag_indexer_jar_map_detach(JagIndexerJarMap *jar_map, JgiJarEntry *entry) {
 
 
 static void l_viper_snapshot_set(VipIListener *listener, struct _VipSnapshot *new_snapshot) {
-	JagIndexerJarMapPrivate *priv = JAG_INDEXER_JAR_MAP_GET_PRIVATE(listener);
+	JagIndexerJarMap *instance = JAG_INDEXER_JAR_MAP(listener);
+	JagIndexerJarMapPrivate *priv = jag_indexer_jar_map_get_instance_private(instance);
 	cat_lock_lock(priv->lock);
 	CatArrayWo *e_entries = cat_hash_map_wo_enlist_values(priv->e_map, NULL);
 	if (e_entries && cat_array_wo_size(e_entries)>0) {
@@ -155,5 +150,3 @@ static void l_viper_snapshot_set(VipIListener *listener, struct _VipSnapshot *ne
 static void l_viper_listener_iface_init(VipIListenerInterface *iface) {
 	iface->snapshotSet = l_viper_snapshot_set;
 }
-
-

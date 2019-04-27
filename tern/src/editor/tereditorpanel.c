@@ -52,8 +52,9 @@ static void ter_editor_panel_init(TerEditorPanel *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	TerEditorPanel *instance = TER_EDITOR_PANEL(object);
-//	TerEditorPanelPrivate *priv = ter_editor_panel_get_instance_private(instance);
+	TerEditorPanel *instance = TER_EDITOR_PANEL(object);
+	TerEditorPanelPrivate *priv = ter_editor_panel_get_instance_private(instance);
+	cat_unref_ptr(priv->a_clazz_name);
 	G_OBJECT_CLASS(ter_editor_panel_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -90,4 +91,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

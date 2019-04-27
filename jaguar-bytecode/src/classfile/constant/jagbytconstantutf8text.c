@@ -37,60 +37,51 @@ struct _JagBytConstantUtf8TextPrivate {
 static void l_constant_iface_init(JagBytIConstantInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytConstantUtf8Text, jag_byt_constant_utf8_text, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagBytConstantUtf8Text)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_ICONSTANT, l_constant_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_constant_utf8_text_class_init(JagBytConstantUtf8TextClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytConstantUtf8TextPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_constant_utf8_text_init(JagBytConstantUtf8Text *instance) {
-	JagBytConstantUtf8TextPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_CONSTANT_UTF8_TEXT, JagBytConstantUtf8TextPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytConstantUtf8Text *instance = JAG_BYT_CONSTANT_UTF8_TEXT(object);
-	JagBytConstantUtf8TextPrivate *priv = instance->priv;
+	JagBytConstantUtf8TextPrivate *priv = jag_byt_constant_utf8_text_get_instance_private(instance);
 	cat_unref_ptr(priv->a_text);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_constant_utf8_text_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_constant_utf8_text_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytConstantUtf8Text *jag_byt_constant_utf8_text_new(CatStringWo *a_text) {
 	JagBytConstantUtf8Text *result = g_object_new(JAG_BYT_TYPE_CONSTANT_UTF8_TEXT, NULL);
 	cat_ref_anounce(result);
-	JagBytConstantUtf8TextPrivate *priv = result->priv;
+	JagBytConstantUtf8TextPrivate *priv = jag_byt_constant_utf8_text_get_instance_private(result);
 	priv->a_text = cat_ref_ptr(a_text);
 	cat_log_debug("text=%s", cat_string_wo_getchars(priv->a_text));
 	return result;
 }
 
-
 CatStringWo *jag_byt_constant_utf8_text_get_value(JagBytConstantUtf8Text *constant_ut8) {
-	return constant_ut8->priv->a_text;
+	JagBytConstantUtf8TextPrivate *priv = jag_byt_constant_utf8_text_get_instance_private(constant_ut8);
+	return priv->a_text;
 }
-
-
-
 
 
 /********************* start JagBytIConstantInterface implementation *********************/
@@ -103,11 +94,9 @@ static gboolean l_constant_try_resolve(JagBytIConstant *self, struct _JagBytCons
 	return TRUE;
 }
 
-
 static void l_constant_iface_init(JagBytIConstantInterface *iface) {
 	iface->isResolved = l_constant_is_resolved;
 	iface->tryResolve = l_constant_try_resolve;
 }
-
 
 /********************* end JagBytIConstantInterface implementation *********************/

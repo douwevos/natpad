@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTTPHEADER_H_
 #define JAGASTTPHEADER_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_TP_HEADER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_TP_HEADER))
 #define JAG_AST_IS_TP_HEADER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_TP_HEADER))
 #define JAG_AST_TP_HEADER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_TP_HEADER, JagAstTpHeaderClass))
-#define JAG_AST_TP_HEADER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_TP_HEADER, JagAstTpHeaderPrivate))
 
 typedef struct _JagAstTpHeader               JagAstTpHeader;
 typedef struct _JagAstTpHeaderPrivate        JagAstTpHeaderPrivate;
@@ -47,7 +45,6 @@ typedef struct _JagAstTpHeaderClass          JagAstTpHeaderClass;
 
 struct _JagAstTpHeader {
 	GObject parent;
-	JagAstTpHeaderPrivate *priv;
 };
 
 struct _JagAstTpHeaderClass {
@@ -62,6 +59,5 @@ JagAstTpHeader *jag_ast_tp_header_new(JagBytName *classname, JagAstModifiers *mo
 void jag_ast_tp_header_write(JagAstTpHeader *tp_header, JagAstWriter *out);
 
 G_END_DECLS
-
 
 #endif /* JAGASTTPHEADER_H_ */

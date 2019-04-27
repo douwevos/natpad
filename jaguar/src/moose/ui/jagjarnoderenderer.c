@@ -27,48 +27,36 @@
 #define CAT_LOG_CLAZZ "JagJarNodeRenderer"
 #include <logging/catlog.h>
 
-struct _JagJarNodeRendererPrivate {
-	void *dummy;
-};
-
 static void l_renderer_iface_init(MooINodeRendererInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JagJarNodeRenderer, jag_jar_node_renderer, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(JagJarNodeRenderer, jag_jar_node_renderer, G_TYPE_OBJECT, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_RENDERER, l_renderer_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_jar_node_renderer_class_init(JagJarNodeRendererClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagJarNodeRendererPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_jar_node_renderer_init(JagJarNodeRenderer *instance) {
-	JagJarNodeRendererPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_JAR_NODE_RENDERER, JagJarNodeRendererPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_jar_node_renderer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_jar_node_renderer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagJarNodeRenderer *jag_jar_node_renderer_new() {
 	JagJarNodeRenderer *result = g_object_new(JAG_TYPE_JAR_NODE_RENDERER, NULL);
@@ -76,18 +64,11 @@ JagJarNodeRenderer *jag_jar_node_renderer_new() {
 	return result;
 }
 
-
-
-
-
-
 void jag_jar_renderer_draw_jar(cairo_t *cairo, double xoffset, int yoffset, double size, gboolean with_blue) {
-
 	double nn = size*0.08;
 	xoffset += nn;
 	yoffset += nn;
 	size = size-nn*2.0;
-
 
 //	double x2  = 0.5+xoffset+(size*0.260);
 //	double y2 = 0.5+yoffset+(size*0.165);
@@ -123,9 +104,6 @@ void jag_jar_renderer_draw_jar(cairo_t *cairo, double xoffset, int yoffset, doub
 	double x2  = 0.5+xoffset+(size*0.90);
 	double x21  = 0.5+xoffset+(size*0.85);
 
-
-
-
 	cairo_set_line_width(cairo, 0.75);
 
 	/* glass */
@@ -153,7 +131,6 @@ void jag_jar_renderer_draw_jar(cairo_t *cairo, double xoffset, int yoffset, doub
 		cairo_set_source_rgb(cairo, 0.85, 0.85, 1.0);
 	}
 
-
 	cairo_fill_preserve(cairo);
 //	cairo_set_source_rgb(cairo, 0.3, 0.3, 0.7);
 	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0);
@@ -170,7 +147,6 @@ void jag_jar_renderer_draw_jar(cairo_t *cairo, double xoffset, int yoffset, doub
 
 	cairo_set_line_width(cairo, 1.0);
 
-
 	cairo_move_to(cairo, x1,y2);
 	cairo_curve_to(cairo, x1,y1, x2,y1, x2,y2);
 	cairo_line_to(cairo, x2, y4);
@@ -183,16 +159,11 @@ void jag_jar_renderer_draw_jar(cairo_t *cairo, double xoffset, int yoffset, doub
 	cairo_fill_preserve(cairo);
 	cairo_set_source_rgb(cairo, 0.0, 0.3, 0.0);
 	cairo_stroke(cairo);
-
 }
-
-
 
 /********************* begin MooINodeRendererFactory implementation *********************/
 
-
 static void l_update_layout(MooINodeRenderer *self, struct _MooNodeLayout *node_layout) {
-
 }
 
 static void l_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNodeLayout *node_layout) {
@@ -203,8 +174,6 @@ static void l_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNodeLayou
 	layout_x += size;
 	jag_jar_renderer_draw_jar(cairo, layout_x, layout_y, size, FALSE);
 }
-
-
 
 static void l_renderer_iface_init(MooINodeRendererInterface *iface) {
 	iface->updateLayout = l_update_layout;

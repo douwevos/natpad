@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define VIP_IS_PATH(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_PATH))
 #define VIP_IS_PATH_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_PATH))
 #define VIP_PATH_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_PATH, VipPathClass))
-#define VIP_PATH_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_PATH, VipPathPrivate))
 
 typedef struct _VipPath               VipPath;
 typedef struct _VipPathPrivate        VipPathPrivate;
@@ -57,7 +56,6 @@ struct _VipICdProvider;
 
 struct _VipPath {
 	GObject parent;
-	VipPathPrivate *priv;
 };
 
 struct _VipPathClass {
@@ -108,6 +106,5 @@ gboolean vip_path_is_a_child(VipPath *path, VipPath *potential_child);
 VipPathDriveType vip_path_get_directory_type(VipPath *path);
 
 G_END_DECLS
-
 
 #endif /* VIPPATH_H_ */

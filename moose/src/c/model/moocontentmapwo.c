@@ -43,46 +43,40 @@ struct _MooContentMapWoPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooContentMapWo, moo_content_map_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooContentMapWo)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_content_map_wo_class_init(MooContentMapWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooContentMapWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_content_map_wo_init(MooContentMapWo *instance) {
-	MooContentMapWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_CONTENT_MAP_WO, MooContentMapWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	MooContentMapWo *instance = moo_content_map_wo(object);
-	MooContentMapWoPrivate *priv = instance->priv;
+	MooContentMapWo *instance = MOO_CONTENT_MAP_WO(object);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(instance);
 	if (priv->wo_info) {
 		cat_unref_ptr(priv->wo_info->original);
 		cat_unref_ptr(priv->wo_info->e_original_map);
 		cat_free_ptr(priv->wo_info);
 	}
 	cat_unref_ptr(priv->e_map);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_content_map_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_content_map_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -90,7 +84,7 @@ static void l_finalize(GObject *object) {
 MooContentMapWo *moo_content_map_wo_new() {
 	MooContentMapWo *result = g_object_new(MOO_TYPE_CONTENT_MAP_WO, NULL);
 	cat_ref_anounce(result);
-	MooContentMapWoPrivate *priv = result->priv;
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(result);
 	priv->e_map = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 	priv->version = 1;
 	priv->wo_info = g_new0(WoInfo, 1);
@@ -98,11 +92,11 @@ MooContentMapWo *moo_content_map_wo_new() {
 }
 
 MooContentMapWo *moo_content_map_wo_ensure_editable(MooContentMapWo *content_map) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(content_map);
 	if (priv->wo_info==NULL) {
 		MooContentMapWo *result = g_object_new(MOO_TYPE_CONTENT_MAP_WO, NULL);
 		cat_ref_anounce(result);
-		MooContentMapWoPrivate *rpriv = result->priv;
+		MooContentMapWoPrivate *rpriv = moo_content_map_wo_get_instance_private(result);
 		rpriv->wo_info = g_new0(WoInfo, 1);
 		rpriv->wo_info->original = cat_ref_ptr(content_map);
 		rpriv->wo_info->e_original_map = cat_ref_ptr(priv->e_map);
@@ -115,12 +109,12 @@ MooContentMapWo *moo_content_map_wo_ensure_editable(MooContentMapWo *content_map
 
 
 gboolean moo_content_map_wo_is_fixed(MooContentMapWo *content_map) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(content_map);
 	return priv->wo_info == NULL;
 }
 
 MooContentMapWo *moo_content_map_wo_anchor(MooContentMapWo *content_map, int version) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(content_map);
 	if (priv->wo_info == NULL) {
 		return content_map;
 	}
@@ -177,8 +171,8 @@ gboolean moo_content_map_wo_equal(MooContentMapWo *content_map_a, MooContentMapW
 		return FALSE;
 	}
 
-	MooContentMapWoPrivate *priv_a = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map_a);
-	MooContentMapWoPrivate *priv_b = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map_b);
+	MooContentMapWoPrivate *priv_a = moo_content_map_wo_get_instance_private(content_map_a);
+	MooContentMapWoPrivate *priv_b = moo_content_map_wo_get_instance_private(content_map_b);
 	if (priv_a->e_map==priv_b->e_map) {
 		return TRUE;
 	}
@@ -243,27 +237,27 @@ gboolean moo_content_map_wo_equal(MooContentMapWo *content_map_a, MooContentMapW
 
 
 void moo_content_map_wo_set(MooContentMapWo *content_map, MooIContent *content) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(content_map);
 	CHECK_IF_WRITABLE_LIST(content_map, )
 	CatStringWo *key = moo_icontent_get_key(content);
 	cat_hash_map_wo_put(priv->e_map, (GObject*) key, (GObject *) content);
 }
 
 void moo_content_map_wo_set_with_key(MooContentMapWo *content_map, MooIContent *content, CatStringWo *key) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(content_map);
 	CHECK_IF_WRITABLE_LIST(content_map, )
 	cat_hash_map_wo_put(priv->e_map, (GObject*) key, (GObject *) content);
 }
 
 void moo_content_map_wo_create_link(MooContentMapWo *content_map, CatStringWo *key, CatStringWo *link_to) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(content_map);
 	CHECK_IF_WRITABLE_LIST(content_map, )
 	cat_hash_map_wo_put(priv->e_map, (GObject*) key, (GObject *) link_to);
 }
 
 
 MooIContent *moo_content_map_wo_get(MooContentMapWo *content_map, CatStringWo *key) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(content_map);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(content_map);
 	while(TRUE) {
 		GObject *val = cat_hash_map_wo_get(priv->e_map, key);
 		if (MOO_IS_ICONTENT(val)) {
@@ -280,9 +274,8 @@ MooIContent *moo_content_map_wo_get(MooContentMapWo *content_map, CatStringWo *k
 	return NULL;
 }
 
-
 GObject *moo_content_map_wo_get_raw(MooContentMapWo *self, CatStringWo *key) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(self);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(self);
 	return cat_hash_map_wo_get(priv->e_map, key);
 }
 
@@ -290,7 +283,8 @@ GObject *moo_content_map_wo_get_raw(MooContentMapWo *self, CatStringWo *key) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MooContentMapWoPrivate *priv = MOO_CONTENT_MAP_WO_GET_PRIVATE(self);
+	MooContentMapWo *instance = MOO_CONTENT_MAP_WO(self);
+	MooContentMapWoPrivate *priv = moo_content_map_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 
 	cat_string_wo_append_chars(append_to, iname);

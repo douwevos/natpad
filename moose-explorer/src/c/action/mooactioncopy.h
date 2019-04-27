@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ACTION_COPY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ACTION_COPY))
 #define MOO_IS_ACTION_COPY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ACTION_COPY))
 #define MOO_ACTION_COPY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ACTION_COPY, MooActionCopyClass))
-#define MOO_ACTION_COPY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ACTION_COPY, MooActionCopyPrivate))
-
 
 typedef struct _MooActionCopy               MooActionCopy;
 typedef struct _MooActionCopyPrivate        MooActionCopyPrivate;
 typedef struct _MooActionCopyClass          MooActionCopyClass;
 
-
 struct _MooActionCopy {
 	LeaAction parent;
-	MooActionCopyPrivate *priv;
 };
 
 struct _MooActionCopyClass {
 	LeaActionClass parent_class;
 };
-
 
 GType moo_action_copy_get_type();
 

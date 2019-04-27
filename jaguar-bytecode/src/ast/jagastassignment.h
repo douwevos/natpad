@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTASSIGNMENT_H_
 #define JAGASTASSIGNMENT_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_ASSIGNMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_ASSIGNMENT))
 #define JAG_AST_IS_ASSIGNMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_ASSIGNMENT))
 #define JAG_AST_ASSIGNMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_ASSIGNMENT, JagAstAssignmentClass))
-#define JAG_AST_ASSIGNMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_ASSIGNMENT, JagAstAssignmentPrivate))
 
 typedef struct _JagAstAssignment               JagAstAssignment;
 typedef struct _JagAstAssignmentPrivate        JagAstAssignmentPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstAssignmentClass          JagAstAssignmentClass;
 
 struct _JagAstAssignment {
 	GObject parent;
-	JagAstAssignmentPrivate *priv;
 };
 
 struct _JagAstAssignmentClass {
@@ -59,8 +56,6 @@ JagAstAssignment *jag_ast_assignment_new(JagAstIExpression *lvalue, JagAstIExpre
 
 void jag_ast_assignment_write(JagAstAssignment *assignment, JagAstWriter *out);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTASSIGNMENT_H_ */

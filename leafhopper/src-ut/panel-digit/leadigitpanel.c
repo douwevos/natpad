@@ -30,30 +30,24 @@
 #define CAT_LOG_CLAZZ "LeaDigitPanel"
 #include <logging/catlog.h>
 
-G_DEFINE_TYPE(LeaDigitPanel, lea_digit_panel, LEA_TYPE_PANEL)
+G_DEFINE_TYPE(LeaDigitPanel, lea_digit_panel, LEA_TYPE_PANEL) // @suppress("Unused static function")
 
-static gpointer parent_class = NULL;
-
-static void _finalize(GObject *object);
+static void l_finalize(GObject *object);
 
 static void lea_digit_panel_class_init(LeaDigitPanelClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->finalize = _finalize;
+	object_class->finalize = l_finalize;
 }
 
 static void lea_digit_panel_init(LeaDigitPanel *obj) {
 }
 
-
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalizing: %p %s", object, g_type_name_from_instance((GTypeInstance *) object));
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(lea_digit_panel_parent_class)->finalize(object);
 	cat_log_detail("finalized: %p", object);
 }
-
 
 static void l_disbale_actions(GtkButton *button, gpointer user_data) {
 }

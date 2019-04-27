@@ -33,54 +33,47 @@ struct _JagBytLabelRepositoryPrivate {
 	int hard_count;
 };
 
-G_DEFINE_TYPE (JagBytLabelRepository, jag_byt_label_repository, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytLabelRepository, jag_byt_label_repository, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_label_repository_class_init(JagBytLabelRepositoryClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytLabelRepositoryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_label_repository_init(JagBytLabelRepository *instance) {
-	JagBytLabelRepositoryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_LABEL_REPOSITORY, JagBytLabelRepositoryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytLabelRepository *instance = JAG_BYT_LABEL_REPOSITORY(object);
-	JagBytLabelRepositoryPrivate *priv = instance->priv;
+	JagBytLabelRepositoryPrivate *priv = jag_byt_label_repository_get_instance_private(instance);
 	cat_unref_ptr(priv->e_label_set);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_label_repository_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_label_repository_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytLabelRepository *jag_byt_label_repository_new() {
 	JagBytLabelRepository *result = g_object_new(JAG_BYT_TYPE_LABEL_REPOSITORY, NULL);
 	cat_ref_anounce(result);
-	JagBytLabelRepositoryPrivate *priv = result->priv;
+	JagBytLabelRepositoryPrivate *priv = jag_byt_label_repository_get_instance_private(result);
 	priv->e_label_set = cat_hash_map_wo_new((GHashFunc) cat_integer_hash, (GEqualFunc) cat_integer_equal);
 	priv->hard_count = 0;
 	return result;
 }
 
 JagBytLabel *jag_byt_label_repository_get(JagBytLabelRepository *label_repository, int mnemonicIndex) {
-	JagBytLabelRepositoryPrivate *priv = JAG_BYT_LABEL_REPOSITORY_GET_PRIVATE(label_repository);
+	JagBytLabelRepositoryPrivate *priv = jag_byt_label_repository_get_instance_private(label_repository);
 	CatInteger *midx = cat_integer_new(mnemonicIndex);
 	JagBytLabel *result = (JagBytLabel *) cat_hash_map_wo_get(priv->e_label_set, midx);
 	cat_unref_ptr(midx);
@@ -88,9 +81,8 @@ JagBytLabel *jag_byt_label_repository_get(JagBytLabelRepository *label_repositor
 }
 
 
-
 JagBytLabel *jag_byt_label_repository_create_soft(JagBytLabelRepository *label_repository, int mnemonicIndex, int offset) {
-	JagBytLabelRepositoryPrivate *priv = JAG_BYT_LABEL_REPOSITORY_GET_PRIVATE(label_repository);
+	JagBytLabelRepositoryPrivate *priv = jag_byt_label_repository_get_instance_private(label_repository);
 	CatInteger *midx = cat_integer_new(mnemonicIndex);
 	JagBytLabel *result = (JagBytLabel *) cat_hash_map_wo_get(priv->e_label_set, midx);
 	if (result == NULL) {
@@ -103,7 +95,7 @@ JagBytLabel *jag_byt_label_repository_create_soft(JagBytLabelRepository *label_r
 }
 
 JagBytLabel *jag_byt_label_repository_create_hard(JagBytLabelRepository *label_repository, int mnemonicIndex, int bytecodeOffset) {
-	JagBytLabelRepositoryPrivate *priv = JAG_BYT_LABEL_REPOSITORY_GET_PRIVATE(label_repository);
+	JagBytLabelRepositoryPrivate *priv = jag_byt_label_repository_get_instance_private(label_repository);
 	CatInteger *midx = cat_integer_new(mnemonicIndex);
 	JagBytLabel *result = (JagBytLabel *) cat_hash_map_wo_get(priv->e_label_set, midx);
 	if (result == NULL) {
@@ -121,9 +113,3 @@ JagBytLabel *jag_byt_label_repository_create_hard(JagBytLabelRepository *label_r
 	cat_unref_ptr(midx);
 	return result;
 }
-
-
-
-
-
-

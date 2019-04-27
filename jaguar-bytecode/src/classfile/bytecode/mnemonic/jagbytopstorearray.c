@@ -36,6 +36,7 @@ struct _JagBytOpStoreArrayPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpStoreArray, jag_byt_op_store_array, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpStoreArray)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -43,16 +44,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_store_array_class_init(JagBytOpStoreArrayClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpStoreArrayPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_store_array_init(JagBytOpStoreArray *instance) {
-	JagBytOpStoreArrayPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_STORE_ARRAY, JagBytOpStoreArrayPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -71,20 +68,22 @@ static void l_finalize(GObject *object) {
 JagBytOpStoreArray *jag_byt_op_store_array_new(JagBytOperation operation, int offset, JagBytType array_content_type) {
 	JagBytOpStoreArray *result = g_object_new(JAG_BYT_TYPE_OP_STORE_ARRAY, NULL);
 	cat_ref_anounce(result);
-	JagBytOpStoreArrayPrivate *priv = result->priv;
+	JagBytOpStoreArrayPrivate *priv = jag_byt_op_store_array_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 1);
 	priv->array_content_type = array_content_type;
 	return result;
 }
 
 JagBytType jag_byt_op_store_array_get_store_type(JagBytOpStoreArray *store_array) {
-	return JAG_BYT_OP_STORE_ARRAY_GET_PRIVATE(store_array)->array_content_type;
+	JagBytOpStoreArrayPrivate *priv = jag_byt_op_store_array_get_instance_private(store_array);
+	return priv->array_content_type;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpStoreArrayPrivate *priv = JAG_BYT_OP_STORE_ARRAY_GET_PRIVATE(self);
+	JagBytOpStoreArray *instance = JAG_BYT_OP_STORE_ARRAY(self);
+	JagBytOpStoreArrayPrivate *priv = jag_byt_op_store_array_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new();
 	short op_code = jag_byt_imnemonic_get_opp_code(self);
 	switch(priv->array_content_type) {

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGJARNODERENDERER_H_
 #define JAGJARNODERENDERER_H_
 
@@ -36,30 +35,23 @@ G_BEGIN_DECLS
 #define JAG_IS_JAR_NODE_RENDERER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_JAR_NODE_RENDERER))
 #define JAG_IS_JAR_NODE_RENDERER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_JAR_NODE_RENDERER))
 #define JAG_JAR_NODE_RENDERER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_JAR_NODE_RENDERER, JagJarNodeRendererClass))
-#define JAG_JAR_NODE_RENDERER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_JAR_NODE_RENDERER, JagJarNodeRendererPrivate))
-
 
 typedef struct _JagJarNodeRenderer               JagJarNodeRenderer;
-typedef struct _JagJarNodeRendererPrivate        JagJarNodeRendererPrivate;
 typedef struct _JagJarNodeRendererClass          JagJarNodeRendererClass;
-
 
 struct _JagJarNodeRenderer {
 	GObject parent;
-	JagJarNodeRendererPrivate *priv;
 };
 
 struct _JagJarNodeRendererClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_jar_node_renderer_get_type();
 
 JagJarNodeRenderer *jag_jar_node_renderer_new();
 
 void jag_jar_renderer_draw_jar(cairo_t *cairo, double xoffset, int yoffset, double size, gboolean with_blue);
-
 
 G_END_DECLS
 

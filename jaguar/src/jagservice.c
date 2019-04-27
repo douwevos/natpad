@@ -68,45 +68,36 @@ struct _JagServicePrivate {
 	JagMooseService *jag_moose_service;
 
 	JagEditorConnector *connector;
-
 };
 
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface);
 static void l_change_listener_iface_init(CowIChangeListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagService, jag_service, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagService)
 		G_IMPLEMENT_INTERFACE(ELK_TYPE_IRESOURCE_HANDLER, l_resource_handler_iface_init);
 		G_IMPLEMENT_INTERFACE(COW_TYPE_ICHANGE_LISTENER, l_change_listener_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_service_class_init(JagServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 
 }
 
 static void jag_service_init(JagService *instance) {
-	JagServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_SERVICE, JagServicePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagService *instance = JAG_SERVICE(object);
-	JagServicePrivate *priv = instance->priv;
-
+	JagServicePrivate *priv = jag_service_get_instance_private(instance);
 
 	cat_unref_ptr(priv->jag_moose_service);
-
 
 	if (priv->indexer) {
 //		if (priv->module_map) {
@@ -141,27 +132,23 @@ static void _dispose(GObject *object) {
 //	}
 //	cat_unref_ptr(priv->module_map);
 //	cat_unref_ptr(priv->wor_service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
-
-
-
 static void l_setup_properties_container(JagService *jag_service) {
-	JagServicePrivate *priv = JAG_SERVICE_GET_PRIVATE(jag_service);
+	JagServicePrivate *priv = jag_service_get_instance_private(jag_service);
 	priv->module_properties_handler = jag_module_properties_handler_new(priv->jag_moose_service);
 
 	MooCowPropertiesContainer *cow_properties_container = (MooCowPropertiesContainer *) moo_service_get_cow_properties_container(priv->moo_service);
 	moo_cow_properties_container_add_handler(cow_properties_container, (MooIPropertiesHandler *) priv->module_properties_handler);
-
 
 	priv->module_panel_factory = jag_module_panel_factory_new();
 
@@ -169,9 +156,8 @@ static void l_setup_properties_container(JagService *jag_service) {
 	cow_panel_model_add_factory(panel_model, (CowIPanelFactory *) priv->module_panel_factory);
 }
 
-
 static void l_attach_preferences(JagService *jag_service) {
-	JagServicePrivate *priv = JAG_SERVICE_GET_PRIVATE(jag_service);
+	JagServicePrivate *priv = jag_service_get_instance_private(jag_service);
 	ElkPreferencesService *prefs_service = elk_service_get_preferences_service(priv->elk_service);
 	CowPanelModel *panel_model = elk_preferences_service_get_panel_model(prefs_service);
 
@@ -192,7 +178,7 @@ static void l_attach_preferences(JagService *jag_service) {
 JagService *jag_service_new(WorService *wor_service, ElkService *elk_service, MooService *moo_service) {
 	JagService *result = g_object_new(JAG_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	JagServicePrivate *priv = result->priv;
+	JagServicePrivate *priv = jag_service_get_instance_private(result);
 	priv->wor_service = wor_service;
 	priv->elk_service = cat_ref_ptr(elk_service);
 	priv->moo_service = cat_ref_ptr(moo_service);
@@ -208,22 +194,14 @@ JagService *jag_service_new(WorService *wor_service, ElkService *elk_service, Mo
 //	l_setup_configuration_container(result);
 //	jag_module_map_add_listener(priv->module_map, JAG_IMODULE_MAP_LISTENER(priv->indexer));
 
-
-
-
-
 	l_attach_preferences(result);
-
 	return result;
 }
 
-
-
 //JagIJarMap *jag_service_get_jar_map(JagService *jag_service) {
-//	JagServicePrivate *priv = JAG_SERVICE_GET_PRIVATE(jag_service);
+//	JagServicePrivate *priv = jag_service_get_instance_private(jag_service);
 //	return (JagIJarMap *) priv->module_map;
 //}
-
 
 
 static CatS s_txt_java = CAT_S_DEF(".java");
@@ -231,7 +209,7 @@ static CatS s_txt_dot_class = CAT_S_DEF(".class");
 
 static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_enlist_to, MooNodeWo *node) {
 	JagService *jag_service = JAG_SERVICE(self);
-	JagServicePrivate *priv = JAG_SERVICE_GET_PRIVATE(jag_service);
+	JagServicePrivate *priv = jag_service_get_instance_private(jag_service);
 
 	JagSrcfileContentWo *classfile_content = (JagSrcfileContentWo *) moo_node_wo_get_content((MooNodeWo *) node, jag_srcfile_content_wo_key());
 	if (classfile_content) {
@@ -284,21 +262,17 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 	}
 }
 
-
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
 //	iface->matchScoreFile = l_match_score_file;
 //	iface->createFileEditor = l_create_file_editor;
 	iface->enlistEditorFactories = l_enlist_editor_factories;
 }
 
-
-
 /********************* start CowIChangeListener implementation *********************/
-
 
 static void l_config_changed(CowIChangeListener *self, GObject *new_config) {
 	JagService *jag_service = JAG_SERVICE(self);
-	JagServicePrivate *priv = JAG_SERVICE_GET_PRIVATE(jag_service);
+	JagServicePrivate *priv = jag_service_get_instance_private(jag_service);
 	ElkPreferencesWo *a_elk_prefs = (ElkPreferencesWo *) new_config;
 	JagPreferencesWo *a_jag_prefs = NULL;
 	if (a_elk_prefs) {
@@ -313,7 +287,6 @@ static void l_config_changed(CowIChangeListener *self, GObject *new_config) {
 
 
 }
-
 
 static void l_change_listener_iface_init(CowIChangeListenerInterface *iface) {
 	iface->configChanged = l_config_changed;

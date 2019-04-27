@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTTHROWSTATEMENT_H_
 #define JAGASTTHROWSTATEMENT_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_THROW_STATEMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_THROW_STATEMENT))
 #define JAG_AST_IS_THROW_STATEMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_THROW_STATEMENT))
 #define JAG_AST_THROW_STATEMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_THROW_STATEMENT, JagAstThrowStatementClass))
-#define JAG_AST_THROW_STATEMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_THROW_STATEMENT, JagAstThrowStatementPrivate))
 
 typedef struct _JagAstThrowStatement               JagAstThrowStatement;
 typedef struct _JagAstThrowStatementPrivate        JagAstThrowStatementPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstThrowStatementClass          JagAstThrowStatementClass;
 
 struct _JagAstThrowStatement {
 	GObject parent;
-	JagAstThrowStatementPrivate *priv;
 };
 
 struct _JagAstThrowStatementClass {
@@ -58,6 +55,5 @@ GType jag_ast_throw_statement_get_type();
 JagAstThrowStatement *jag_ast_throw_statement_new(JagAstIExpression *throw_expression);
 
 G_END_DECLS
-
 
 #endif /* JAGASTTHROWSTATEMENT_H_ */

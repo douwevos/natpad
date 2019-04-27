@@ -39,6 +39,7 @@ struct _JagBytOpTableSwitchPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpTableSwitch, jag_byt_op_table_switch, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpTableSwitch)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -46,16 +47,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_table_switch_class_init(JagBytOpTableSwitchClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpTableSwitchPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_table_switch_init(JagBytOpTableSwitch *instance) {
-	JagBytOpTableSwitchPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_TABLE_SWITCH, JagBytOpTableSwitchPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -68,7 +65,7 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
 	JagBytOpTableSwitch *instance = JAG_BYT_OP_TABLE_SWITCH(object);
-	JagBytOpTableSwitchPrivate *priv = instance->priv;
+	JagBytOpTableSwitchPrivate *priv = jag_byt_op_table_switch_get_instance_private(instance);
 	if (priv->table!=NULL) {
 		g_free(priv->table);
 		priv->table = NULL;
@@ -80,7 +77,7 @@ static void l_finalize(GObject *object) {
 JagBytOpTableSwitch *jag_byt_op_table_switch_new(int offset, int default_value, int low_value, int high_value, int *table) {
 	JagBytOpTableSwitch *result = g_object_new(JAG_BYT_TYPE_OP_TABLE_SWITCH, NULL);
 	cat_ref_anounce(result);
-	JagBytOpTableSwitchPrivate *priv = result->priv;
+	JagBytOpTableSwitchPrivate *priv = jag_byt_op_table_switch_get_instance_private(result);
 	int pad = (3-(offset+1))%4;
 	int length = (high_value-low_value+1)*4+12 + pad;
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, OP_TABLESWITCH, offset, length);
@@ -94,7 +91,8 @@ JagBytOpTableSwitch *jag_byt_op_table_switch_new(int offset, int default_value, 
 /********************* start JagBytIMnemonic implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpTableSwitchPrivate *priv = JAG_BYT_OP_TABLE_SWITCH_GET_PRIVATE(self);
+	JagBytOpTableSwitch *instance = JAG_BYT_OP_TABLE_SWITCH(self);
+	JagBytOpTableSwitchPrivate *priv = jag_byt_op_table_switch_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new_with("tableswitch ");
 
 	cat_string_wo_append_decimal(result, priv->low_value);

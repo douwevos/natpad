@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTFIELDACCESSEXPRESSION_H_
 #define JAGASTFIELDACCESSEXPRESSION_H_
-
 
 #include "jagastiexpression.h"
 #include "jagastidentifier.h"
@@ -38,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_FIELD_ACCESS_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_FIELD_ACCESS_EXPRESSION))
 #define JAG_AST_IS_FIELD_ACCESS_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_FIELD_ACCESS_EXPRESSION))
 #define JAG_AST_FIELD_ACCESS_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_FIELD_ACCESS_EXPRESSION, JagAstFieldAccessExpressionClass))
-#define JAG_AST_FIELD_ACCESS_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_FIELD_ACCESS_EXPRESSION, JagAstFieldAccessExpressionPrivate))
 
 typedef struct _JagAstFieldAccessExpression               JagAstFieldAccessExpression;
 typedef struct _JagAstFieldAccessExpressionPrivate        JagAstFieldAccessExpressionPrivate;
@@ -47,7 +44,6 @@ typedef struct _JagAstFieldAccessExpressionClass          JagAstFieldAccessExpre
 
 struct _JagAstFieldAccessExpression {
 	GObject parent;
-	JagAstFieldAccessExpressionPrivate *priv;
 };
 
 struct _JagAstFieldAccessExpressionClass {
@@ -60,6 +56,5 @@ GType jag_ast_field_access_expression_get_type();
 JagAstFieldAccessExpression *jag_ast_field_access_expression_new(JagAstIExpression *instance_expression, JagAstIdentifier *field_name);
 
 G_END_DECLS
-
 
 #endif /* JAGASTFIELDACCESSEXPRESSION_H_ */

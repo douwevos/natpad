@@ -39,15 +39,13 @@ struct _VipDeleteNodeRequestPrivate {
 	CatLock *lock;
 };
 
-G_DEFINE_TYPE(VipDeleteNodeRequest, vip_delete_node_request, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE_WITH_PRIVATE(VipDeleteNodeRequest, vip_delete_node_request, WOR_TYPE_REQUEST);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void vip_delete_node_request_class_init(VipDeleteNodeRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipDeleteNodeRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -57,14 +55,12 @@ static void vip_delete_node_request_class_init(VipDeleteNodeRequestClass *clazz)
 }
 
 static void vip_delete_node_request_init(VipDeleteNodeRequest *instance) {
-	VipDeleteNodeRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_DELETE_NODE_REQUEST, VipDeleteNodeRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipDeleteNodeRequest *instance = VIP_DELETE_NODE_REQUEST(object);
-	VipDeleteNodeRequestPrivate *priv = instance->priv;
+	VipDeleteNodeRequestPrivate *priv = vip_delete_node_request_get_instance_private(instance);
 	cat_unref_ptr(priv->lock);
 	cat_unref_ptr(priv->node_to_delete);
 	cat_unref_ptr(priv->vip_service);
@@ -83,7 +79,7 @@ static void l_finalize(GObject *object) {
 VipDeleteNodeRequest *vip_delete_node_request_new(struct _VipService *vip_service, CatReadableTreeNode *node_to_delete) {
 	VipDeleteNodeRequest *result = g_object_new(VIP_TYPE_DELETE_NODE_REQUEST, NULL);
 	cat_ref_anounce(result);
-	VipDeleteNodeRequestPrivate *priv = result->priv;
+	VipDeleteNodeRequestPrivate *priv = vip_delete_node_request_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->node_to_delete = cat_ref_ptr(node_to_delete);
 	priv->did_delete = FALSE;
@@ -93,10 +89,9 @@ VipDeleteNodeRequest *vip_delete_node_request_new(struct _VipService *vip_servic
 	return result;
 }
 
-
 // TODO possible dead lock ... please add timeout
 gboolean vip_delete_node_request_wait_for_result(VipDeleteNodeRequest *request) {
-	VipDeleteNodeRequestPrivate *priv = VIP_DELETE_NODE_REQUEST_GET_PRIVATE(request);
+	VipDeleteNodeRequestPrivate *priv = vip_delete_node_request_get_instance_private(request);
 	cat_lock_lock(priv->lock);
 	while(!priv->did_run) {
 		cat_lock_wait(priv->lock);
@@ -107,7 +102,8 @@ gboolean vip_delete_node_request_wait_for_result(VipDeleteNodeRequest *request) 
 
 
 static void l_run_request(WorRequest *self) {
-	VipDeleteNodeRequestPrivate *priv = VIP_DELETE_NODE_REQUEST_GET_PRIVATE(self);
+	VipDeleteNodeRequest *instance = VIP_DELETE_NODE_REQUEST(self);
+	VipDeleteNodeRequestPrivate *priv = vip_delete_node_request_get_instance_private(instance);
 
 	CatTree *tree = vip_service_get_tree(priv->vip_service);
 	CatWritableTreeNode *writable_root_node = cat_tree_get_writable_root_node(tree);
@@ -143,6 +139,4 @@ static void l_run_request(WorRequest *self) {
 	priv->did_run = TRUE;
 	cat_lock_notify_all(priv->lock);
 	cat_lock_unlock(priv->lock);
-
 }
-

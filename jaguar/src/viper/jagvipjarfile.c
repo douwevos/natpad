@@ -39,52 +39,45 @@ static void l_file_iface_init(VipIFileInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagVipJarFile, jag_vip_jar_file, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagVipJarFile)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IRESOURCE, l_resource_iface_init);
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_IFILE, l_file_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_vip_jar_file_class_init(JagVipJarFileClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagVipJarFilePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_vip_jar_file_init(JagVipJarFile *instance) {
-	JagVipJarFilePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_VIP_JAR_FILE, JagVipJarFilePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagVipJarFile *instance = JAG_VIP_JAR_FILE(object);
-	JagVipJarFilePrivate *priv = instance->priv;
+	JagVipJarFilePrivate *priv = jag_vip_jar_file_get_instance_private(instance);
 	cat_unref_ptr(priv->a_entry_name);
 	cat_unref_ptr(priv->main_file);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_vip_jar_file_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_vip_jar_file_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagVipJarFile *jag_vip_jar_file_new(VipIFile *main_file, CatStringWo *a_entry_name, int entry_index) {
 	JagVipJarFile *result = g_object_new(JAG_TYPE_VIP_JAR_FILE, NULL);
 	cat_ref_anounce(result);
-	JagVipJarFilePrivate *priv = result->priv;
+	JagVipJarFilePrivate *priv = jag_vip_jar_file_get_instance_private(result);
 	priv->main_file = cat_ref_ptr(main_file);
 	priv->a_entry_name = cat_ref_ptr(a_entry_name);
 	priv->entry_index = entry_index;
@@ -92,13 +85,12 @@ JagVipJarFile *jag_vip_jar_file_new(VipIFile *main_file, CatStringWo *a_entry_na
 }
 
 
-
 /********************* start VipIResource implementation *********************/
 
 static CatStringWo *l_resource_get_name(VipIResource *self) {
-	JagVipJarFilePrivate *priv = JAG_VIP_JAR_FILE_GET_PRIVATE(self);
+	JagVipJarFile *instance = JAG_VIP_JAR_FILE(self);
+	JagVipJarFilePrivate *priv = jag_vip_jar_file_get_instance_private(instance);
 	return priv->a_entry_name;
-
 }
 
 static long long l_resource_last_modified(VipIResource *self) {
@@ -106,7 +98,8 @@ static long long l_resource_last_modified(VipIResource *self) {
 }
 
 VipPath *l_resource_path(VipIResource *self) {
-	JagVipJarFilePrivate *priv = JAG_VIP_JAR_FILE_GET_PRIVATE(self);
+	JagVipJarFile *instance = JAG_VIP_JAR_FILE(self);
+	JagVipJarFilePrivate *priv = jag_vip_jar_file_get_instance_private(instance);
 	VipPath *main_path = vip_iresource_path((VipIResource *) priv->main_file);
 
 	cat_log_error("%o", main_path);
@@ -135,7 +128,8 @@ static long long l_file_length(VipIFile *self) {
 }
 
 static CatIInputStream *l_file_open_input_stream(VipIFile *self) {
-	JagVipJarFilePrivate *priv = JAG_VIP_JAR_FILE_GET_PRIVATE(self);
+	JagVipJarFile *instance = JAG_VIP_JAR_FILE(self);
+	JagVipJarFilePrivate *priv = jag_vip_jar_file_get_instance_private(instance);
 
 	CatIInputStream *stream = vip_ifile_open_input_stream(priv->main_file);
 	if (stream) {
@@ -168,7 +162,6 @@ static CatIInputStream *l_file_open_input_stream(VipIFile *self) {
 	return NULL;
 }
 
-
 static void l_file_iface_init(VipIFileInterface *iface) {
 	iface->length = l_file_length;
 	iface->openInputStream = l_file_open_input_stream;
@@ -177,11 +170,11 @@ static void l_file_iface_init(VipIFileInterface *iface) {
 /********************* end VipIFile implementation *********************/
 
 void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagVipJarFilePrivate *priv = JAG_VIP_JAR_FILE_GET_PRIVATE(self);
+	JagVipJarFile *instance = JAG_VIP_JAR_FILE(self);
+	JagVipJarFilePrivate *priv = jag_vip_jar_file_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:%o, main_file=%o]", iname, self, priv->a_entry_name, priv->main_file);
 }
-
 
 static void l_stringable_iface_init(CatIStringableInterface *iface) {
 	iface->print = l_stringable_print;

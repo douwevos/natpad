@@ -36,63 +36,53 @@ struct _JagAstPrefixExpressionPrivate {
 static void l_expression_iface_init(JagAstIExpressionInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstPrefixExpression, jag_ast_prefix_expression, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstPrefixExpression)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_IEXPRESSION, l_expression_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_prefix_expression_class_init(JagAstPrefixExpressionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstPrefixExpressionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_prefix_expression_init(JagAstPrefixExpression *instance) {
-	JagAstPrefixExpressionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_PREFIX_EXPRESSION, JagAstPrefixExpressionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstPrefixExpression *instance = JAG_AST_PREFIX_EXPRESSION(object);
-	JagAstPrefixExpressionPrivate *priv = instance->priv;
+	JagAstPrefixExpressionPrivate *priv = jag_ast_prefix_expression_get_instance_private(instance);
 	cat_unref_ptr(priv->sub_expression);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_prefix_expression_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_prefix_expression_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstPrefixExpression *jag_ast_prefix_expression_new(gboolean is_increment, JagAstIExpression *sub_expression) {
 	JagAstPrefixExpression *result = g_object_new(JAG_AST_TYPE_PREFIX_EXPRESSION, NULL);
 	cat_ref_anounce(result);
-	JagAstPrefixExpressionPrivate *priv = result->priv;
+	JagAstPrefixExpressionPrivate *priv = jag_ast_prefix_expression_get_instance_private(result);
 	priv->is_increment = is_increment;
 	priv->sub_expression = cat_ref_ptr(sub_expression);
 	return result;
 }
 
 
-
-
-
-
-
 /********************* start JagAstIExpression implementation *********************/
 
 static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
-	JagAstPrefixExpressionPrivate *priv = JAG_AST_PREFIX_EXPRESSION_GET_PRIVATE(self);
+	JagAstPrefixExpression *instance = JAG_AST_PREFIX_EXPRESSION(self);
+	JagAstPrefixExpressionPrivate *priv = jag_ast_prefix_expression_get_instance_private(instance);
 	if (priv->is_increment) {
 		jag_ast_writer_print(out, cat_string_wo_new_with("++"));
 	} else {
@@ -106,4 +96,3 @@ static void l_expression_iface_init(JagAstIExpressionInterface *iface) {
 }
 
 /********************* end JagAstIExpression implementation *********************/
-

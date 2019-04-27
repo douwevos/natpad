@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTUTF8TEXT_H_
 #define JAGBYTCONSTANTUTF8TEXT_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_UTF8_TEXT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_UTF8_TEXT))
 #define JAG_BYT_IS_CONSTANT_UTF8_TEXT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_UTF8_TEXT))
 #define JAG_BYT_CONSTANT_UTF8_TEXT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_UTF8_TEXT, JagBytConstantUtf8TextClass))
-#define JAG_BYT_CONSTANT_UTF8_TEXT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_UTF8_TEXT, JagBytConstantUtf8TextPrivate))
 
 typedef struct _JagBytConstantUtf8Text               JagBytConstantUtf8Text;
 typedef struct _JagBytConstantUtf8TextPrivate        JagBytConstantUtf8TextPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagBytConstantUtf8TextClass          JagBytConstantUtf8TextClass
 
 struct _JagBytConstantUtf8Text {
 	GObject parent;
-	JagBytConstantUtf8TextPrivate *priv;
 };
 
 struct _JagBytConstantUtf8TextClass {

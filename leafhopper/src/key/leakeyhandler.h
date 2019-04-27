@@ -36,8 +36,6 @@ G_BEGIN_DECLS
 #define LEA_IS_KEY_HANDLER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_KEY_HANDLER))
 #define LEA_IS_KEY_HANDLER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_KEY_HANDLER))
 #define LEA_KEY_HANDLER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_KEY_HANDLER, LeaKeyHandlerClass))
-#define LEA_KEY_HANDLER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_KEY_HANDLER, LeaKeyHandlerPrivate))
-
 
 typedef struct _LeaKeyHandler	   		LeaKeyHandler;
 typedef struct _LeaKeyHandlerClass	  	LeaKeyHandlerClass;
@@ -63,7 +61,6 @@ void lea_key_handler_remove_binding(LeaKeyHandler *handler, LeaIKeyBinding *key_
 gboolean lea_key_handler_run(LeaKeyHandler *handler, LeaKey *key, LeaKeyContext *context);
 
 void lea_key_handler_update(LeaKeyHandler *handler, LeaActionGroup *action_group);
-
 
 G_END_DECLS
 

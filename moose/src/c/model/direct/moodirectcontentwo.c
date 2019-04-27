@@ -28,18 +28,12 @@
 #define CAT_LOG_CLAZZ "MooDirectContentWo"
 #include <logging/catlog.h>
 
-struct _MooDirectContentWoPrivate {
-	void *dummy;
-};
-
-
 static CatS moo_s_direct_content_key = CAT_S_DEF("MooDirectContentWo");
 
 static void l_content_iface_init(MooIContentInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(MooDirectContentWo, moo_direct_content_wo, CAT_TYPE_WO,
-		G_ADD_PRIVATE(MooDirectContentWo)
+G_DEFINE_TYPE_WITH_CODE(MooDirectContentWo, moo_direct_content_wo, CAT_TYPE_WO, // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ICONTENT, l_content_iface_init);
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
@@ -82,7 +76,6 @@ static void l_finalize(GObject *object) {
 MooDirectContentWo *moo_direct_content_wo_new() {
 	MooDirectContentWo *result = g_object_new(MOO_TYPE_DIRECT_CONTENT_WO, NULL);
 	cat_ref_anounce(result);
-//	MooDirectContentWoPrivate *priv = moo_direct_content_wo_get_instance_private(result);
 	cat_wo_construct((CatWo *) result, TRUE);
 	return result;
 }
@@ -94,7 +87,6 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 	}
 	return CAT_WO_CLASS(moo_direct_content_wo_parent_class)->constructEditable(e_uninitialized, original, info);
 }
-
 
 
 static gboolean l_equal(const CatWo *wo_a, const CatWo *wo_b) {
@@ -112,14 +104,6 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		cat_ref_anounce(e_uninitialized);
 	}
 
-//	MooDirectContentWoPrivate *priv = moo_direct_content_wo_get_instance_private(CHA_FORM_WO(e_uninitialized));
-//	if (wo_source) {
-//		MooDirectContentWoPrivate *priv_src = moo_direct_content_wo_get_instance_private(CHA_FORM_WO(wo_source));
-//		priv->fields = cat_wo_clone(priv_src->fields, CAT_CLONE_DEPTH_NONE);
-//	} else {
-//		priv->fields = cat_array_wo_new();
-//	}
-
 	CatWoClass *wocls = CAT_WO_CLASS(moo_direct_content_wo_parent_class);
 	if (wocls->cloneContent) {
 		return wocls->cloneContent(e_uninitialized, wo_source);
@@ -134,10 +118,7 @@ CatStringWo *moo_direct_content_wo_key() {
 	return CAT_S(moo_s_direct_content_key);
 }
 
-
 /********************* start MooIContent implementation *********************/
-
-
 
 static CatStringWo *l_content_get_key(MooIContent *self) {
 	return moo_direct_content_wo_key();
@@ -158,10 +139,7 @@ static void l_content_iface_init(MooIContentInterface *iface) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-//	MooDirectContentWo *instance = MOO_DIRECT_CONTENT_WO(self);
-//	MooDirectContentWoPrivate *priv = moo_direct_content_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
-
 	cat_string_wo_format(append_to, "%s[%p(%d): %s]", iname, self, cat_wo_get_version((CatWo *) self), cat_wo_is_anchored((CatWo *) self) ? "anchored" : "editable");
 }
 

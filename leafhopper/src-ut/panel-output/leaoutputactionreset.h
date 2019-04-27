@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define LEA_IS_OUTPUT_ACTION_RESET(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_OUTPUT_ACTION_RESET))
 #define LEA_IS_OUTPUT_ACTION_RESET_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_OUTPUT_ACTION_RESET))
 #define LEA_OUTPUT_ACTION_RESET_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_OUTPUT_ACTION_RESET, LeaOutputActionResetClass))
-#define LEA_OUTPUT_ACTION_RESET_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_OUTPUT_ACTION_RESET, LeaOutputActionResetPrivate))
 
 
 typedef struct _LeaOutputActionReset               LeaOutputActionReset;
@@ -44,7 +43,6 @@ typedef struct _LeaOutputActionResetClass          LeaOutputActionResetClass;
 
 struct _LeaOutputActionReset {
 	LeaAction parent;
-	LeaOutputActionResetPrivate *priv;
 };
 
 struct _LeaOutputActionResetClass {

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGMOOSESERVICE_H_
 #define JAGMOOSESERVICE_H_
 
@@ -38,23 +37,18 @@ G_BEGIN_DECLS
 #define JAG_IS_MOOSE_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_MOOSE_SERVICE))
 #define JAG_IS_MOOSE_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_MOOSE_SERVICE))
 #define JAG_MOOSE_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_MOOSE_SERVICE, JagMooseServiceClass))
-#define JAG_MOOSE_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_MOOSE_SERVICE, JagMooseServicePrivate))
-
 
 typedef struct _JagMooseService               JagMooseService;
 typedef struct _JagMooseServicePrivate        JagMooseServicePrivate;
 typedef struct _JagMooseServiceClass          JagMooseServiceClass;
 
-
 struct _JagMooseService {
 	GObject parent;
-	JagMooseServicePrivate *priv;
 };
 
 struct _JagMooseServiceClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_moose_service_get_type();
 

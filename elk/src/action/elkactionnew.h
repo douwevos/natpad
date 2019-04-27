@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define ELK_IS_ACTION_NEW(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_ACTION_NEW))
 #define ELK_IS_ACTION_NEW_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_ACTION_NEW))
 #define ELK_ACTION_NEW_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_ACTION_NEW, ElkActionNewClass))
-#define ELK_ACTION_NEW_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_ACTION_NEW, ElkActionNewPrivate))
 
 typedef struct _ElkActionNew               ElkActionNew;
 typedef struct _ElkActionNewPrivate        ElkActionNewPrivate;
@@ -45,7 +44,6 @@ typedef struct _ElkActionNewClass          ElkActionNewClass;
 
 struct _ElkActionNew {
 	LeaAction parent;
-	ElkActionNewPrivate *priv;
 };
 
 struct _ElkActionNewClass {

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTARGUMENTLIST_H_
 #define JAGASTARGUMENTLIST_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_ARGUMENT_LIST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_ARGUMENT_LIST))
 #define JAG_AST_IS_ARGUMENT_LIST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_ARGUMENT_LIST))
 #define JAG_AST_ARGUMENT_LIST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_ARGUMENT_LIST, JagAstArgumentListClass))
-#define JAG_AST_ARGUMENT_LIST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_ARGUMENT_LIST, JagAstArgumentListPrivate))
 
 typedef struct _JagAstArgumentList               JagAstArgumentList;
 typedef struct _JagAstArgumentListPrivate        JagAstArgumentListPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstArgumentListClass          JagAstArgumentListClass;
 
 struct _JagAstArgumentList {
 	GObject parent;
-	JagAstArgumentListPrivate *priv;
 };
 
 struct _JagAstArgumentListClass {
@@ -69,6 +66,5 @@ gboolean jag_ast_argument_list_equal(JagAstArgumentList *argument_list_a, JagAst
 CatStringWo *jag_ast_argument_list_as_text(JagAstArgumentList *argument_list, CatStringWo *e_dump_buffer);
 
 G_END_DECLS
-
 
 #endif /* JAGASTARGUMENTLIST_H_ */

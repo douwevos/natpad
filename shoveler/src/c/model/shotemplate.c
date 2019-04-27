@@ -33,48 +33,41 @@ struct _ShoTemplatePrivate {
 	CatArrayWo *arguments;
 };
 
-G_DEFINE_TYPE (ShoTemplate, sho_template, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(ShoTemplate, sho_template, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void sho_template_class_init(ShoTemplateClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ShoTemplatePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void sho_template_init(ShoTemplate *instance) {
-	ShoTemplatePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, SHO_TYPE_TEMPLATE, ShoTemplatePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ShoTemplate *instance = SHO_TEMPLATE(object);
-	ShoTemplatePrivate *priv = instance->priv;
+	ShoTemplatePrivate *priv = sho_template_get_instance_private(instance);
 	cat_unref_ptr(priv->name);
 	cat_unref_ptr(priv->arguments);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(sho_template_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(sho_template_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ShoTemplate *sho_template_new(CatStringWo *name) {
 	ShoTemplate *result = g_object_new(SHO_TYPE_TEMPLATE, NULL);
 	cat_ref_anounce(result);
-	ShoTemplatePrivate *priv = result->priv;
+	ShoTemplatePrivate *priv = sho_template_get_instance_private(result);
 	priv->name = cat_ref_ptr(name);
 	priv->arguments = cat_array_wo_new();
 	return result;
@@ -83,8 +76,8 @@ ShoTemplate *sho_template_new(CatStringWo *name) {
 ShoTemplate *sho_template_deep_copy(ShoTemplate *source) {
 	ShoTemplate *result = g_object_new(SHO_TYPE_TEMPLATE, NULL);
 	cat_ref_anounce(result);
-	ShoTemplatePrivate *priv = result->priv;
-	ShoTemplatePrivate *spriv = SHO_TEMPLATE_GET_PRIVATE(source);
+	ShoTemplatePrivate *priv = sho_template_get_instance_private(result);
+	ShoTemplatePrivate *spriv = sho_template_get_instance_private(source);
 	priv->name = cat_ref_ptr(spriv->name);
 	priv->arguments = cat_array_wo_new_size(cat_array_wo_size(spriv->arguments));
 
@@ -101,15 +94,12 @@ ShoTemplate *sho_template_deep_copy(ShoTemplate *source) {
 	return result;
 }
 
-
 CatStringWo *sho_template_get_name(ShoTemplate *stemplate) {
-	ShoTemplatePrivate *priv = SHO_TEMPLATE_GET_PRIVATE(stemplate);
+	ShoTemplatePrivate *priv = sho_template_get_instance_private(stemplate);
 	return priv->name;
 }
 
-
 void sho_template_add_argument(ShoTemplate *stemplate, ShoTemplateArgument *arg) {
-	ShoTemplatePrivate *priv = SHO_TEMPLATE_GET_PRIVATE(stemplate);
+	ShoTemplatePrivate *priv = sho_template_get_instance_private(stemplate);
 	cat_array_wo_append(priv->arguments, (GObject *) arg);
 }
-
