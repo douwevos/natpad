@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef SHOSERIALIZER_H_
 #define SHOSERIALIZER_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define SHO_IS_SERIALIZER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SHO_TYPE_SERIALIZER))
 #define SHO_IS_SERIALIZER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), SHO_TYPE_SERIALIZER))
 #define SHO_SERIALIZER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), SHO_TYPE_SERIALIZER, ShoSerializerClass))
-#define SHO_SERIALIZER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), SHO_TYPE_SERIALIZER, ShoSerializerPrivate))
 
 typedef struct _ShoSerializer               ShoSerializer;
 typedef struct _ShoSerializerPrivate        ShoSerializerPrivate;
@@ -45,7 +43,6 @@ typedef struct _ShoSerializerClass          ShoSerializerClass;
 
 struct _ShoSerializer {
 	GObject parent;
-	ShoSerializerPrivate *priv;
 };
 
 struct _ShoSerializerClass {

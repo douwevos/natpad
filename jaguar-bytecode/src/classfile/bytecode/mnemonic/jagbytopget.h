@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_GET(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_GET))
 #define JAG_BYT_IS_OP_GET_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_GET))
 #define JAG_BYT_OP_GET_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_GET, JagBytOpGetClass))
-#define JAG_BYT_OP_GET_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_GET, JagBytOpGetPrivate))
 
 typedef struct _JagBytOpGet               JagBytOpGet;
 typedef struct _JagBytOpGetPrivate        JagBytOpGetPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytOpGetClass          JagBytOpGetClass;
 
 struct _JagBytOpGet {
 	JagBytAbstractMnemonic parent;
-	JagBytOpGetPrivate *priv;
 };
 
 struct _JagBytOpGetClass {

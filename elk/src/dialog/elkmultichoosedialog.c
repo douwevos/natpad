@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "elkmultichoosedialog.h"
 #include <caterpillar.h>
 #include <dragonfly.h>
@@ -34,60 +33,49 @@
 #define RESPONSE_SELECT_ALL 20
 #define RESPONSE_SELECT_NONE 30
 
-
 struct _ElkMultiChooseDialogPrivate {
 	CatArrayWo *a_editor_list;
 	CatArrayWo *e_selected_list;
 	gboolean *item_selected;
 	GtkWidget *tree_view;
-
 };
 
-G_DEFINE_TYPE (ElkMultiChooseDialog, elk_multi_choose_dialog, GTK_TYPE_DIALOG)
+G_DEFINE_TYPE_WITH_PRIVATE(ElkMultiChooseDialog, elk_multi_choose_dialog, GTK_TYPE_DIALOG)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void elk_multi_choose_dialog_class_init(ElkMultiChooseDialogClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ElkMultiChooseDialogPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
-
-//	GtkDialogClass *sub_clazz = GTK_DIALOG_CLASS(clazz);
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void elk_multi_choose_dialog_init(ElkMultiChooseDialog *instance) {
-	ElkMultiChooseDialogPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_MULTI_CHOOSE_DIALOG, ElkMultiChooseDialogPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkMultiChooseDialog *instance = ELK_MULTI_CHOOSE_DIALOG(object);
-	ElkMultiChooseDialogPrivate *priv = instance->priv;
+	ElkMultiChooseDialogPrivate *priv = elk_multi_choose_dialog_get_instance_private(instance);
 	cat_unref_ptr(priv->a_editor_list);
 	cat_unref_ptr(priv->e_selected_list);
 	cat_free_ptr(priv->item_selected);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_multi_choose_dialog_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(elk_multi_choose_dialog_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 
 
 static void l_text_cell_data_func(GtkTreeViewColumn *column, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, ElkMultiChooseDialog *selector) {
-	ElkMultiChooseDialogPrivate *priv = ELK_MULTI_CHOOSE_DIALOG_GET_PRIVATE(selector);
+	ElkMultiChooseDialogPrivate *priv = elk_multi_choose_dialog_get_instance_private(selector);
 
 	void *data;
 	gtk_tree_model_get(model, iter, 0, &data, -1);
@@ -112,7 +100,7 @@ static void l_text_cell_data_func(GtkTreeViewColumn *column, GtkCellRenderer *re
 static void l_row_toggled(GtkCellRendererToggle *cell_renderer, gchar *path, gpointer user_data) {
 	cat_log_detail("path=%s\n", path);
 	ElkMultiChooseDialog *multi_choose_dialog = (ElkMultiChooseDialog *) user_data;
-	ElkMultiChooseDialogPrivate *priv = ELK_MULTI_CHOOSE_DIALOG_GET_PRIVATE(multi_choose_dialog);
+	ElkMultiChooseDialogPrivate *priv = elk_multi_choose_dialog_get_instance_private(multi_choose_dialog);
 	GtkTreeModel *tree_model = gtk_tree_view_get_model(GTK_TREE_VIEW(priv->tree_view));
 	GtkTreeIter tree_iter;
 	if (gtk_tree_model_get_iter_from_string(tree_model, &tree_iter, path)) {
@@ -129,7 +117,7 @@ static void l_row_toggled(GtkCellRendererToggle *cell_renderer, gchar *path, gpo
 }
 
 static void l_select_all(ElkMultiChooseDialog* multi_choose_dialog, gboolean activate) {
-	ElkMultiChooseDialogPrivate *priv = ELK_MULTI_CHOOSE_DIALOG_GET_PRIVATE(multi_choose_dialog);
+	ElkMultiChooseDialogPrivate *priv = elk_multi_choose_dialog_get_instance_private(multi_choose_dialog);
 	GtkTreeModel *tree_model = gtk_tree_view_get_model(GTK_TREE_VIEW(priv->tree_view));
 	GtkListStore *list_model = GTK_LIST_STORE(tree_model);
 	GtkTreeIter tree_iter;
@@ -152,7 +140,7 @@ static void l_select_all(ElkMultiChooseDialog* multi_choose_dialog, gboolean act
 ElkMultiChooseDialog *elk_multi_choose_dialog_new(GtkWidget *top_window, CatArrayWo *a_editor_list) {
 	ElkMultiChooseDialog *result = g_object_new(ELK_TYPE_MULTI_CHOOSE_DIALOG, NULL);
 	cat_ref_anounce(result);
-	ElkMultiChooseDialogPrivate *priv = result->priv;
+	ElkMultiChooseDialogPrivate *priv = elk_multi_choose_dialog_get_instance_private(result);
 	priv->a_editor_list = cat_ref_ptr(a_editor_list);
 	int item_count = cat_array_wo_size(a_editor_list);
 	priv->item_selected = g_new(gboolean, item_count);
@@ -228,13 +216,8 @@ ElkMultiChooseDialog *elk_multi_choose_dialog_new(GtkWidget *top_window, CatArra
 }
 
 
-
-
-
-
-
 int elk_multi_choose_dialog_run(ElkMultiChooseDialog* multi_choose_dialog) {
-	ElkMultiChooseDialogPrivate *priv = ELK_MULTI_CHOOSE_DIALOG_GET_PRIVATE(multi_choose_dialog);
+	ElkMultiChooseDialogPrivate *priv = elk_multi_choose_dialog_get_instance_private(multi_choose_dialog);
 	gboolean cont = TRUE;
 	int response;
 	cat_array_wo_clear(priv->e_selected_list);
@@ -271,6 +254,6 @@ int elk_multi_choose_dialog_run(ElkMultiChooseDialog* multi_choose_dialog) {
 
 
 CatArrayWo *elk_multi_choose_dialog_get_selected(ElkMultiChooseDialog* multi_choose_dialog) {
-	ElkMultiChooseDialogPrivate *priv = ELK_MULTI_CHOOSE_DIALOG_GET_PRIVATE(multi_choose_dialog);
+	ElkMultiChooseDialogPrivate *priv = elk_multi_choose_dialog_get_instance_private(multi_choose_dialog);
 	return priv->e_selected_list;
 }

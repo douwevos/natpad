@@ -21,11 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTDEFINES_H_
 #define JAGBYTDEFINES_H_
-
-
 
 #define JAG_ACC_PUBLIC        0x0001
 #define JAG_ACC_PRIVATE       0x0002
@@ -43,6 +40,5 @@
 #define JAG_ACC_SYNTHETIC     0x1000
 #define JAG_ACC_ANNOTATION    0x2000
 #define JAG_ACC_ENUM          0x4000
-
 
 #endif /* JAGBYTDEFINES_H_ */

@@ -34,52 +34,45 @@ struct _ElkActionCloseAllPrivate {
 	CatArrayWo *editor_list;
 };
 
-G_DEFINE_TYPE (ElkActionCloseAll, elk_action_close_all, LEA_TYPE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE(ElkActionCloseAll, elk_action_close_all, LEA_TYPE_ACTION)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void elk_action_close_all_class_init(ElkActionCloseAllClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ElkActionCloseAllPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 
 	LeaActionClass *action_clazz = LEA_ACTION_CLASS(clazz);
 	action_clazz->action_run = l_action_run;
 }
 
 static void elk_action_close_all_init(ElkActionCloseAll *instance) {
-	ElkActionCloseAllPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_ACTION_CLOSE_ALL, ElkActionCloseAllPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkActionCloseAll *instance = ELK_ACTION_CLOSE_ALL(object);
-	ElkActionCloseAllPrivate *priv = instance->priv;
+	ElkActionCloseAllPrivate *priv = elk_action_close_all_get_instance_private(instance);
 	cat_unref_ptr(priv->service);
 	cat_unref_ptr(priv->editor_list);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_action_close_all_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(elk_action_close_all_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ElkActionCloseAll *elk_action_close_all_new(ElkIService *service) {
 	ElkActionCloseAll *result = g_object_new(ELK_TYPE_ACTION_CLOSE_ALL, NULL);
 	cat_ref_anounce(result);
-	ElkActionCloseAllPrivate *priv = result->priv;
+	ElkActionCloseAllPrivate *priv = elk_action_close_all_get_instance_private(result);
 	priv->service = cat_ref_ptr(service);
 	priv->editor_list = NULL;
 	lea_action_construct(LEA_ACTION(result), cat_string_wo_new_with("elk.close.all"), cat_string_wo_new_with("Close All"), cat_string_wo_new_with("window-close"));
@@ -91,16 +84,14 @@ ElkActionCloseAll *elk_action_close_all_new(ElkIService *service) {
 
 
 
-static void l_action_run(LeaAction *self) {
-	ElkActionCloseAll *action = ELK_ACTION_CLOSE_ALL(self);
-	ElkActionCloseAllPrivate *priv = ELK_ACTION_CLOSE_ALL_GET_PRIVATE(action);
+static void l_action_run(LeaAction *action) {
+	ElkActionCloseAllPrivate *priv = elk_action_close_all_get_instance_private((ElkActionCloseAll *) action);
 	elk_iservice_close_multiple_resource_editors(priv->service, NULL);
 }
 
 
 void elk_action_close_all_set_editor_list(ElkActionCloseAll *action, CatArrayWo *a_editor_list) {
-	ElkActionCloseAll *elk_action = ELK_ACTION_CLOSE_ALL(action);
-	ElkActionCloseAllPrivate *priv = ELK_ACTION_CLOSE_ALL_GET_PRIVATE(elk_action);
+	ElkActionCloseAllPrivate *priv = elk_action_close_all_get_instance_private(action);
 	if (priv->editor_list == a_editor_list) {
 		return;
 	}
@@ -113,7 +104,4 @@ void elk_action_close_all_set_editor_list(ElkActionCloseAll *action, CatArrayWo 
 	}
 	lea_action_set_sensitive_self((LeaAction *) action, is_active);
 }
-
-
-
 

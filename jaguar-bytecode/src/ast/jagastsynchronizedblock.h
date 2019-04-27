@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTSYNCHRONIZEDBLOCK_H_
 #define JAGASTSYNCHRONIZEDBLOCK_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_SYNCHRONIZED_BLOCK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_SYNCHRONIZED_BLOCK))
 #define JAG_AST_IS_SYNCHRONIZED_BLOCK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_SYNCHRONIZED_BLOCK))
 #define JAG_AST_SYNCHRONIZED_BLOCK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_SYNCHRONIZED_BLOCK, JagAstSynchronizedBlockClass))
-#define JAG_AST_SYNCHRONIZED_BLOCK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_SYNCHRONIZED_BLOCK, JagAstSynchronizedBlockPrivate))
 
 typedef struct _JagAstSynchronizedBlock               JagAstSynchronizedBlock;
 typedef struct _JagAstSynchronizedBlockPrivate        JagAstSynchronizedBlockPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstSynchronizedBlockClass          JagAstSynchronizedBlockCla
 
 struct _JagAstSynchronizedBlock {
 	JagAstBlock parent;
-	JagAstSynchronizedBlockPrivate *priv;
 };
 
 struct _JagAstSynchronizedBlockClass {
@@ -59,6 +56,5 @@ GType jag_ast_synchronized_block_get_type();
 JagAstSynchronizedBlock *jag_ast_synchronized_block_new(JagAstIExpression *sync_expression);
 
 G_END_DECLS
-
 
 #endif /* JAGASTSYNCHRONIZEDBLOCK_H_ */

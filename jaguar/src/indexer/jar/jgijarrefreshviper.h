@@ -36,8 +36,6 @@ G_BEGIN_DECLS
 #define JGI_IS_JAR_REFRESH_VIPER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JGI_TYPE_JAR_REFRESH_VIPER))
 #define JGI_IS_JAR_REFRESH_VIPER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JGI_TYPE_JAR_REFRESH_VIPER))
 #define JGI_JAR_REFRESH_VIPER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JGI_TYPE_JAR_REFRESH_VIPER, JgiJarRefreshViperClass))
-#define JGI_JAR_REFRESH_VIPER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JGI_TYPE_JAR_REFRESH_VIPER, JgiJarRefreshViperPrivate))
-
 
 typedef struct _JgiJarRefreshViper               JgiJarRefreshViper;
 typedef struct _JgiJarRefreshViperPrivate        JgiJarRefreshViperPrivate;
@@ -46,19 +44,16 @@ typedef struct _JgiJarRefreshViperClass          JgiJarRefreshViperClass;
 
 struct _JgiJarRefreshViper {
 	WorRequest parent;
-	JgiJarRefreshViperPrivate *priv;
 };
 
 struct _JgiJarRefreshViperClass {
 	WorRequestClass parent_class;
 };
 
-
 GType jgi_jar_refresh_viper_get_type();
 
 JgiJarRefreshViper *jgi_jar_refresh_viper_new(JgiJarEntry *entry, VipSnapshot *snapshot);
 
 G_END_DECLS
-
 
 #endif /* JGIJARREFRESHVIPER_H_ */

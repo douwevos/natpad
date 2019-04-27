@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_PUSH(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_PUSH))
 #define JAG_BYT_IS_OP_PUSH_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_PUSH))
 #define JAG_BYT_OP_PUSH_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_PUSH, JagBytOpPushClass))
-#define JAG_BYT_OP_PUSH_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_PUSH, JagBytOpPushPrivate))
 
 typedef struct _JagBytOpPush               JagBytOpPush;
 typedef struct _JagBytOpPushPrivate        JagBytOpPushPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytOpPushClass          JagBytOpPushClass;
 
 struct _JagBytOpPush {
 	JagBytAbstractMnemonic parent;
-	JagBytOpPushPrivate *priv;
 };
 
 struct _JagBytOpPushClass {

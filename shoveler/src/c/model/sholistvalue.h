@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef SHOLISTVALUE_H_
 #define SHOLISTVALUE_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define SHO_IS_LIST_VALUE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SHO_TYPE_LIST_VALUE))
 #define SHO_IS_LIST_VALUE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), SHO_TYPE_LIST_VALUE))
 #define SHO_LIST_VALUE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), SHO_TYPE_LIST_VALUE, ShoListValueClass))
-
 
 typedef struct _ShoListValue               ShoListValue;
 typedef struct _ShoListValuePrivate        ShoListValuePrivate;

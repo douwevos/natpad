@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTMETHODREF_H_
 #define JAGBYTCONSTANTMETHODREF_H_
 
@@ -39,7 +38,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_METHODREF(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_METHODREF))
 #define JAG_BYT_IS_CONSTANT_METHODREF_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_METHODREF))
 #define JAG_BYT_CONSTANT_METHODREF_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_METHODREF, JagBytConstantMethodrefClass))
-#define JAG_BYT_CONSTANT_METHODREF_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_METHODREF, JagBytConstantMethodrefPrivate))
 
 typedef struct _JagBytConstantMethodref               JagBytConstantMethodref;
 typedef struct _JagBytConstantMethodrefPrivate        JagBytConstantMethodrefPrivate;
@@ -48,7 +46,6 @@ typedef struct _JagBytConstantMethodrefClass          JagBytConstantMethodrefCla
 
 struct _JagBytConstantMethodref {
 	GObject parent;
-	JagBytConstantMethodrefPrivate *priv;
 };
 
 struct _JagBytConstantMethodrefClass {
@@ -65,8 +62,6 @@ JagBytMethodHeader *jag_byt_constant_methodref_get_method_header(JagBytConstantM
 
 JagAstDeclarationType *jag_byt_constant_methodref_get_method_class_declaration_type(JagBytConstantMethodref *constant_methodref);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTCONSTANTMETHODREF_H_ */

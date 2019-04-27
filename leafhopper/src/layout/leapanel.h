@@ -39,7 +39,6 @@ G_BEGIN_DECLS
 #define LEA_IS_PANEL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_PANEL))
 #define LEA_IS_PANEL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_PANEL))
 #define LEA_PANEL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_PANEL, LeaPanelClass))
-#define LEA_PANEL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_PANEL, LeaPanelPrivate))
 
 typedef struct _LeaPanel         LeaPanel;
 typedef struct _LeaPanelClass    LeaPanelClass;

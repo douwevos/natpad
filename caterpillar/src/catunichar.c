@@ -28,8 +28,11 @@
 #define CAT_LOG_CLAZZ "CatUnichar"
 #include "logging/catlog.h"
 
+struct _CatUnicharPrivate {
+	gunichar value;
+};
 
-G_DEFINE_TYPE(CatUnichar, cat_unichar, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(CatUnichar, cat_unichar, G_TYPE_OBJECT)
 
 static void cat_unichar_class_init(CatUnicharClass *clazz) {
 }
@@ -40,12 +43,14 @@ static void cat_unichar_init(CatUnichar *synax) {
 CatUnichar *cat_unichar_new(gunichar value) {
 	CatUnichar *result = g_object_new(CAT_TYPE_UNICHAR, NULL);
 	cat_ref_anounce(result);
-	result->value = value;
+	CatUnicharPrivate *priv = cat_unichar_get_instance_private(result);
+	priv->value = value;
 	return result;
 }
 
 int cat_unichar_hash(const CatUnichar *unichar) {
-	return (int) unichar->value;
+	CatUnicharPrivate *priv = cat_unichar_get_instance_private((CatUnichar *) unichar);
+	return (int) priv->value;
 }
 
 gboolean cat_unichar_equal(const CatUnichar *unichar_a, const CatUnichar *unichar_b) {
@@ -55,5 +60,7 @@ gboolean cat_unichar_equal(const CatUnichar *unichar_a, const CatUnichar *unicha
 	if (unichar_a==NULL || unichar_b==NULL) {
 		return FALSE;
 	}
-	return  unichar_a->value==unichar_b->value;
+	CatUnicharPrivate *priv_a = cat_unichar_get_instance_private((CatUnichar *) unichar_a);
+	CatUnicharPrivate *priv_b = cat_unichar_get_instance_private((CatUnichar *) unichar_b);
+	return  priv_a->value==priv_b->value;
 }

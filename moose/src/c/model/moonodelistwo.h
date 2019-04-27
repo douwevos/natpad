@@ -33,7 +33,6 @@ G_BEGIN_DECLS
 #define MOO_IS_NODE_LIST_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_NODE_LIST_WO))
 #define MOO_IS_NODE_LIST_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_NODE_LIST_WO))
 #define MOO_NODE_LIST_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_NODE_LIST_WO, MooNodeListWoClass))
-#define MOO_NODE_LIST_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_NODE_LIST_WO, MooNodeListWoPrivate))
 
 
 typedef struct _MooNodeListWo               MooNodeListWo;
@@ -44,7 +43,6 @@ struct _MooNodeWo;
 
 struct _MooNodeListWo {
 	GObject parent;
-	MooNodeListWoPrivate *priv;
 };
 
 struct _MooNodeListWoClass {

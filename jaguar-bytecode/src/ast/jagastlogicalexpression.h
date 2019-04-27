@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTLOGICALEXPRESSION_H_
 #define JAGASTLOGICALEXPRESSION_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_LOGICAL_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_LOGICAL_EXPRESSION))
 #define JAG_AST_IS_LOGICAL_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_LOGICAL_EXPRESSION))
 #define JAG_AST_LOGICAL_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_LOGICAL_EXPRESSION, JagAstLogicalExpressionClass))
-#define JAG_AST_LOGICAL_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_LOGICAL_EXPRESSION, JagAstLogicalExpressionPrivate))
 
 typedef struct _JagAstLogicalExpression               JagAstLogicalExpression;
 typedef struct _JagAstLogicalExpressionPrivate        JagAstLogicalExpressionPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstLogicalExpressionClass          JagAstLogicalExpressionCla
 
 struct _JagAstLogicalExpression {
 	GObject parent;
-	JagAstLogicalExpressionPrivate *priv;
 };
 
 struct _JagAstLogicalExpressionClass {
@@ -58,6 +55,5 @@ GType jag_ast_logical_expression_get_type();
 JagAstLogicalExpression *jag_ast_logical_expression_new(JagBytMathOperator logical_operator, CatArrayWo *e_expressions);
 
 G_END_DECLS
-
 
 #endif /* JAGASTLOGICALEXPRESSION_H_ */

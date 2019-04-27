@@ -36,8 +36,6 @@ G_BEGIN_DECLS
 #define JAG_IS_REFRESH_COMPILER_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_REFRESH_COMPILER_REQUEST))
 #define JAG_IS_REFRESH_COMPILER_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_REFRESH_COMPILER_REQUEST))
 #define JAG_REFRESH_COMPILER_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_REFRESH_COMPILER_REQUEST, JagRefreshCompilerRequestClass))
-#define JAG_REFRESH_COMPILER_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_REFRESH_COMPILER_REQUEST, JagRefreshCompilerRequestPrivate))
-
 
 typedef struct _JagRefreshCompilerRequest               JagRefreshCompilerRequest;
 typedef struct _JagRefreshCompilerRequestPrivate        JagRefreshCompilerRequestPrivate;

@@ -35,10 +35,9 @@ struct _JagMooApplyTransactionChangesRequestPrivate {
 static void l_mergeable_request_iface_init(WorIMergeableRequestInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagMooApplyTransactionChangesRequest, jag_moo_apply_transaction_changes_request, WOR_TYPE_REQUEST, {
+		G_ADD_PRIVATE(JagMooApplyTransactionChangesRequest)
 		G_IMPLEMENT_INTERFACE(WOR_TYPE_IMERGEABLE_REQUEST, l_mergeable_request_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -46,9 +45,6 @@ static void l_run_request(WorRequest *request);
 
 
 static void jag_moo_apply_transaction_changes_request_class_init(JagMooApplyTransactionChangesRequestClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagMooApplyTransactionChangesRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -58,41 +54,37 @@ static void jag_moo_apply_transaction_changes_request_class_init(JagMooApplyTran
 }
 
 static void jag_moo_apply_transaction_changes_request_init(JagMooApplyTransactionChangesRequest *instance) {
-	JagMooApplyTransactionChangesRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_MOO_APPLY_TRANSACTION_CHANGES_REQUEST, JagMooApplyTransactionChangesRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagMooApplyTransactionChangesRequest *instance = JAG_MOO_APPLY_TRANSACTION_CHANGES_REQUEST(object);
-	JagMooApplyTransactionChangesRequestPrivate *priv = instance->priv;
+	JagMooApplyTransactionChangesRequestPrivate *priv = jag_moo_apply_transaction_changes_request_get_instance_private(instance);
 	cat_unref_ptr(priv->jag_moose_service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_moo_apply_transaction_changes_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_moo_apply_transaction_changes_request_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagMooApplyTransactionChangesRequest *jag_moo_apply_transaction_changes_request_new(JagMooseService *jag_moose_service) {
 	JagMooApplyTransactionChangesRequest *result = g_object_new(JAG_TYPE_MOO_APPLY_TRANSACTION_CHANGES_REQUEST, NULL);
 	cat_ref_anounce(result);
-	JagMooApplyTransactionChangesRequestPrivate *priv = result->priv;
+	JagMooApplyTransactionChangesRequestPrivate *priv = jag_moo_apply_transaction_changes_request_get_instance_private(result);
 	priv->jag_moose_service = cat_ref_ptr(jag_moose_service);
 	wor_request_construct((WorRequest *) result);
 	wor_request_set_time_out((WorRequest *) result, cat_date_current_time()+25);
 	return result;
 }
 
-
-
 static void l_run_request(WorRequest *request) {
-	JagMooApplyTransactionChangesRequestPrivate *priv = JAG_MOO_APPLY_TRANSACTION_CHANGES_REQUEST_GET_PRIVATE(request);
+	JagMooApplyTransactionChangesRequest *instance = JAG_MOO_APPLY_TRANSACTION_CHANGES_REQUEST(request);
+	JagMooApplyTransactionChangesRequestPrivate *priv = jag_moo_apply_transaction_changes_request_get_instance_private(instance);
 	cat_log_debug("RUNNING !!!");
 
 	MooService *moo_service= jag_moose_service_get_moo_service(priv->jag_moose_service);
@@ -215,8 +207,6 @@ static void l_run_request(WorRequest *request) {
 //	cat_log_debug("finalizedRootNode="+finalizedRootNode+", editableRootNode="+transaction.root);
 //
 //	transaction.commitEditable(editableRootNode);
-
-
 }
 
 static WorMergeResult l_try_merge(WorIMergeableRequest *new_request, WorIMergeableRequest *in_queue) {
@@ -229,9 +219,6 @@ static WorMergeResult l_try_merge(WorIMergeableRequest *new_request, WorIMergeab
 	return WOR_MERGE_FAILED;
 }
 
-
-
 static void l_mergeable_request_iface_init(WorIMergeableRequestInterface *iface) {
 	iface->tryMerge = l_try_merge;
 }
-

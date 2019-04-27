@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGMOOAPPLYTRANSACTIONCHANGESREQUEST_H_
 #define JAGMOOAPPLYTRANSACTIONCHANGESREQUEST_H_
 
@@ -37,8 +36,6 @@ G_BEGIN_DECLS
 #define JAG_IS_MOO_APPLY_TRANSACTION_CHANGES_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_MOO_APPLY_TRANSACTION_CHANGES_REQUEST))
 #define JAG_IS_MOO_APPLY_TRANSACTION_CHANGES_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_MOO_APPLY_TRANSACTION_CHANGES_REQUEST))
 #define JAG_MOO_APPLY_TRANSACTION_CHANGES_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_MOO_APPLY_TRANSACTION_CHANGES_REQUEST, JagMooApplyTransactionChangesRequestClass))
-#define JAG_MOO_APPLY_TRANSACTION_CHANGES_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_MOO_APPLY_TRANSACTION_CHANGES_REQUEST, JagMooApplyTransactionChangesRequestPrivate))
-
 
 typedef struct _JagMooApplyTransactionChangesRequest               JagMooApplyTransactionChangesRequest;
 typedef struct _JagMooApplyTransactionChangesRequestPrivate        JagMooApplyTransactionChangesRequestPrivate;
@@ -47,13 +44,11 @@ typedef struct _JagMooApplyTransactionChangesRequestClass          JagMooApplyTr
 
 struct _JagMooApplyTransactionChangesRequest {
 	WorRequest parent;
-	JagMooApplyTransactionChangesRequestPrivate *priv;
 };
 
 struct _JagMooApplyTransactionChangesRequestClass {
 	WorRequestClass parent_class;
 };
-
 
 GType jag_moo_apply_transaction_changes_request_get_type();
 

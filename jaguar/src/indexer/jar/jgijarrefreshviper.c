@@ -33,16 +33,13 @@ struct _JgiJarRefreshViperPrivate {
 	VipSnapshot *snapshot;
 };
 
-
-G_DEFINE_TYPE(JgiJarRefreshViper, jgi_jar_refresh_viper, WOR_TYPE_REQUEST)
+G_DEFINE_TYPE_WITH_PRIVATE(JgiJarRefreshViper, jgi_jar_refresh_viper, WOR_TYPE_REQUEST)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void jgi_jar_refresh_viper_class_init(JgiJarRefreshViperClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JgiJarRefreshViperPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -52,14 +49,12 @@ static void jgi_jar_refresh_viper_class_init(JgiJarRefreshViperClass *clazz) {
 }
 
 static void jgi_jar_refresh_viper_init(JgiJarRefreshViper *instance) {
-	JgiJarRefreshViperPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JGI_TYPE_JAR_REFRESH_VIPER, JgiJarRefreshViperPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JgiJarRefreshViper *instance = JGI_JAR_REFRESH_VIPER(object);
-	JgiJarRefreshViperPrivate *priv = instance->priv;
+	JgiJarRefreshViperPrivate *priv = jgi_jar_refresh_viper_get_instance_private(instance);
 	cat_unref_ptr(priv->entry);
 	cat_unref_ptr(priv->snapshot);
 	G_OBJECT_CLASS(jgi_jar_refresh_viper_parent_class)->dispose(object);
@@ -73,11 +68,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JgiJarRefreshViper *jgi_jar_refresh_viper_new(JgiJarEntry *entry, VipSnapshot *snapshot) {
 	JgiJarRefreshViper *result = g_object_new(JGI_TYPE_JAR_REFRESH_VIPER, NULL);
 	cat_ref_anounce(result);
-	JgiJarRefreshViperPrivate *priv = result->priv;
+	JgiJarRefreshViperPrivate *priv = jgi_jar_refresh_viper_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	priv->entry = cat_ref_ptr(entry);
 	priv->snapshot = cat_ref_ptr(snapshot);
@@ -85,10 +79,8 @@ JgiJarRefreshViper *jgi_jar_refresh_viper_new(JgiJarEntry *entry, VipSnapshot *s
 }
 
 
-
-
 static void l_run_request(WorRequest *request) {
-	JgiJarRefreshViperPrivate *priv = JGI_JAR_REFRESH_VIPER_GET_PRIVATE(request);
+	JgiJarRefreshViper *instance = JGI_JAR_REFRESH_VIPER(request);
+	JgiJarRefreshViperPrivate *priv = jgi_jar_refresh_viper_get_instance_private(instance);
 	jgi_jar_entry_set_vip_snapshot(priv->entry, priv->snapshot);
 }
-

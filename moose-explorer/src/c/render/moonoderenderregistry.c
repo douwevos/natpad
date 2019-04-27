@@ -20,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "moonoderenderregistry.h"
 #include "mooinoderenderer.h"
 #include "moodefaultnoderenderer.h"
@@ -36,41 +34,34 @@ struct _MooNodeRenderRegistryPrivate {
 	MooINodeRenderer *default_renderer;
 };
 
-G_DEFINE_TYPE (MooNodeRenderRegistry, moo_node_render_registry, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooNodeRenderRegistry, moo_node_render_registry, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_node_render_registry_class_init(MooNodeRenderRegistryClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooNodeRenderRegistryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_node_render_registry_init(MooNodeRenderRegistry *instance) {
-	MooNodeRenderRegistryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_NODE_RENDER_REGISTRY, MooNodeRenderRegistryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooNodeRenderRegistry *instance = MOO_NODE_RENDER_REGISTRY(object);
-	MooNodeRenderRegistryPrivate *priv = instance->priv;
+	MooNodeRenderRegistryPrivate *priv = moo_node_render_registry_get_instance_private(instance);
 	cat_unref_ptr(priv->e_factories);
 	cat_unref_ptr(priv->default_renderer);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_node_render_registry_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_node_render_registry_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -78,20 +69,19 @@ static void l_finalize(GObject *object) {
 MooNodeRenderRegistry *moo_node_render_registry_new() {
 	MooNodeRenderRegistry *result = g_object_new(MOO_TYPE_NODE_RENDER_REGISTRY, NULL);
 	cat_ref_anounce(result);
-	MooNodeRenderRegistryPrivate *priv = result->priv;
+	MooNodeRenderRegistryPrivate *priv = moo_node_render_registry_get_instance_private(result);
 	priv->e_factories = cat_array_wo_new();
 	priv->default_renderer = (MooINodeRenderer *) moo_default_node_renderer_new();
 	return result;
 }
 
 void moo_node_render_registry_add_render_factory(MooNodeRenderRegistry *registry, MooINodeRendererFactory *factory) {
-	MooNodeRenderRegistryPrivate *priv = MOO_NODE_RENDER_REGISTRY_GET_PRIVATE(registry);
+	MooNodeRenderRegistryPrivate *priv = moo_node_render_registry_get_instance_private(registry);
 	cat_array_wo_append(priv->e_factories, (GObject *) factory);
-
 }
 
 CatArrayWo *moo_node_render_registry_create_renderers_for_node(MooNodeRenderRegistry *registry, MooNodeWo *node) {
-	MooNodeRenderRegistryPrivate *priv = MOO_NODE_RENDER_REGISTRY_GET_PRIVATE(registry);
+	MooNodeRenderRegistryPrivate *priv = moo_node_render_registry_get_instance_private(registry);
 	CatArrayWo *result = cat_array_wo_new();
 
 	CatIIterator *iter = cat_array_wo_iterator(priv->e_factories);
@@ -109,6 +99,3 @@ CatArrayWo *moo_node_render_registry_create_renderers_for_node(MooNodeRenderRegi
 	}
 	return result;
 }
-
-
-

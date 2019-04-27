@@ -38,16 +38,13 @@ struct _JagIndexRefreshRequestPrivate {
 	WorQueue *post_queue;
 };
 
-
-G_DEFINE_TYPE(JagIndexRefreshRequest, jag_index_refresh_request, WOR_TYPE_REQUEST)
+G_DEFINE_TYPE_WITH_PRIVATE(JagIndexRefreshRequest, jag_index_refresh_request, WOR_TYPE_REQUEST)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void jag_index_refresh_request_class_init(JagIndexRefreshRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagIndexRefreshRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -57,14 +54,12 @@ static void jag_index_refresh_request_class_init(JagIndexRefreshRequestClass *cl
 }
 
 static void jag_index_refresh_request_init(JagIndexRefreshRequest *instance) {
-	JagIndexRefreshRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_INDEX_REFRESH_REQUEST, JagIndexRefreshRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagIndexRefreshRequest *instance = JAG_INDEX_REFRESH_REQUEST(object);
-	JagIndexRefreshRequestPrivate *priv = instance->priv;
+	JagIndexRefreshRequestPrivate *priv = jag_index_refresh_request_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->post_queue);
 	G_OBJECT_CLASS(jag_index_refresh_request_parent_class)->dispose(object);
@@ -82,13 +77,12 @@ static void l_finalize(GObject *object) {
 JagIndexRefreshRequest *jag_index_refresh_request_new(MooService *moo_service, WorQueue *post_queue) {
 	JagIndexRefreshRequest *result = g_object_new(JAG_TYPE_INDEX_REFRESH_REQUEST, NULL);
 	cat_ref_anounce(result);
-	JagIndexRefreshRequestPrivate *priv = result->priv;
+	JagIndexRefreshRequestPrivate *priv = jag_index_refresh_request_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->post_queue = cat_ref_ptr(post_queue);
 	wor_request_construct((WorRequest *) result);
 	return result;
 }
-
 
 
 //static void l_create_new_modules(JagIndexRefreshRequestPrivate *priv, CatArrayWo *e_new_modules) {
@@ -201,7 +195,8 @@ static void l_index_single_module(JagIndexRefreshRequestPrivate *priv, int o_chi
 }
 
 static void l_run_request(WorRequest *request) {
-	JagIndexRefreshRequestPrivate *priv = JAG_INDEX_REFRESH_REQUEST_GET_PRIVATE(request);
+	JagIndexRefreshRequest *instance = JAG_INDEX_REFRESH_REQUEST(request);
+	JagIndexRefreshRequestPrivate *priv = jag_index_refresh_request_get_instance_private(instance);
 
 //	CatArrayWo *e_new_modules = cat_array_wo_new();
 
@@ -218,8 +213,6 @@ static void l_run_request(WorRequest *request) {
 				continue;
 			}
 
-
-
 			JagIndexModuleContent *index_module_content = jag_module_content_wo_get_index_context(jag_module_content);
 			if (jag_index_module_content_need_to_update(index_module_content, jag_module_content_wo_get_version(jag_module_content))) {
 
@@ -227,7 +220,6 @@ static void l_run_request(WorRequest *request) {
 				cat_log_debug("module needs update: %o", child_node);
 				l_index_single_module(priv, child_idx, child_node);
 			}
-
 
 //			JagIndexModuleContent *jag_index_module_content = (JagIndexModuleContent *) moo_node_wo_get_content(child_node, jag_index_module_content_key());
 //			if (jag_index_module_content==NULL) {

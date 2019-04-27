@@ -38,14 +38,12 @@ struct _LeaKeyHandlerPrivate {
 	LeaKeyNode *running_sequence;
 };
 
-G_DEFINE_TYPE (LeaKeyHandler, lea_key_handler, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(LeaKeyHandler, lea_key_handler, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void lea_key_handler_class_init(LeaKeyHandlerClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaKeyHandlerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -56,7 +54,8 @@ static void lea_key_handler_init(LeaKeyHandler *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	LeaKeyHandlerPrivate *priv = LEA_KEY_HANDLER_GET_PRIVATE(object);
+	LeaKeyHandler *instance = LEA_KEY_HANDLER(object);
+	LeaKeyHandlerPrivate *priv = lea_key_handler_get_instance_private(instance);
 	cat_unref_ptr(priv->binding_root);
 	cat_log_detail("end-dispose:%p", object);
 }
@@ -72,7 +71,7 @@ static void l_finalize(GObject *object) {
 LeaKeyHandler *lea_key_handler_new() {
 	LeaKeyHandler *result = g_object_new(LEA_TYPE_KEY_HANDLER, NULL);
 	cat_ref_anounce(result);
-	LeaKeyHandlerPrivate *priv = LEA_KEY_HANDLER_GET_PRIVATE(result);
+	LeaKeyHandlerPrivate *priv = lea_key_handler_get_instance_private(result);
 	priv->active_panel_type = 0;
 	priv->binding_root = lea_key_node_new();
 	priv->running_sequence = NULL;
@@ -118,7 +117,7 @@ static gboolean l_attempt_in_sequence(LeaKeyHandlerPrivate *priv, LeaKeyNode *ke
 
 gboolean lea_key_handler_run(LeaKeyHandler *handler, LeaKey *key, LeaKeyContext *context) {
 	gboolean result = FALSE;
-	LeaKeyHandlerPrivate *priv = LEA_KEY_HANDLER_GET_PRIVATE(handler);
+	LeaKeyHandlerPrivate *priv = lea_key_handler_get_instance_private(handler);
 
 	LeaKeyNode *key_in_node = (LeaKeyNode *) lea_key_node_key_new(key);
 	LeaKeyNode *key_in_context = (LeaKeyNode *) lea_key_node_context_new(context);
@@ -140,7 +139,7 @@ gboolean lea_key_handler_run(LeaKeyHandler *handler, LeaKey *key, LeaKeyContext 
 
 void lea_key_handler_add_binding(LeaKeyHandler *handler, LeaIKeyBinding *key_binding) {
 	cat_log_debug("add:key_binding=%o", key_binding);
-	LeaKeyHandlerPrivate *priv = LEA_KEY_HANDLER_GET_PRIVATE(handler);
+	LeaKeyHandlerPrivate *priv = lea_key_handler_get_instance_private(handler);
 	LeaKeyNode *key_node = priv->binding_root;
 
 	LeaKeySequence *sequence = lea_ikey_binding_get_key_sequence(key_binding);
@@ -174,7 +173,7 @@ void lea_key_handler_add_binding(LeaKeyHandler *handler, LeaIKeyBinding *key_bin
 
 void lea_key_handler_remove_binding(LeaKeyHandler *handler, LeaIKeyBinding *key_binding) {
 	cat_log_debug("remove:key_binding=%o", key_binding);
-	LeaKeyHandlerPrivate *priv = LEA_KEY_HANDLER_GET_PRIVATE(handler);
+	LeaKeyHandlerPrivate *priv = lea_key_handler_get_instance_private(handler);
 	LeaKeyNode *key_node = priv->binding_root;
 	CatArrayWo *e_enlisted = cat_array_wo_new();
 	cat_array_wo_append(e_enlisted, (GObject *) key_node);
@@ -223,7 +222,7 @@ void lea_key_handler_remove_binding(LeaKeyHandler *handler, LeaIKeyBinding *key_
 
 void lea_key_handler_update(LeaKeyHandler *handler, LeaActionGroup *action_group) {
 	cat_log_debug("handler-update:start");
-	LeaKeyHandlerPrivate *priv = LEA_KEY_HANDLER_GET_PRIVATE(handler);
+	LeaKeyHandlerPrivate *priv = lea_key_handler_get_instance_private(handler);
 	CatArrayWo *e_enlisted_bindings = cat_array_wo_new();
 	lea_action_group_enlist_recursive(action_group, e_enlisted_bindings, TRUE);
 
@@ -262,5 +261,3 @@ void lea_key_handler_update(LeaKeyHandler *handler, LeaActionGroup *action_group
 	cat_unref_ptr(e_enlisted_bindings);
 	cat_log_debug("handler-update:end");
 }
-
-

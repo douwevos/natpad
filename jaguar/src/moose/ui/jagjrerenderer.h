@@ -23,8 +23,6 @@
 #ifndef JAGJRERENDERER_H_
 #define JAGJRERENDERER_H_
 
-
-
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
@@ -36,10 +34,8 @@ G_BEGIN_DECLS
 #define JAG_IS_JRE_RENDERER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_JRE_RENDERER))
 #define JAG_JRE_RENDERER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_JRE_RENDERER, JagJreRendererClass))
 
-
 typedef struct _JagJreRenderer               JagJreRenderer;
 typedef struct _JagJreRendererClass          JagJreRendererClass;
-
 
 struct _JagJreRenderer {
 	GObject parent;
@@ -48,7 +44,6 @@ struct _JagJreRenderer {
 struct _JagJreRendererClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_jre_renderer_get_type();
 

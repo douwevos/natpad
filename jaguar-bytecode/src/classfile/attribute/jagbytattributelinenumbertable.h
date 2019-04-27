@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTATTRIBUTELINENUMBERTABLE_H_
 #define JAGBYTATTRIBUTELINENUMBERTABLE_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_LINE_NUMBER_TABLE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_LINE_NUMBER_TABLE))
 #define JAG_BYT_IS_ATTRIBUTE_LINE_NUMBER_TABLE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_LINE_NUMBER_TABLE))
 #define JAG_BYT_ATTRIBUTE_LINE_NUMBER_TABLE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_LINE_NUMBER_TABLE, JagBytAttributeLineNumberTableClass))
-#define JAG_BYT_ATTRIBUTE_LINE_NUMBER_TABLE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_LINE_NUMBER_TABLE, JagBytAttributeLineNumberTablePrivate))
 
 typedef struct _JagBytAttributeLineNumberTable               JagBytAttributeLineNumberTable;
 typedef struct _JagBytAttributeLineNumberTablePrivate        JagBytAttributeLineNumberTablePrivate;
@@ -47,7 +45,6 @@ typedef struct _JagBytAttributeLineNumberTableClass          JagBytAttributeLine
 
 struct _JagBytAttributeLineNumberTable {
 	JagBytAttribute parent;
-	JagBytAttributeLineNumberTablePrivate *priv;
 };
 
 struct _JagBytAttributeLineNumberTableClass {
@@ -65,6 +62,5 @@ JagBytAttributeLineNumberTable *jag_byt_attribute_line_number_table_new(CatStrin
 JagBytLineNumberTable *jag_byt_attribute_line_number_table_get_table(JagBytAttributeLineNumberTable *attr_line_number_table);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTATTRIBUTELINENUMBERTABLE_H_ */

@@ -38,8 +38,6 @@ G_BEGIN_DECLS
 #define JGI_IS_JRE_ENTRY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JGI_TYPE_JRE_ENTRY))
 #define JGI_IS_JRE_ENTRY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JGI_TYPE_JRE_ENTRY))
 #define JGI_JRE_ENTRY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JGI_TYPE_JRE_ENTRY, JgiJreEntryClass))
-#define JGI_JRE_ENTRY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JGI_TYPE_JRE_ENTRY, JgiJreEntryPrivate))
-
 
 typedef struct _JgiJreEntry               JgiJreEntry;
 typedef struct _JgiJreEntryPrivate        JgiJreEntryPrivate;
@@ -48,7 +46,6 @@ typedef struct _JgiJreEntryClass          JgiJreEntryClass;
 
 struct _JgiJreEntry {
 	GObject parent;
-	JgiJreEntryPrivate *priv;
 };
 
 struct _JgiJreEntryClass {

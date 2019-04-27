@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTIFTHENELSE_H_
 #define JAGASTIFTHENELSE_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_IF_THEN_ELSE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_IF_THEN_ELSE))
 #define JAG_AST_IS_IF_THEN_ELSE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_IF_THEN_ELSE))
 #define JAG_AST_IF_THEN_ELSE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_IF_THEN_ELSE, JagAstIfThenElseClass))
-#define JAG_AST_IF_THEN_ELSE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_IF_THEN_ELSE, JagAstIfThenElsePrivate))
 
 typedef struct _JagAstIfThenElse               JagAstIfThenElse;
 typedef struct _JagAstIfThenElsePrivate        JagAstIfThenElsePrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstIfThenElseClass          JagAstIfThenElseClass;
 
 struct _JagAstIfThenElse {
 	GObject parent;
-	JagAstIfThenElsePrivate *priv;
 };
 
 struct _JagAstIfThenElseClass {
@@ -59,6 +56,5 @@ GType jag_ast_if_then_else_get_type();
 JagAstIfThenElse *jag_ast_if_then_else_new(JagAstIExpression *expression, JagAstBlock *then_block, JagAstBlock *else_block);
 
 G_END_DECLS
-
 
 #endif /* JAGASTIFTHENELSE_H_ */

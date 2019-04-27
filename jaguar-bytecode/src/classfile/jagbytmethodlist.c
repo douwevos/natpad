@@ -33,61 +33,55 @@ struct _JagBytMethodListPrivate {
 	CatArrayWo *a_method_list;
 };
 
-G_DEFINE_TYPE (JagBytMethodList, jag_byt_method_list, G_TYPE_INITIALLY_UNOWNED)
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytMethodList, jag_byt_method_list, G_TYPE_INITIALLY_UNOWNED)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_method_list_class_init(JagBytMethodListClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytMethodListPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_method_list_init(JagBytMethodList *instance) {
-	JagBytMethodListPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_METHOD_LIST, JagBytMethodListPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytMethodList *instance = JAG_BYT_METHOD_LIST(object);
-	JagBytMethodListPrivate *priv = instance->priv;
+	JagBytMethodListPrivate *priv = jag_byt_method_list_get_instance_private(instance);
 	cat_unref_ptr(priv->a_method_list);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_method_list_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_method_list_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytMethodList *jag_byt_method_list_new(CatArrayWo *a_method_list) {
 	JagBytMethodList *result = g_object_new(JAG_BYT_TYPE_METHOD_LIST, NULL);
 	cat_ref_anounce(result);
-	JagBytMethodListPrivate *priv = result->priv;
+	JagBytMethodListPrivate *priv = jag_byt_method_list_get_instance_private(result);
 	priv->a_method_list = cat_ref_ptr(a_method_list);
 	return result;
 }
 
-
 int jag_byt_method_list_count(JagBytMethodList *method_list) {
-	return cat_array_wo_size(method_list->priv->a_method_list);
+	JagBytMethodListPrivate *priv = jag_byt_method_list_get_instance_private(method_list);
+	return cat_array_wo_size(priv->a_method_list);
 }
 
 JagBytMethod *jag_byt_method_list_get_at(JagBytMethodList *method_list, int index) {
-	return JAG_BYT_METHOD(cat_array_wo_get(method_list->priv->a_method_list, index));
+	JagBytMethodListPrivate *priv = jag_byt_method_list_get_instance_private(method_list);
+	return JAG_BYT_METHOD(cat_array_wo_get(priv->a_method_list, index));
 }
 
 CatIIterator *jag_byt_method_list_iterator(JagBytMethodList *method_list) {
-	return cat_array_wo_iterator(method_list->priv->a_method_list);
+	JagBytMethodListPrivate *priv = jag_byt_method_list_get_instance_private(method_list);
+	return cat_array_wo_iterator(priv->a_method_list);
 }
-

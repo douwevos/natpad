@@ -36,22 +36,18 @@ G_BEGIN_DECLS
 #define MOO_IS_RENAME_DIALOG(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_RENAME_DIALOG))
 #define MOO_IS_RENAME_DIALOG_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_RENAME_DIALOG))
 #define MOO_RENAME_DIALOG_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_RENAME_DIALOG, MooRenameDialogClass))
-#define MOO_RENAME_DIALOG_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_RENAME_DIALOG, MooRenameDialogPrivate))
 
 typedef struct _MooRenameDialog               MooRenameDialog;
 typedef struct _MooRenameDialogPrivate        MooRenameDialogPrivate;
 typedef struct _MooRenameDialogClass          MooRenameDialogClass;
 
-
 struct _MooRenameDialog {
 	GtkDialog parent;
-	MooRenameDialogPrivate *priv;
 };
 
 struct _MooRenameDialogClass {
 	GtkDialogClass parent_class;
 };
-
 
 GType moo_rename_dialog_get_type();
 

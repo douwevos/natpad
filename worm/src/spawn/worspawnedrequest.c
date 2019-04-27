@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "worspawnedrequest.h"
 #include <caterpillar.h>
 
@@ -37,53 +35,45 @@ struct _WorSpawnedRequestPrivate {
 	WorRequest *delegate_request;
 };
 
-G_DEFINE_TYPE (WorSpawnedRequest, wor_spawned_request, WOR_TYPE_REQUEST)
+G_DEFINE_TYPE_WITH_PRIVATE(WorSpawnedRequest, wor_spawned_request, WOR_TYPE_REQUEST)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
-
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void wor_spawned_request_class_init(WorSpawnedRequestClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(WorSpawnedRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 
 	WorRequestClass *req_clazz = WOR_REQUEST_CLASS(clazz);
 	req_clazz->runRequest = l_run_request;
 }
 
 static void wor_spawned_request_init(WorSpawnedRequest *instance) {
-	WorSpawnedRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_SPAWNED_REQUEST, WorSpawnedRequestPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorSpawnedRequest *instance = WOR_SPAWNED_REQUEST(object);
-	WorSpawnedRequestPrivate *priv = instance->priv;
+	WorSpawnedRequestPrivate *priv = wor_spawned_request_get_instance_private(instance);
 	cat_unref_ptr(priv->delegate_request);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(wor_spawned_request_parent_class)->dispose(object);
 	cat_unref_ptr(priv->finished_condition);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(wor_spawned_request_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 WorSpawnedRequest *wor_spawned_request_new(WorRequest *delegate_request) {
 	WorSpawnedRequest *result = g_object_new(WOR_TYPE_SPAWNED_REQUEST, NULL);
 	cat_ref_anounce(result);
-	WorSpawnedRequestPrivate *priv = result->priv;
+	WorSpawnedRequestPrivate *priv = wor_spawned_request_get_instance_private(result);
 	priv->finished = FALSE;
 	priv->delegate_request = cat_ref_ptr(delegate_request);
 	priv->finished_condition = wor_condition_new();
@@ -91,10 +81,9 @@ WorSpawnedRequest *wor_spawned_request_new(WorRequest *delegate_request) {
 	return result;
 }
 
-
 static void l_run_request(WorRequest *request) {
 	WorSpawnedRequest *spawned_request = WOR_SPAWNED_REQUEST(request);
-	WorSpawnedRequestPrivate *priv = spawned_request->priv;
+	WorSpawnedRequestPrivate *priv = wor_spawned_request_get_instance_private(spawned_request);
 	cat_log_debug("request:%p, running delegate:%p", request, priv->delegate_request);
 	WOR_REQUEST_GET_CLASS(priv->delegate_request)->runRequest(priv->delegate_request);
 	priv->finished = TRUE;
@@ -105,14 +94,17 @@ static void l_run_request(WorRequest *request) {
 
 
 WorCondition *wor_spawned_request_get_finished_condition(WorSpawnedRequest *spawned_request) {
-	return spawned_request->priv->finished_condition;
+	WorSpawnedRequestPrivate *priv = wor_spawned_request_get_instance_private(spawned_request);
+	return priv->finished_condition;
 }
 
 gboolean wor_spawned_request_get_is_finished(WorSpawnedRequest *spawned_request) {
-	return spawned_request->priv->finished;
+	WorSpawnedRequestPrivate *priv = wor_spawned_request_get_instance_private(spawned_request);
+	return priv->finished;
 }
 
 
 WorRequest *wor_spawned_request_get_delegate(WorSpawnedRequest *spawned_request) {
-	return spawned_request->priv->delegate_request;
+	WorSpawnedRequestPrivate *priv = wor_spawned_request_get_instance_private(spawned_request);
+	return priv->delegate_request;
 }

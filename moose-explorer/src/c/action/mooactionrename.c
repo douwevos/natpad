@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "mooactionrename.h"
 #include "../moonodelayout.h"
 
@@ -35,16 +34,13 @@ struct _MooActionRenamePrivate {
 	LeaFrame *frame;
 };
 
-
-G_DEFINE_TYPE(MooActionRename, moo_action_rename, LEA_TYPE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE(MooActionRename, moo_action_rename, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void moo_action_rename_class_init(MooActionRenameClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooActionRenamePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -54,14 +50,12 @@ static void moo_action_rename_class_init(MooActionRenameClass *clazz) {
 }
 
 static void moo_action_rename_init(MooActionRename *instance) {
-	MooActionRenamePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ACTION_RENAME, MooActionRenamePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooActionRename *instance = MOO_ACTION_RENAME(object);
-	MooActionRenamePrivate *priv = instance->priv;
+	MooActionRenamePrivate *priv = moo_action_rename_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->a_selection);
 	cat_unref_ptr(priv->frame);
@@ -76,11 +70,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 MooActionRename *moo_action_rename_new(MooService *moo_service, LeaFrame *frame) {
 	MooActionRename *result = g_object_new(MOO_TYPE_ACTION_RENAME, NULL);
 	cat_ref_anounce(result);
-	MooActionRenamePrivate *priv = result->priv;
+	MooActionRenamePrivate *priv = moo_action_rename_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->a_selection = NULL;
 	priv->frame = cat_ref_ptr(frame);
@@ -90,11 +83,8 @@ MooActionRename *moo_action_rename_new(MooService *moo_service, LeaFrame *frame)
 	return result;
 }
 
-
-
-
 void moo_action_rename_set_selection(MooActionRename *action_rename, CatArrayWo *selection) {
-	MooActionRenamePrivate *priv = MOO_ACTION_RENAME_GET_PRIVATE(action_rename);
+	MooActionRenamePrivate *priv = moo_action_rename_get_instance_private(action_rename);
 	if (priv->a_selection == selection) {
 		return;
 	}
@@ -108,14 +98,13 @@ void moo_action_rename_set_selection(MooActionRename *action_rename, CatArrayWo 
 			has_renameable_node = TRUE;
 		}
 	}
-
 	lea_action_set_sensitive_self(LEA_ACTION(action_rename), has_renameable_node);
 }
 
 
-
 static void l_action_run(LeaAction *self) {
-	MooActionRenamePrivate *priv = MOO_ACTION_RENAME_GET_PRIVATE(self);
+	MooActionRename *instance = MOO_ACTION_RENAME(self);
+	MooActionRenamePrivate *priv = moo_action_rename_get_instance_private(instance);
 	if (priv->a_selection) {
 		MooNodeLayout *node_layout = (MooNodeLayout *) cat_array_wo_get_first(priv->a_selection);
 		MooNodeWo *node = moo_node_layout_get_node(node_layout);
@@ -123,14 +112,8 @@ static void l_action_run(LeaAction *self) {
 		if ((serivces_content!=NULL) && moo_iservices_content_can_rename(serivces_content)) {
 			moo_iservices_content_rename(serivces_content, priv->moo_service, node, priv->frame);
 		}
-//		MooEditableNode *editable_node = moo_editable_node_new(node, FALSE);
-//		moo_clipboard_cut_or_copy(priv->moo_clipboard, priv->selection, TRUE);
 	} else {
 		cat_log_warn("no renameable selection");
 		lea_action_set_sensitive_self(LEA_ACTION(self), FALSE);
 	}
-
 }
-
-
-

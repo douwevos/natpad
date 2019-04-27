@@ -20,15 +20,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "mooinodematcher.h"
 
 G_DEFINE_INTERFACE(MooINodeMatcher, moo_inode_matcher, G_TYPE_OBJECT);
 
 static void moo_inode_matcher_default_init (MooINodeMatcherInterface *klass) {
 }
-
 
 //long long moo_inode_matcher_next(MooINodeMatcher *self) {
 //	g_return_val_if_fail(MOO_IS_INODE_MATCHER(self), 0);

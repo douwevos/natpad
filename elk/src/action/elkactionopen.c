@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "elkactionopen.h"
 #include <caterpillar.h>
 
@@ -35,18 +33,13 @@ struct _ElkActionOpenPrivate {
 	ElkIService *service;
 };
 
-G_DEFINE_TYPE (ElkActionOpen, elk_action_open, LEA_TYPE_ACTION)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(ElkActionOpen, elk_action_open, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void elk_action_open_class_init(ElkActionOpenClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ElkActionOpenPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -56,42 +49,37 @@ static void elk_action_open_class_init(ElkActionOpenClass *clazz) {
 }
 
 static void elk_action_open_init(ElkActionOpen *instance) {
-	ElkActionOpenPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_ACTION_OPEN, ElkActionOpenPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkActionOpen *instance = ELK_ACTION_OPEN(object);
-	ElkActionOpenPrivate *priv = instance->priv;
+	ElkActionOpenPrivate *priv = elk_action_open_get_instance_private(instance);
 	cat_unref_ptr(priv->service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_action_open_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(elk_action_open_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ElkActionOpen *elk_action_open_new(ElkIService *service) {
 	ElkActionOpen *result = g_object_new(ELK_TYPE_ACTION_OPEN, NULL);
 	cat_ref_anounce(result);
-	ElkActionOpenPrivate *priv = result->priv;
+	ElkActionOpenPrivate *priv = elk_action_open_get_instance_private(result);
 	priv->service = cat_ref_ptr(service);
 	lea_action_construct((LeaAction *) result, cat_string_wo_new_with("elk.open.resource"), cat_string_wo_new_with("Open _File..."), cat_string_wo_new_with("document-open"));
 	lea_action_set_default_key_sequence(LEA_ACTION(result), lea_key_sequence_from_string(cat_string_wo_new_with("Ctrl+O")));
 	return result;
 }
 
-
-
 static void l_action_run(LeaAction *self) {
 	ElkActionOpen *action = ELK_ACTION_OPEN(self);
+	ElkActionOpenPrivate *priv = elk_action_open_get_instance_private(action);
 	cat_log_debug("calling select_and_open_resources");
-	elk_iservice_select_and_open_resources(action->priv->service);
+	elk_iservice_select_and_open_resources(priv->service);
 }
-
-

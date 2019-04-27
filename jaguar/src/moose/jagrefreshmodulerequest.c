@@ -43,18 +43,13 @@ struct _JagRefreshModuleRequestPrivate {
 	gboolean was_modified, libraries_modified;
 };
 
-G_DEFINE_TYPE (JagRefreshModuleRequest, jag_refresh_module_request, WOR_TYPE_REQUEST)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagRefreshModuleRequest, jag_refresh_module_request, WOR_TYPE_REQUEST)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void jag_refresh_module_request_class_init(JagRefreshModuleRequestClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagRefreshModuleRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -63,34 +58,30 @@ static void jag_refresh_module_request_class_init(JagRefreshModuleRequestClass *
 	worm_clazz->runRequest = l_run_request;
 }
 
-
 static void jag_refresh_module_request_init(JagRefreshModuleRequest *instance) {
-	JagRefreshModuleRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_REFRESH_MODULE_REQUEST, JagRefreshModuleRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagRefreshModuleRequest *instance = JAG_REFRESH_MODULE_REQUEST(object);
-	JagRefreshModuleRequestPrivate *priv = instance->priv;
+	JagRefreshModuleRequestPrivate *priv = jag_refresh_module_request_get_instance_private(instance);
 	cat_unref_ptr(priv->jag_moose_service);
 	cat_unref_ptr(priv->refresh_compiler_request);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_refresh_module_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_refresh_module_request_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagRefreshModuleRequest *jag_refresh_module_request_new(JagMooseService *jag_mooose_service, long long unique_id, int last_known_node_idx) {
 	JagRefreshModuleRequest *result = g_object_new(JAG_TYPE_REFRESH_MODULE_REQUEST, NULL);
 	cat_ref_anounce(result);
-	JagRefreshModuleRequestPrivate *priv = result->priv;
+	JagRefreshModuleRequestPrivate *priv = jag_refresh_module_request_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	priv->jag_moose_service = cat_ref_ptr(jag_mooose_service);
 	priv->last_known_node_idx = last_known_node_idx;
@@ -101,15 +92,12 @@ JagRefreshModuleRequest *jag_refresh_module_request_new(JagMooseService *jag_moo
 	return result;
 }
 
-
 static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTransaction *transaction, int nodeIndex);
 
-
 static void l_run_request(WorRequest *request) {
-
-	JagRefreshModuleRequestPrivate *priv = JAG_REFRESH_MODULE_REQUEST_GET_PRIVATE(request);
+	JagRefreshModuleRequest *instance = JAG_REFRESH_MODULE_REQUEST(request);
+	JagRefreshModuleRequestPrivate *priv = jag_refresh_module_request_get_instance_private(instance);
 	MooService *moo_service = jag_moose_service_get_moo_service(priv->jag_moose_service);
-
 
 	MooTransaction *tx = moo_service_create_transaction((GObject *) request, moo_service);
 	while(moo_transaction_retry(tx)) {
@@ -144,9 +132,7 @@ static void l_run_request(WorRequest *request) {
  		}
 	}
 
-
 	cat_log_debug("was_modified=%d, libraries_modified=%d", priv->was_modified, priv->libraries_modified);
-
 
 	WorService *wor_service = moo_service_get_worm_service(moo_service);
 	if (priv->was_modified) {
@@ -169,7 +155,6 @@ static void l_run_request(WorRequest *request) {
 
 
 static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTransaction *transaction, int nodeIndex) {
-
 	cat_unref_ptr(priv->refresh_compiler_request);
 	priv->was_modified = FALSE;
 	priv->libraries_modified = FALSE;
@@ -182,8 +167,6 @@ static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTran
 
 	int resource_content_change_count = moo_resource_content_wo_get_version(resource_content);
 
-
-
 	gboolean shouldRefresh = jagContent==NULL;
 	shouldRefresh = TRUE;
 	if (!shouldRefresh) {
@@ -194,10 +177,8 @@ static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTran
 
 //	cat_log_debug("shouldRefresh="+shouldRefresh);
 
-
 	MooIdPath *mainPath = moo_id_path_new();
 	cat_ref_sink_ptr(mainPath);
-
 
 	if (shouldRefresh) {
 		MooNodeWo *e_root_node = moo_node_wo_ensure_editable((MooNodeWo *) tx_node, NULL);
@@ -252,8 +233,6 @@ static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTran
 			}
 		}
 
-
-
 		CatArrayWo *a_libraries = jag_module_settings_wo_get_libraries(moduleSettings);
 
 		priv->libraries_modified = jag_module_content_wo_set_libraries(e_jag_module_content, a_libraries);
@@ -278,30 +257,6 @@ static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTran
 
 		}
 
-
-
-
-
-
-//		/* compiler */
-//		int foundIndex = editableChild.findIndex(new JagCompilerMatcher(), -1);
-//		MooNode nodeCompiler = NULL;
-//		MooNodeWo editableCompiler = NULL;
-//		if (foundIndex>=0) {
-////				nodeCompiler = (JagNodeCompiler) module.childAt(foundIndex);
-////				editableCompiler = editableChild.getEditableChild(foundIndex);
-//		} else {
-//			nodeCompiler = mooseContext.getCompilerNode("java");
-//			if (nodeCompiler!=NULL) {
-//////					nodeCompiler = new JagNodeCompiler(transaction.uniqueIdCounter.incrementAndGet());
-//				editableCompiler = editableChild.addNewChild(nodeCompiler);
-////					cat_log_debug("added new child");
-//			} else {
-//				// TODO remove compiler from module
-//			}
-//		}
-
-//		return NULL;
 		cat_log_debug("unreffing path");
 		cat_unref_ptr(modulePath);
 		cat_unref_ptr(mainPath);
@@ -312,4 +267,3 @@ static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTran
 	}
 	return NULL;
 }
-

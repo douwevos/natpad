@@ -51,46 +51,40 @@ struct _JagNodeRendererFactoryPrivate {
 static void l_renderer_factory_iface_init(MooINodeRendererFactoryInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagNodeRendererFactory, jag_node_renderer_factory, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagNodeRendererFactory)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_RENDERER_FACTORY, l_renderer_factory_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_node_renderer_factory_class_init(JagNodeRendererFactoryClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagNodeRendererFactoryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_node_renderer_factory_init(JagNodeRendererFactory *instance) {
-	JagNodeRendererFactoryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_NODE_RENDERER_FACTORY, JagNodeRendererFactoryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagNodeRendererFactory *instance = JAG_NODE_RENDERER_FACTORY(object);
-	JagNodeRendererFactoryPrivate *priv = instance->priv;
+	JagNodeRendererFactoryPrivate *priv = jag_node_renderer_factory_get_instance_private(instance);
 	cat_unref_ptr(priv->classfileRenderer);
 	cat_unref_ptr(priv->jarRenderer);
 	cat_unref_ptr(priv->jre_renderer);
 	cat_unref_ptr(priv->packageRenderer);
 	cat_unref_ptr(priv->srcFolderRenderer);
 	cat_unref_ptr(priv->library_renderer);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_node_renderer_factory_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_node_renderer_factory_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -98,7 +92,7 @@ static void l_finalize(GObject *object) {
 JagNodeRendererFactory *jag_node_renderer_factory_new() {
 	JagNodeRendererFactory *result = g_object_new(JAG_TYPE_NODE_RENDERER_FACTORY, NULL);
 	cat_ref_anounce(result);
-	JagNodeRendererFactoryPrivate *priv = result->priv;
+	JagNodeRendererFactoryPrivate *priv = jag_node_renderer_factory_get_instance_private(result);
 	priv->jarRenderer = jag_jar_node_renderer_new();
 	priv->srcFolderRenderer = jag_src_folder_renderer_new();
 	priv->packageRenderer = jag_package_renderer_new();
@@ -107,8 +101,6 @@ JagNodeRendererFactory *jag_node_renderer_factory_new() {
 	priv->library_renderer = jag_library_renderer_new();
 	return result;
 }
-
-
 
 /********************* begin MooINodeRendererFactory implementation *********************/
 
@@ -120,7 +112,8 @@ static CatS l_s_txt_java = CAT_S_DEF(".java");
 
 static struct _MooINodeRenderer *l_request_renderer_for_node(MooINodeRendererFactory *self, struct _MooNodeWo *node) {
 	struct _MooINodeRenderer *result = NULL;
-	JagNodeRendererFactoryPrivate *priv = JAG_NODE_RENDERER_FACTORY_GET_PRIVATE(self);
+	JagNodeRendererFactory *instance = JAG_NODE_RENDERER_FACTORY(self);
+	JagNodeRendererFactoryPrivate *priv = jag_node_renderer_factory_get_instance_private(instance);
 
 	if (moo_node_wo_get_content(node, moo_resource_content_wo_key())!=NULL) {
 		CatStringWo *a_name = moo_node_wo_get_name(node);				// TODO name should be taken from resource-content
@@ -148,8 +141,6 @@ static struct _MooINodeRenderer *l_request_renderer_for_node(MooINodeRendererFac
 	}
 	return result;
 }
-
-
 
 static void l_renderer_factory_iface_init(MooINodeRendererFactoryInterface *iface) {
 	iface->requestRendererForNode = l_request_renderer_for_node;

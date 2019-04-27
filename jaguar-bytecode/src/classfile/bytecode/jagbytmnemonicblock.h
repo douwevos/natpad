@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_MNEMONIC_BLOCK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_MNEMONIC_BLOCK))
 #define JAG_BYT_IS_MNEMONIC_BLOCK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_MNEMONIC_BLOCK))
 #define JAG_BYT_MNEMONIC_BLOCK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_MNEMONIC_BLOCK, JagBytMnemonicBlockClass))
-#define JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_MNEMONIC_BLOCK, JagBytMnemonicBlockPrivate))
 
 typedef struct _JagBytMnemonicBlock               JagBytMnemonicBlock;
 typedef struct _JagBytMnemonicBlockPrivate        JagBytMnemonicBlockPrivate;
@@ -46,7 +45,6 @@ typedef struct _JagBytMnemonicBlockClass          JagBytMnemonicBlockClass;
 
 struct _JagBytMnemonicBlock {
 	GObject parent;
-	JagBytMnemonicBlockPrivate *priv;
 };
 
 struct _JagBytMnemonicBlockClass {

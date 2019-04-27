@@ -18,58 +18,49 @@ G_DEFINE_TYPE_WITH_CODE(MooIdPath, moo_id_path, G_TYPE_INITIALLY_UNOWNED, {
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_id_path_class_init(MooIdPathClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooIdPathPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_id_path_init(MooIdPath *instance) {
-	MooIdPathPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ID_PATH, MooIdPathPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooIdPath *instance = MOO_ID_PATH(object);
-	MooIdPathPrivate *priv = instance->priv;
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(instance);
 	cat_free_ptr(priv->ids);
 	cat_free_ptr(priv->index_cache);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_id_path_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_id_path_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 MooIdPath *moo_id_path_new() {
 	MooIdPath *result = g_object_new(MOO_TYPE_ID_PATH, NULL);
 	cat_ref_anounce(result);
-	MooIdPathPrivate *priv = result->priv;
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(result);
 	priv->count = 0;
 	priv->ids = NULL;
 	priv->index_cache = NULL;
 	return result;
 }
 
-
 MooIdPath *moo_id_path_append_id(MooIdPath *base_path, long long unique_id, int index) {
-	MooIdPathPrivate *priv = MOO_ID_PATH_GET_PRIVATE(base_path);
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(base_path);
 	MooIdPath *result = moo_id_path_new();
-	MooIdPathPrivate *rpriv = MOO_ID_PATH_GET_PRIVATE(result);
+	MooIdPathPrivate *rpriv = moo_id_path_get_instance_private(result);
 	if (priv->count<=0) {
 		rpriv->count = 1;
 		rpriv->ids = g_malloc(sizeof(long long));
@@ -91,9 +82,9 @@ MooIdPath *moo_id_path_append_id(MooIdPath *base_path, long long unique_id, int 
 }
 
 MooIdPath *moo_id_path_append_multiple_ids(MooIdPath *base_path, long long *unique_ids, int *indexes, int count2add) {
-	MooIdPathPrivate *priv = MOO_ID_PATH_GET_PRIVATE(base_path);
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(base_path);
 	MooIdPath *result = moo_id_path_new();
-	MooIdPathPrivate *rpriv = MOO_ID_PATH_GET_PRIVATE(result);
+	MooIdPathPrivate *rpriv = moo_id_path_get_instance_private(result);
 	int count = 0;
 	if (priv->count>0) {
 		count = priv->count;
@@ -119,16 +110,11 @@ MooIdPath *moo_id_path_append_multiple_ids(MooIdPath *base_path, long long *uniq
 			rpriv->index_cache[offset+idx] = -1;
 		}
 	}
-
 	return result;
 }
 
-
-
-
 MooNodeWo *moo_id_path_create_editable_node(MooIdPath *id_path, MooNodeWo *root_node) {
-	MooIdPathPrivate *priv = MOO_ID_PATH_GET_PRIVATE(id_path);
-
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(id_path);
 	if (moo_node_wo_is_fixed(root_node)) {
 		cat_log_error("root node is fixed:%o", root_node);
 		return NULL;
@@ -164,9 +150,8 @@ MooNodeWo *moo_id_path_create_editable_node(MooIdPath *id_path, MooNodeWo *root_
 	return root_node;
 }
 
-
 MooNodeWo *moo_id_path_get_tail(MooIdPath *id_path, MooNodeWo *root_node) {
-	MooIdPathPrivate *priv = MOO_ID_PATH_GET_PRIVATE(id_path);
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(id_path);
 
 	int idx;
 	for(idx=0; idx<priv->count; idx++) {
@@ -198,16 +183,13 @@ MooNodeWo *moo_id_path_get_tail(MooIdPath *id_path, MooNodeWo *root_node) {
 	return root_node;
 }
 
-
 int moo_id_path_count(MooIdPath *id_path) {
-	MooIdPathPrivate *priv = MOO_ID_PATH_GET_PRIVATE(id_path);
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(id_path);
 	return priv->count;
 }
 
-
-
 MooNodeWo *moo_id_path_get_at(MooIdPath *id_path, MooNodeWo *root_node, int index) {
-	MooIdPathPrivate *priv = MOO_ID_PATH_GET_PRIVATE(id_path);
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(id_path);
 
 	if (index<0 || index>=priv->count) {
 		return NULL;
@@ -243,12 +225,11 @@ MooNodeWo *moo_id_path_get_at(MooIdPath *id_path, MooNodeWo *root_node, int inde
 	return root_node;
 }
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	MooIdPathPrivate *priv = MOO_ID_PATH_GET_PRIVATE(self);
+	MooIdPath *instance = MOO_ID_PATH(self);
+	MooIdPathPrivate *priv = moo_id_path_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 
 	cat_string_wo_append_chars(append_to, iname);

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOEXPLORER_H_
 #define MOOEXPLORER_H_
 
@@ -39,17 +38,13 @@ G_BEGIN_DECLS
 #define MOO_IS_EXPLORER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_EXPLORER))
 #define MOO_IS_EXPLORER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_EXPLORER))
 #define MOO_EXPLORER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_EXPLORER, MooExplorerClass))
-#define MOO_EXPLORER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_EXPLORER, MooExplorerPrivate))
-
 
 typedef struct _MooExplorer               MooExplorer;
 typedef struct _MooExplorerPrivate        MooExplorerPrivate;
 typedef struct _MooExplorerClass          MooExplorerClass;
 
-
 struct _MooExplorer {
 	GtkDrawingArea parent;
-	MooExplorerPrivate *priv;
 };
 
 struct _MooExplorerClass {
@@ -57,11 +52,9 @@ struct _MooExplorerClass {
 	void (*activateNode)(MooExplorer *self, MooNodeLayout *node_layout);
 };
 
-
 GType moo_explorer_get_type();
 
 void moo_explorer_construct(MooExplorer *moo_explorer, MooService *moo_service, MooNodeRenderRegistry *render_registry);
-
 
 MooExplorer *moo_explorer_new(MooService *moo_service, MooNodeRenderRegistry *render_registry);
 

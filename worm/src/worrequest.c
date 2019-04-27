@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "worrequest.h"
 #include "woriconditionobserver.h"
 
@@ -42,57 +41,52 @@ struct _WorRequestPrivate {
 };
 
 
-static void _condition_observer_iface_init(WorIConditionObserverInterface *iface);
+static void l_condition_observer_iface_init(WorIConditionObserverInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(WorRequest, wor_request, G_TYPE_OBJECT, {
-	G_IMPLEMENT_INTERFACE(WOR_TYPE_ICONDITION_OBSERVER, _condition_observer_iface_init);
+		G_ADD_PRIVATE(WorRequest)
+		G_IMPLEMENT_INTERFACE(WOR_TYPE_ICONDITION_OBSERVER, l_condition_observer_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void wor_request_class_init(WorRequestClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(WorRequestPrivate));
-
 	clazz->tryCombine = NULL;
 	clazz->addNotify = wor_request_add_notify_real;
 	clazz->setNotified = wor_request_set_notified_real;
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void wor_request_init(WorRequest *instance) {
-	WorRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_REQUEST, WorRequestPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorRequest *instance = WOR_REQUEST(object);
-	WorRequestPrivate *priv = instance->priv;
+	WorRequestPrivate *priv = wor_request_get_instance_private(instance);
 	cat_unref_ptr(priv->consumerLock);
 	cat_unref_ptr(priv->conditionStateMap);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(wor_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(object);
+	WorRequest *instance = WOR_REQUEST(object);
+	WorRequestPrivate *priv = wor_request_get_instance_private(instance);
 	cat_unref_ptr(priv->mapLock);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(wor_request_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 
 void wor_request_construct(WorRequest *request) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	cat_log_debug("request=%s, %p, priv=%p", g_type_name_from_instance((GTypeInstance *) request), request, priv);
 	priv->consumerLock = NULL;
 	priv->delaySet = FALSE;
@@ -104,20 +98,19 @@ void wor_request_construct(WorRequest *request) {
 
 
 gboolean wor_request_is_delayed(WorRequest *request) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	return priv->delaySet;
 }
 
 void wor_request_add_notify_real(WorRequest *request, CatLock *serviceConsumerLock) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	cat_ref_swap(priv->consumerLock, serviceConsumerLock);
 }
 
 void wor_request_add_notify(WorRequest *request, CatLock *serviceConsumerLock) {
 	WOR_REQUEST_GET_CLASS(request)->addNotify(request, serviceConsumerLock);
 
-
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	cat_log_debug("request:%s, %p, priv=%p", g_type_name_from_instance((GTypeInstance *) request), request, priv);
 	cat_lock_lock(priv->mapLock);
 	CatHashMapWo *localMap = priv->conditionStateMap==NULL ? NULL : cat_ref_ptr(priv->conditionStateMap);
@@ -142,12 +135,11 @@ void wor_request_add_notify(WorRequest *request, CatLock *serviceConsumerLock) {
 			priv->isNotified = TRUE;
 		}
 	}
-
 }
 
 
 void wor_request_set_notified_real(WorRequest *request) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	cat_log_debug("getting notified:priv->consumerLock=%p", priv->consumerLock);
 	if (priv->consumerLock) {
 		cat_lock_lock(priv->consumerLock);
@@ -164,9 +156,8 @@ void wor_request_set_notified(WorRequest *request) {
 }
 
 
-
 void wor_request_set_time_out(WorRequest *request, uint64_t time_out) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	if (time_out<1000000) {
 		cat_log_warn("possible incorrect time-out configured:%o", request);
 	}
@@ -175,21 +166,19 @@ void wor_request_set_time_out(WorRequest *request, uint64_t time_out) {
 }
 
 uint64_t wor_request_get_time_out(WorRequest *request) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	return priv->timeOut;
 }
 
-
 gboolean wor_request_get_and_reset_notified(WorRequest *request) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	gboolean result = priv->isNotified;
 	priv->isNotified = FALSE;
 	return result;
 }
 
-
 void wor_request_add_condition(WorRequest *request, WorCondition *condition2add) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	cat_lock_lock(priv->mapLock);
 	CatHashMapWo *newMap = priv->conditionStateMap;
 	WorConditionState *condition_state = wor_condition_state_new(condition2add, WOR_ICONDITION_OBSERVER(request));
@@ -208,7 +197,7 @@ void wor_request_add_condition(WorRequest *request, WorCondition *condition2add)
 
 gboolean wor_request_remove_condition(WorRequest *request, WorCondition *condition2remove) {
 	gboolean result = FALSE;
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	cat_lock_lock(priv->mapLock);
 	if (priv->conditionStateMap!=NULL) {
 		if (cat_hash_map_wo_get(priv->conditionStateMap, (GObject *) condition2remove)!=NULL) {
@@ -225,9 +214,8 @@ gboolean wor_request_remove_condition(WorRequest *request, WorCondition *conditi
 	return result;
 }
 
-
 void wor_request_update_states(WorRequest *request) {
-	WorRequestPrivate *priv = WOR_REQUEST_GET_PRIVATE(request);
+	WorRequestPrivate *priv = wor_request_get_instance_private(request);
 	cat_log_debug("request:%s, %p, priv=%p", g_type_name_from_instance((GTypeInstance *) request), request, priv);
 	cat_lock_lock(priv->mapLock);
 	CatHashMapWo *localMap = priv->conditionStateMap==NULL ? NULL : cat_ref_ptr(priv->conditionStateMap);
@@ -247,16 +235,11 @@ void wor_request_update_states(WorRequest *request) {
 }
 
 
-
-
-
-
-static void _condition_observer_condition_reporting(WorIConditionObserver *self) {
+static void l_condition_observer_condition_reporting(WorIConditionObserver *self) {
 	WorRequest *request = WOR_REQUEST(self);
 	wor_request_set_notified(request);
 }
 
-static void _condition_observer_iface_init(WorIConditionObserverInterface *iface) {
-	iface->condition_reporting = _condition_observer_condition_reporting;
+static void l_condition_observer_iface_init(WorIConditionObserverInterface *iface) {
+	iface->condition_reporting = l_condition_observer_condition_reporting;
 }
-

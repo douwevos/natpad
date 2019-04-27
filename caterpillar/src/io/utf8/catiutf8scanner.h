@@ -45,9 +45,6 @@ struct _CatIUtf8ScannerInterface {
 
 GType cat_iutf8_scanner_get_type(void);
 
-
 gunichar cat_iutf8_scanner_next_char(CatIUtf8Scanner *self, CatStreamStatus *status);
 
-
 #endif /* CATIUTF8SCANNER_H_ */
-

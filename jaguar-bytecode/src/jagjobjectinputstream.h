@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define JAG_IS_JOBJECT_INPUT_STREAM(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_JOBJECT_INPUT_STREAM))
 #define JAG_IS_JOBJECT_INPUT_STREAM_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_JOBJECT_INPUT_STREAM))
 #define JAG_JOBJECT_INPUT_STREAM_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_JOBJECT_INPUT_STREAM, JagJObjectInputStreamClass))
-#define JAG_JOBJECT_INPUT_STREAM_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_JOBJECT_INPUT_STREAM, JagJObjectInputStreamPrivate))
 
 typedef struct _JagJObjectInputStream               JagJObjectInputStream;
 typedef struct _JagJObjectInputStreamPrivate        JagJObjectInputStreamPrivate;
@@ -43,7 +42,6 @@ typedef struct _JagJObjectInputStreamClass          JagJObjectInputStreamClass;
 
 struct _JagJObjectInputStream {
 	GObject parent;
-	JagJObjectInputStreamPrivate *priv;
 };
 
 struct _JagJObjectInputStreamClass {
@@ -55,7 +53,6 @@ GType jag_jobject_input_stream_get_type();
 
 JagJObjectInputStream *jag_jobject_input_stream_new_from_array(CatStringWo *e_buf);
 JagJObjectInputStream *jag_jobject_input_stream_new(CatIInputStream *input_stream);
-
 
 int8_t jag_jobject_input_stream_read_byte(JagJObjectInputStream *stream);
 void jag_jobject_input_stream_read_bytes(JagJObjectInputStream *stream, char *data, int length);

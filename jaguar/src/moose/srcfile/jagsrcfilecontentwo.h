@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define JAG_IS_SRCFILE_CONTENT_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_SRCFILE_CONTENT_WO))
 #define JAG_IS_SRCFILE_CONTENT_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SRCFILE_CONTENT_WO))
 #define JAG_SRCFILE_CONTENT_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SRCFILE_CONTENT_WO, JagSrcfileContentWoClass))
-#define JAG_SRCFILE_CONTENT_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_SRCFILE_CONTENT_WO, JagSrcfileContentWoPrivate))
-
 
 typedef struct _JagSrcfileContentWo               JagSrcfileContentWo;
 typedef struct _JagSrcfileContentWoPrivate        JagSrcfileContentWoPrivate;
 typedef struct _JagSrcfileContentWoClass          JagSrcfileContentWoClass;
 
-
 struct _JagSrcfileContentWo {
 	GObject parent;
-	JagSrcfileContentWoPrivate *priv;
 };
 
 struct _JagSrcfileContentWoClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_srcfile_content_wo_get_type();
 
@@ -71,7 +66,6 @@ VipIFile *jag_srcfile_content_wo_get_file(JagSrcfileContentWo *content);
 void jag_srcfile_content_wo_set_file(JagSrcfileContentWo *e_content, VipIFile *file);
 
 JagIndexSourceContent *jag_srcfile_content_wo_get_index_context(JagSrcfileContentWo *content);
-
 
 CatStringWo *jag_srcfile_content_wo_key();
 

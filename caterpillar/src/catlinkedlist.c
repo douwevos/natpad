@@ -392,7 +392,7 @@ static void l_iterator_interface_init(CatIIteratorInterface *iface) {
 }
 
 
-G_DEFINE_TYPE_WITH_CODE(CatLinkedListIter, cat_linked_list_iter, G_TYPE_OBJECT,
+G_DEFINE_TYPE_WITH_CODE(CatLinkedListIter, cat_linked_list_iter, G_TYPE_OBJECT, // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_IITERATOR, l_iterator_interface_init)
 );
 

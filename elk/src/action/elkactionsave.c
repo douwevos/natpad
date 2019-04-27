@@ -34,9 +34,7 @@ struct _ElkActionSavePrivate {
 	DraEditorPanel *editor_panel;
 };
 
-G_DEFINE_TYPE_WITH_CODE(ElkActionSave, elk_action_save, LEA_TYPE_ACTION, {
-		G_ADD_PRIVATE(ElkActionSave)
-});
+G_DEFINE_TYPE_WITH_PRIVATE(ElkActionSave, elk_action_save, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);

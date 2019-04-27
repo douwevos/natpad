@@ -34,8 +34,6 @@ G_BEGIN_DECLS
 #define LEA_IS_KEY_SEQUENCE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_KEY_SEQUENCE))
 #define LEA_IS_KEY_SEQUENCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_KEY_SEQUENCE))
 #define LEA_KEY_SEQUENCE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_KEY_SEQUENCE, LeaKeySequenceClass))
-#define LEA_KEY_SEQUENCE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_KEY_SEQUENCE, LeaKeySequencePrivate))
-
 
 typedef struct _LeaKeySequence               LeaKeySequence;
 typedef struct _LeaKeySequencePrivate        LeaKeySequencePrivate;
@@ -44,7 +42,6 @@ typedef struct _LeaKeySequenceClass          LeaKeySequenceClass;
 
 struct _LeaKeySequence {
 	GInitiallyUnowned parent;
-	LeaKeySequencePrivate *priv;
 };
 
 struct _LeaKeySequenceClass {

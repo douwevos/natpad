@@ -45,49 +45,42 @@ struct _JagBytAttributeCodePrivate {
 	JagBytAttributeMap *attribute_map;
 };
 
-G_DEFINE_TYPE (JagBytAttributeCode, jag_byt_attribute_code, JAG_BYT_TYPE_ATTRIBUTE) // @suppress("Unused static function")
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytAttributeCode, jag_byt_attribute_code, JAG_BYT_TYPE_ATTRIBUTE) // @suppress("Unused static function")
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_attribute_code_class_init(JagBytAttributeCodeClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAttributeCodePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_attribute_code_init(JagBytAttributeCode *instance) {
-	JagBytAttributeCodePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ATTRIBUTE_CODE, JagBytAttributeCodePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytAttributeCode *instance = JAG_BYT_ATTRIBUTE_CODE(object);
-	JagBytAttributeCodePrivate *priv = instance->priv;
+	JagBytAttributeCodePrivate *priv = jag_byt_attribute_code_get_instance_private(instance);
 	cat_unref_ptr(priv->e_bytecode);
 	cat_unref_ptr(priv->e_exceptions);
 	cat_unref_ptr(priv->attribute_map);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_attribute_code_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_attribute_code_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytAttributeCode *jag_byt_attribute_code_new(CatStringWo *e_attribute_data, JagBytIConstantProvider *constant_provider) {
 	JagBytAttributeCode *result = g_object_new(JAG_BYT_TYPE_ATTRIBUTE_CODE, NULL);
 	cat_ref_anounce(result);
-	JagBytAttributeCodePrivate *priv = result->priv;
+	JagBytAttributeCodePrivate *priv = jag_byt_attribute_code_get_instance_private(result);
 	jag_byt_attribute_construct((JagBytAttribute *) result);
 	JagJObjectInputStream *obj_istream = jag_jobject_input_stream_new_from_array(e_attribute_data);
 	priv->max_stack = jag_jobject_input_stream_read_short(obj_istream);
@@ -119,17 +112,17 @@ JagBytAttributeCode *jag_byt_attribute_code_new(CatStringWo *e_attribute_data, J
 }
 
 CatStringWo *jag_byt_attribute_code_get_bytecode(JagBytAttributeCode *attribute_code) {
-	JagBytAttributeCodePrivate *priv = JAG_BYT_ATTRIBUTE_CODE_GET_PRIVATE(attribute_code);
+	JagBytAttributeCodePrivate *priv = jag_byt_attribute_code_get_instance_private(attribute_code);
 	return priv->e_bytecode;
 }
 
 CatArrayWo *jag_byt_attribute_code_get_exceptions(JagBytAttributeCode *attribute_code) {
-	JagBytAttributeCodePrivate *priv = JAG_BYT_ATTRIBUTE_CODE_GET_PRIVATE(attribute_code);
+	JagBytAttributeCodePrivate *priv = jag_byt_attribute_code_get_instance_private(attribute_code);
 	return priv->e_exceptions;
 }
 
 JagBytAttributeLocalVariableTable *jag_byt_attribute_code_get_local_variable_table(JagBytAttributeCode *attribute_code) {
-	JagBytAttributeCodePrivate *priv = JAG_BYT_ATTRIBUTE_CODE_GET_PRIVATE(attribute_code);
+	JagBytAttributeCodePrivate *priv = jag_byt_attribute_code_get_instance_private(attribute_code);
 	JagBytAttributeLocalVariableTable *result = NULL;
 	JagBytAttribute *attr = jag_byt_attribute_map_get(priv->attribute_map, CAT_S(jag_txt_attribute_local_variable_table));
 	if (JAG_BYT_IS_ATTRIBUTE_LOCAL_VARIABLE_TABLE(attr)) {
@@ -139,7 +132,7 @@ JagBytAttributeLocalVariableTable *jag_byt_attribute_code_get_local_variable_tab
 }
 
 JagBytAttributeLineNumberTable *jag_byt_attribute_code_get_line_number_table(JagBytAttributeCode *attribute_code) {
-	JagBytAttributeCodePrivate *priv = JAG_BYT_ATTRIBUTE_CODE_GET_PRIVATE(attribute_code);
+	JagBytAttributeCodePrivate *priv = jag_byt_attribute_code_get_instance_private(attribute_code);
 	JagBytAttributeLineNumberTable *result = NULL;
 	JagBytAttribute *attr = jag_byt_attribute_map_get(priv->attribute_map, CAT_S(jag_txt_attribute_line_number_table));
 	if (JAG_BYT_IS_ATTRIBUTE_LINE_NUMBER_TABLE(attr)) {
@@ -162,7 +155,7 @@ static void jag_hex8(CatStringWo *e_output, int val) {
 }
 
 void jag_byt_attribute_code_as_source(JagBytAttributeCode *code_attribute, CatStringWo *e_source, CatStringWo *a_indent) {
-	JagBytAttributeCodePrivate *priv = code_attribute->priv;
+	JagBytAttributeCodePrivate *priv = jag_byt_attribute_code_get_instance_private(code_attribute);
 
 	CatStringWo *e_mnemonic = cat_string_wo_new();
 
@@ -859,16 +852,7 @@ void jag_byt_attribute_code_as_source(JagBytAttributeCode *code_attribute, CatSt
 		}
 
 		cat_string_wo_append(e_source, e_mnemonic);
-
 		cat_string_wo_append_chars(e_source, "\n");
 	}
 
 }
-
-
-
-
-
-
-
-

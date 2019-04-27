@@ -20,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "moosnapshotwork.h"
 #include "mooinodework.h"
 #include "moomodulework.h"
@@ -43,73 +41,55 @@ struct _MooSnapshotWorkPrivate {
 static void l_node_work_iface_init(MooINodeWorkInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooSnapshotWork, moo_snapshot_work, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooSnapshotWork)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_INODE_WORK, l_node_work_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_snapshot_work_class_init(MooSnapshotWorkClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooSnapshotWorkPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_snapshot_work_init(MooSnapshotWork *instance) {
-	MooSnapshotWorkPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_SNAPSHOT_WORK, MooSnapshotWorkPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooSnapshotWork *instance = MOO_SNAPSHOT_WORK(object);
-	MooSnapshotWorkPrivate *priv = instance->priv;
+	MooSnapshotWorkPrivate *priv = moo_snapshot_work_get_instance_private(instance);
 	cat_unref_ptr(priv->editable_node);
 	cat_unref_ptr(priv->moose_sequence);
 	cat_unref_ptr(priv->snapshot);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_snapshot_work_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_snapshot_work_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 MooSnapshotWork *moo_snapshot_work_new(VipISequence *moose_sequence, VipSnapshot *snapshot, MooNodeWo *editable_node) {
 	MooSnapshotWork *result = g_object_new(MOO_TYPE_SNAPSHOT_WORK, NULL);
 	cat_ref_anounce(result);
-	MooSnapshotWorkPrivate *priv = result->priv;
+	MooSnapshotWorkPrivate *priv = moo_snapshot_work_get_instance_private(result);
 	priv->moose_sequence = cat_ref_ptr(moose_sequence);
 	priv->snapshot = cat_ref_ptr(snapshot);
 	priv->editable_node = cat_ref_ptr(editable_node);
 	return result;
 }
 
-
-
 /********************* begin MooINodeWork implementation *********************/
 
-
-//VipNodePath *moo_module_update_and_get_base_viper_path(MooModule *module, VipSnapshot *snapshot) {
-//	MooModulePrivate *priv = MOO_MODULE_GET_PRIVATE(module);
-//	cat_log_detail("base_path=%o", priv->vip_base_node_path);
-//	VipNodePath *new_snapshot = vip_node_path_update(priv->vip_base_node_path, snapshot);
-//	cat_ref_swap(priv->vip_base_node_path, new_snapshot);
-//	return new_snapshot;
-//}
-
-
 static void l_do_work(MooINodeWork *self, CatArrayWo *e_work_list) {
-	MooSnapshotWorkPrivate *priv = MOO_SNAPSHOT_WORK_GET_PRIVATE(self);
+	MooSnapshotWork *instance = MOO_SNAPSHOT_WORK(self);
+	MooSnapshotWorkPrivate *priv = moo_snapshot_work_get_instance_private(instance);
 	int enode_count = moo_node_wo_child_count(priv->editable_node);
 	cat_log_detail("self=%o, enode_count=%d", self, enode_count);
 	if (enode_count>0) {
@@ -136,7 +116,6 @@ static void l_do_work(MooINodeWork *self, CatArrayWo *e_work_list) {
 			}
 		}
 	}
-
 }
 
 static void l_node_work_iface_init(MooINodeWorkInterface *iface) {

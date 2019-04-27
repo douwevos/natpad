@@ -38,42 +38,36 @@ struct _VipSnapshotPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipSnapshot, vip_snapshot, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipSnapshot)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_snapshot_class_init(VipSnapshotClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipSnapshotPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_snapshot_init(VipSnapshot *instance) {
-	VipSnapshotPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_SNAPSHOT, VipSnapshotPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipSnapshot *instance = VIP_SNAPSHOT(object);
-	VipSnapshotPrivate *priv = instance->priv;
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(instance);
 	cat_unref_ptr(priv->root);
 	cat_unref_ptr(priv->version_generator);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_snapshot_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_snapshot_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -81,53 +75,44 @@ static void l_finalize(GObject *object) {
 VipSnapshot *vip_snapshot_new(CatReadableTreeNode *root) {
 	VipSnapshot *result = g_object_new(VIP_TYPE_SNAPSHOT, NULL);
 	cat_ref_anounce(result);
-	VipSnapshotPrivate *priv = result->priv;
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(result);
 	priv->root = cat_ref_ptr(root);
 	priv->version_generator = cat_atomic_long_new();
 	priv->version = cat_atomic_long_increment(priv->version_generator);
 	return result;
 }
 
-
-
 VipSnapshot *l_snapshot_new(CatReadableTreeNode *root, CatAtomicLong *versionGenerator) {
 	VipSnapshot *result = g_object_new(VIP_TYPE_SNAPSHOT, NULL);
 	cat_ref_anounce(result);
-	VipSnapshotPrivate *priv = result->priv;
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(result);
 	priv->root = cat_ref_ptr(root);
 	priv->version_generator = cat_ref_ptr(versionGenerator);
 	priv->version = cat_atomic_long_increment(priv->version_generator);
 	return result;
 }
 
-
 VipSnapshot *vip_snapshot_set_root(VipSnapshot *snapshot, CatReadableTreeNode *newRoot) {
-	VipSnapshotPrivate *priv = VIP_SNAPSHOT_GET_PRIVATE(snapshot);
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(snapshot);
 	if (newRoot==priv->root) {
 		return cat_ref_ptr(snapshot);
 	}
 	return l_snapshot_new(newRoot, priv->version_generator);
 }
 
-
 VipSnapshot *vip_snapshot_copy(VipSnapshot *snapshot, CatArrayWo /*VipNode*/ *from, VipNode *to) {
-
 	return NULL;
 }
 
-
-
 CatReadableTreeNode *vip_snapshot_get_root(VipSnapshot *snapshot) {
-	VipSnapshotPrivate *priv = VIP_SNAPSHOT_GET_PRIVATE(snapshot);
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(snapshot);
 	return priv->root;
 }
 
-
 long long vip_snapshot_get_version(VipSnapshot *snapshot) {
-	VipSnapshotPrivate *priv = VIP_SNAPSHOT_GET_PRIVATE(snapshot);
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(snapshot);
 	return priv->version;
 }
-
 
 CatTreeNode *vip_snapshot_refresh(VipSnapshot *snapshot, CatTreeNode *node) {
 	if (node==NULL) {
@@ -145,10 +130,8 @@ CatTreeNode *vip_snapshot_refresh(VipSnapshot *snapshot, CatTreeNode *node) {
 	return result;
 }
 
-
-
 void vip_snapshot_print(VipSnapshot *snapshot, CatStringWo *e_buf) {
-	VipSnapshotPrivate *priv = VIP_SNAPSHOT_GET_PRIVATE(snapshot);
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(snapshot);
 	cat_string_wo_append_chars(e_buf, "snapshot:");
 	cat_string_wo_append_hexadecimal(e_buf, (unsigned long long int) snapshot, -1);
 	cat_string_wo_append_chars(e_buf, "\n");
@@ -159,12 +142,11 @@ void vip_snapshot_print(VipSnapshot *snapshot, CatStringWo *e_buf) {
 }
 
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	VipSnapshotPrivate *priv = VIP_SNAPSHOT_GET_PRIVATE(self);
+	VipSnapshot *instance = VIP_SNAPSHOT(self);
+	VipSnapshotPrivate *priv = vip_snapshot_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:version=%ld, root-node=%p]", iname, self, priv->version, priv->root);
 }
@@ -174,5 +156,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-

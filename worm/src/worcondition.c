@@ -21,48 +21,41 @@ struct _WorConditionPrivate {
 	volatile int select;
 };
 
-G_DEFINE_TYPE (WorCondition, wor_condition, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(WorCondition, wor_condition, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void wor_condition_class_init(WorConditionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(WorConditionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void wor_condition_init(WorCondition *instance) {
-	WorConditionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_CONDITION, WorConditionPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorCondition *instance = WOR_CONDITION(object);
-	WorConditionPrivate *priv = instance->priv;
+	WorConditionPrivate *priv = wor_condition_get_instance_private(instance);
 	cat_unref_ptr(priv->observer_list);
 	cat_unref_ptr(priv->list_lock);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(wor_condition_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(wor_condition_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 WorCondition *wor_condition_new() {
 	WorCondition *result = g_object_new(WOR_TYPE_CONDITION, NULL);
 	cat_ref_anounce(result);
-	WorConditionPrivate *priv = result->priv;
+	WorConditionPrivate *priv = wor_condition_get_instance_private(result);
 	priv->list_lock = cat_lock_new();
 	priv->observer_list = NULL;
 	priv->select = 0;
@@ -77,7 +70,7 @@ static void l_observer_died(gpointer data, GObject *object_killed) {
 
 
 int wor_condition_register_observer(WorCondition *condition, WorIConditionObserver *observer) {
-	WorConditionPrivate *priv = WOR_CONDITION_GET_PRIVATE(condition);
+	WorConditionPrivate *priv = wor_condition_get_instance_private(condition);
 	g_object_weak_ref((GObject *) observer, l_observer_died, condition);
 	cat_lock_lock(priv->list_lock);
 	CatArrayWo *new_list = priv->observer_list;
@@ -97,7 +90,7 @@ int wor_condition_register_observer(WorCondition *condition, WorIConditionObserv
 
 gboolean wor_condition_unregister_observer(WorCondition *condition, WorIConditionObserver *observer) {
 	gboolean result = FALSE;
-	WorConditionPrivate *priv = WOR_CONDITION_GET_PRIVATE(condition);
+	WorConditionPrivate *priv = wor_condition_get_instance_private(condition);
 	cat_lock_lock(priv->list_lock);
 	if (priv->observer_list!=NULL) {
 		int idx = cat_array_wo_find_index(priv->observer_list, observer, -1);
@@ -120,9 +113,8 @@ gboolean wor_condition_unregister_observer(WorCondition *condition, WorIConditio
 	return result;
 }
 
-
 void wor_condition_up(WorCondition *condition) {
-	WorConditionPrivate *priv = WOR_CONDITION_GET_PRIVATE(condition);
+	WorConditionPrivate *priv = wor_condition_get_instance_private(condition);
 	cat_lock_lock(priv->list_lock);
 	priv->select++;
 	CatArrayWo *local_list = cat_ref_ptr(priv->observer_list);
@@ -140,20 +132,17 @@ void wor_condition_up(WorCondition *condition) {
 	}
 }
 
-
 int wor_condition_get_select(WorCondition *condition) {
-	WorConditionPrivate *priv = WOR_CONDITION_GET_PRIVATE(condition);
+	WorConditionPrivate *priv = wor_condition_get_instance_private(condition);
 	cat_lock_lock(priv->list_lock);
 	int result = priv->select;
 	cat_lock_unlock(priv->list_lock);
 	return result;
 }
 
-
 int wor_condition_hash_code(WorCondition *condition) {
 	return (int) ((long) condition);	/* a very simple hashcode :) */
 }
-
 
 gboolean wor_condition_equals(WorCondition *condition, WorCondition *other) {
 	return condition == other ? TRUE : FALSE;

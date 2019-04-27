@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef SHOTEMPLATECALL_H_
 #define SHOTEMPLATECALL_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define SHO_IS_TEMPLATE_CALL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SHO_TYPE_TEMPLATE_CALL))
 #define SHO_IS_TEMPLATE_CALL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), SHO_TYPE_TEMPLATE_CALL))
 #define SHO_TEMPLATE_CALL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), SHO_TYPE_TEMPLATE_CALL, ShoTemplateCallClass))
-#define SHO_TEMPLATE_CALL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), SHO_TYPE_TEMPLATE_CALL, ShoTemplateCallPrivate))
 
 typedef struct _ShoTemplateCall               ShoTemplateCall;
 typedef struct _ShoTemplateCallPrivate        ShoTemplateCallPrivate;
@@ -45,24 +43,19 @@ typedef struct _ShoTemplateCallClass          ShoTemplateCallClass;
 
 struct _ShoTemplateCall {
 	GObject parent;
-	ShoTemplateCallPrivate *priv;
 };
 
 struct _ShoTemplateCallClass {
 	GObjectClass parent_class;
 };
 
-
 GType sho_template_call_get_type();
 
 ShoTemplateCall *sho_template_call_new(CatStringWo *template_name);
 ShoTemplateCall *sho_template_call_deep_copy(ShoTemplateCall *source);
 
-
 void sho_template_call_set_argument_list(ShoTemplateCall *template_call, ShoListValue *argument_list);
 
-
 G_END_DECLS
-
 
 #endif /* SHOTEMPLATECALL_H_ */

@@ -36,55 +36,43 @@ struct _JagBytOpGotoPrivate {
 static void l_mnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpGoto, jag_byt_op_goto, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, { // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpGoto)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_mnemonic_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_goto_class_init(JagBytOpGotoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytOpGotoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_goto_init(JagBytOpGoto *instance) {
-	JagBytOpGotoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_GOTO, JagBytOpGotoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpGoto *instance = JAG_BYT_OP_GOTO(object);
-//	JagBytOpGotoPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_goto_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_goto_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytOpGoto *jag_byt_op_goto_new(JagBytOperation operation, int offset, int branch_offset) {
 	JagBytOpGoto *result = g_object_new(JAG_BYT_TYPE_OP_GOTO, NULL);
 	cat_ref_anounce(result);
-	JagBytOpGotoPrivate *priv = result->priv;
+	JagBytOpGotoPrivate *priv = jag_byt_op_goto_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, operation==OP_GOTO_W ? 5 : 3);
 	priv->branch_offset = branch_offset;
 	return result;
 }
-
-
-
-
 
 
 /********************* start JagBytIMnemonicInterface implementation *********************/
@@ -93,15 +81,14 @@ static int l_mnemonic_get_continues_offset(JagBytIMnemonic *self) {
 	return -1;
 }
 
-
 static int l_mnemonic_get_branch_offset(JagBytIMnemonic *self) {
-//	JagBytAbstractMnemonicPrivate *priv = JAG_BYT_ABSTRACT_MNEMONIC_GET_PRIVATE(self);
 	int offset = jag_byt_imnemonic_get_offset(self);
-	return JAG_BYT_OP_GOTO_GET_PRIVATE(self)->branch_offset + offset;
+	JagBytOpGotoPrivate *priv = jag_byt_op_goto_get_instance_private(JAG_BYT_OP_GOTO(self));
+	return priv->branch_offset + offset;
 }
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpGotoPrivate *priv = JAG_BYT_OP_GOTO_GET_PRIVATE(self);
+	JagBytOpGotoPrivate *priv = jag_byt_op_goto_get_instance_private(JAG_BYT_OP_GOTO(self));
 	CatStringWo *result = cat_string_wo_new();
 	short opp_code = jag_byt_imnemonic_get_opp_code(self);
 	switch(opp_code) {

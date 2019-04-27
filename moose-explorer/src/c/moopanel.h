@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOPANEL_H_
 #define MOOPANEL_H_
 
@@ -38,23 +37,18 @@ G_BEGIN_DECLS
 #define MOO_IS_PANEL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_PANEL))
 #define MOO_IS_PANEL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_PANEL))
 #define MOO_PANEL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_PANEL, MooPanelClass))
-#define MOO_PANEL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_PANEL, MooPanelPrivate))
-
 
 typedef struct _MooPanel               MooPanel;
 typedef struct _MooPanelPrivate        MooPanelPrivate;
 typedef struct _MooPanelClass          MooPanelClass;
 
-
 struct _MooPanel {
 	LeaPanel parent;
-	MooPanelPrivate *priv;
 };
 
 struct _MooPanelClass {
 	LeaPanelClass parent_class;
 };
-
 
 GType moo_panel_get_type();
 

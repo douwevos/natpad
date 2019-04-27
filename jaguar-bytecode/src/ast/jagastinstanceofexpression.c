@@ -36,60 +36,54 @@ struct _JagAstInstanceOfExpressionPrivate {
 static void l_expression_iface_init(JagAstIExpressionInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstInstanceOfExpression, jag_ast_instance_of_expression, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstInstanceOfExpression)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_IEXPRESSION, l_expression_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_instance_of_expression_class_init(JagAstInstanceOfExpressionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstInstanceOfExpressionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_instance_of_expression_init(JagAstInstanceOfExpression *instance) {
-	JagAstInstanceOfExpressionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_INSTANCE_OF_EXPRESSION, JagAstInstanceOfExpressionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstInstanceOfExpression *instance = JAG_AST_INSTANCE_OF_EXPRESSION(object);
-	JagAstInstanceOfExpressionPrivate *priv = instance->priv;
+	JagAstInstanceOfExpressionPrivate *priv = jag_ast_instance_of_expression_get_instance_private(instance);
 	cat_unref_ptr(priv->expression);
 	cat_unref_ptr(priv->cast_type);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_instance_of_expression_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_instance_of_expression_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstInstanceOfExpression *jag_ast_instance_of_expression_new(JagAstDeclarationType *cast_type, JagAstIExpression *expression) {
 	JagAstInstanceOfExpression *result = g_object_new(JAG_AST_TYPE_INSTANCE_OF_EXPRESSION, NULL);
 	cat_ref_anounce(result);
-	JagAstInstanceOfExpressionPrivate *priv = result->priv;
+	JagAstInstanceOfExpressionPrivate *priv = jag_ast_instance_of_expression_get_instance_private(result);
 	priv->cast_type = cat_ref_ptr(cast_type);
 	priv->expression = cat_ref_ptr(expression);
 	return result;
 }
 
 
-
 /********************* start JagAstIExpression implementation *********************/
 
 static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
-	JagAstInstanceOfExpressionPrivate *priv = JAG_AST_INSTANCE_OF_EXPRESSION_GET_PRIVATE(self);
+	JagAstInstanceOfExpression *instance = JAG_AST_INSTANCE_OF_EXPRESSION(self);
+	JagAstInstanceOfExpressionPrivate *priv = jag_ast_instance_of_expression_get_instance_private(instance);
 
 	jag_ast_iexpression_write(priv->expression, out);
 	jag_ast_writer_print(out, cat_string_wo_new_with(" instanceof "));

@@ -35,17 +35,13 @@ G_BEGIN_DECLS
 #define LEA_IS_PROV_WINDOW_GROUP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_PROV_WINDOW_GROUP))
 #define LEA_IS_PROV_WINDOW_GROUP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_PROV_WINDOW_GROUP))
 #define LEA_PROV_WINDOW_GROUP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_PROV_WINDOW_GROUP, LeaProvWindowGroupClass))
-#define LEA_PROV_WINDOW_GROUP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_PROV_WINDOW_GROUP, LeaProvWindowGroupPrivate))
-
 
 typedef struct _LeaProvWindowGroup               LeaProvWindowGroup;
-typedef struct _LeaProvWindowGroupPrivate        LeaProvWindowGroupPrivate;
 typedef struct _LeaProvWindowGroupClass          LeaProvWindowGroupClass;
 
 
 struct _LeaProvWindowGroup {
 	LeaActionGroup parent;
-	LeaProvWindowGroupPrivate *priv;
 };
 
 struct _LeaProvWindowGroupClass {

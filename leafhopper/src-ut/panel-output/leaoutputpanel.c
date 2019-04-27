@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "leaoutputpanel.h"
 #include <caterpillar.h>
 
@@ -29,24 +28,20 @@
 #define CAT_LOG_CLAZZ "LeaOutputPanel"
 #include <logging/catlog.h>
 
-G_DEFINE_TYPE (LeaOutputPanel, lea_output_panel, LEA_TYPE_PANEL)
+G_DEFINE_TYPE (LeaOutputPanel, lea_output_panel, LEA_TYPE_PANEL) // @suppress("Unused static function")
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
 static void lea_output_panel_class_init(LeaOutputPanelClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
+	object_class->dispose = l_dispose;
 }
 
 static void lea_output_panel_init(LeaOutputPanel *instance) {
 }
 
-static void _dispose(GObject *object) {
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+static void l_dispose(GObject *object) {
+	G_OBJECT_CLASS(lea_output_panel_parent_class)->dispose(object);
 //	cat_log_detail("dispose:%p", object);
 //	LeaOutputPanel *instance = LEA_OUTPUT_PANEL(object);
 //	cat_log_detail("end-dispose:%p", object);

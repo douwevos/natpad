@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTNAMEANDTP_H_
 #define JAGBYTCONSTANTNAMEANDTP_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_NAME_AND_TP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_NAME_AND_TP))
 #define JAG_BYT_IS_CONSTANT_NAME_AND_TP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_NAME_AND_TP))
 #define JAG_BYT_CONSTANT_NAME_AND_TP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_NAME_AND_TP, JagBytConstantNameAndTpClass))
-#define JAG_BYT_CONSTANT_NAME_AND_TP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_NAME_AND_TP, JagBytConstantNameAndTpPrivate))
 
 typedef struct _JagBytConstantNameAndTp               JagBytConstantNameAndTp;
 typedef struct _JagBytConstantNameAndTpPrivate        JagBytConstantNameAndTpPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagBytConstantNameAndTpClass          JagBytConstantNameAndTpCla
 
 struct _JagBytConstantNameAndTp {
 	GObject parent;
-	JagBytConstantNameAndTpPrivate *priv;
 };
 
 struct _JagBytConstantNameAndTpClass {
@@ -58,10 +55,8 @@ GType jag_byt_constant_name_and_tp_get_type();
 
 JagBytConstantNameAndTp *jag_byt_constant_name_and_tp_new(int name_index, int descriptor_index);
 
-
 CatStringWo *jag_byt_constant_name_and_tp_get_name(JagBytConstantNameAndTp *name_and_type);
 CatStringWo *jag_byt_constant_name_and_tp_get_descriptor(JagBytConstantNameAndTp *name_and_type);
-
 
 G_END_DECLS
 

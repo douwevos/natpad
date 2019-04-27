@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOIDPATH_H_
 #define MOOIDPATH_H_
 
@@ -35,23 +34,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ID_PATH(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ID_PATH))
 #define MOO_IS_ID_PATH_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ID_PATH))
 #define MOO_ID_PATH_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ID_PATH, MooIdPathClass))
-#define MOO_ID_PATH_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ID_PATH, MooIdPathPrivate))
-
 
 typedef struct _MooIdPath               MooIdPath;
 typedef struct _MooIdPathPrivate        MooIdPathPrivate;
 typedef struct _MooIdPathClass          MooIdPathClass;
 
-
 struct _MooIdPath {
 	GInitiallyUnowned parent;
-	MooIdPathPrivate *priv;
 };
 
 struct _MooIdPathClass {
 	GInitiallyUnownedClass parent_class;
 };
-
 
 GType moo_id_path_get_type();
 
@@ -68,6 +62,5 @@ MooNodeWo *moo_id_path_get_tail(MooIdPath *id_path, MooNodeWo *root_node);
 MooNodeWo *moo_id_path_get_at(MooIdPath *id_path, MooNodeWo *root_node, int index);
 
 G_END_DECLS
-
 
 #endif /* MOOIDPATH_H_ */

@@ -18,8 +18,6 @@ G_BEGIN_DECLS
 #define LEA_IS_ACTION_GROUP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_ACTION_GROUP))
 #define LEA_IS_ACTION_GROUP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_ACTION_GROUP))
 #define LEA_ACTION_GROUP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_ACTION_GROUP, LeaActionGroupClass))
-#define LEA_ACTION_GROUP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_ACTION_GROUP, LeaActionGroupPrivate))
-
 
 typedef struct _LeaActionGroup             LeaActionGroup;
 typedef struct _LeaActionGroupClass        LeaActionGroupClass;
@@ -63,7 +61,6 @@ void lea_action_group_enlist_recursive(LeaActionGroup *action_group, CatArrayWo 
 //void lea_action_group_merge(LeaActionGroup *action_group, LeaActionGroup *merge_group);
 //
 //void lea_action_group_unmerge(LeaActionGroup *action_group, LeaActionGroup *merge_group);
-
 
 G_END_DECLS
 

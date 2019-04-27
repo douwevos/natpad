@@ -26,12 +26,6 @@
 #include "jar/jagindexerjarmap.h"
 #include "context/jagindexerjremap.h"
 #include "worm/jagindexrefreshrequest.h"
-//#include "jagclazznotify.h"
-//#include "worm/jagindexerrefreshrequest.h"
-//#include "worm/jagclazznotifyrequest.h"
-//#include "../module/jagmonnodesource.h"
-//#include "../module/jagimodulemaplistener.h"
-//#include "../module/jagmonnodesourcefile.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -42,49 +36,31 @@ struct _JagIndexerPrivate {
 	WorService *wor_service;
 	MooService *moo_service;
 	WorQueue *request_queue;
-//	CatArrayWo *e_notify_queue;
-//	CatArrayWo *e_notify_queue_jar_entries;
-//	CatLock *notify_queue_lock;
-//	WorRequest *refresh_request;
-//
-//
-//	CatArrayWo *e_pending_requests;
-//	int max_pending_requests;
-//
-//
 };
-//
-static void l_moose_transaction_listener_iface_init(MooITransactionListenerInterface *iface);
-//static void l_module_map_listener_iface_init(JagIModuleMapListenerInterface *iface);
-//
-G_DEFINE_TYPE_WITH_CODE(JagIndexer, jag_indexer, G_TYPE_OBJECT, {
-		G_IMPLEMENT_INTERFACE(MOO_TYPE_ITRANSACTION_LISTENER, l_moose_transaction_listener_iface_init);
-//		G_IMPLEMENT_INTERFACE(JAG_TYPE_IMODULE_MAP_LISTENER, l_module_map_listener_iface_init);
-});
 
-static gpointer parent_class = NULL;
+static void l_moose_transaction_listener_iface_init(MooITransactionListenerInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE(JagIndexer, jag_indexer, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagIndexer)
+		G_IMPLEMENT_INTERFACE(MOO_TYPE_ITRANSACTION_LISTENER, l_moose_transaction_listener_iface_init);
+});
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_indexer_class_init(JagIndexerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagIndexerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_indexer_init(JagIndexer *instance) {
-	JagIndexerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_INDEXER, JagIndexerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagIndexer *instance = JAG_INDEXER(object);
-	JagIndexerPrivate *priv = instance->priv;
+	JagIndexerPrivate *priv = jag_indexer_get_instance_private(instance);
 //	if (priv->refresh_request) {
 //		jag_indexer_refresh_request_stop((JagIndexerRefreshRequest *) priv->refresh_request);
 //		cat_unref_ptr(priv->refresh_request);
@@ -100,21 +76,21 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->wor_service);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->request_queue);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_indexer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_indexer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagIndexer *jag_indexer_new(WorService *wor_service, MooService *moo_service) {
 	JagIndexer *result = g_object_new(JAG_TYPE_INDEXER, NULL);
 	cat_ref_anounce(result);
-	JagIndexerPrivate *priv = result->priv;
+	JagIndexerPrivate *priv = jag_indexer_get_instance_private(result);
 	priv->wor_service = cat_ref_ptr(wor_service);
 
 	priv->moo_service = cat_ref_ptr(moo_service);
@@ -140,14 +116,16 @@ void jag_indexer_set_preferences(JagIndexer *indexer, JagPreferencesWo *a_jag_pr
 
 
 MooService *jag_indexer_get_moo_service(JagIndexer *indexer) {
-	return JAG_INDEXER_GET_PRIVATE(indexer)->moo_service;
+	JagIndexerPrivate *priv = jag_indexer_get_instance_private(indexer);
+	return priv->moo_service;
 }
 
 
 /********************* begin MooITransactionListener implementation *********************/
 
 static void l_moose_transaction_commited(MooITransactionListener *self, struct _MooTransaction *transaction, struct _MooNodeWo *new_root) {
-	JagIndexerPrivate *priv = JAG_INDEXER_GET_PRIVATE(self);
+	JagIndexer *instance = JAG_INDEXER(self);
+	JagIndexerPrivate *priv = jag_indexer_get_instance_private(instance);
 	JagIndexRefreshRequest *request = jag_index_refresh_request_new(priv->moo_service, priv->request_queue);
 	wor_service_post_request(priv->wor_service, (WorRequest *) request);
 	cat_unref_ptr(request);

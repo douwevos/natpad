@@ -46,52 +46,45 @@ struct _JagBytMethodPrivate {
 	JagBytTryCatchList *try_catch_list;
 };
 
-G_DEFINE_TYPE (JagBytMethod, jag_byt_method, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytMethod, jag_byt_method, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_method_class_init(JagBytMethodClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytMethodPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_method_init(JagBytMethod *instance) {
-	JagBytMethodPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_METHOD, JagBytMethodPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytMethod *instance = JAG_BYT_METHOD(object);
-	JagBytMethodPrivate *priv = instance->priv;
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private(instance);
 	cat_unref_ptr(priv->constant_provider);
 	cat_unref_ptr(priv->attribute_map);
 	cat_unref_ptr(priv->modifiers);
 	cat_unref_ptr(priv->a_method_name);
 	cat_unref_ptr(priv->try_catch_list);
 	cat_unref_ptr(priv->method_header);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_method_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_method_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytMethod *jag_byt_method_new(JagBytName *mainTypeName, JagBytIConstantProvider *constant_provider, uint16_t accessFlags, uint16_t nameIndex, uint16_t descriptorIndex, JagBytAttributeMap *attribute_map) {
 	JagBytMethod *result = g_object_new(JAG_BYT_TYPE_METHOD, NULL);
 	cat_ref_anounce(result);
-	JagBytMethodPrivate *priv = result->priv;
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private(result);
 	priv->constant_provider = cat_ref_ptr(constant_provider);
 	priv->accessFlags = accessFlags;
 	priv->nameIndex = nameIndex;
@@ -127,59 +120,48 @@ JagBytMethod *jag_byt_method_new(JagBytName *mainTypeName, JagBytIConstantProvid
 	jag_byt_method_header_set_exceptions(priv->method_header, exceptions);
 	cat_unref_ptr(exceptions);
 
-
 	priv->try_catch_list = NULL;
-
 	return result;
 }
 
 
 uint16_t jag_byt_method_get_access_flags(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	return priv->accessFlags;
 }
 
 JagAstModifiers *jag_byt_method_get_modifiers(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	return priv->modifiers;
 }
 
-
 uint16_t jag_byt_method_get_name_index(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	return priv->nameIndex;
 }
 
 uint16_t jag_byt_method_get_descriptor_index(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	return priv->descriptorIndex;
 }
 
 JagBytAttributeMap *jag_byt_method_get_attribute_map(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	return priv->attribute_map;
 }
 
-
-
-
-
-
-
 CatStringWo *jag_byt_method_get_name(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	return priv->a_method_name;
 }
 
-
 JagBytMethodHeader *jag_byt_method_get_method_header(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	return priv->method_header;
 }
 
-
 JagBytAttributeLocalVariableTable *jag_byt_method_get_local_variable_table(JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	JagBytAttributeLocalVariableTable *result = NULL;
 	JagBytAttributeCode *attributeCode = jag_byt_attribute_map_get_code(priv->attribute_map);
 	if (attributeCode!=NULL) {
@@ -189,7 +171,7 @@ JagBytAttributeLocalVariableTable *jag_byt_method_get_local_variable_table(JagBy
 }
 
 JagBytAttributeLineNumberTable *jag_byt_method_get_line_number_table(JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	JagBytAttributeLineNumberTable *result = NULL;
 	JagBytAttributeCode *attributeCode = jag_byt_attribute_map_get_code(priv->attribute_map);
 	if (attributeCode!=NULL) {
@@ -198,10 +180,8 @@ JagBytAttributeLineNumberTable *jag_byt_method_get_line_number_table(JagBytMetho
 	return result;
 }
 
-
-
 CatStringWo *jag_byt_method_get_bytecode(const JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	CatStringWo *e_result = NULL;
 	JagBytAttributeCode *attribute_code = jag_byt_attribute_map_get_code(priv->attribute_map);
 	if (attribute_code) {
@@ -210,9 +190,8 @@ CatStringWo *jag_byt_method_get_bytecode(const JagBytMethod *method) {
 	return e_result;
 }
 
-
 JagBytTryCatchList *jag_byt_method_get_try_catch_list(JagBytMethod *method) {
-	JagBytMethodPrivate *priv = JAG_BYT_METHOD_GET_PRIVATE(method);
+	JagBytMethodPrivate *priv = jag_byt_method_get_instance_private((JagBytMethod *) method);
 	if (priv->try_catch_list==NULL) {
 		JagBytAttributeCode *attributeCode = jag_byt_attribute_map_get_code(priv->attribute_map);
 		if (attributeCode!=NULL) {
@@ -222,4 +201,3 @@ JagBytTryCatchList *jag_byt_method_get_try_catch_list(JagBytMethod *method) {
 	}
 	return priv->try_catch_list;
 }
-

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "jagastwriter.h"
 
 #include <logging/catlogdefs.h>
@@ -38,9 +37,7 @@ struct _JagAstWriterPrivate {
 	int indent;
 };
 
-G_DEFINE_TYPE (JagAstWriter, jag_ast_writer, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagAstWriter, jag_ast_writer, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -49,42 +46,37 @@ static void l_store_and_clear_line(JagAstWriter *writer);
 static void l_rebuild_indent(JagAstWriter *writer);
 
 static void jag_ast_writer_class_init(JagAstWriterClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstWriterPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_writer_init(JagAstWriter *instance) {
-	JagAstWriterPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_WRITER, JagAstWriterPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstWriter *instance = JAG_AST_WRITER(object);
-	JagAstWriterPrivate *priv = instance->priv;
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(instance);
 	cat_unref_ptr(priv->e_lines);
 	cat_unref_ptr(priv->e_last_line);
 	cat_unref_ptr(priv->a_last_index_text);
 	cat_unref_ptr(priv->a_indent_text);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_writer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_writer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstWriter *jag_ast_writer_new() {
 	JagAstWriter *result = g_object_new(JAG_AST_TYPE_WRITER, NULL);
 	cat_ref_anounce(result);
-	JagAstWriterPrivate *priv = result->priv;
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(result);
 	priv->e_lines = cat_array_wo_new();
 	priv->e_last_line = cat_string_wo_new();
 
@@ -96,7 +88,7 @@ JagAstWriter *jag_ast_writer_new() {
 
 
 void jag_ast_writer_set_at_least_line_nr(JagAstWriter *writer, int lineNumber) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 	if (lineNumber>=0) {
 		while(cat_array_wo_size(priv->e_lines)<lineNumber) {
 			l_store_and_clear_line(writer);
@@ -106,7 +98,7 @@ void jag_ast_writer_set_at_least_line_nr(JagAstWriter *writer, int lineNumber) {
 
 
 JagAstWriter *jag_ast_writer_print(JagAstWriter *writer, CatStringWo *a_text) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 	int lastIndex = 0;
 	int idx;
 	for(idx=0; idx<cat_string_wo_length(a_text); idx++) {
@@ -126,7 +118,7 @@ JagAstWriter *jag_ast_writer_print(JagAstWriter *writer, CatStringWo *a_text) {
 }
 
 void jag_ast_writer_clear(JagAstWriter *writer) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 	cat_array_wo_clear(priv->e_lines);
 	cat_string_wo_clear(priv->e_last_line);
 	priv->indent = 0;
@@ -137,7 +129,7 @@ void jag_ast_writer_clear(JagAstWriter *writer) {
 }
 
 static void l_store_and_clear_line(JagAstWriter *writer) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 
 	CatStringWo *e_complete_line = cat_string_wo_clone(priv->a_last_index_text, CAT_CLONE_DEPTH_MAIN);
 	cat_string_wo_append(e_complete_line, priv->e_last_line);
@@ -150,19 +142,19 @@ static void l_store_and_clear_line(JagAstWriter *writer) {
 }
 
 void jag_ast_writer_increase_indent(JagAstWriter *writer) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 	priv->indent++;
 	l_rebuild_indent(writer);
 }
 
 void jag_ast_writer_decrease_indent(JagAstWriter *writer) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 	priv->indent--;
 	l_rebuild_indent(writer);
 }
 
 CatStringWo *jag_ast_writer_to_string(JagAstWriter *writer) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 	CatStringWo *e_buf = cat_string_wo_new();
 	int idx;
 	for(idx=0; idx<cat_array_wo_size(priv->e_lines); idx++) {
@@ -179,7 +171,7 @@ CatStringWo *jag_ast_writer_to_string(JagAstWriter *writer) {
 }
 
 static void l_rebuild_indent(JagAstWriter *writer) {
-	JagAstWriterPrivate *priv = JAG_AST_WRITER_GET_PRIVATE(writer);
+	JagAstWriterPrivate *priv = jag_ast_writer_get_instance_private(writer);
 	CatStringWo *e_newIndent = cat_string_wo_new();
 	int idx;
 	for(idx=0; idx<priv->indent; idx++) {
@@ -193,4 +185,3 @@ static void l_rebuild_indent(JagAstWriter *writer) {
 		cat_ref_swap(priv->a_last_index_text, priv->a_indent_text);
 	}
 }
-

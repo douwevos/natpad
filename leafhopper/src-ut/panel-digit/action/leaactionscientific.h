@@ -34,17 +34,13 @@ G_BEGIN_DECLS
 #define LEA_IS_ACTION_SCIENTIFIC(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_ACTION_SCIENTIFIC))
 #define LEA_IS_ACTION_SCIENTIFIC_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_ACTION_SCIENTIFIC))
 #define LEA_ACTION_SCIENTIFIC_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_ACTION_SCIENTIFIC, LeaActionScientificClass))
-#define LEA_ACTION_SCIENTIFIC_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_ACTION_SCIENTIFIC, LeaActionScientificPrivate))
-
 
 typedef struct _LeaActionScientific               LeaActionScientific;
-typedef struct _LeaActionScientificPrivate        LeaActionScientificPrivate;
 typedef struct _LeaActionScientificClass          LeaActionScientificClass;
 
 
 struct _LeaActionScientific {
 	LeaAction parent;
-	LeaActionScientificPrivate *priv;
 };
 
 struct _LeaActionScientificClass {

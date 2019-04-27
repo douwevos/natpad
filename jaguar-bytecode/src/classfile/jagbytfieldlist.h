@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_FIELD_LIST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_FIELD_LIST))
 #define JAG_BYT_IS_FIELD_LIST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_FIELD_LIST))
 #define JAG_BYT_FIELD_LIST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_FIELD_LIST, JagBytFieldListClass))
-#define JAG_BYT_FIELD_LIST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_FIELD_LIST, JagBytFieldListPrivate))
 
 typedef struct _JagBytFieldList               JagBytFieldList;
 typedef struct _JagBytFieldListPrivate        JagBytFieldListPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytFieldListClass          JagBytFieldListClass;
 
 struct _JagBytFieldList {
 	GInitiallyUnowned parent;
-	JagBytFieldListPrivate *priv;
 };
 
 struct _JagBytFieldListClass {

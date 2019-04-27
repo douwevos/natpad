@@ -69,43 +69,37 @@ struct _JagBytMnemonicBlockPrivate {
 static void l_mnemonic_block_iface_init(JagBytIMnemonicBlockInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytMnemonicBlock, jag_byt_mnemonic_block, G_TYPE_OBJECT ,{
+		G_ADD_PRIVATE(JagBytMnemonicBlock)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC_BLOCK, l_mnemonic_block_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_mnemonic_block_class_init(JagBytMnemonicBlockClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytMnemonicBlockPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_mnemonic_block_init(JagBytMnemonicBlock *instance) {
-	JagBytMnemonicBlockPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_MNEMONIC_BLOCK, JagBytMnemonicBlockPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytMnemonicBlock *instance = JAG_BYT_MNEMONIC_BLOCK(object);
-	JagBytMnemonicBlockPrivate *priv = instance->priv;
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(instance);
 	cat_unref_ptr(priv->e_bytecode);
 	cat_unref_ptr(priv->label_repository);
 	cat_unref_ptr(priv->e_opperationList);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_mnemonic_block_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_mnemonic_block_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -116,7 +110,7 @@ static void l_resolve_labels(JagBytMnemonicBlock *block);
 JagBytMnemonicBlock *jag_byt_mnemonic_block_new(CatStringWo *e_bytecode) {
 	JagBytMnemonicBlock *result = g_object_new(JAG_BYT_TYPE_MNEMONIC_BLOCK, NULL);
 	cat_ref_anounce(result);
-	JagBytMnemonicBlockPrivate *priv = result->priv;
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(result);
 	priv->e_bytecode = cat_ref_ptr(e_bytecode);
 	priv->e_opperationList = cat_array_wo_new();
 	l_run(result);
@@ -126,12 +120,12 @@ JagBytMnemonicBlock *jag_byt_mnemonic_block_new(CatStringWo *e_bytecode) {
 
 
 JagBytLabelRepository *jag_byt_mnemonic_block_get_label_repository(JagBytMnemonicBlock *mnemonic_block) {
-	JagBytMnemonicBlockPrivate *priv = JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(mnemonic_block);
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(mnemonic_block);
 	return priv->label_repository;
 }
 
 int jag_byt_mnemonic_block_find_by_bytecode_offset(JagBytMnemonicBlock *mnemonic_block, int bytecode_offset) {
-	JagBytMnemonicBlockPrivate *priv = JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(mnemonic_block);
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(mnemonic_block);
 	int index;
 	int op_count = cat_array_wo_size(priv->e_opperationList);
 	for(index=0; index<op_count; index++) {
@@ -145,18 +139,18 @@ int jag_byt_mnemonic_block_find_by_bytecode_offset(JagBytMnemonicBlock *mnemonic
 }
 
 int jag_byt_mnemonic_block_count(JagBytMnemonicBlock *mnemonic_block) {
-	JagBytMnemonicBlockPrivate *priv = JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(mnemonic_block);
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(mnemonic_block);
 	return cat_array_wo_size(priv->e_opperationList);
 }
 
 JagBytIMnemonic *jag_byt_mnemonic_block_get(JagBytMnemonicBlock *mnemonic_block, int index) {
-	JagBytMnemonicBlockPrivate *priv = JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(mnemonic_block);
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(mnemonic_block);
 	return (JagBytIMnemonic *) cat_array_wo_get(priv->e_opperationList, index);
 }
 
 
 JagBytLabel *jag_byt_mnemonic_block_find_or_create_label_at(JagBytMnemonicBlock *mnemonic_block, int mnemonic_index) {
-	JagBytMnemonicBlockPrivate *priv = JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(mnemonic_block);
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(mnemonic_block);
 	JagBytLabel *label = jag_byt_label_repository_get(priv->label_repository, mnemonic_index);
 	if (label==NULL) {
 		int bytecodeOffset = -1;
@@ -175,7 +169,7 @@ JagBytLabel *jag_byt_mnemonic_block_find_or_create_label_at(JagBytMnemonicBlock 
 
 
 static void l_resolve_labels(JagBytMnemonicBlock *block) {
-	JagBytMnemonicBlockPrivate *priv = JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(block);
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(block);
 	priv->label_repository = jag_byt_label_repository_new();
 	int oppIndex = 0;
 	CatIIterator *iter = cat_array_wo_iterator(priv->e_opperationList);
@@ -250,7 +244,7 @@ static int l_read_unsigned_byte(CatStringWo *e_bytecode, int *ptr) {
 
 
 static void l_run(JagBytMnemonicBlock *block) {
-	JagBytMnemonicBlockPrivate *priv = JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(block);
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(block);
 	gboolean isWide = FALSE;
 	int startAdres = 0;
 	int bytecodePtr = 0;
@@ -719,10 +713,6 @@ static void l_run(JagBytMnemonicBlock *block) {
 }
 
 
-
-
-
-
 static JagBytIMnemonic *l_mnemonic_block_get(JagBytIMnemonicBlock *self, int index) {
 	return jag_byt_mnemonic_block_get(JAG_BYT_MNEMONIC_BLOCK(self), index);
 }
@@ -736,9 +726,9 @@ static int l_mnemonic_block_find_by_bytecode_offset(JagBytIMnemonicBlock *self, 
 }
 
 static JagBytLabelRepository *l_mnemonic_block_get_label_repository(JagBytIMnemonicBlock *self) {
-	return JAG_BYT_MNEMONIC_BLOCK_GET_PRIVATE(self)->label_repository;
+	JagBytMnemonicBlockPrivate *priv = jag_byt_mnemonic_block_get_instance_private(JAG_BYT_MNEMONIC_BLOCK(self));
+	return priv->label_repository;
 }
-
 
 static void l_mnemonic_block_iface_init(JagBytIMnemonicBlockInterface *iface) {
 	iface->get = l_mnemonic_block_get;

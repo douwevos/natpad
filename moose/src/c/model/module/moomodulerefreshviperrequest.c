@@ -41,46 +41,37 @@ struct _MooModuleRefreshViperRequestPrivate {
 	gboolean force_refresh;
 };
 
-
-G_DEFINE_TYPE(MooModuleRefreshViperRequest, moo_module_refresh_viper_request, WOR_TYPE_REQUEST)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooModuleRefreshViperRequest, moo_module_refresh_viper_request, WOR_TYPE_REQUEST)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void moo_module_refresh_viper_request_class_init(MooModuleRefreshViperRequestClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooModuleRefreshViperRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 
 	WorRequestClass *req_class = WOR_REQUEST_CLASS(clazz);
 	req_class->runRequest = l_run_request;
-
 }
 
 static void moo_module_refresh_viper_request_init(MooModuleRefreshViperRequest *instance) {
-	MooModuleRefreshViperRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_MODULE_REFRESH_VIPER_REQUEST, MooModuleRefreshViperRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooModuleRefreshViperRequest *instance = MOO_MODULE_REFRESH_VIPER_REQUEST(object);
-	MooModuleRefreshViperRequestPrivate *priv = instance->priv;
+	MooModuleRefreshViperRequestPrivate *priv = moo_module_refresh_viper_request_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_module_refresh_viper_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_module_refresh_viper_request_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -88,7 +79,7 @@ static void l_finalize(GObject *object) {
 MooModuleRefreshViperRequest *moo_module_refresh_viper_request_new(MooService *moo_service, long long module_id, gboolean force_refresh) {
 	MooModuleRefreshViperRequest *result = g_object_new(MOO_TYPE_MODULE_REFRESH_VIPER_REQUEST, NULL);
 	cat_ref_anounce(result);
-	MooModuleRefreshViperRequestPrivate *priv = result->priv;
+	MooModuleRefreshViperRequestPrivate *priv = moo_module_refresh_viper_request_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->module_id = module_id;
 	priv->force_refresh = force_refresh;
@@ -97,14 +88,12 @@ MooModuleRefreshViperRequest *moo_module_refresh_viper_request_new(MooService *m
 }
 
 
-
 static void l_refresh_module_settings(MooModuleContentWo *e_module_content, MooNodeWo *e_module_node);
 
 
-
-
 static void l_run_request(WorRequest *request) {
-	MooModuleRefreshViperRequestPrivate *priv = MOO_MODULE_REFRESH_VIPER_REQUEST_GET_PRIVATE(request);
+	MooModuleRefreshViperRequest *instance = MOO_MODULE_REFRESH_VIPER_REQUEST(request);
+	MooModuleRefreshViperRequestPrivate *priv = moo_module_refresh_viper_request_get_instance_private(instance);
 	cat_log_debug("starting:%o, forced=%d", request, priv->force_refresh);
 
 	MooTransaction *transaction = moo_service_create_transaction((GObject *) request, priv->moo_service);

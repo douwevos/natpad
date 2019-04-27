@@ -78,7 +78,7 @@ static CatTreeNode *l_create_new(CatITreeEntryListProvider *list_provider, int l
 }
 
 static CatTreeEntry *l_get_entry(CatTreeNode *tree_node) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(tree_node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_private(tree_node);
 	CatTreeEntryList *entry_list = cat_itree_entry_list_provider_get_entry_list(priv->list_provider);
 	return cat_tree_entry_list_get_entry(entry_list, priv->location);
 }
@@ -92,19 +92,19 @@ static CatTreeEntry *l_get_writable_entry(CatTreeNodePrivate *priv) {
 
 
 void cat_writable_tree_node_set_child_at(CatWritableTreeNode *node, int index, CatWritableTreeNode *child) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_private((CatTreeNode *) node);
 	CatTreeEntry *node_entry = l_get_entry((CatTreeNode *) node);
 	int child_location = cat_tree_entry_get_child(node_entry, index);
 	if (child_location!= -1) {
 		node_entry = l_get_writable_entry(priv);
-		cat_tree_entry_set_child_at(node_entry, index, CAT_TREE_NODE_GET_PRIVATE(child)->location);
+		cat_tree_entry_set_child_at(node_entry, index, cat_tree_node_get_private((CatTreeNode *) child)->location);
 	} else {
 		// TODO error
 	}
 }
 
 void cat_writable_tree_node_remove_child_at(CatWritableTreeNode *node, int index) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_private((CatTreeNode *) node);
 	CatTreeEntry *node_entry = l_get_entry((CatTreeNode *) node);
 	int child_location = cat_tree_entry_get_child(node_entry, index);
 	if (child_location!= -1) {
@@ -121,7 +121,7 @@ void cat_writable_tree_node_remove_child_at(CatWritableTreeNode *node, int index
 
 void cat_writable_tree_node_remove_child(CatWritableTreeNode *node, CatWritableTreeNode *child_node) {
 	CatTreeEntry *node_entry = l_get_entry((CatTreeNode *) node);
-	int child_index = cat_tree_entry_find_child_index(node_entry, CAT_TREE_NODE_GET_PRIVATE(child_node)->location);
+	int child_index = cat_tree_entry_find_child_index(node_entry, cat_tree_node_get_private((CatTreeNode *) child_node)->location);
 	if (child_index!=-1) {
 		cat_writable_tree_node_remove_child_at(node, child_index);
 	}
@@ -130,7 +130,7 @@ void cat_writable_tree_node_remove_child(CatWritableTreeNode *node, CatWritableT
 
 
 CatWritableTreeNode *cat_writable_tree_node_append_child(CatWritableTreeNode *node) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_private((CatTreeNode *) node);
 	CatTreeEntry *node_entry = l_get_writable_entry(priv);
 	CatTreeEntryList *entry_list = cat_itree_entry_list_provider_get_writable_entry_list(priv->list_provider);
 	int created_location = cat_tree_entry_list_create_node(entry_list);
@@ -143,7 +143,7 @@ CatWritableTreeNode *cat_writable_tree_node_append_child(CatWritableTreeNode *no
 
 
 void cat_writable_tree_node_set_content(CatWritableTreeNode *node, GObject *new_content) {
-	CatTreeNodePrivate *priv = CAT_TREE_NODE_GET_PRIVATE(node);
+	CatTreeNodePrivate *priv = cat_tree_node_get_private((CatTreeNode *) node);
 	CatTreeEntry *node_entry = l_get_writable_entry(priv);
 	cat_tree_entry_set_payload(node_entry, new_content);
 }

@@ -37,29 +37,13 @@ G_BEGIN_DECLS
 #define ELK_IS_GROUP_FILE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_GROUP_FILE))
 #define ELK_IS_GROUP_FILE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_GROUP_FILE))
 #define ELK_GROUP_FILE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_GROUP_FILE, ElkGroupFileClass))
-#define ELK_GROUP_FILE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_GROUP_FILE, ElkGroupFilePrivate))
 
 typedef struct _ElkGroupFile               ElkGroupFile;
 typedef struct _ElkGroupFilePrivate        ElkGroupFilePrivate;
 typedef struct _ElkGroupFileClass          ElkGroupFileClass;
 
-//#define ELK_ACT_ABOUT                         0
-//#define ELK_ACT_EXIT                          1
-//#define ELK_ACT_PREFERENCES                   2
-//#define ELK_ACT_SELECT_AND_OPEN               3
-//#define ELK_ACT_NEW_EMPTY                     4
-//#define ELK_ACT_REVERT                        5
-//#define ELK_ACT_SAVE                          6
-//#define ELK_ACT_SAVE_AS                       7
-//#define ELK_ACT_SAVE_ALL                      8
-//#define ELK_ACT_CLOSE                         9
-//#define ELK_ACT_CLOSE_ALL                     10
-//
-//#define ELK_ACT_COUNT                         11
-
 struct _ElkGroupFile {
 	LeaActionGroup parent;
-	ElkGroupFilePrivate *priv;
 };
 
 struct _ElkGroupFileClass {
@@ -71,9 +55,7 @@ GType elk_group_file_get_type();
 
 ElkGroupFile *elk_group_file_new(ElkIService *service);
 
-
 LeaAction *elk_group_file_get(ElkGroupFile *group, int index);
-
 
 void elk_group_file_set_editor_panel(ElkGroupFile *group, DraEditorPanel *editor);
 

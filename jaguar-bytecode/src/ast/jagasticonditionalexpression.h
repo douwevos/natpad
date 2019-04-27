@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTICONDITIONALEXPRESSION_H_
 #define JAGASTICONDITIONALEXPRESSION_H_
-
 
 #include "formater/jagastwriter.h"
 #include "jagastiexpression.h"
@@ -47,8 +45,6 @@ struct _JagAstIConditionalExpressionInterface {
 
 GType jag_ast_iconditional_expression_get_type(void);
 
-
 JagAstIConditionalExpression *jag_ast_iconditional_expression_invert(JagAstIConditionalExpression *self);
-
 
 #endif /* JAGASTICONDITIONALEXPRESSION_H_ */

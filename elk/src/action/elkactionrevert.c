@@ -33,18 +33,13 @@ struct _ElkActionRevertPrivate {
 	DraEditorPanel *editor_panel;
 };
 
-G_DEFINE_TYPE (ElkActionRevert, elk_action_revert, LEA_TYPE_ACTION)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(ElkActionRevert, elk_action_revert, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void elk_action_revert_class_init(ElkActionRevertClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ElkActionRevertPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -54,30 +49,28 @@ static void elk_action_revert_class_init(ElkActionRevertClass *clazz) {
 }
 
 static void elk_action_revert_init(ElkActionRevert *instance) {
-	ElkActionRevertPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_ACTION_REVERT, ElkActionRevertPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkActionRevert *instance = ELK_ACTION_REVERT(object);
-	ElkActionRevertPrivate *priv = instance->priv;
+	ElkActionRevertPrivate *priv = elk_action_revert_get_instance_private(instance);
 	cat_unref_ptr(priv->editor_panel);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_action_revert_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(elk_action_revert_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ElkActionRevert *elk_action_revert_new() {
 	ElkActionRevert *result = g_object_new(ELK_TYPE_ACTION_REVERT, NULL);
 	cat_ref_anounce(result);
-	ElkActionRevertPrivate *priv = result->priv;
+	ElkActionRevertPrivate *priv = elk_action_revert_get_instance_private(result);
 	lea_action_construct(LEA_ACTION(result), cat_string_wo_new_with("elk.editor.revert"), cat_string_wo_new_with("Rever_t"), cat_string_wo_new_with("document-revert"));
 	lea_action_set_sensitive_self(LEA_ACTION(result), FALSE);
 	priv->editor_panel = NULL;
@@ -86,7 +79,7 @@ ElkActionRevert *elk_action_revert_new() {
 
 
 static void l_action_run(LeaAction *self) {
-	ElkActionRevertPrivate *priv = ELK_ACTION_REVERT_GET_PRIVATE(self);
+	ElkActionRevertPrivate *priv = elk_action_revert_get_instance_private(ELK_ACTION_REVERT(self));
 	cat_log_debug("priv->editor=%p", priv->editor_panel);
 	if (priv->editor_panel) {
 		DRA_EDITOR_PANEL_GET_CLASS(priv->editor_panel)->revert(priv->editor_panel);
@@ -95,7 +88,7 @@ static void l_action_run(LeaAction *self) {
 }
 
 void elk_action_revert_set_editor_panel(ElkActionRevert *action, DraEditorPanel *editor_panel) {
-	ElkActionRevertPrivate *priv = ELK_ACTION_REVERT_GET_PRIVATE(action);
+	ElkActionRevertPrivate *priv = elk_action_revert_get_instance_private(action);
 	cat_ref_swap(priv->editor_panel, editor_panel);
 	gboolean can_revert = FALSE;
 	if (editor_panel) {

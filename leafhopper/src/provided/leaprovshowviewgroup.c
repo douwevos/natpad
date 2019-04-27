@@ -27,33 +27,23 @@
 #define CAT_LOG_CLAZZ "LeaProvShowViewGroup"
 #include <logging/catlog.h>
 
-struct _LeaProvShowViewGroupPrivate {
-	void *dummy;
-};
 
-
-G_DEFINE_TYPE(LeaProvShowViewGroup, lea_prov_show_view_group, LEA_TYPE_ACTION_GROUP)
+G_DEFINE_TYPE(LeaProvShowViewGroup, lea_prov_show_view_group, LEA_TYPE_ACTION_GROUP) // @suppress("Unused static function")
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void lea_prov_show_view_group_class_init(LeaProvShowViewGroupClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaProvShowViewGroupPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void lea_prov_show_view_group_init(LeaProvShowViewGroup *instance) {
-	LeaProvShowViewGroupPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, LEA_TYPE_PROV_SHOW_VIEW_GROUP, LeaProvShowViewGroupPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	LeaProvShowViewGroup *instance = LEA_PROV_SHOW_VIEW_GROUP(object);
-//	LeaProvShowViewGroupPrivate *priv = instance->priv;
 	G_OBJECT_CLASS(lea_prov_show_view_group_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -69,16 +59,5 @@ static void l_finalize(GObject *object) {
 LeaProvShowViewGroup *lea_prov_show_view_group_new() {
 	LeaProvShowViewGroup *result = g_object_new(LEA_TYPE_PROV_SHOW_VIEW_GROUP, NULL);
 	cat_ref_anounce(result);
-//	LeaProvShowViewGroupPrivate *priv = result->priv;
-//	LEA_ACTION_GROUP_construct((LeaActionGroup *) result);
 	return result;
 }
-
-
-
-
-
-
-
-
-

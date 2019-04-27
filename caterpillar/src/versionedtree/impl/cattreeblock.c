@@ -35,28 +35,24 @@ struct _CatTreeBlockPrivate {
 };
 
 
-G_DEFINE_TYPE(CatTreeBlock, cat_tree_block, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(CatTreeBlock, cat_tree_block, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_tree_block_class_init(CatTreeBlockClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatTreeBlockPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_tree_block_init(CatTreeBlock *instance) {
-	CatTreeBlockPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_TREE_BLOCK, CatTreeBlockPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatTreeBlock *instance = CAT_TREE_BLOCK(object);
-	CatTreeBlockPrivate *priv = instance->priv;
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(instance);
 	if (priv->internal) {
 		int idx;
 		for(idx=0; idx<CAT_TREE_BLOCK_SIZE; idx++) {
@@ -79,7 +75,7 @@ static void l_finalize(GObject *object) {
 CatTreeBlock *cat_tree_block_new() {
 	CatTreeBlock *result = g_object_new(CAT_TYPE_TREE_BLOCK, NULL);
 	cat_ref_anounce(result);
-	CatTreeBlockPrivate *priv = result->priv;
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(result);
 	priv->internal = g_malloc0(sizeof(CatTreeEntry *) * CAT_TREE_BLOCK_SIZE);
 	priv->used = 0;
 	priv->marked_fixed = FALSE;
@@ -91,7 +87,7 @@ CatTreeBlock *cat_tree_block_new() {
 
 
 void cat_tree_block_mark(CatTreeBlock *block) {
-	CatTreeBlockPrivate *priv = CAT_TREE_BLOCK_GET_PRIVATE(block);
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
 	priv->marked_fixed = TRUE;
 	int idx;
 	for(idx=0; idx<CAT_TREE_BLOCK_SIZE; idx++) {
@@ -103,17 +99,18 @@ void cat_tree_block_mark(CatTreeBlock *block) {
 }
 
 gboolean cat_tree_block_is_marked_fixed(CatTreeBlock *block) {
-	return CAT_TREE_BLOCK_GET_PRIVATE(block)->marked_fixed;
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
+	return priv->marked_fixed;
 }
 
 CatTreeBlock *cat_tree_block_ensure_writable(CatTreeBlock *block) {
-	CatTreeBlockPrivate *priv = CAT_TREE_BLOCK_GET_PRIVATE(block);
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
 	if (!priv->marked_fixed) {
 		return cat_ref_ptr(block);
 	}
 	CatTreeBlock *result = cat_tree_block_new();
 	cat_ref_anounce(result);
-	CatTreeBlockPrivate *rpriv = result->priv;
+	CatTreeBlockPrivate *rpriv = cat_tree_block_get_instance_private(result);
 	int idx;
 	for(idx=0; idx<CAT_TREE_BLOCK_SIZE; idx++) {
 		rpriv->internal[idx] = cat_ref_ptr(priv->internal[idx]);
@@ -124,7 +121,7 @@ CatTreeBlock *cat_tree_block_ensure_writable(CatTreeBlock *block) {
 
 
 void cat_tree_block_set(CatTreeBlock *block, int index, CatTreeEntry *node) {
-	CatTreeBlockPrivate *priv = CAT_TREE_BLOCK_GET_PRIVATE(block);
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
 	if (priv->internal[index]!=NULL) {
 		priv->used--;
 	}
@@ -136,20 +133,23 @@ void cat_tree_block_set(CatTreeBlock *block, int index, CatTreeEntry *node) {
 
 
 gboolean cat_tree_block_has_available_spot(CatTreeBlock *block) {
-	return CAT_TREE_BLOCK_GET_PRIVATE(block)->used != CAT_TREE_BLOCK_SIZE;
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
+	return priv->used != CAT_TREE_BLOCK_SIZE;
 }
 
 gboolean cat_tree_block_is_empty(CatTreeBlock *block) {
-	return CAT_TREE_BLOCK_GET_PRIVATE(block)->used == 0;
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
+	return priv->used == 0;
 }
 
 int cat_tree_block_count(CatTreeBlock *block) {
-	return CAT_TREE_BLOCK_GET_PRIVATE(block)->used;
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
+	return priv->used;
 }
 
 
 int cat_tree_block_create_node(CatTreeBlock *block) {
-	CatTreeBlockPrivate *priv = CAT_TREE_BLOCK_GET_PRIVATE(block);
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
 	if (priv->used == CAT_TREE_BLOCK_SIZE) {
 		return -1;
 	}
@@ -165,7 +165,7 @@ int cat_tree_block_create_node(CatTreeBlock *block) {
 }
 
 int cat_tree_block_find(CatTreeBlock *block, CatIMatcher *matcher) {
-	CatTreeBlockPrivate *priv = CAT_TREE_BLOCK_GET_PRIVATE(block);
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
 	int idx;
 	for(idx=0; idx<CAT_TREE_BLOCK_SIZE; idx++) {
 		if (priv->internal[idx]!=NULL) {
@@ -180,12 +180,12 @@ int cat_tree_block_find(CatTreeBlock *block, CatIMatcher *matcher) {
 
 
 CatTreeEntry *cat_tree_block_get(CatTreeBlock *block, int index) {
-	CatTreeBlockPrivate *priv = CAT_TREE_BLOCK_GET_PRIVATE(block);
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
 	return priv->internal[index];
 }
 
 CatTreeEntry *cat_tree_block_get_writable(CatTreeBlock *block, int entry_index) {
-	CatTreeBlockPrivate *priv = CAT_TREE_BLOCK_GET_PRIVATE(block);
+	CatTreeBlockPrivate *priv = cat_tree_block_get_instance_private(block);
 	CatTreeEntry *entry = priv->internal[entry_index];
 	if (entry!=NULL && cat_tree_entry_is_marked_fixed(entry)) {
 		entry = cat_tree_entry_ensure_writable(entry);
@@ -194,5 +194,4 @@ CatTreeEntry *cat_tree_block_get_writable(CatTreeBlock *block, int entry_index) 
 	}
 	return entry;
 }
-
 

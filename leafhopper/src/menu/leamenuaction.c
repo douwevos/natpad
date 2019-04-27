@@ -42,6 +42,7 @@ static void l_stringable_iface_init(CatIStringableInterface *iface);
 static void l_attachable_iface_init(LeaIAttachableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(LeaMenuAction, lea_menu_action, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(LeaMenuAction)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 		G_IMPLEMENT_INTERFACE(LEA_TYPE_IATTACHABLE, l_attachable_iface_init);
 });
@@ -50,8 +51,6 @@ static void l_dispose(GObject *object);
 static void l_widget_map_cb(GtkWidget *widget, gpointer data);
 
 static void lea_menu_action_class_init(LeaMenuActionClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaMenuActionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 }
@@ -60,13 +59,12 @@ static void lea_menu_action_init(LeaMenuAction *node) {
 }
 
 static void l_week_notify(gpointer data, GObject *ptr_of_obj) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(data);
-	priv->menu_item = NULL;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(object);
+	LeaMenuAction *instance = LEA_MENU_ACTION(object);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(instance);
 	if (priv->menu_item) {
 		g_object_weak_unref((GObject *) (priv->menu_item), (GWeakNotify) l_week_notify, object);
 		priv->menu_item = NULL;
@@ -82,7 +80,7 @@ static void l_dispose(GObject *object) {
 LeaMenuAction *lea_menu_action_new(LeaAction *action, LeaMenuSetupType setupType) {
 	LeaMenuAction *result = g_object_new(LEA_TYPE_MENU_ACTION, NULL);
 	cat_ref_anounce(result);
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(result);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(result);
 	priv->action = cat_ref_ptr(action);
 	priv->menu_type = setupType;
 	priv->e_children = cat_array_wo_new();
@@ -115,21 +113,24 @@ LeaMenuAction *lea_menu_action_new(LeaAction *action, LeaMenuSetupType setupType
 }
 
 LeaAction *lea_menu_action_get_action(LeaMenuAction *menu_action) {
-	return LEA_MENU_ACTION_GET_PRIVATE(menu_action)->action;
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(menu_action);
+	return priv->action;
 }
 
 GtkMenuShell *lea_menu_action_get_menu_shell(LeaMenuAction *menu_action) {
-	return (GtkMenuShell *) LEA_MENU_ACTION_GET_PRIVATE(menu_action)->menu_shell;
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(menu_action);
+	return (GtkMenuShell *) priv->menu_shell;
 }
 
 GtkWidget *lea_menu_action_get_widget(LeaMenuAction *menu_action) {
-	return LEA_MENU_ACTION_GET_PRIVATE(menu_action)->menu_item;
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(menu_action);
+	return priv->menu_item;
 }
 
 static void l_widget_map_cb(GtkWidget *widget, gpointer data) {
 	LeaMenuAction *menu_action = LEA_MENU_ACTION(data);
 
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(menu_action);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(menu_action);
 	if (priv->action) {
 		LeaActionClass *action_class = LEA_ACTION_GET_CLASS(priv->action);
 		if (action_class->refresh) {
@@ -324,7 +325,7 @@ LeaMenuAction *l_find_menu_action(CatArrayWo *e_children, LeaAction *action, int
 }
 
 static gboolean l_update_children(LeaMenuAction *menu_action, CatArrayWo *e_actions, LeaKeyContext *active_context) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(menu_action);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(menu_action);
 	int idx;
 	gboolean result = FALSE;
 	for(idx=0; idx<cat_array_wo_size(e_actions); idx++) {
@@ -354,7 +355,7 @@ static gboolean l_update_children(LeaMenuAction *menu_action, CatArrayWo *e_acti
 }
 
 gboolean lea_menu_action_update(LeaMenuAction *menu_action, LeaKeyContext *active_context) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(menu_action);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(menu_action);
 	gboolean result = FALSE;
 	cat_log_indent_level++;
 	cat_log_debug("menu_action=%o, action=%o", menu_action, priv->action);
@@ -388,12 +389,11 @@ gboolean lea_menu_action_update(LeaMenuAction *menu_action, LeaKeyContext *activ
 }
 
 
-
-
 /********************* begin CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(self);
+	LeaMenuAction *instance = LEA_MENU_ACTION(self);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 
 	cat_string_wo_format(append_to, "%s[%p: action=%o, type=%d]", iname, self, priv->action, priv->menu_type);
@@ -406,40 +406,39 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 /********************* end CatIStringable implementation *********************/
 
 
-
-
 /********************* begin LeaIAttachable implementation *********************/
 
-
 static void l_attachable_sensitivity_set(LeaIAttachable *self, gboolean sensitivity) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(self);
+	LeaMenuAction *instance = LEA_MENU_ACTION(self);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(instance);
 	if (priv->menu_item) {
 		gtk_widget_set_sensitive(priv->menu_item, sensitivity);
 	}
 }
 
 static void l_attachable_visibility_set(LeaIAttachable *self, gboolean sensitivity) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(self);
+	LeaMenuAction *instance = LEA_MENU_ACTION(self);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(instance);
 	if (priv->menu_item) {
 		gtk_widget_set_visible(priv->menu_item, sensitivity);
 	}
 }
 
 static void l_attachable_toggability_set(LeaIAttachable *self, gboolean toggable) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(self);
+	LeaMenuAction *instance = LEA_MENU_ACTION(self);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(instance);
 	if (LEA_IS_FULL_MENU_ITEM(priv->menu_item)) {
 		lea_full_menu_item_set_toggable((LeaFullMenuItem *) priv->menu_item, toggable);
 	}
 }
 
-
 static void l_attachable_toggled(LeaIAttachable *self, gboolean toggled) {
-	LeaMenuActionPrivate *priv = LEA_MENU_ACTION_GET_PRIVATE(self);
+	LeaMenuAction *instance = LEA_MENU_ACTION(self);
+	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(instance);
 	if (LEA_IS_FULL_MENU_ITEM(priv->menu_item)) {
 		lea_full_menu_item_set_toggled((LeaFullMenuItem *) priv->menu_item, toggled);
 	}
 }
-
 
 static void l_attachable_iface_init(LeaIAttachableInterface *iface) {
 	iface->sensitivitySet = l_attachable_sensitivity_set;

@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ACTION_REFRESH(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ACTION_REFRESH))
 #define MOO_IS_ACTION_REFRESH_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ACTION_REFRESH))
 #define MOO_ACTION_REFRESH_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ACTION_REFRESH, MooActionRefreshClass))
-#define MOO_ACTION_REFRESH_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ACTION_REFRESH, MooActionRefreshPrivate))
-
 
 typedef struct _MooActionRefresh               MooActionRefresh;
 typedef struct _MooActionRefreshPrivate        MooActionRefreshPrivate;
 typedef struct _MooActionRefreshClass          MooActionRefreshClass;
 
-
 struct _MooActionRefresh {
 	LeaAction parent;
-	MooActionRefreshPrivate *priv;
 };
 
 struct _MooActionRefreshClass {
 	LeaActionClass parent_class;
 };
-
 
 GType moo_action_refresh_get_type();
 

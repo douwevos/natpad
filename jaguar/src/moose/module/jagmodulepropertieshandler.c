@@ -33,10 +33,10 @@ struct _JagModulePropertiesHandlerPrivate {
 	JagMooseService *jag_moose_service;
 };
 
-
 static void l_properties_handler_iface_init(MooIPropertiesHandlerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagModulePropertiesHandler, jag_module_properties_handler, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagModulePropertiesHandler)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_IPROPERTIES_HANDLER, l_properties_handler_iface_init);
 });
 
@@ -44,22 +44,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_module_properties_handler_class_init(JagModulePropertiesHandlerClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagModulePropertiesHandlerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_module_properties_handler_init(JagModulePropertiesHandler *instance) {
-	JagModulePropertiesHandlerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_MODULE_PROPERTIES_HANDLER, JagModulePropertiesHandlerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagModulePropertiesHandler *instance = JAG_MODULE_PROPERTIES_HANDLER(object);
-	JagModulePropertiesHandlerPrivate *priv = instance->priv;
+	JagModulePropertiesHandlerPrivate *priv = jag_module_properties_handler_get_instance_private(instance);
 	cat_unref_ptr(priv->jag_moose_service);
 	G_OBJECT_CLASS(jag_module_properties_handler_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -76,18 +72,17 @@ static void l_finalize(GObject *object) {
 JagModulePropertiesHandler *jag_module_properties_handler_new(JagMooseService *jag_moose_service) {
 	JagModulePropertiesHandler *result = g_object_new(JAG_TYPE_MODULE_PROPERTIES_HANDLER, NULL);
 	cat_ref_anounce(result);
-	JagModulePropertiesHandlerPrivate *priv = result->priv;
+	JagModulePropertiesHandlerPrivate *priv = jag_module_properties_handler_get_instance_private(result);
 	priv->jag_moose_service = cat_ref_ptr(jag_moose_service);
 	return result;
 }
 
 
-
 /********************* begin MooIPropertiesHandler implementation *********************/
 
 static void l_properties_handler_commit(MooIPropertiesHandler *self, CatIIterator *iter, struct _MooNodeWo *input_node, struct _MooNodeWo *real_node) {
-	JagModulePropertiesHandlerPrivate *priv = JAG_MODULE_PROPERTIES_HANDLER_GET_PRIVATE(self);
-
+	JagModulePropertiesHandler *instance = JAG_MODULE_PROPERTIES_HANDLER(self);
+	JagModulePropertiesHandlerPrivate *priv = jag_module_properties_handler_get_instance_private(instance);
 
 	JagModuleContentWo *inp_jag_module_content = (JagModuleContentWo *) moo_node_wo_get_content(input_node, jag_module_content_wo_key());
 	MooModuleContentWo *inp_moo_module_content = (MooModuleContentWo *) moo_node_wo_get_content(input_node, moo_module_content_wo_key());
@@ -124,8 +119,6 @@ static void l_properties_handler_commit(MooIPropertiesHandler *self, CatIIterato
 	MOO_IPROPERTIES_HANDLER_NEXT(iter, input_node, real_node);
 
 
-
-
 	WorRequest *request = (WorRequest *) jag_refresh_module_request_new(priv->jag_moose_service, moo_node_wo_get_unique_id(real_node), -1);
 	WorService *wor_service = jag_moose_service_get_worm_service(priv->jag_moose_service);
 	wor_request_set_time_out(request, cat_date_current_time()+50);
@@ -139,4 +132,3 @@ static void l_properties_handler_iface_init(MooIPropertiesHandlerInterface *ifac
 }
 
 /********************* end MooIPropertiesHandler implementation *********************/
-

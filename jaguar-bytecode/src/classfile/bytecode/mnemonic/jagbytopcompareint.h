@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_COMPARE_INT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_COMPARE_INT))
 #define JAG_BYT_IS_OP_COMPARE_INT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_COMPARE_INT))
 #define JAG_BYT_OP_COMPARE_INT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_COMPARE_INT, JagBytOpCompareIntClass))
-#define JAG_BYT_OP_COMPARE_INT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_COMPARE_INT, JagBytOpCompareIntPrivate))
 
 typedef struct _JagBytOpCompareInt               JagBytOpCompareInt;
 typedef struct _JagBytOpCompareIntPrivate        JagBytOpCompareIntPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpCompareIntClass          JagBytOpCompareIntClass;
 
 struct _JagBytOpCompareInt {
 	JagBytAbstractMnemonic parent;
-	JagBytOpCompareIntPrivate *priv;
 };
 
 struct _JagBytOpCompareIntClass {

@@ -40,28 +40,24 @@ struct _ElkDocumentIOPrivate {
 	CatAtomicInteger *sequence;
 };
 
-G_DEFINE_TYPE (ElkDocumentIO, elk_document_io, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(ElkDocumentIO, elk_document_io, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void elk_document_io_class_init(ElkDocumentIOClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(ElkDocumentIOPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void elk_document_io_init(ElkDocumentIO *instance) {
-	ElkDocumentIOPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_DOCUMENT_IO, ElkDocumentIOPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkDocumentIO *instance = ELK_DOCUMENT_IO(object);
-	ElkDocumentIOPrivate *priv = instance->priv;
+	ElkDocumentIOPrivate *priv = elk_document_io_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_service);
 	cat_unref_ptr(priv->e_document_map);
 	cat_unref_ptr(priv->document_manager);
@@ -80,7 +76,7 @@ static void l_finalize(GObject *object) {
 ElkDocumentIO *elk_document_io_new(VipService *vip_service, ChaDocumentManager *document_manager) {
 	ElkDocumentIO *result = g_object_new(ELK_TYPE_DOCUMENT_IO, NULL);
 	cat_ref_anounce(result);
-	ElkDocumentIOPrivate *priv = result->priv;
+	ElkDocumentIOPrivate *priv = elk_document_io_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->document_manager = cat_ref_ptr(document_manager);
 	priv->e_document_map = cat_hash_map_wo_new((GHashFunc) vip_path_hash, (GEqualFunc) vip_path_equal);
@@ -91,7 +87,7 @@ ElkDocumentIO *elk_document_io_new(VipService *vip_service, ChaDocumentManager *
 
 ElkDocumentBin *elk_document_io_open_document_for_file(ElkDocumentIO *document_io, VipIFile *vip_file) {
 	cat_log_debug("document_io=%p", document_io);
-	ElkDocumentIOPrivate *priv = ELK_DOCUMENT_IO_GET_PRIVATE(document_io);
+	ElkDocumentIOPrivate *priv = elk_document_io_get_instance_private(document_io);
 	cat_log_debug("vip_file=%o", vip_file);
 	VipPath *file_path = vip_iresource_path((VipIResource *) vip_file);
 	cat_log_debug("file_path=%o", file_path);
@@ -108,7 +104,7 @@ ElkDocumentBin *elk_document_io_open_document_for_file(ElkDocumentIO *document_i
 }
 
 ElkDocumentBin *elk_document_io_open_new_document(ElkDocumentIO *document_io) {
-	ElkDocumentIOPrivate *priv = ELK_DOCUMENT_IO_GET_PRIVATE(document_io);
+	ElkDocumentIOPrivate *priv = elk_document_io_get_instance_private(document_io);
 	CatStringWo *name = cat_string_wo_new();
 	int nr = cat_atomic_integer_increment(priv->sequence);
 	cat_string_wo_format(name, "<new-%d>", nr);

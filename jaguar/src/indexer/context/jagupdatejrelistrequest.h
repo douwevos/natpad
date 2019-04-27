@@ -35,8 +35,6 @@ G_BEGIN_DECLS
 #define JAG_IS_UPDATE_JRE_LIST_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_UPDATE_JRE_LIST_REQUEST))
 #define JAG_IS_UPDATE_JRE_LIST_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_UPDATE_JRE_LIST_REQUEST))
 #define JAG_UPDATE_JRE_LIST_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_UPDATE_JRE_LIST_REQUEST, JagUpdateJreListRequestClass))
-#define JAG_UPDATE_JRE_LIST_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_UPDATE_JRE_LIST_REQUEST, JagUpdateJreListRequestPrivate))
-
 
 typedef struct _JagUpdateJreListRequest               JagUpdateJreListRequest;
 typedef struct _JagUpdateJreListRequestPrivate        JagUpdateJreListRequestPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagUpdateJreListRequestClass          JagUpdateJreListRequestCla
 
 struct _JagUpdateJreListRequest {
 	WorRequest parent;
-	JagUpdateJreListRequestPrivate *priv;
 };
 
 struct _JagUpdateJreListRequestClass {

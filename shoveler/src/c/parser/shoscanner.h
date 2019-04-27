@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define SHO_IS_SCANNER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SHO_TYPE_SCANNER))
 #define SHO_IS_SCANNER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), SHO_TYPE_SCANNER))
 #define SHO_SCANNER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), SHO_TYPE_SCANNER, ShoScannerClass))
-#define SHO_SCANNER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), SHO_TYPE_SCANNER, ShoScannerPrivate))
 
 typedef struct _ShoScanner               ShoScanner;
 typedef struct _ShoScannerPrivate        ShoScannerPrivate;
@@ -43,7 +42,6 @@ typedef struct _ShoScannerClass          ShoScannerClass;
 
 struct _ShoScanner {
 	GObject parent;
-	ShoScannerPrivate *priv;
 };
 
 struct _ShoScannerClass {

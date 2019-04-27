@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_LOAD_INDEX(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_LOAD_INDEX))
 #define JAG_BYT_IS_OP_LOAD_INDEX_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_LOAD_INDEX))
 #define JAG_BYT_OP_LOAD_INDEX_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_LOAD_INDEX, JagBytOpLoadIndexClass))
-#define JAG_BYT_OP_LOAD_INDEX_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_LOAD_INDEX, JagBytOpLoadIndexPrivate))
 
 typedef struct _JagBytOpLoadIndex               JagBytOpLoadIndex;
 typedef struct _JagBytOpLoadIndexPrivate        JagBytOpLoadIndexPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpLoadIndexClass          JagBytOpLoadIndexClass;
 
 struct _JagBytOpLoadIndex {
 	JagBytAbstractMnemonic parent;
-	JagBytOpLoadIndexPrivate *priv;
 };
 
 struct _JagBytOpLoadIndexClass {

@@ -33,7 +33,6 @@ struct _WoInfo {
 
 typedef struct _WoInfo WoInfo;
 
-
 struct _JagSrcFolderPathWoPrivate {
 	MooNamePath *name_path;
 	int resource_node_version;
@@ -45,6 +44,7 @@ struct _JagSrcFolderPathWoPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagSrcFolderPathWo, jag_src_folder_path_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagSrcFolderPathWo)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -52,22 +52,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_src_folder_path_wo_class_init(JagSrcFolderPathWoClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagSrcFolderPathWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_src_folder_path_wo_init(JagSrcFolderPathWo *instance) {
-	JagSrcFolderPathWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_SRC_FOLDER_PATH_WO, JagSrcFolderPathWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagSrcFolderPathWo *instance = JAG_SRC_FOLDER_PATH_WO(object);
-	JagSrcFolderPathWoPrivate *priv = instance->priv;
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(instance);
 	cat_unref_ptr(priv->name_path);
 	if (priv->wo_info) {
 		cat_unref_ptr(priv->wo_info->original);
@@ -87,7 +83,7 @@ static void l_finalize(GObject *object) {
 JagSrcFolderPathWo *jag_src_folder_path_wo_new(MooNamePath *name_path) {
 	JagSrcFolderPathWo *result = g_object_new(JAG_TYPE_SRC_FOLDER_PATH_WO, NULL);
 	cat_ref_anounce(result);
-	JagSrcFolderPathWoPrivate *priv = result->priv;
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(result);
 	priv->name_path = cat_ref_ptr(name_path);
 	priv->resource_node_version = -1;
 	priv->jaguar_node_offset = -1;
@@ -97,13 +93,12 @@ JagSrcFolderPathWo *jag_src_folder_path_wo_new(MooNamePath *name_path) {
 	return result;
 }
 
-
 JagSrcFolderPathWo *jag_src_folder_path_wo_ensure_editable(JagSrcFolderPathWo *path) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(path);
 	if (priv->wo_info==NULL) {
 		JagSrcFolderPathWo *result = g_object_new(JAG_TYPE_SRC_FOLDER_PATH_WO, NULL);
 		cat_ref_anounce(result);
-		JagSrcFolderPathWoPrivate *opriv = result->priv;
+		JagSrcFolderPathWoPrivate *opriv = jag_src_folder_path_wo_get_instance_private(result);
 		opriv->name_path = cat_ref_ptr(priv->name_path);
 		opriv->resource_node_version = priv->resource_node_version;
 		opriv->jaguar_node_offset = priv->jaguar_node_offset;
@@ -116,7 +111,7 @@ JagSrcFolderPathWo *jag_src_folder_path_wo_ensure_editable(JagSrcFolderPathWo *p
 }
 
 JagSrcFolderPathWo *jag_src_folder_path_wo_get_original(JagSrcFolderPathWo *e_path) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(e_path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(e_path);
 	if (priv->wo_info) {
 		if (priv->wo_info->original) {
 			return priv->wo_info->original;
@@ -126,12 +121,12 @@ JagSrcFolderPathWo *jag_src_folder_path_wo_get_original(JagSrcFolderPathWo *e_pa
 }
 
 gboolean jag_src_folder_path_wo_is_fixed(JagSrcFolderPathWo *path) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(path);
 	return priv->wo_info == NULL;
 }
 
 JagSrcFolderPathWo *jag_src_folder_path_wo_anchor(JagSrcFolderPathWo *path, int version) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(path);
 	cat_log_debug("anchoring entry:%o", path);
 	if (priv->wo_info == NULL) {
 		cat_log_debug("wo_info was NULL");
@@ -139,7 +134,7 @@ JagSrcFolderPathWo *jag_src_folder_path_wo_anchor(JagSrcFolderPathWo *path, int 
 	}
 	gboolean was_modified = TRUE;
 	if (priv->wo_info->original) {
-		JagSrcFolderPathWoPrivate *opriv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(priv->wo_info->original);
+		JagSrcFolderPathWoPrivate *opriv = jag_src_folder_path_wo_get_instance_private(priv->wo_info->original);
 		was_modified = (priv->name_path!=opriv->name_path)
 				|| (priv->resource_node_version!=opriv->resource_node_version)
 				|| (priv->jaguar_node_offset!=opriv->jaguar_node_offset);
@@ -169,14 +164,13 @@ JagSrcFolderPathWo *jag_src_folder_path_wo_anchor(JagSrcFolderPathWo *path, int 
 		} \
 
 
-
 MooNamePath *jag_src_folder_path_wo_get_name_path(JagSrcFolderPathWo *path) {
-	return JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(path)->name_path;
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(path);
+	return priv->name_path;
 }
 
-
 gboolean jag_src_folder_path_wo_update_resource_node_version(JagSrcFolderPathWo *e_path, int new_res_version) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(e_path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(e_path);
 	gboolean result = FALSE;
 	if (priv->resource_node_version<new_res_version) {
 		CHECK_IF_WRITABLE(FALSE)
@@ -187,7 +181,7 @@ gboolean jag_src_folder_path_wo_update_resource_node_version(JagSrcFolderPathWo 
 }
 
 gboolean jag_src_folder_path_wo_test_resource_node_version(JagSrcFolderPathWo *e_path, int new_res_version) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(e_path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(e_path);
 	gboolean result = FALSE;
 	if (priv->resource_node_version<new_res_version) {
 		result = TRUE;
@@ -195,26 +189,22 @@ gboolean jag_src_folder_path_wo_test_resource_node_version(JagSrcFolderPathWo *e
 	return result;
 }
 
-
-
 int jag_src_folder_path_wo_get_jaguar_node_offset(JagSrcFolderPathWo *path) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(path);
 	return priv->jaguar_node_offset;
 }
 
 void jag_src_folder_path_wo_set_jaguar_node_offset(JagSrcFolderPathWo *e_path, int new_offset) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(e_path);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(e_path);
 	CHECK_IF_WRITABLE()
 	priv->jaguar_node_offset = new_offset;
 }
 
-
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagSrcFolderPathWoPrivate *priv = JAG_SRC_FOLDER_PATH_WO_GET_PRIVATE(self);
+	JagSrcFolderPathWo *instance = JAG_SRC_FOLDER_PATH_WO(self);
+	JagSrcFolderPathWoPrivate *priv = jag_src_folder_path_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p: %s, version=%d, jaguar_node_offset=%d, resource_node_version=%d, name_path=%o]", iname, self, priv->wo_info ? "editable" : "anchored", priv->version, priv->jaguar_node_offset, priv->resource_node_version, priv->name_path);
 }
@@ -224,5 +214,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-

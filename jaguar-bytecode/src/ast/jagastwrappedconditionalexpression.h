@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTWRAPPEDCONDITIONALEXPRESSION_H_
 #define JAGASTWRAPPEDCONDITIONALEXPRESSION_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_WRAPPED_CONDITIONAL_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_WRAPPED_CONDITIONAL_EXPRESSION))
 #define JAG_AST_IS_WRAPPED_CONDITIONAL_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_WRAPPED_CONDITIONAL_EXPRESSION))
 #define JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_WRAPPED_CONDITIONAL_EXPRESSION, JagAstWrappedConditionalExpressionClass))
-#define JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_WRAPPED_CONDITIONAL_EXPRESSION, JagAstWrappedConditionalExpressionPrivate))
 
 typedef struct _JagAstWrappedConditionalExpression               JagAstWrappedConditionalExpression;
 typedef struct _JagAstWrappedConditionalExpressionPrivate        JagAstWrappedConditionalExpressionPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstWrappedConditionalExpressionClass          JagAstWrappedCo
 
 struct _JagAstWrappedConditionalExpression {
 	GObject parent;
-	JagAstWrappedConditionalExpressionPrivate *priv;
 };
 
 struct _JagAstWrappedConditionalExpressionClass {
@@ -58,11 +55,8 @@ GType jag_ast_wrapped_conditional_expression_get_type();
 
 JagAstWrappedConditionalExpression *jag_ast_wrapped_conditional_expression_new(JagAstIExpression *expression);
 
-
 JagAstIConditionalExpression *jag_ast_wrapped_conditional_expression_ensure_is_conditional(JagAstIExpression *expression);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTWRAPPEDCONDITIONALEXPRESSION_H_ */

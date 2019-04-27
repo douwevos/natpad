@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef WORIREQUESTPOSTBOX_H_
 #define WORIREQUESTPOSTBOX_H_
-
 
 #include <caterpillar.h>
 #include "worrequest.h"
@@ -47,6 +45,5 @@ struct _WorIRequestPostBoxInterface {
 GType wor_irequest_post_box_get_type(void);
 
 void wor_irequest_post_box_post_request(WorIRequestPostBox *self, WorRequest *post);
-
 
 #endif /* WORIREQUESTPOSTBOX_H_ */

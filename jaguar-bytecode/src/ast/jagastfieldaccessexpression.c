@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "jagastfieldaccessexpression.h"
 
 #include <logging/catlogdefs.h>
@@ -38,60 +36,53 @@ struct _JagAstFieldAccessExpressionPrivate {
 static void l_expression_iface_init(JagAstIExpressionInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstFieldAccessExpression, jag_ast_field_access_expression, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstFieldAccessExpression)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_IEXPRESSION, l_expression_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_field_access_expression_class_init(JagAstFieldAccessExpressionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstFieldAccessExpressionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_field_access_expression_init(JagAstFieldAccessExpression *instance) {
-	JagAstFieldAccessExpressionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_FIELD_ACCESS_EXPRESSION, JagAstFieldAccessExpressionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstFieldAccessExpression *instance = JAG_AST_FIELD_ACCESS_EXPRESSION(object);
-	JagAstFieldAccessExpressionPrivate *priv = instance->priv;
+	JagAstFieldAccessExpressionPrivate *priv = jag_ast_field_access_expression_get_instance_private(instance);
 	cat_unref_ptr(priv->instance_expression);
 	cat_unref_ptr(priv->field_name);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_field_access_expression_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_field_access_expression_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstFieldAccessExpression *jag_ast_field_access_expression_new(JagAstIExpression *instance_expression, JagAstIdentifier *field_name) {
 	JagAstFieldAccessExpression *result = g_object_new(JAG_AST_TYPE_FIELD_ACCESS_EXPRESSION, NULL);
 	cat_ref_anounce(result);
-	JagAstFieldAccessExpressionPrivate *priv = result->priv;
+	JagAstFieldAccessExpressionPrivate *priv = jag_ast_field_access_expression_get_instance_private(result);
 	priv->instance_expression = cat_ref_ptr(instance_expression);
 	priv->field_name = cat_ref_ptr(field_name);
 	return result;
 }
 
-
-
 /********************* start JagAstIExpression implementation *********************/
 
 static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
-	JagAstFieldAccessExpressionPrivate *priv = JAG_AST_FIELD_ACCESS_EXPRESSION_GET_PRIVATE(self);
+	JagAstFieldAccessExpression *instance = JAG_AST_FIELD_ACCESS_EXPRESSION(self);
+	JagAstFieldAccessExpressionPrivate *priv = jag_ast_field_access_expression_get_instance_private(instance);
 	if (priv->instance_expression) {
 		jag_ast_iexpression_write(priv->instance_expression, out);
 		jag_ast_writer_print(out, cat_string_wo_new_with("."));

@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define ELK_IS_DOCUMENT_IO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_DOCUMENT_IO))
 #define ELK_IS_DOCUMENT_IO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_DOCUMENT_IO))
 #define ELK_DOCUMENT_IO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_DOCUMENT_IO, ElkDocumentIOClass))
-#define ELK_DOCUMENT_IO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_DOCUMENT_IO, ElkDocumentIOPrivate))
 
 typedef struct _ElkDocumentIO               ElkDocumentIO;
 typedef struct _ElkDocumentIOPrivate        ElkDocumentIOPrivate;
@@ -45,7 +44,6 @@ typedef struct _ElkDocumentIOClass          ElkDocumentIOClass;
 
 struct _ElkDocumentIO {
 	GObject parent;
-	ElkDocumentIOPrivate *priv;
 };
 
 struct _ElkDocumentIOClass {

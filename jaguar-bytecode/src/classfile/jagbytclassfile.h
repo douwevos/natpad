@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCLASSFILE_H_
 #define JAGBYTCLASSFILE_H_
 
@@ -43,7 +42,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CLASSFILE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CLASSFILE))
 #define JAG_BYT_IS_CLASSFILE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CLASSFILE))
 #define JAG_BYT_CLASSFILE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CLASSFILE, JagBytClassfileClass))
-#define JAG_BYT_CLASSFILE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CLASSFILE, JagBytClassfilePrivate))
 
 typedef struct _JagBytClassfile               JagBytClassfile;
 typedef struct _JagBytClassfilePrivate        JagBytClassfilePrivate;
@@ -52,7 +50,6 @@ typedef struct _JagBytClassfileClass          JagBytClassfileClass;
 
 struct _JagBytClassfile {
 	GObject parent;
-	JagBytClassfilePrivate *priv;
 };
 
 struct _JagBytClassfileClass {

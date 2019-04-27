@@ -46,6 +46,7 @@ struct _JgiJreEntryPrivate {
 static void l_ilink_listener_iface_init(JagILinkListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JgiJreEntry, jgi_jre_entry, G_TYPE_OBJECT,
+		G_ADD_PRIVATE(JgiJreEntry)
 		G_IMPLEMENT_INTERFACE(JAG_TYPE_ILINK_LISTENER, l_ilink_listener_iface_init)
 );
 
@@ -53,22 +54,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jgi_jre_entry_class_init(JgiJreEntryClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JgiJreEntryPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jgi_jre_entry_init(JgiJreEntry *instance) {
-	JgiJreEntryPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JGI_TYPE_JRE_ENTRY, JgiJreEntryPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JgiJreEntry *instance = JGI_JRE_ENTRY(object);
-	JgiJreEntryPrivate *priv = instance->priv;
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(instance);
 	cat_unref_ptr(priv->jre_link);
 	cat_unref_ptr(priv->a_jre);
 	cat_unref_ptr(priv->e_jar_entries);
@@ -91,7 +88,7 @@ static void l_finalize(GObject *object) {
 JgiJreEntry *jgi_jre_entry_new(WorService *wor_service, VipISequence *moo_sequence, JagPrefsJreWo *a_jre, JagLink *jre_link) {
 	JgiJreEntry *result = g_object_new(JGI_TYPE_JRE_ENTRY, NULL);
 	cat_ref_anounce(result);
-	JgiJreEntryPrivate *priv = result->priv;
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(result);
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->moo_sequence = cat_ref_ptr(moo_sequence);
 	priv->jre_link = cat_weak_reference_new((GObject *) jre_link);
@@ -119,19 +116,19 @@ JgiJreEntry *jgi_jre_entry_new(WorService *wor_service, VipISequence *moo_sequen
 }
 
 CatStringWo *jgi_jre_entry_get_name(JgiJreEntry *entry) {
-	JgiJreEntryPrivate *priv = JGI_JRE_ENTRY_GET_PRIVATE(entry);
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(entry);
 	CatStringWo *a_jre_name = jag_prefs_jre_wo_get_name(priv->a_jre);
 	return a_jre_name;
 }
 
 MooNodeWo *jgi_jre_entry_get_moo_node_ref(JgiJreEntry *entry) {
-	JgiJreEntryPrivate *priv = JGI_JRE_ENTRY_GET_PRIVATE(entry);
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(entry);
 	return (MooNodeWo *) jag_link_get_value_ref(priv->link_moo_node);
 }
 
 
 void jgi_jre_entry_add_jar(JgiJreEntry *jre_entry, JgiJarEntry *jar_entry) {
-	JgiJreEntryPrivate *priv = JGI_JRE_ENTRY_GET_PRIVATE(jre_entry);
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(jre_entry);
 	cat_lock_lock(priv->lock);
 	cat_array_wo_append(priv->e_jar_entries, (GObject *) jar_entry);
 	cat_lock_unlock(priv->lock);
@@ -139,7 +136,7 @@ void jgi_jre_entry_add_jar(JgiJreEntry *jre_entry, JgiJarEntry *jar_entry) {
 }
 
 gboolean jgi_jre_entry_set_jar_entry_list(JgiJreEntry *jre_entry, JagIndexerJarMap *jar_map, CatArrayWo *e_new_jar_entry_list, int jre_list_version) {
-	JgiJreEntryPrivate *priv = JGI_JRE_ENTRY_GET_PRIVATE(jre_entry);
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(jre_entry);
 	cat_log_debug("new_jar_entry_list=%o, jre_list_version=%d", e_new_jar_entry_list, jre_list_version);
 	cat_lock_lock(priv->lock);
 	if (priv->jre_list_version>= jre_list_version) {
@@ -185,7 +182,7 @@ gboolean jgi_jre_entry_set_jar_entry_list(JgiJreEntry *jre_entry, JagIndexerJarM
 }
 
 void jgi_jre_entry_update_moose_node(JgiJreEntry *jre_entry) {
-	JgiJreEntryPrivate *priv = JGI_JRE_ENTRY_GET_PRIVATE(jre_entry);
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(jre_entry);
 	MooNodeWo *init_root_node = (MooNodeWo *) jag_link_get_value_ref(priv->link_moo_node);
 	MooNodeWo *e_root_node = moo_node_wo_ensure_editable(init_root_node, NULL);
 	MooNodeWo *e_jre_node = moo_node_wo_get_editable_child_at(e_root_node, 0);
@@ -236,14 +233,13 @@ void jgi_jre_entry_update_moose_node(JgiJreEntry *jre_entry) {
 	cat_unref_ptr(init_root_node);
 }
 
-
 void jgi_jre_entry_refresh_jar_entry(JgiJreEntry *jre_entry, JgiJarEntry *jar_entry, int last_jar_entry_index) {
-//	JgiJreEntryPrivate *priv = JGI_JRE_ENTRY_GET_PRIVATE(jre_entry);
-
+//	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(jre_entry);
 }
 
 static void l_link_notify(JagILinkListener *self, JagLink *link, GObject *notify_data) {
-	JgiJreEntryPrivate *priv = JGI_JRE_ENTRY_GET_PRIVATE(self);
+	JgiJreEntry *instance = JGI_JRE_ENTRY(self);
+	JgiJreEntryPrivate *priv = jgi_jre_entry_get_instance_private(instance);
 	JgiJarEntry *jar_entry = (JgiJarEntry *) notify_data;
 	cat_lock_lock(priv->lock);
 	int jar_entry_index = cat_array_wo_find_index(priv->e_jar_entries, jar_entry, -1);
@@ -254,14 +250,11 @@ static void l_link_notify(JagILinkListener *self, JagLink *link, GObject *notify
 
 		jgi_jre_entry_update_moose_node((JgiJreEntry *) self);
 
-
-
 //		JagmJreRefreshEntryRequest *request = jagm_jre_refresh_entry_request_new((JgiJreEntry *) self, jar_entry, jar_entry_index);
 //		wor_service_post_request(priv->wor_service, (WorRequest *) request);
 //		cat_unref_ptr(request);
 	}
 }
-
 
 static void l_ilink_listener_iface_init(JagILinkListenerInterface *iface) {
 	iface->notify = l_link_notify;

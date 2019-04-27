@@ -33,23 +33,17 @@ G_BEGIN_DECLS
 #define JAG_IS_CLASSFILE_RENDERER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_CLASSFILE_RENDERER))
 #define JAG_IS_CLASSFILE_RENDERER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_CLASSFILE_RENDERER))
 #define JAG_CLASSFILE_RENDERER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_CLASSFILE_RENDERER, JagClassfileRendererClass))
-#define JAG_CLASSFILE_RENDERER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_CLASSFILE_RENDERER, JagClassfileRendererPrivate))
-
 
 typedef struct _JagClassfileRenderer               JagClassfileRenderer;
-typedef struct _JagClassfileRendererPrivate        JagClassfileRendererPrivate;
 typedef struct _JagClassfileRendererClass          JagClassfileRendererClass;
-
 
 struct _JagClassfileRenderer {
 	GObject parent;
-	JagClassfileRendererPrivate *priv;
 };
 
 struct _JagClassfileRendererClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_classfile_renderer_get_type();
 

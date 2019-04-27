@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTPREFIXEXPRESSION_H_
 #define JAGASTPREFIXEXPRESSION_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_PREFIX_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_PREFIX_EXPRESSION))
 #define JAG_AST_IS_PREFIX_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_PREFIX_EXPRESSION))
 #define JAG_AST_PREFIX_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_PREFIX_EXPRESSION, JagAstPrefixExpressionClass))
-#define JAG_AST_PREFIX_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_PREFIX_EXPRESSION, JagAstPrefixExpressionPrivate))
 
 typedef struct _JagAstPrefixExpression               JagAstPrefixExpression;
 typedef struct _JagAstPrefixExpressionPrivate        JagAstPrefixExpressionPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstPrefixExpressionClass          JagAstPrefixExpressionClass
 
 struct _JagAstPrefixExpression {
 	GObject parent;
-	JagAstPrefixExpressionPrivate *priv;
 };
 
 struct _JagAstPrefixExpressionClass {
@@ -58,6 +55,5 @@ GType jag_ast_prefix_expression_get_type();
 JagAstPrefixExpression *jag_ast_prefix_expression_new(gboolean is_increment, JagAstIExpression *sub_expression);
 
 G_END_DECLS
-
 
 #endif /* JAGASTPREFIXEXPRESSION_H_ */

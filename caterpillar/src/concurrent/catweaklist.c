@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "catweaklist.h"
 #include "catweakreference.h"
 #include "catlock.h"
@@ -35,28 +34,24 @@ struct _CatWeakListPrivate {
 	CatArrayWo *e_weak_list;
 };
 
-G_DEFINE_TYPE(CatWeakList, cat_weak_list, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(CatWeakList, cat_weak_list, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_weak_list_class_init(CatWeakListClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatWeakListPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_weak_list_init(CatWeakList *instance) {
-	CatWeakListPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_WEAK_LIST, CatWeakListPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatWeakList *instance = CAT_WEAK_LIST(object);
-	CatWeakListPrivate *priv = instance->priv;
+	CatWeakListPrivate *priv = cat_weak_list_get_instance_private(instance);
 	cat_unref_ptr(priv->e_weak_list);
 	cat_unref_ptr(priv->lock);
 	G_OBJECT_CLASS(cat_weak_list_parent_class)->dispose(object);
@@ -74,7 +69,7 @@ static void l_finalize(GObject *object) {
 CatWeakList *cat_weak_list_new() {
 	CatWeakList *result = g_object_new(CAT_TYPE_WEAK_LIST, NULL);
 	cat_ref_anounce(result);
-	CatWeakListPrivate *priv = result->priv;
+	CatWeakListPrivate *priv = cat_weak_list_get_instance_private(result);
 	priv->lock = cat_lock_new();
 	priv->e_weak_list = cat_array_wo_new();
 	return result;
@@ -82,7 +77,7 @@ CatWeakList *cat_weak_list_new() {
 
 int cat_weak_list_size(CatWeakList *weak_list) {
 	int result = 0;
-	CatWeakListPrivate *priv = CAT_WEAK_LIST_GET_PRIVATE(weak_list);
+	CatWeakListPrivate *priv = cat_weak_list_get_instance_private(weak_list);
 	cat_lock_lock(priv->lock);
 	result = cat_array_wo_size(priv->e_weak_list);
 	cat_lock_unlock(priv->lock);
@@ -93,7 +88,7 @@ void cat_weak_list_append(CatWeakList *weak_list, GObject *ref) {
 	if (ref==NULL) {
 		return;
 	}
-	CatWeakListPrivate *priv = CAT_WEAK_LIST_GET_PRIVATE(weak_list);
+	CatWeakListPrivate *priv = cat_weak_list_get_instance_private(weak_list);
 	cat_lock_lock(priv->lock);
 	CatWeakReference *wref = cat_weak_reference_new(ref);
 	cat_array_wo_append(priv->e_weak_list, (GObject *) wref);
@@ -105,7 +100,7 @@ gboolean cat_weak_list_append_once(CatWeakList *weak_list, GObject *ref) {
 	if (ref==NULL) {
 		return FALSE;
 	}
-	CatWeakListPrivate *priv = CAT_WEAK_LIST_GET_PRIVATE(weak_list);
+	CatWeakListPrivate *priv = cat_weak_list_get_instance_private(weak_list);
 	gboolean result = TRUE;
 	cat_lock_lock(priv->lock);
 
@@ -136,7 +131,7 @@ gboolean cat_weak_list_append_once(CatWeakList *weak_list, GObject *ref) {
 
 gboolean cat_weak_list_remove(CatWeakList *weak_list, GObject *ref) {
 	gboolean result = FALSE;
-	CatWeakListPrivate *priv = CAT_WEAK_LIST_GET_PRIVATE(weak_list);
+	CatWeakListPrivate *priv = cat_weak_list_get_instance_private(weak_list);
 	cat_lock_lock(priv->lock);
 	int idx;
 	for(idx=cat_array_wo_size(priv->e_weak_list)-1; idx>=0; idx--) {
@@ -159,7 +154,7 @@ gboolean cat_weak_list_remove(CatWeakList *weak_list, GObject *ref) {
 
 
 CatArrayWo *cat_weak_list_enlist(CatWeakList *weak_list, CatArrayWo *e_enlist_to) {
-	CatWeakListPrivate *priv = CAT_WEAK_LIST_GET_PRIVATE(weak_list);
+	CatWeakListPrivate *priv = cat_weak_list_get_instance_private(weak_list);
 	if (e_enlist_to==NULL) {
 		e_enlist_to = cat_array_wo_new();
 	}
@@ -187,7 +182,3 @@ CatIIterator *cat_weak_list_iterator(CatWeakList *weak_list) {
 	cat_unref_ptr(strong_list);
 	return result;
 }
-
-
-
-

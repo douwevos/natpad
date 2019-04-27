@@ -33,8 +33,6 @@ G_BEGIN_DECLS
 #define MOO_IS_PROPERTIES_HANDLER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_PROPERTIES_HANDLER))
 #define MOO_IS_PROPERTIES_HANDLER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_PROPERTIES_HANDLER))
 #define MOO_PROPERTIES_HANDLER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_PROPERTIES_HANDLER, MooPropertiesHandlerClass))
-#define MOO_PROPERTIES_HANDLER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_PROPERTIES_HANDLER, MooPropertiesHandlerPrivate))
-
 
 typedef struct _MooPropertiesHandler               MooPropertiesHandler;
 typedef struct _MooPropertiesHandlerPrivate        MooPropertiesHandlerPrivate;
@@ -44,13 +42,11 @@ struct _MooService;
 
 struct _MooPropertiesHandler {
 	GObject parent;
-	MooPropertiesHandlerPrivate *priv;
 };
 
 struct _MooPropertiesHandlerClass {
 	GObjectClass parent_class;
 };
-
 
 GType moo_properties_handler_get_type();
 

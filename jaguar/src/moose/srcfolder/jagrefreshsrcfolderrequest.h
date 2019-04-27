@@ -35,17 +35,13 @@ G_BEGIN_DECLS
 #define JAG_IS_REFRESH_SRC_FOLDER_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_REFRESH_SRC_FOLDER_REQUEST))
 #define JAG_IS_REFRESH_SRC_FOLDER_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_REFRESH_SRC_FOLDER_REQUEST))
 #define JAG_REFRESH_SRC_FOLDER_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_REFRESH_SRC_FOLDER_REQUEST, JagRefreshSrcFolderRequestClass))
-#define JAG_REFRESH_SRC_FOLDER_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_REFRESH_SRC_FOLDER_REQUEST, JagRefreshSrcFolderRequestPrivate))
-
 
 typedef struct _JagRefreshSrcFolderRequest               JagRefreshSrcFolderRequest;
 typedef struct _JagRefreshSrcFolderRequestPrivate        JagRefreshSrcFolderRequestPrivate;
 typedef struct _JagRefreshSrcFolderRequestClass          JagRefreshSrcFolderRequestClass;
 
-
 struct _JagRefreshSrcFolderRequest {
 	WorRequest parent;
-	JagRefreshSrcFolderRequestPrivate *priv;
 };
 
 struct _JagRefreshSrcFolderRequestClass {

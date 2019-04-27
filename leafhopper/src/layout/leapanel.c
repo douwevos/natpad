@@ -43,7 +43,7 @@ struct _LeaPanelPrivate {
 };
 
 
-G_DEFINE_TYPE(LeaPanel, lea_panel, GTK_TYPE_BIN)
+G_DEFINE_TYPE_WITH_PRIVATE(LeaPanel, lea_panel, GTK_TYPE_BIN)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -55,10 +55,7 @@ static void  l_widget_grab_focus(GtkWidget           *widget) {
 	lea_panel_request_focus(LEA_PANEL(widget));
 }
 
-
 static void lea_panel_class_init(LeaPanelClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaPanelPrivate));
-
 	clazz->focusActivated = NULL;
 	clazz->focusSet = NULL;
 	clazz->close = lea_panel_close_real;
@@ -79,9 +76,8 @@ static void lea_panel_init(LeaPanel *node) {
 }
 
 
-
 void lea_panel_construct(LeaPanel *panel, LeaIPanelOwner *panel_owner, gpointer frame, const CatStringWo *c_name, GtkWidget *widget) {
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 	cat_log_debug("panel=%p %s", panel, g_type_name_from_instance((GTypeInstance *) panel));
 	priv->panel_owner = cat_ref_ptr(panel_owner);
 	priv->label = c_name;
@@ -111,7 +107,7 @@ static void l_dispose(GObject *object) {
 	cat_log_debug("dispose: %p rc=%d %s", object, object->ref_count, g_type_name_from_instance((GTypeInstance *) object));
 	cat_log_indent_level++;
 	LeaPanel *instance = LEA_PANEL(object);
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(instance);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(instance);
 
 	if (priv->child) {
 		gtk_container_remove(GTK_CONTAINER(instance), priv->child);
@@ -149,11 +145,13 @@ static void l_widget_destroy(GtkWidget *widget) {
 
 
 gboolean lea_panel_get_has_focus(LeaPanel *panel) {
-	return LEA_PANEL_GET_PRIVATE(panel)->hasFocus;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
+	return priv->hasFocus;
 }
 
 void lea_panel_set_has_focus(LeaPanel *panel, gboolean nval) {
-	LEA_PANEL_GET_PRIVATE(panel)->hasFocus = nval;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
+	priv->hasFocus = nval;
 	LeaPanelClass *panel_class = LEA_PANEL_GET_CLASS(panel);
 	if (panel_class->focusSet) {
 		panel_class->focusSet(panel, nval);
@@ -165,7 +163,7 @@ LeaKeyContext *lea_panel_get_key_context(LeaPanel *panel) {
 		return NULL;
 	}
 	LeaKeyContext *result = NULL;
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 	if (priv->panel_owner) {
 		result = lea_ipanel_owner_get_key_context(priv->panel_owner);
 	}
@@ -173,11 +171,13 @@ LeaKeyContext *lea_panel_get_key_context(LeaPanel *panel) {
 }
 
 void lea_panel_set_order_index(LeaPanel *panel, int order_index) {
-	LEA_PANEL_GET_PRIVATE(panel)->order_index = order_index;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
+	priv->order_index = order_index;
 }
 
 int lea_panel_get_order_index(LeaPanel *panel) {
-	return LEA_PANEL_GET_PRIVATE(panel)->order_index;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
+	return priv->order_index;
 }
 
 
@@ -186,7 +186,7 @@ gboolean lea_panel_close(LeaPanel *panel) {
 }
 
 gboolean lea_panel_close_real(LeaPanel *panel) {
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 	GtkWidget *parent_widget = gtk_widget_get_parent(GTK_WIDGET(panel));
 	if (parent_widget==NULL) {
 		return FALSE;
@@ -230,23 +230,26 @@ LeaSurface *lea_panel_get_surface(LeaPanel *panel) {
 }
 
 LeaIPanelOwner *lea_panel_get_panel_owner(LeaPanel *panel) {
-	return LEA_PANEL_GET_PRIVATE(panel)->panel_owner;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
+	return priv->panel_owner;
 }
 
 
 const CatStringWo *lea_panel_get_label(const LeaPanel *panel) {
-	return LEA_PANEL_GET_PRIVATE((LeaPanel *) panel)->label;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private((LeaPanel *) panel);
+	return priv->label;
 }
 
 gboolean lea_panel_is_active(LeaPanel *panel) {
 	if (panel == NULL) {
 		return FALSE;
 	}
-	return LEA_PANEL_GET_PRIVATE(panel)->is_active;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
+	return priv->is_active;
 }
 
 void lea_panel_set_label(LeaPanel *panel, const CatStringWo *label) {
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 
 	if (cat_string_wo_equal(priv->label, label)) {
 		return;
@@ -270,7 +273,7 @@ void lea_panel_set_label(LeaPanel *panel, const CatStringWo *label) {
 
 
 void lea_panel_request_focus(LeaPanel *panel) {
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 
 	if (priv->child==NULL) {
 		cat_log_warn("panel has no child");
@@ -290,7 +293,7 @@ void lea_panel_request_focus(LeaPanel *panel) {
 
 
 void lea_panel_focus_activated(LeaPanel *panel, gboolean is_active) {
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 
 	LeaPanelClass *clazz = LEA_PANEL_GET_CLASS(panel);
 	if (priv->is_active != is_active) {
@@ -307,11 +310,12 @@ void lea_panel_focus_activated(LeaPanel *panel, gboolean is_active) {
 }
 
 LeaActionGroup *lea_panel_get_action_group(LeaPanel *panel) {
-	return LEA_PANEL_GET_PRIVATE(panel)->action_group;
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
+	return priv->action_group;
 }
 
 void lea_panel_set_action_group(LeaPanel *panel, LeaActionGroup *group) {
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 	cat_ref_swap(priv->action_group, group);
 }
 
@@ -330,15 +334,14 @@ int lea_panel_hash(LeaPanel *panel) {
 
 void lea_panel_add_listener(LeaPanel *panel, LeaIPanelListener *listener) {
 	g_return_if_fail(listener!=NULL);
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 	cat_weak_list_append_once(priv->listeners, (GObject *) listener);
 }
 
 void lea_panel_remove_listener(LeaPanel *panel, LeaIPanelListener *listener) {
-	LeaPanelPrivate *priv = LEA_PANEL_GET_PRIVATE(panel);
+	LeaPanelPrivate *priv = lea_panel_get_instance_private(panel);
 	cat_weak_list_remove(priv->listeners, (GObject *) listener);
 }
-
 
 static void l_widget_show(GtkWidget *widget) {
 	if (GTK_WIDGET_CLASS(lea_panel_parent_class)->show) {
@@ -350,7 +353,6 @@ static void l_widget_show(GtkWidget *widget) {
 	if (childWidget) {
 		gtk_widget_show(childWidget);
 	}
-
 }
 
 static void l_widget_hide(GtkWidget *widget) {

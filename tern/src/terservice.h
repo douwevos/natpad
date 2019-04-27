@@ -38,28 +38,23 @@ G_BEGIN_DECLS
 #define TER_IS_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TER_TYPE_SERVICE))
 #define TER_IS_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_SERVICE))
 #define TER_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_SERVICE, TerServiceClass))
-#define TER_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TER_TYPE_SERVICE, TerServicePrivate))
 
 typedef struct _TerService               TerService;
 typedef struct _TerServicePrivate        TerServicePrivate;
 typedef struct _TerServiceClass          TerServiceClass;
 
-
 struct _TerService {
 	GObject parent;
-	TerServicePrivate *priv;
 };
 
 struct _TerServiceClass {
 	GObjectClass parent_class;
 };
 
-
 GType ter_service_get_type();
 
 TerService *ter_service_new(WorService *wor_service, ElkService *elk_service, VipService *vip_service);
 
 G_END_DECLS
-
 
 #endif /* TERSERVICE_H_ */

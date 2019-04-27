@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOACTIONADDPROJECT_H_
 #define MOOACTIONADDPROJECT_H_
 
@@ -37,24 +36,20 @@ G_BEGIN_DECLS
 #define MOO_IS_ACTION_ADD_PROJECT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ACTION_ADD_PROJECT))
 #define MOO_IS_ACTION_ADD_PROJECT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ACTION_ADD_PROJECT))
 #define MOO_ACTION_ADD_PROJECT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ACTION_ADD_PROJECT, MooActionAddProjectClass))
-#define MOO_ACTION_ADD_PROJECT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ACTION_ADD_PROJECT, MooActionAddProjectPrivate))
 
 typedef struct _MooActionAddProject               MooActionAddProject;
 typedef struct _MooActionAddProjectPrivate        MooActionAddProjectPrivate;
 typedef struct _MooActionAddProjectClass          MooActionAddProjectClass;
 
-
 extern CatS moo_s_action_add_project;
 
 struct _MooActionAddProject {
 	LeaAction parent;
-	MooActionAddProjectPrivate *priv;
 };
 
 struct _MooActionAddProjectClass {
 	LeaActionClass parent_class;
 };
-
 
 GType moo_action_add_project_get_type();
 

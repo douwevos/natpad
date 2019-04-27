@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ACTION_RENAME(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ACTION_RENAME))
 #define MOO_IS_ACTION_RENAME_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ACTION_RENAME))
 #define MOO_ACTION_RENAME_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ACTION_RENAME, MooActionRenameClass))
-#define MOO_ACTION_RENAME_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ACTION_RENAME, MooActionRenamePrivate))
-
 
 typedef struct _MooActionRename               MooActionRename;
 typedef struct _MooActionRenamePrivate        MooActionRenamePrivate;
 typedef struct _MooActionRenameClass          MooActionRenameClass;
 
-
 struct _MooActionRename {
 	LeaAction parent;
-	MooActionRenamePrivate *priv;
 };
 
 struct _MooActionRenameClass {
 	LeaActionClass parent_class;
 };
-
 
 GType moo_action_rename_get_type();
 

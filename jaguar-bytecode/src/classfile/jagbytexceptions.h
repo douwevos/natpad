@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_EXCEPTIONS(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_EXCEPTIONS))
 #define JAG_BYT_IS_EXCEPTIONS_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_EXCEPTIONS))
 #define JAG_BYT_EXCEPTIONS_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_EXCEPTIONS, JagBytExceptionsClass))
-#define JAG_BYT_EXCEPTIONS_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_EXCEPTIONS, JagBytExceptionsPrivate))
 
 typedef struct _JagBytExceptions               JagBytExceptions;
 typedef struct _JagBytExceptionsPrivate        JagBytExceptionsPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytExceptionsClass          JagBytExceptionsClass;
 
 struct _JagBytExceptions {
 	GObject parent;
-	JagBytExceptionsPrivate *priv;
 };
 
 struct _JagBytExceptionsClass {

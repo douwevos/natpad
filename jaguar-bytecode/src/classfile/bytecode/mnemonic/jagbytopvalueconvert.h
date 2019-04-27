@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_VALUE_CONVERT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_VALUE_CONVERT))
 #define JAG_BYT_IS_OP_VALUE_CONVERT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_VALUE_CONVERT))
 #define JAG_BYT_OP_VALUE_CONVERT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_VALUE_CONVERT, JagBytOpValueConvertClass))
-#define JAG_BYT_OP_VALUE_CONVERT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_VALUE_CONVERT, JagBytOpValueConvertPrivate))
 
 typedef struct _JagBytOpValueConvert               JagBytOpValueConvert;
 typedef struct _JagBytOpValueConvertPrivate        JagBytOpValueConvertPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpValueConvertClass          JagBytOpValueConvertClass;
 
 struct _JagBytOpValueConvert {
 	JagBytAbstractMnemonic parent;
-	JagBytOpValueConvertPrivate *priv;
 };
 
 struct _JagBytOpValueConvertClass {

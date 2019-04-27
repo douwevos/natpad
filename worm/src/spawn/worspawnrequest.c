@@ -38,51 +38,43 @@ struct _WorSpawnRequestPrivate {
 //	int limit;
 };
 
-G_DEFINE_TYPE (WorSpawnRequest, wor_spawn_request, WOR_TYPE_REQUEST)
+G_DEFINE_TYPE_WITH_PRIVATE(WorSpawnRequest, wor_spawn_request, WOR_TYPE_REQUEST)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
-
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void wor_spawn_request_class_init(WorSpawnRequestClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(WorSpawnRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 
 	WorRequestClass *req_clazz = WOR_REQUEST_CLASS(clazz);
 	req_clazz->runRequest = l_run_request;
 }
 
 static void wor_spawn_request_init(WorSpawnRequest *instance) {
-	WorSpawnRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_SPAWN_REQUEST, WorSpawnRequestPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorSpawnRequest *instance = WOR_SPAWN_REQUEST(object);
-	WorSpawnRequestPrivate *priv = instance->priv;
+	WorSpawnRequestPrivate *priv = wor_spawn_request_get_instance_private(instance);
 	cat_unref_ptr(priv->e_spawned_list);
 	cat_unref_ptr(priv->request_post_box);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(wor_spawn_request_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(wor_spawn_request_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 void wor_spawn_request_construct(WorSpawnRequest *request, WorIRequestPostBox *request_post_box) {
-	WorSpawnRequestPrivate *priv = WOR_SPAWN_REQUEST_GET_PRIVATE(request);
+	WorSpawnRequestPrivate *priv = wor_spawn_request_get_instance_private(request);
 	priv->request_post_box = cat_ref_ptr(request_post_box);
 	priv->started = FALSE;
 	priv->e_spawned_list = cat_array_wo_new();
@@ -90,12 +82,11 @@ void wor_spawn_request_construct(WorSpawnRequest *request, WorIRequestPostBox *r
 	wor_request_construct(WOR_REQUEST(request));
 }
 
-
 #define MAX_ACTIVE   30
 
 static void l_run_request(WorRequest *request) {
 	WorSpawnRequest *spawn_request = WOR_SPAWN_REQUEST(request);
-	WorSpawnRequestPrivate *priv = spawn_request->priv;
+	WorSpawnRequestPrivate *priv = wor_spawn_request_get_instance_private(spawn_request);
 
 	/* initialize spawning */
 	if (!priv->started) {
@@ -147,7 +138,3 @@ static void l_run_request(WorRequest *request) {
 		wor_irequest_post_box_post_request(priv->request_post_box, request);
 	}
 }
-
-
-
-

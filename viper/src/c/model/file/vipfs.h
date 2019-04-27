@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef VIPFS_H_
 #define VIPFS_H_
 
@@ -35,7 +34,6 @@ G_BEGIN_DECLS
 #define VIP_IS_FS(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_FS))
 #define VIP_IS_FS_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_FS))
 #define VIP_FS_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_FS, VipFSClass))
-#define VIP_FS_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_FS, VipFSPrivate))
 
 
 typedef struct _VipFS               VipFS;
@@ -52,7 +50,6 @@ enum _VipFSType {
 
 struct _VipFS {
 	GObject parent;
-	VipFSPrivate *priv;
 };
 
 struct _VipFSClass {

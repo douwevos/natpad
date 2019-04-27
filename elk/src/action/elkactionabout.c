@@ -33,18 +33,13 @@ struct _ElkActionAboutPrivate {
 	VipService *vip_service;
 };
 
-G_DEFINE_TYPE (ElkActionAbout, elk_action_about, LEA_TYPE_ACTION)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(ElkActionAbout, elk_action_about, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void elk_action_about_class_init(ElkActionAboutClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ElkActionAboutPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -54,30 +49,28 @@ static void elk_action_about_class_init(ElkActionAboutClass *clazz) {
 }
 
 static void elk_action_about_init(ElkActionAbout *instance) {
-	ElkActionAboutPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_ACTION_ABOUT, ElkActionAboutPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkActionAbout *instance = ELK_ACTION_ABOUT(object);
-	ElkActionAboutPrivate *priv = instance->priv;
+	ElkActionAboutPrivate *priv = elk_action_about_get_instance_private(instance);
 	cat_unref_ptr(priv->frame);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_action_about_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(elk_action_about_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ElkActionAbout *elk_action_about_new(LeaFrame *frame, VipService *vip_service) {
 	ElkActionAbout *result = g_object_new(ELK_TYPE_ACTION_ABOUT, NULL);
 	cat_ref_anounce(result);
-	ElkActionAboutPrivate *priv = result->priv;
+	ElkActionAboutPrivate *priv = elk_action_about_get_instance_private(result);
 	priv->frame = cat_ref_ptr(frame);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	lea_action_construct((LeaAction *) result, cat_string_wo_new_with("elk.about"), cat_string_wo_new_with("_About Natpad"), cat_string_wo_new_with("help-about"));
@@ -89,7 +82,7 @@ ElkActionAbout *elk_action_about_new(LeaFrame *frame, VipService *vip_service) {
 
 
 static void l_action_run(LeaAction *self) {
-	ElkActionAboutPrivate *priv = ELK_ACTION_ABOUT_GET_PRIVATE(self);
+	ElkActionAboutPrivate *priv = elk_action_about_get_instance_private((ElkActionAbout *) self);
 
 	GtkWidget *w_about = gtk_about_dialog_new();
 	GtkAboutDialog *about_dlg = GTK_ABOUT_DIALOG(w_about);

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef VIPNODENAMEMATCHER_H_
 #define VIPNODENAMEMATCHER_H_
 
@@ -35,17 +34,13 @@ G_BEGIN_DECLS
 #define VIP_IS_NODE_NAME_MATCHER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_NODE_NAME_MATCHER))
 #define VIP_IS_NODE_NAME_MATCHER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_NODE_NAME_MATCHER))
 #define VIP_NODE_NAME_MATCHER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_NODE_NAME_MATCHER, VipNodeNameMatcherClass))
-#define VIP_NODE_NAME_MATCHER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_NODE_NAME_MATCHER, VipNodeNameMatcherPrivate))
-
 
 typedef struct _VipNodeNameMatcher               VipNodeNameMatcher;
 typedef struct _VipNodeNameMatcherPrivate        VipNodeNameMatcherPrivate;
 typedef struct _VipNodeNameMatcherClass          VipNodeNameMatcherClass;
 
-
 struct _VipNodeNameMatcher {
 	GObject parent;
-	VipNodeNameMatcherPrivate *priv;
 };
 
 struct _VipNodeNameMatcherClass {

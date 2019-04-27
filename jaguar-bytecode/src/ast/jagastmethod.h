@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTMETHOD_H_
 #define JAGASTMETHOD_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_METHOD(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_METHOD))
 #define JAG_AST_IS_METHOD_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_METHOD))
 #define JAG_AST_METHOD_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_METHOD, JagAstMethodClass))
-#define JAG_AST_METHOD_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_METHOD, JagAstMethodPrivate))
 
 typedef struct _JagAstMethod               JagAstMethod;
 typedef struct _JagAstMethodPrivate        JagAstMethodPrivate;
@@ -47,7 +45,6 @@ typedef struct _JagAstMethodClass          JagAstMethodClass;
 
 struct _JagAstMethod {
 	GObject parent;
-	JagAstMethodPrivate *priv;
 };
 
 struct _JagAstMethodClass {
@@ -60,6 +57,5 @@ GType jag_ast_method_get_type();
 JagAstMethod *jag_ast_method_new(JagAstModifiers *modifiers, JagAstMethodHeader *method_header, JagAstBlock *statement_block);
 
 G_END_DECLS
-
 
 #endif /* JAGASTMETHOD_H_ */

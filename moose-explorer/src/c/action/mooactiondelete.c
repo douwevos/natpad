@@ -34,16 +34,13 @@ struct _MooActionDeletePrivate {
 	CatArrayWo *selection;
 };
 
-
-G_DEFINE_TYPE(MooActionDelete, moo_action_delete, LEA_TYPE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE(MooActionDelete, moo_action_delete, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void moo_action_delete_class_init(MooActionDeleteClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooActionDeletePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -53,14 +50,12 @@ static void moo_action_delete_class_init(MooActionDeleteClass *clazz) {
 }
 
 static void moo_action_delete_init(MooActionDelete *instance) {
-	MooActionDeletePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ACTION_DELETE, MooActionDeletePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooActionDelete *instance = MOO_ACTION_DELETE(object);
-	MooActionDeletePrivate *priv = instance->priv;
+	MooActionDeletePrivate *priv = moo_action_delete_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->frame);
 	cat_unref_ptr(priv->selection);
@@ -79,7 +74,7 @@ static void l_finalize(GObject *object) {
 MooActionDelete *moo_action_delete_new(MooService *moo_service, LeaFrame *frame) {
 	MooActionDelete *result = g_object_new(MOO_TYPE_ACTION_DELETE, NULL);
 	cat_ref_anounce(result);
-	MooActionDeletePrivate *priv = result->priv;
+	MooActionDeletePrivate *priv = moo_action_delete_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->frame = cat_ref_ptr(frame);
 	priv->selection = NULL;
@@ -90,7 +85,7 @@ MooActionDelete *moo_action_delete_new(MooService *moo_service, LeaFrame *frame)
 }
 
 void moo_action_delete_set_selection(MooActionDelete *action_delete, CatArrayWo *selection) {
-	MooActionDeletePrivate *priv = MOO_ACTION_DELETE_GET_PRIVATE(action_delete);
+	MooActionDeletePrivate *priv = moo_action_delete_get_instance_private(action_delete);
 	if (priv->selection == selection) {
 		return;
 	}
@@ -98,7 +93,6 @@ void moo_action_delete_set_selection(MooActionDelete *action_delete, CatArrayWo 
 	gboolean has_deleteable_node = FALSE;
 
 	if (priv->selection) {
-
 		has_deleteable_node = cat_array_wo_size(priv->selection)>0;
 		CatIIterator *iter = cat_array_wo_iterator(priv->selection);
 		while(cat_iiterator_has_next(iter)) {
@@ -118,7 +112,8 @@ void moo_action_delete_set_selection(MooActionDelete *action_delete, CatArrayWo 
 
 
 static void l_action_run(LeaAction *self) {
-	MooActionDeletePrivate *priv = MOO_ACTION_DELETE_GET_PRIVATE(self);
+	MooActionDelete *instance = MOO_ACTION_DELETE(self);
+	MooActionDeletePrivate *priv = moo_action_delete_get_instance_private(instance);
 	if (priv->selection) {
 		VipService *vip_service = moo_service_get_viper_service(priv->moo_service);
 		CatIIterator *iter = cat_array_wo_iterator(priv->selection);

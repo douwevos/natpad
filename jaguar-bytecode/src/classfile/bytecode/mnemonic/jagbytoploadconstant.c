@@ -37,62 +37,56 @@ struct _JagBytOpLoadConstantPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpLoadConstant, jag_byt_op_load_constant, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpLoadConstant)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_load_constant_class_init(JagBytOpLoadConstantClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytOpLoadConstantPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_load_constant_init(JagBytOpLoadConstant *instance) {
-	JagBytOpLoadConstantPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_LOAD_CONSTANT, JagBytOpLoadConstantPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytOpLoadConstant *instance = JAG_BYT_OP_LOAD_CONSTANT(object);
-	JagBytOpLoadConstantPrivate *priv = instance->priv;
+	JagBytOpLoadConstantPrivate *priv = jag_byt_op_load_constant_get_instance_private(instance);
 	cat_unref_ptr(priv->constant_value);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_load_constant_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_load_constant_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytOpLoadConstant *jag_byt_op_load_constant_new(JagBytOperation operation, JagBytType constant_type, CatIStringable *constant_value, int offset) {
 	JagBytOpLoadConstant *result = g_object_new(JAG_BYT_TYPE_OP_LOAD_CONSTANT, NULL);
 	cat_ref_anounce(result);
-	JagBytOpLoadConstantPrivate *priv = result->priv;
+	JagBytOpLoadConstantPrivate *priv = jag_byt_op_load_constant_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 1);
 	priv->constant_type = constant_type;
 	priv->constant_value = constant_value;
 	return result;
 }
 
-
-
 JagBytType jag_byt_op_load_constant_get_constant_type(JagBytOpLoadConstant *load_constant) {
-	return JAG_BYT_OP_LOAD_CONSTANT_GET_PRIVATE(load_constant)->constant_type;
+	JagBytOpLoadConstantPrivate *priv = jag_byt_op_load_constant_get_instance_private(load_constant);
+	return priv->constant_type;
 }
 
 CatIStringable *jag_byt_op_load_constant_get_contant_value(JagBytOpLoadConstant *load_constant) {
-	return JAG_BYT_OP_LOAD_CONSTANT_GET_PRIVATE(load_constant)->constant_value;
+	JagBytOpLoadConstantPrivate *priv = jag_byt_op_load_constant_get_instance_private(load_constant);
+	return priv->constant_value;
 }
 
 
@@ -121,7 +115,6 @@ static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *la
 	}
 	return result;
 }
-
 
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);

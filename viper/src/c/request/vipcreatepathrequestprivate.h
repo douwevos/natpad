@@ -25,8 +25,6 @@
 
 #include "vipcreatepathrequest.h"
 
-
 VipNodePath *vip_create_path_request_for_path(VipCreatePathRequest *request, VipPath *full_path);
-
 
 #endif /* VIPCREATEPATHREQUESTPRIVATE_H_ */

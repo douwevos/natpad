@@ -45,9 +45,10 @@ struct _VipCreatePathRequestPrivate {
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(VipCreatePathRequest, vip_create_path_request, WOR_TYPE_REQUEST,
+G_DEFINE_TYPE_WITH_CODE(VipCreatePathRequest, vip_create_path_request, WOR_TYPE_REQUEST, {
+		G_ADD_PRIVATE(VipCreatePathRequest)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
-		);
+});
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -56,8 +57,6 @@ static void l_run_request(WorRequest *request);
 static VipNodePath *l_open(VipCreatePathRequest *request);
 
 static void vip_create_path_request_class_init(VipCreatePathRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(VipCreatePathRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -67,14 +66,12 @@ static void vip_create_path_request_class_init(VipCreatePathRequestClass *clazz)
 }
 
 static void vip_create_path_request_init(VipCreatePathRequest *instance) {
-	VipCreatePathRequestPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_CREATE_PATH_REQUEST, VipCreatePathRequestPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipCreatePathRequest *instance = VIP_CREATE_PATH_REQUEST(object);
-	VipCreatePathRequestPrivate *priv = instance->priv;
+	VipCreatePathRequestPrivate *priv = vip_create_path_request_get_instance_private(instance);
 	cat_unref_ptr(priv->full_path);
 	cat_unref_ptr(priv->node_path);
 	cat_unref_ptr(priv->vip_service);
@@ -94,7 +91,7 @@ static void l_finalize(GObject *object) {
 VipCreatePathRequest *vip_create_path_request_new(struct _VipService *vip_service, VipPath *full_path) {
 	VipCreatePathRequest *result = g_object_new(VIP_TYPE_CREATE_PATH_REQUEST, NULL);
 	cat_ref_anounce(result);
-	VipCreatePathRequestPrivate *priv = result->priv;
+	VipCreatePathRequestPrivate *priv = vip_create_path_request_get_instance_private(result);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->full_path = cat_ref_ptr(full_path);
 	priv->node_path = NULL;
@@ -106,7 +103,7 @@ VipCreatePathRequest *vip_create_path_request_new(struct _VipService *vip_servic
 
 // TODO possible dead lock ... please add timeout
 VipNodePath *vip_create_path_request_wait_for_path(VipCreatePathRequest *request) {
-	VipCreatePathRequestPrivate *priv = VIP_CREATE_PATH_REQUEST_GET_PRIVATE(request);
+	VipCreatePathRequestPrivate *priv = vip_create_path_request_get_instance_private(request);
 	cat_lock_lock(priv->lock);
 	while(!priv->did_run) {
 		cat_lock_wait_timed(priv->lock, 1000);
@@ -117,7 +114,7 @@ VipNodePath *vip_create_path_request_wait_for_path(VipCreatePathRequest *request
 
 
 static CatArrayWo *l_creat_path_entries(VipCreatePathRequest *request, VipPath *full_path) {
-	VipCreatePathRequestPrivate *priv = VIP_CREATE_PATH_REQUEST_GET_PRIVATE(request);
+	VipCreatePathRequestPrivate *priv = vip_create_path_request_get_instance_private(request);
 	CatTree *tree = vip_service_get_tree(priv->vip_service);
 	CatWritableTreeNode *root_node = cat_tree_get_writable_root_node(tree);
 	CatWritableTreeNode *cdNode = root_node;
@@ -242,7 +239,7 @@ VipNodePath *vip_create_path_request_for_path(VipCreatePathRequest *request, Vip
 
 
 static VipNodePath *l_open(VipCreatePathRequest *request) {
-	VipCreatePathRequestPrivate *priv = VIP_CREATE_PATH_REQUEST_GET_PRIVATE(request);
+	VipCreatePathRequestPrivate *priv = vip_create_path_request_get_instance_private(request);
 	CatTree *tree = vip_service_get_tree(priv->vip_service);
 
 	CatArrayWo *e_node_list = l_creat_path_entries(request, priv->full_path);
@@ -271,7 +268,8 @@ static VipNodePath *l_open(VipCreatePathRequest *request) {
 }
 
 static void l_run_request(WorRequest *self) {
-	VipCreatePathRequestPrivate *priv = VIP_CREATE_PATH_REQUEST_GET_PRIVATE(self);
+	VipCreatePathRequest *instance = VIP_CREATE_PATH_REQUEST(self);
+	VipCreatePathRequestPrivate *priv = vip_create_path_request_get_instance_private(instance);
 	priv->node_path = l_open((VipCreatePathRequest *) self);
 	cat_lock_lock(priv->lock);
 	priv->did_run = TRUE;
@@ -282,7 +280,8 @@ static void l_run_request(WorRequest *self) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	VipCreatePathRequestPrivate *priv = VIP_CREATE_PATH_REQUEST_GET_PRIVATE(self);
+	VipCreatePathRequest *instance = VIP_CREATE_PATH_REQUEST(self);
+	VipCreatePathRequestPrivate *priv = vip_create_path_request_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p, full_path=%o, node-path=%o]", iname, self, priv->full_path, priv->node_path);
 }
@@ -292,4 +291,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

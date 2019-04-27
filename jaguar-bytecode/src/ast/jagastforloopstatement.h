@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTFORLOOPSTATEMENT_H_
 #define JAGASTFORLOOPSTATEMENT_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_FOR_LOOP_STATEMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_FOR_LOOP_STATEMENT))
 #define JAG_AST_IS_FOR_LOOP_STATEMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_FOR_LOOP_STATEMENT))
 #define JAG_AST_FOR_LOOP_STATEMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_FOR_LOOP_STATEMENT, JagAstForLoopStatementClass))
-#define JAG_AST_FOR_LOOP_STATEMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_FOR_LOOP_STATEMENT, JagAstForLoopStatementPrivate))
 
 typedef struct _JagAstForLoopStatement               JagAstForLoopStatement;
 typedef struct _JagAstForLoopStatementPrivate        JagAstForLoopStatementPrivate;
@@ -47,7 +45,6 @@ typedef struct _JagAstForLoopStatementClass          JagAstForLoopStatementClass
 
 struct _JagAstForLoopStatement {
 	GObject parent;
-	JagAstForLoopStatementPrivate *priv;
 };
 
 struct _JagAstForLoopStatementClass {
@@ -60,6 +57,5 @@ GType jag_ast_for_loop_statement_get_type();
 JagAstForLoopStatement *jag_ast_for_loop_statement_new(JagAstIAstNode *forInit, JagAstIExpression *forCondition, JagAstIAstNode *forUpdate, JagAstBlock *body);
 
 G_END_DECLS
-
 
 #endif /* JAGASTFORLOOPSTATEMENT_H_ */

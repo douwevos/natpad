@@ -38,49 +38,42 @@ struct _JagAstTpPrivate {
 
 G_DEFINE_TYPE (JagAstTp, jag_ast_tp, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_tp_class_init(JagAstTpClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstTpPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_tp_init(JagAstTp *instance) {
-	JagAstTpPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_TP, JagAstTpPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstTp *instance = JAG_AST_TP(object);
-	JagAstTpPrivate *priv = instance->priv;
+	JagAstTpPrivate *priv = jag_ast_tp_get_instance_private(instance);
 	cat_unref_ptr(priv->e_fields);
 	cat_unref_ptr(priv->e_imports);
 	cat_unref_ptr(priv->e_methods);
 	cat_unref_ptr(priv->package_statement);
 	cat_unref_ptr(priv->type_header);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_tp_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_tp_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstTp *jag_ast_tp_new(JagAstPackageStatement *package_statement, CatArrayWo *e_imports, JagAstTpHeader *type_header, CatArrayWo *e_fields, CatArrayWo *e_methods) {
 	JagAstTp *result = g_object_new(JAG_AST_TYPE_TP, NULL);
 	cat_ref_anounce(result);
-	JagAstTpPrivate *priv = result->priv;
+	JagAstTpPrivate *priv = jag_ast_tp_get_instance_private(result);
 	priv->package_statement = cat_ref_ptr(package_statement);
 	priv->e_imports = cat_ref_ptr(e_imports);
 	priv->type_header = cat_ref_ptr(type_header);
@@ -90,7 +83,7 @@ JagAstTp *jag_ast_tp_new(JagAstPackageStatement *package_statement, CatArrayWo *
 }
 
 JagAstFieldDeclaration *jag_ast_tp_find_field_by_name(JagAstTp *tp, CatStringWo *a_field_name) {
-	JagAstTpPrivate *priv = JAG_AST_TP_GET_PRIVATE(tp);
+	JagAstTpPrivate *priv = jag_ast_tp_get_instance_private(tp);
 	JagAstFieldDeclaration *result = NULL;
 	CatIIterator *iter = cat_array_wo_iterator(priv->e_fields);
 	while(cat_iiterator_has_next(iter)) {
@@ -106,7 +99,7 @@ JagAstFieldDeclaration *jag_ast_tp_find_field_by_name(JagAstTp *tp, CatStringWo 
 }
 
 void jag_ast_tp_write(JagAstTp *tp, JagAstWriter *out) {
-	JagAstTpPrivate *priv = JAG_AST_TP_GET_PRIVATE(tp);
+	JagAstTpPrivate *priv = jag_ast_tp_get_instance_private(tp);
 	if (priv->package_statement!=NULL) {
 		jag_ast_istatement_write_statement((JagAstIStatement *) priv->package_statement, out);
 		jag_ast_writer_print(out, cat_string_wo_new_with("\n"));
@@ -149,5 +142,3 @@ void jag_ast_tp_write(JagAstTp *tp, JagAstWriter *out) {
 	jag_ast_writer_decrease_indent(out);
 	jag_ast_writer_print(out, cat_string_wo_new_with("}\n"));
 }
-
-

@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_METHOD_LIST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_METHOD_LIST))
 #define JAG_BYT_IS_METHOD_LIST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_METHOD_LIST))
 #define JAG_BYT_METHOD_LIST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_METHOD_LIST, JagBytMethodListClass))
-#define JAG_BYT_METHOD_LIST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_METHOD_LIST, JagBytMethodListPrivate))
 
 typedef struct _JagBytMethodList               JagBytMethodList;
 typedef struct _JagBytMethodListPrivate        JagBytMethodListPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytMethodListClass          JagBytMethodListClass;
 
 struct _JagBytMethodList {
 	GInitiallyUnowned parent;
-	JagBytMethodListPrivate *priv;
 };
 
 struct _JagBytMethodListClass {

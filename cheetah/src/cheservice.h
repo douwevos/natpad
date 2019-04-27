@@ -36,22 +36,18 @@ G_BEGIN_DECLS
 #define CHE_IS_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CHE_TYPE_SERVICE))
 #define CHE_IS_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CHE_TYPE_SERVICE))
 #define CHE_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CHE_TYPE_SERVICE, CheServiceClass))
-#define CHE_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CHE_TYPE_SERVICE, CheServicePrivate))
 
 typedef struct _CheService               CheService;
 typedef struct _CheServicePrivate        CheServicePrivate;
 typedef struct _CheServiceClass          CheServiceClass;
 
-
 struct _CheService {
 	GObject parent;
-	CheServicePrivate *priv;
 };
 
 struct _CheServiceClass {
 	GObjectClass parent_class;
 };
-
 
 GType che_service_get_type();
 

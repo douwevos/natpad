@@ -37,45 +37,39 @@ struct _JagBytOpLoadFastIndexPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpLoadFastIndex, jag_byt_op_load_fast_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpLoadFastIndex)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_load_fast_index_class_init(JagBytOpLoadFastIndexClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytOpLoadFastIndexPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_load_fast_index_init(JagBytOpLoadFastIndex *instance) {
-	JagBytOpLoadFastIndexPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_LOAD_FAST_INDEX, JagBytOpLoadFastIndexPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_load_fast_index_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_load_fast_index_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytOpLoadFastIndex *jag_byt_op_load_fast_index_new(JagBytOperation operation, int offset, JagBytType value_type, int frame_index) {
 	JagBytOpLoadFastIndex *result = g_object_new(JAG_BYT_TYPE_OP_LOAD_FAST_INDEX, NULL);
 	cat_ref_anounce(result);
-	JagBytOpLoadFastIndexPrivate *priv = result->priv;
+	JagBytOpLoadFastIndexPrivate *priv = jag_byt_op_load_fast_index_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 1);
 	priv->value_type = value_type;
 	priv->index = frame_index;
@@ -83,7 +77,8 @@ JagBytOpLoadFastIndex *jag_byt_op_load_fast_index_new(JagBytOperation operation,
 }
 
 int jag_byt_op_load_fast_index_get_frame_index(JagBytOpLoadFastIndex *load_fast_index) {
-	return JAG_BYT_OP_LOAD_FAST_INDEX_GET_PRIVATE(load_fast_index)->index;
+	JagBytOpLoadFastIndexPrivate *priv = jag_byt_op_load_fast_index_get_instance_private(load_fast_index);
+	return priv->index;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
@@ -117,7 +112,6 @@ static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *la
 	}
 	return result;
 }
-
 
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);

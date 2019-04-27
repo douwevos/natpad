@@ -21,12 +21,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTINT_H_
 #define JAGBYTCONSTANTINT_H_
 
 #define JAG_BYT_CONSTANT_INT_ID  3
-
 
 #include <caterpillar.h>
 
@@ -38,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_INT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_INT))
 #define JAG_BYT_IS_CONSTANT_INT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_INT))
 #define JAG_BYT_CONSTANT_INT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_INT, JagBytConstantIntClass))
-#define JAG_BYT_CONSTANT_INT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_INT, JagBytConstantIntPrivate))
 
 typedef struct _JagBytConstantInt               JagBytConstantInt;
 typedef struct _JagBytConstantIntPrivate        JagBytConstantIntPrivate;
@@ -47,7 +44,6 @@ typedef struct _JagBytConstantIntClass          JagBytConstantIntClass;
 
 struct _JagBytConstantInt {
 	GObject parent;
-	JagBytConstantIntPrivate *priv;
 };
 
 struct _JagBytConstantIntClass {
@@ -62,7 +58,5 @@ JagBytConstantInt *jag_byt_constant_int_new(int32_t value);
 int32_t jag_byt_constant_int_get_value(JagBytConstantInt *constant_int);
 
 G_END_DECLS
-
-
 
 #endif /* JAGBYTCONSTANTINT_H_ */

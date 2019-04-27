@@ -39,50 +39,44 @@ struct _JagAstIfThenElsePrivate {
 static void l_statement_iface_init(JagAstIStatementInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstIfThenElse, jag_ast_if_then_else, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstIfThenElse)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_ISTATEMENT, l_statement_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_if_then_else_class_init(JagAstIfThenElseClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstIfThenElsePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_if_then_else_init(JagAstIfThenElse *instance) {
-	JagAstIfThenElsePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_IF_THEN_ELSE, JagAstIfThenElsePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstIfThenElse *instance = JAG_AST_IF_THEN_ELSE(object);
-	JagAstIfThenElsePrivate *priv = instance->priv;
+	JagAstIfThenElsePrivate *priv = jag_ast_if_then_else_get_instance_private(instance);
 	cat_unref_ptr(priv->expression);
 	cat_unref_ptr(priv->then_block);
 	cat_unref_ptr(priv->else_block);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_if_then_else_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_if_then_else_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstIfThenElse *jag_ast_if_then_else_new(JagAstIExpression *expression, JagAstBlock *then_block, JagAstBlock *else_block) {
 	JagAstIfThenElse *result = g_object_new(JAG_AST_TYPE_IF_THEN_ELSE, NULL);
 	cat_ref_anounce(result);
-	JagAstIfThenElsePrivate *priv = result->priv;
+	JagAstIfThenElsePrivate *priv = jag_ast_if_then_else_get_instance_private(result);
 	priv->expression = cat_ref_ptr(expression);
 	priv->then_block = cat_ref_ptr(then_block);
 	priv->else_block = cat_ref_ptr(else_block);
@@ -91,21 +85,17 @@ JagAstIfThenElse *jag_ast_if_then_else_new(JagAstIExpression *expression, JagAst
 }
 
 
-
-
-
-
-
-
 /********************* start JagAstIStatement implementation *********************/
 
 static void l_statement_set_at_least_line_nr(JagAstIStatement *self, int at_least_line_nr) {
-	JagAstIfThenElsePrivate *priv = JAG_AST_IF_THEN_ELSE_GET_PRIVATE(self);
+	JagAstIfThenElse *instance = JAG_AST_IF_THEN_ELSE(self);
+	JagAstIfThenElsePrivate *priv = jag_ast_if_then_else_get_instance_private(instance);
 	priv->statement_line_nr = at_least_line_nr;
 }
 
 static void l_statement_write_statement(JagAstIStatement *self, JagAstWriter *out) {
-	JagAstIfThenElsePrivate *priv = JAG_AST_IF_THEN_ELSE_GET_PRIVATE(self);
+	JagAstIfThenElse *instance = JAG_AST_IF_THEN_ELSE(self);
+	JagAstIfThenElsePrivate *priv = jag_ast_if_then_else_get_instance_private(instance);
 	jag_ast_writer_set_at_least_line_nr(out, priv->statement_line_nr);
 	jag_ast_writer_print(out, cat_string_wo_new_with("if ("));
 	jag_ast_iexpression_write(priv->expression, out);

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTCASTEXPRESSION_H_
 #define JAGASTCASTEXPRESSION_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_CAST_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_CAST_EXPRESSION))
 #define JAG_AST_IS_CAST_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_CAST_EXPRESSION))
 #define JAG_AST_CAST_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_CAST_EXPRESSION, JagAstCastExpressionClass))
-#define JAG_AST_CAST_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_CAST_EXPRESSION, JagAstCastExpressionPrivate))
 
 typedef struct _JagAstCastExpression               JagAstCastExpression;
 typedef struct _JagAstCastExpressionPrivate        JagAstCastExpressionPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstCastExpressionClass          JagAstCastExpressionClass;
 
 struct _JagAstCastExpression {
 	GObject parent;
-	JagAstCastExpressionPrivate *priv;
 };
 
 struct _JagAstCastExpressionClass {
@@ -59,7 +56,5 @@ GType jag_ast_cast_expression_get_type();
 JagAstCastExpression *jag_ast_cast_expression_new(JagAstDeclarationType *cast_type, JagAstIExpression *expression);
 
 G_END_DECLS
-
-
 
 #endif /* JAGASTCASTEXPRESSION_H_ */

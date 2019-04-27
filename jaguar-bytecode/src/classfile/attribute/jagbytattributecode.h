@@ -21,10 +21,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTATTRIBUTECODE_H_
 #define JAGBYTATTRIBUTECODE_H_
-
 
 #include "jagbytattribute.h"
 #include "jagbytattributelocalvariabletable.h"
@@ -40,7 +38,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_CODE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_CODE))
 #define JAG_BYT_IS_ATTRIBUTE_CODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_CODE))
 #define JAG_BYT_ATTRIBUTE_CODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_CODE, JagBytAttributeCodeClass))
-#define JAG_BYT_ATTRIBUTE_CODE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_CODE, JagBytAttributeCodePrivate))
 
 typedef struct _JagBytAttributeCode               JagBytAttributeCode;
 typedef struct _JagBytAttributeCodePrivate        JagBytAttributeCodePrivate;
@@ -49,7 +46,6 @@ typedef struct _JagBytAttributeCodeClass          JagBytAttributeCodeClass;
 
 struct _JagBytAttributeCode {
 	JagBytAttribute parent;
-	JagBytAttributeCodePrivate *priv;
 };
 
 struct _JagBytAttributeCodeClass {
@@ -75,6 +71,5 @@ JagBytAttributeLineNumberTable *jag_byt_attribute_code_get_line_number_table(Jag
 void jag_byt_attribute_code_as_source(JagBytAttributeCode *code_attribute, CatStringWo *e_source, CatStringWo *a_indent);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTATTRIBUTECODE_H_ */

@@ -36,47 +36,40 @@ struct _JagBytAttributeLineNumberTablePrivate {
 	JagBytLineNumberTable *table;
 };
 
-G_DEFINE_TYPE (JagBytAttributeLineNumberTable, jag_byt_attribute_line_number_table, JAG_BYT_TYPE_ATTRIBUTE)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytAttributeLineNumberTable, jag_byt_attribute_line_number_table, JAG_BYT_TYPE_ATTRIBUTE)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_attribute_line_number_table_class_init(JagBytAttributeLineNumberTableClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAttributeLineNumberTablePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_attribute_line_number_table_init(JagBytAttributeLineNumberTable *instance) {
-	JagBytAttributeLineNumberTablePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ATTRIBUTE_LINE_NUMBER_TABLE, JagBytAttributeLineNumberTablePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytAttributeLineNumberTable *instance = JAG_BYT_ATTRIBUTE_LINE_NUMBER_TABLE(object);
-	JagBytAttributeLineNumberTablePrivate *priv = instance->priv;
+	JagBytAttributeLineNumberTablePrivate *priv = jag_byt_attribute_line_number_table_get_instance_private(instance);
 	cat_unref_ptr(priv->table);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_attribute_line_number_table_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_attribute_line_number_table_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytAttributeLineNumberTable *jag_byt_attribute_line_number_table_new(CatStringWo *e_attribute_data, JagBytIConstantProvider *constant_provider) {
 	JagBytAttributeLineNumberTable *result = g_object_new(JAG_BYT_TYPE_ATTRIBUTE_LINE_NUMBER_TABLE, NULL);
 	cat_ref_anounce(result);
-	JagBytAttributeLineNumberTablePrivate *priv = result->priv;
+	JagBytAttributeLineNumberTablePrivate *priv = jag_byt_attribute_line_number_table_get_instance_private(result);
 	jag_byt_attribute_construct((JagBytAttribute *) result);
 
 	JagJObjectInputStream *obj_istream = jag_jobject_input_stream_new_from_array(e_attribute_data);
@@ -99,6 +92,6 @@ JagBytAttributeLineNumberTable *jag_byt_attribute_line_number_table_new(CatStrin
 
 
 JagBytLineNumberTable *jag_byt_attribute_line_number_table_get_table(JagBytAttributeLineNumberTable *attr_line_number_table) {
-	JagBytAttributeLineNumberTablePrivate *priv = JAG_BYT_ATTRIBUTE_LINE_NUMBER_TABLE_GET_PRIVATE(attr_line_number_table);
+	JagBytAttributeLineNumberTablePrivate *priv = jag_byt_attribute_line_number_table_get_instance_private(attr_line_number_table);
 	return priv->table;
 }

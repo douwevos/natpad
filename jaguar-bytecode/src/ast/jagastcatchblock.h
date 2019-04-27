@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTCATCHBLOCK_H_
 #define JAGASTCATCHBLOCK_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_CATCH_BLOCK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_CATCH_BLOCK))
 #define JAG_AST_IS_CATCH_BLOCK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_CATCH_BLOCK))
 #define JAG_AST_CATCH_BLOCK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_CATCH_BLOCK, JagAstCatchBlockClass))
-#define JAG_AST_CATCH_BLOCK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_CATCH_BLOCK, JagAstCatchBlockPrivate))
 
 typedef struct _JagAstCatchBlock               JagAstCatchBlock;
 typedef struct _JagAstCatchBlockPrivate        JagAstCatchBlockPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstCatchBlockClass          JagAstCatchBlockClass;
 
 struct _JagAstCatchBlock {
 	JagAstBlock parent;
-	JagAstCatchBlockPrivate *priv;
 };
 
 struct _JagAstCatchBlockClass {
@@ -59,7 +56,5 @@ GType jag_ast_catch_block_get_type();
 JagAstCatchBlock *jag_ast_catch_block_new(JagAstFieldDeclaration *field_declaration);
 
 G_END_DECLS
-
-
 
 #endif /* JAGASTCATCHBLOCK_H_ */

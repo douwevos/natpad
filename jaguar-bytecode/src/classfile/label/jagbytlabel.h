@@ -21,14 +21,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTLABEL_H_
 #define JAGBYTLABEL_H_
 
 #include <caterpillar.h>
 
 G_BEGIN_DECLS
-
 
 enum _JagBytLabelType {
 	JAG_BYT_LABEL_TYPE_HARD,
@@ -43,14 +41,12 @@ typedef enum _JagBytLabelType JagBytLabelType;
 #define JAG_BYT_IS_LABEL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_LABEL))
 #define JAG_BYT_IS_LABEL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_LABEL))
 #define JAG_BYT_LABEL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_LABEL, JagBytLabelClass))
-#define JAG_BYT_LABEL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_LABEL, JagBytLabelPrivate))
 
 struct _JagBytLabelPrivate;
 typedef struct _JagBytLabelPrivate        JagBytLabelPrivate;
 
 struct _JagBytLabel {
 	GObject parent;
-	JagBytLabelPrivate *priv;
 };
 
 struct _JagBytLabelClass {

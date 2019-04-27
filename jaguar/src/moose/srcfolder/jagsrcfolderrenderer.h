@@ -35,23 +35,17 @@ G_BEGIN_DECLS
 #define JAG_IS_SRC_FOLDER_RENDERER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_SRC_FOLDER_RENDERER))
 #define JAG_IS_SRC_FOLDER_RENDERER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SRC_FOLDER_RENDERER))
 #define JAG_SRC_FOLDER_RENDERER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SRC_FOLDER_RENDERER, JagSrcFolderRendererClass))
-#define JAG_SRC_FOLDER_RENDERER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_SRC_FOLDER_RENDERER, JagSrcFolderRendererPrivate))
-
 
 typedef struct _JagSrcFolderRenderer               JagSrcFolderRenderer;
-typedef struct _JagSrcFolderRendererPrivate        JagSrcFolderRendererPrivate;
 typedef struct _JagSrcFolderRendererClass          JagSrcFolderRendererClass;
-
 
 struct _JagSrcFolderRenderer {
 	GObject parent;
-	JagSrcFolderRendererPrivate *priv;
 };
 
 struct _JagSrcFolderRendererClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_src_folder_renderer_get_type();
 
@@ -60,7 +54,5 @@ JagSrcFolderRenderer *jag_src_folder_renderer_new();
 void jag_src_folder_renderer_draw_package(cairo_t *cairo, double xoffset, int yoffset, double size, gboolean non_empty);
 
 G_END_DECLS
-
-
 
 #endif /* JAGSRCFOLDERRENDERER_H_ */

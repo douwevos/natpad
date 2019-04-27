@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTLONG_H_
 #define JAGBYTCONSTANTLONG_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_LONG(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_LONG))
 #define JAG_BYT_IS_CONSTANT_LONG_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_LONG))
 #define JAG_BYT_CONSTANT_LONG_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_LONG, JagBytConstantLongClass))
-#define JAG_BYT_CONSTANT_LONG_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_LONG, JagBytConstantLongPrivate))
 
 typedef struct _JagBytConstantLong               JagBytConstantLong;
 typedef struct _JagBytConstantLongPrivate        JagBytConstantLongPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagBytConstantLongClass          JagBytConstantLongClass;
 
 struct _JagBytConstantLong {
 	GObject parent;
-	JagBytConstantLongPrivate *priv;
 };
 
 struct _JagBytConstantLongClass {
@@ -60,8 +57,6 @@ JagBytConstantLong *jag_byt_constant_long_new(int64_t value);
 
 int64_t jag_byt_constant_long_get_value(JagBytConstantLong *constant_long);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTCONSTANTLONG_H_ */

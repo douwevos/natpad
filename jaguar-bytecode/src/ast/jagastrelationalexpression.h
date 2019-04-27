@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTRELATIONALEXPRESSION_H_
 #define JAGASTRELATIONALEXPRESSION_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_RELATIONAL_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_RELATIONAL_EXPRESSION))
 #define JAG_AST_IS_RELATIONAL_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_RELATIONAL_EXPRESSION))
 #define JAG_AST_RELATIONAL_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_RELATIONAL_EXPRESSION, JagAstRelationalExpressionClass))
-#define JAG_AST_RELATIONAL_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_RELATIONAL_EXPRESSION, JagAstRelationalExpressionPrivate))
 
 typedef struct _JagAstRelationalExpression               JagAstRelationalExpression;
 typedef struct _JagAstRelationalExpressionPrivate        JagAstRelationalExpressionPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstRelationalExpressionClass          JagAstRelationalExpress
 
 struct _JagAstRelationalExpression {
 	GObject parent;
-	JagAstRelationalExpressionPrivate *priv;
 };
 
 struct _JagAstRelationalExpressionClass {
@@ -59,6 +56,5 @@ GType jag_ast_relational_expression_get_type();
 JagAstRelationalExpression *jag_ast_relational_expression_new(JagBytConditionType condition_type, JagAstIExpression *left, JagAstIExpression *right);
 
 G_END_DECLS
-
 
 #endif /* JAGASTRELATIONALEXPRESSION_H_ */

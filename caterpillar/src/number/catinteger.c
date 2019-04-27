@@ -37,56 +37,52 @@ struct _CatIntegerPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatInteger, cat_integer, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CatInteger)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_integer_class_init(CatIntegerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CatIntegerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_integer_init(CatInteger *instance) {
-	CatIntegerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_INTEGER, CatIntegerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(cat_integer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(cat_integer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 CatInteger *cat_integer_new(int value) {
 	CatInteger *result = g_object_new(CAT_TYPE_INTEGER, NULL);
 	cat_ref_anounce(result);
-	CatIntegerPrivate *priv = result->priv;
+	CatIntegerPrivate *priv = cat_integer_get_instance_private(result);
 	priv->value = value;
 	return result;
 }
 
 
 int cat_integer_value(CatInteger *iobj) {
-	return CAT_INTEGER_GET_PRIVATE(iobj)->value;
+	CatIntegerPrivate *priv = cat_integer_get_instance_private(iobj);
+	return priv->value;
 }
 
 int cat_integer_hash(CatInteger *iobj) {
-	return CAT_INTEGER_GET_PRIVATE(iobj)->value;
+	CatIntegerPrivate *priv = cat_integer_get_instance_private(iobj);
+	return priv->value;
 }
 
 gboolean cat_integer_equal(const CatInteger *iobj_a, const CatInteger *iobj_b) {
@@ -97,8 +93,10 @@ gboolean cat_integer_equal(const CatInteger *iobj_a, const CatInteger *iobj_b) {
 		return FALSE;
 	}
 
-	int val_a = CAT_INTEGER_GET_PRIVATE(iobj_a)->value;
-	int val_b = CAT_INTEGER_GET_PRIVATE(iobj_b)->value;
+	CatIntegerPrivate *priv_a = cat_integer_get_instance_private((CatInteger *) iobj_a);
+	CatIntegerPrivate *priv_b = cat_integer_get_instance_private((CatInteger *) iobj_b);
+	int val_a = priv_a->value;
+	int val_b = priv_b->value;
 	return val_a==val_b;
 }
 
@@ -115,18 +113,17 @@ int cat_integer_compare(CatInteger *iobj_a, CatInteger *iobj_b) {
 		return 1;
 	}
 
-	int val_a = CAT_INTEGER_GET_PRIVATE(iobj_a)->value;
-	int val_b = CAT_INTEGER_GET_PRIVATE(iobj_b)->value;
+	CatIntegerPrivate *priv_a = cat_integer_get_instance_private((CatInteger *) iobj_a);
+	CatIntegerPrivate *priv_b = cat_integer_get_instance_private((CatInteger *) iobj_b);
+	int val_a = priv_a->value;
+	int val_b = priv_b->value;
 	return val_a==val_b ? 0 : (val_a<val_b ? -1 : 1);
 }
-
-
-
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	CatIntegerPrivate *iobj = CAT_INTEGER_GET_PRIVATE(self);
+	CatIntegerPrivate *iobj = cat_integer_get_instance_private(CAT_INTEGER(self));
 	cat_string_wo_append_decimal(append_to, iobj->value);
 }
 

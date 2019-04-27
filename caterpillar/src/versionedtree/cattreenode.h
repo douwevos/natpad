@@ -33,7 +33,6 @@ G_BEGIN_DECLS
 #define CAT_IS_TREE_NODE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_TREE_NODE))
 #define CAT_IS_TREE_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_TREE_NODE))
 #define CAT_TREE_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_TREE_NODE, CatTreeNodeClass))
-#define CAT_TREE_NODE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_TREE_NODE, CatTreeNodePrivate))
 
 
 typedef struct _CatTreeNode               CatTreeNode;
@@ -43,7 +42,6 @@ typedef struct _CatTreeNodeClass          CatTreeNodeClass;
 
 struct _CatTreeNode {
 	GObject parent;
-	CatTreeNodePrivate *priv;
 };
 
 struct _CatTreeNodeClass {

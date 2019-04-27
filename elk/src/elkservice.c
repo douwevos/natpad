@@ -37,7 +37,7 @@
 
 static void l_service_iface_init(ElkIServiceInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(ElkService, elk_service, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(ElkService, elk_service, G_TYPE_OBJECT, { // @suppress("Unused static function")
 			G_IMPLEMENT_INTERFACE(ELK_TYPE_ISERVICE, l_service_iface_init);
 })
 
@@ -58,7 +58,6 @@ static void elk_service_init(ElkService *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkService *instance = ELK_SERVICE(object);
-
 
 	if (instance->moo_explorer_service) {
 		g_object_run_dispose((GObject *) (instance->moo_explorer_service));

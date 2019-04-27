@@ -37,43 +37,37 @@ struct _JagScanJarMapWorkPrivate {
 static void l_scan_work_iface_init(VipIScanWorkInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagScanJarMapWork, jag_scan_jar_map_work, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagScanJarMapWork)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_ISCAN_WORK, l_scan_work_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_scan_jar_map_work_class_init(JagScanJarMapWorkClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagScanJarMapWorkPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_scan_jar_map_work_init(JagScanJarMapWork *instance) {
-	JagScanJarMapWorkPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_SCAN_JAR_MAP_WORK, JagScanJarMapWorkPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagScanJarMapWork *instance = JAG_SCAN_JAR_MAP_WORK(object);
-	JagScanJarMapWorkPrivate *priv = instance->priv;
+	JagScanJarMapWorkPrivate *priv = jag_scan_jar_map_work_get_instance_private(instance);
 	cat_unref_ptr(priv->e_child_work);
 	cat_unref_ptr(priv->id_provider);
 	cat_unref_ptr(priv->node);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_scan_jar_map_work_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_scan_jar_map_work_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -81,7 +75,7 @@ static void l_finalize(GObject *object) {
 JagScanJarMapWork *jag_scan_jar_map_work_new(VipISequence *id_provider, CatWritableTreeNode *node, gboolean recursive_from_parent, gboolean validated_by_parent) {
 	JagScanJarMapWork *result = g_object_new(JAG_TYPE_SCAN_JAR_MAP_WORK, NULL);
 	cat_ref_anounce(result);
-	JagScanJarMapWorkPrivate *priv = result->priv;
+	JagScanJarMapWorkPrivate *priv = jag_scan_jar_map_work_get_instance_private(result);
 	priv->id_provider = cat_ref_ptr(id_provider);
 	priv->node = cat_ref_ptr(node);
 	priv->e_child_work = NULL;
@@ -90,24 +84,16 @@ JagScanJarMapWork *jag_scan_jar_map_work_new(VipISequence *id_provider, CatWrita
 }
 
 
-
-
-
-
-
-
-
 /********************* start VipIScanWork implementation *********************/
 
 static void l_initialize_work_for_map(JagScanJarMapWork *scan_work, VipMapperRegistry *mapper_registry) {
-	JagScanJarMapWorkPrivate *priv = JAG_SCAN_JAR_MAP_WORK_GET_PRIVATE(scan_work);
+	JagScanJarMapWorkPrivate *priv = jag_scan_jar_map_work_get_instance_private(scan_work);
 	cat_unref_ptr(priv->e_child_work);
 	priv->e_child_work = cat_array_wo_new();
 	cat_log_debug("scan_work=%p, child_work=%p", scan_work, priv->e_child_work);
 
 	VipNode *main_vip_node = (VipNode *) cat_tree_node_get_content((CatTreeNode *) priv->node);
 	gboolean parentRecursive = priv->recursive_from_parent || vip_node_should_scan_recursive(main_vip_node);
-
 
 	VipIResource *main_resource = vip_node_get_content(main_vip_node);
 	if (parentRecursive && VIP_IS_IMAP(main_resource)) {
@@ -154,10 +140,9 @@ static void l_initialize_work_for_map(JagScanJarMapWork *scan_work, VipMapperReg
 	}
 }
 
-
-
 static CatArrayWo *l_scan_work_init_child_work(VipIScanWork *self, struct _VipMapperRegistry *mapper_registry) {
-	JagScanJarMapWorkPrivate *priv = JAG_SCAN_JAR_MAP_WORK_GET_PRIVATE(self);
+	JagScanJarMapWork *instance = JAG_SCAN_JAR_MAP_WORK(self);
+	JagScanJarMapWorkPrivate *priv = jag_scan_jar_map_work_get_instance_private(instance);
 	if (priv->e_child_work==NULL) {
 //		VipIResource *content = vip_node_get_content(priv->main_node);
 //		if (VIP_IS_IMAP(content)) {
@@ -174,12 +159,9 @@ static void l_scan_work_run_scan(VipIScanWork *self) {
 }
 
 
-
-
 static void l_scan_work_iface_init(VipIScanWorkInterface *iface) {
 	iface->initChildWork = l_scan_work_init_child_work;
 	iface->runScan = l_scan_work_run_scan;
 }
-
 
 /********************* end VipIScanWork implementation *********************/

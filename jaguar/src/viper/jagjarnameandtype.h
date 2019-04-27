@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGJARNAMEANDTYPE_H_
 #define JAGJARNAMEANDTYPE_H_
 
@@ -35,23 +34,18 @@ G_BEGIN_DECLS
 #define JAG_IS_JAR_NAME_AND_TYPE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_JAR_NAME_AND_TYPE))
 #define JAG_IS_JAR_NAME_AND_TYPE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_JAR_NAME_AND_TYPE))
 #define JAG_JAR_NAME_AND_TYPE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_JAR_NAME_AND_TYPE, JagJarNameAndTypeClass))
-#define JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_JAR_NAME_AND_TYPE, JagJarNameAndTypePrivate))
-
 
 typedef struct _JagJarNameAndType               JagJarNameAndType;
 typedef struct _JagJarNameAndTypePrivate        JagJarNameAndTypePrivate;
 typedef struct _JagJarNameAndTypeClass          JagJarNameAndTypeClass;
 
-
 struct _JagJarNameAndType {
 	GObject parent;
-	JagJarNameAndTypePrivate *priv;
 };
 
 struct _JagJarNameAndTypeClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_jar_name_and_type_get_type();
 
@@ -59,15 +53,11 @@ int jag_jar_name_and_type_hash(JagJarNameAndType *name_and_type);
 
 gboolean jag_jar_name_and_type_equal(JagJarNameAndType *name_and_type_a, JagJarNameAndType *name_and_type_b);
 
-
 JagJarNameAndType *jag_jar_name_and_type_new(CatStringWo *a_name, gboolean is_map);
-
 
 JagJarNameAndType *jag_jar_name_and_type_add(JagJarNameAndType *name_and_type, CatStringWo *a_path, gboolean isMap);
 
-
 VipIResource *jag_jar_name_and_type_get_vip_resource(JagJarNameAndType *name_and_type, VipIFile *mainFile, CatArrayWo *a_parent_path);
-
 
 void jag_jar_name_and_type_set_index(JagJarNameAndType *name_and_type, int entry_index);
 

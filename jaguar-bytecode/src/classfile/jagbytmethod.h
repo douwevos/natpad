@@ -41,7 +41,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_METHOD(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_METHOD))
 #define JAG_BYT_IS_METHOD_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_METHOD))
 #define JAG_BYT_METHOD_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_METHOD, JagBytMethodClass))
-#define JAG_BYT_METHOD_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_METHOD, JagBytMethodPrivate))
 
 typedef struct _JagBytMethod               JagBytMethod;
 typedef struct _JagBytMethodPrivate        JagBytMethodPrivate;
@@ -50,7 +49,6 @@ typedef struct _JagBytMethodClass          JagBytMethodClass;
 
 struct _JagBytMethod {
 	GObject parent;
-	JagBytMethodPrivate *priv;
 };
 
 struct _JagBytMethodClass {

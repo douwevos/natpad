@@ -20,7 +20,6 @@ G_BEGIN_DECLS
 #define WOR_IS_CONDITION_STATE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), WOR_TYPE_CONDITION_STATE))
 #define WOR_IS_CONDITION_STATE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), WOR_TYPE_CONDITION_STATE))
 #define WOR_CONDITION_STATE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), WOR_TYPE_CONDITION_STATE, WorConditionStateClass))
-#define WOR_CONDITION_STATE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), WOR_TYPE_CONDITION_STATE, WorConditionStatePrivate))
 
 typedef struct _WorConditionState               WorConditionState;
 typedef struct _WorConditionStatePrivate        WorConditionStatePrivate;
@@ -29,7 +28,6 @@ typedef struct _WorConditionStateClass          WorConditionStateClass;
 
 struct _WorConditionState {
 	GObject parent;
-	WorConditionStatePrivate *priv;
 };
 
 struct _WorConditionStateClass {
@@ -48,9 +46,6 @@ gboolean wor_condition_state_peek(WorConditionState *state);
 
 gboolean wor_condition_state_was_selected(WorConditionState *state);
 
-
 G_END_DECLS
-
-
 
 #endif /* WORCONDITIONSTATE_H_ */

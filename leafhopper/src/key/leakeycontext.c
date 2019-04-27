@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "leakeycontext.h"
 
 #include <logging/catlogdefs.h>
@@ -35,6 +34,7 @@ struct _LeaKeyContextPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(LeaKeyContext, lea_key_context, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(LeaKeyContext)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -42,22 +42,18 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void lea_key_context_class_init(LeaKeyContextClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaKeyContextPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void lea_key_context_init(LeaKeyContext *instance) {
-	LeaKeyContextPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, LEA_TYPE_KEY_CONTEXT, LeaKeyContextPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	LeaKeyContext *instance = LEA_KEY_CONTEXT(object);
-	LeaKeyContextPrivate *priv = instance->priv;
+	LeaKeyContextPrivate *priv = lea_key_context_get_instance_private(instance);
 	cat_unref_ptr(priv->a_context_name);
 	G_OBJECT_CLASS(lea_key_context_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -74,7 +70,7 @@ static void l_finalize(GObject *object) {
 LeaKeyContext *lea_key_context_new(CatStringWo *ca_context_name) {
 	LeaKeyContext *result = g_object_new(LEA_TYPE_KEY_CONTEXT, NULL);
 	cat_ref_anounce(result);
-	LeaKeyContextPrivate *priv = result->priv;
+	LeaKeyContextPrivate *priv = lea_key_context_get_instance_private(result);
 	priv->a_context_name = ca_context_name;
 	return result;
 }
@@ -82,12 +78,13 @@ LeaKeyContext *lea_key_context_new(CatStringWo *ca_context_name) {
 
 
 CatStringWo *lea_key_context_get_name(LeaKeyContext *key_context) {
-	return LEA_KEY_CONTEXT_GET_PRIVATE(key_context)->a_context_name;
+	LeaKeyContextPrivate *priv = lea_key_context_get_instance_private(key_context);
+	return priv->a_context_name;
 
 }
 
 int lea_key_context_hash(LeaKeyContext *key_context) {
-	LeaKeyContextPrivate *priv = LEA_KEY_CONTEXT_GET_PRIVATE(key_context);
+	LeaKeyContextPrivate *priv = lea_key_context_get_instance_private(key_context);
 	return cat_string_wo_hash(priv->a_context_name);
 }
 
@@ -98,17 +95,17 @@ gboolean lea_key_context_equal(LeaKeyContext *key_context_a, LeaKeyContext *key_
 	if ((key_context_a==NULL) || (key_context_b==NULL)) {
 		return FALSE;
 	}
-	LeaKeyContextPrivate *priv_a = LEA_KEY_CONTEXT_GET_PRIVATE(key_context_a);
-	LeaKeyContextPrivate *priv_b = LEA_KEY_CONTEXT_GET_PRIVATE(key_context_b);
+	LeaKeyContextPrivate *priv_a = lea_key_context_get_instance_private(key_context_a);
+	LeaKeyContextPrivate *priv_b = lea_key_context_get_instance_private(key_context_b);
 	return cat_string_wo_equal(priv_a->a_context_name, priv_b->a_context_name);
 }
-
 
 
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	LeaKeyContextPrivate *priv = LEA_KEY_CONTEXT_GET_PRIVATE(self);
+	LeaKeyContext *instance = LEA_KEY_CONTEXT(self);
+	LeaKeyContextPrivate *priv = lea_key_context_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%o]", iname, priv->a_context_name);
 }
@@ -118,6 +115,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-
-

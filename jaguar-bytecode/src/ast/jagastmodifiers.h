@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTMODIFIERS_H_
 #define JAGASTMODIFIERS_H_
 
@@ -50,7 +49,6 @@ typedef enum _JagAstModifier JagAstModifier;
 #define JAG_AST_IS_MODIFIERS(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_MODIFIERS))
 #define JAG_AST_IS_MODIFIERS_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_MODIFIERS))
 #define JAG_AST_MODIFIERS_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_MODIFIERS, JagAstModifiersClass))
-#define JAG_AST_MODIFIERS_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_MODIFIERS, JagAstModifiersPrivate))
 
 typedef struct _JagAstModifiers               JagAstModifiers;
 typedef struct _JagAstModifiersPrivate        JagAstModifiersPrivate;
@@ -59,7 +57,6 @@ typedef struct _JagAstModifiersClass          JagAstModifiersClass;
 
 struct _JagAstModifiers {
 	GObject parent;
-	JagAstModifiersPrivate *priv;
 };
 
 struct _JagAstModifiersClass {
@@ -82,6 +79,5 @@ gboolean jag_ast_modifiers_equal(JagAstModifiers *modifiers_a, JagAstModifiers *
 const char *jag_ast_modifier_as_text(JagAstModifier modifier);
 
 G_END_DECLS
-
 
 #endif /* JAGASTMODIFIERS_H_ */

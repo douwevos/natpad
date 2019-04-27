@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_LOAD_ARRAY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_LOAD_ARRAY))
 #define JAG_BYT_IS_OP_LOAD_ARRAY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_LOAD_ARRAY))
 #define JAG_BYT_OP_LOAD_ARRAY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_LOAD_ARRAY, JagBytOpLoadArrayClass))
-#define JAG_BYT_OP_LOAD_ARRAY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_LOAD_ARRAY, JagBytOpLoadArrayPrivate))
 
 typedef struct _JagBytOpLoadArray               JagBytOpLoadArray;
 typedef struct _JagBytOpLoadArrayPrivate        JagBytOpLoadArrayPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpLoadArrayClass          JagBytOpLoadArrayClass;
 
 struct _JagBytOpLoadArray {
 	JagBytAbstractMnemonic parent;
-	JagBytOpLoadArrayPrivate *priv;
 };
 
 struct _JagBytOpLoadArrayClass {

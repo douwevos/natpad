@@ -37,47 +37,40 @@ struct _JagBytAttributeLocalVariableTablePrivate {
 	JagBytLocalVariableTable *table;
 };
 
-G_DEFINE_TYPE (JagBytAttributeLocalVariableTable, jag_byt_attribute_local_variable_table, JAG_BYT_TYPE_ATTRIBUTE)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytAttributeLocalVariableTable, jag_byt_attribute_local_variable_table, JAG_BYT_TYPE_ATTRIBUTE)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_attribute_local_variable_table_class_init(JagBytAttributeLocalVariableTableClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAttributeLocalVariableTablePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_attribute_local_variable_table_init(JagBytAttributeLocalVariableTable *instance) {
-	JagBytAttributeLocalVariableTablePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ATTRIBUTE_LOCAL_VARIABLE_TABLE, JagBytAttributeLocalVariableTablePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytAttributeLocalVariableTable *instance = JAG_BYT_ATTRIBUTE_LOCAL_VARIABLE_TABLE(object);
-	JagBytAttributeLocalVariableTablePrivate *priv = instance->priv;
+	JagBytAttributeLocalVariableTablePrivate *priv = jag_byt_attribute_local_variable_table_get_instance_private(instance);
 	cat_unref_ptr(priv->table);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_attribute_local_variable_table_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_attribute_local_variable_table_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytAttributeLocalVariableTable *jag_byt_attribute_local_variable_table_new(CatStringWo *e_attribute_data, JagBytIConstantProvider *constant_provider) {
 	JagBytAttributeLocalVariableTable *result = g_object_new(JAG_BYT_TYPE_ATTRIBUTE_LOCAL_VARIABLE_TABLE, NULL);
 	cat_ref_anounce(result);
-	JagBytAttributeLocalVariableTablePrivate *priv = result->priv;
+	JagBytAttributeLocalVariableTablePrivate *priv = jag_byt_attribute_local_variable_table_get_instance_private(result);
 	jag_byt_attribute_construct((JagBytAttribute *) result);
 
 
@@ -108,15 +101,7 @@ JagBytAttributeLocalVariableTable *jag_byt_attribute_local_variable_table_new(Ca
 	return result;
 }
 
-
-
-
-
-
 JagBytLocalVariableTable *jag_byt_attribute_local_variable_table_get_table(JagBytAttributeLocalVariableTable *attr_local_variable_table) {
-	JagBytAttributeLocalVariableTablePrivate *priv = JAG_BYT_ATTRIBUTE_LOCAL_VARIABLE_TABLE_GET_PRIVATE(attr_local_variable_table);
+	JagBytAttributeLocalVariableTablePrivate *priv = jag_byt_attribute_local_variable_table_get_instance_private(attr_local_variable_table);
 	return priv->table;
 }
-
-
-

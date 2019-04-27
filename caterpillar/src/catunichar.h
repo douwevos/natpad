@@ -35,13 +35,12 @@ G_BEGIN_DECLS
 #define CAT_UNICHAR_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_UNICHAR, CatUnicharClass))
 
 
-typedef struct _CatUnichar	      CatUnichar;
-
-typedef struct _CatUnicharClass	  CatUnicharClass;
+typedef struct _CatUnichar	       CatUnichar;
+typedef struct _CatUnicharPrivate  CatUnicharPrivate;
+typedef struct _CatUnicharClass	   CatUnicharClass;
 
 struct _CatUnichar {
 	GObject parent;
-	gunichar value;
 };
 
 struct _CatUnicharClass {

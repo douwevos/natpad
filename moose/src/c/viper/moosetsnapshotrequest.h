@@ -36,23 +36,18 @@ G_BEGIN_DECLS
 #define MOO_IS_SET_SNAPSHOT_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_SET_SNAPSHOT_REQUEST))
 #define MOO_IS_SET_SNAPSHOT_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_SET_SNAPSHOT_REQUEST))
 #define MOO_SET_SNAPSHOT_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_SET_SNAPSHOT_REQUEST, MooSetSnapshotRequestClass))
-#define MOO_SET_SNAPSHOT_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_SET_SNAPSHOT_REQUEST, MooSetSnapshotRequestPrivate))
-
 
 typedef struct _MooSetSnapshotRequest               MooSetSnapshotRequest;
 typedef struct _MooSetSnapshotRequestPrivate        MooSetSnapshotRequestPrivate;
 typedef struct _MooSetSnapshotRequestClass          MooSetSnapshotRequestClass;
 
-
 struct _MooSetSnapshotRequest {
 	WorRequest parent;
-	MooSetSnapshotRequestPrivate *priv;
 };
 
 struct _MooSetSnapshotRequestClass {
 	WorRequestClass parent_class;
 };
-
 
 GType moo_set_snapshot_request_get_type();
 

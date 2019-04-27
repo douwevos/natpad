@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTUNARYEXPRESSION_H_
 #define JAGASTUNARYEXPRESSION_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_UNARY_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_UNARY_EXPRESSION))
 #define JAG_AST_IS_UNARY_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_UNARY_EXPRESSION))
 #define JAG_AST_UNARY_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_UNARY_EXPRESSION, JagAstUnaryExpressionClass))
-#define JAG_AST_UNARY_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_UNARY_EXPRESSION, JagAstUnaryExpressionPrivate))
 
 typedef struct _JagAstUnaryExpression               JagAstUnaryExpression;
 typedef struct _JagAstUnaryExpressionPrivate        JagAstUnaryExpressionPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstUnaryExpressionClass          JagAstUnaryExpressionClass;
 
 struct _JagAstUnaryExpression {
 	GObject parent;
-	JagAstUnaryExpressionPrivate *priv;
 };
 
 struct _JagAstUnaryExpressionClass {
@@ -59,8 +56,6 @@ GType jag_ast_unary_expression_get_type();
 
 JagAstIConditionalExpression *jag_ast_unary_expression_create(JagAstIConditionalExpression *expression);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTUNARYEXPRESSION_H_ */

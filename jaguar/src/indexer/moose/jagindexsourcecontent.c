@@ -32,29 +32,24 @@ struct _JagIndexSourceContentPrivate {
 	int jag_srcfile_content_version;
 };
 
-
-G_DEFINE_TYPE(JagIndexSourceContent, jag_index_source_content, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JagIndexSourceContent, jag_index_source_content, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_index_source_content_class_init(JagIndexSourceContentClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagIndexSourceContentPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_index_source_content_init(JagIndexSourceContent *instance) {
-	JagIndexSourceContentPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_INDEX_SOURCE_CONTENT, JagIndexSourceContentPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagIndexSourceContent *instance = JAG_INDEX_SOURCE_CONTENT(object);
-	JagIndexSourceContentPrivate *priv = instance->priv;
+	JagIndexSourceContentPrivate *priv = jag_index_source_content_get_instance_private(instance);
 	cat_unref_ptr(priv->lock);
 	G_OBJECT_CLASS(jag_index_source_content_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -71,14 +66,14 @@ static void l_finalize(GObject *object) {
 JagIndexSourceContent *jag_index_source_content_new() {
 	JagIndexSourceContent *result = g_object_new(JAG_TYPE_INDEX_SOURCE_CONTENT, NULL);
 	cat_ref_anounce(result);
-	JagIndexSourceContentPrivate *priv = result->priv;
+	JagIndexSourceContentPrivate *priv = jag_index_source_content_get_instance_private(result);
 	priv->lock = cat_lock_new();
 	priv->jag_srcfile_content_version = -1;
 	return result;
 }
 
 gboolean jag_index_source_content_need_to_update(JagIndexSourceContent *index_source, int jag_srcfile_content_version) {
-	JagIndexSourceContentPrivate *priv = JAG_INDEX_SOURCE_CONTENT_GET_PRIVATE(index_source);
+	JagIndexSourceContentPrivate *priv = jag_index_source_content_get_instance_private(index_source);
 	gboolean result = FALSE;
 	cat_lock_lock(priv->lock);
 	cat_log_debug("jag_srcfile_content_version=%d, priv->jag_srcfile_content_version=%d", jag_srcfile_content_version, priv->jag_srcfile_content_version);
@@ -88,5 +83,4 @@ gboolean jag_index_source_content_need_to_update(JagIndexSourceContent *index_so
 	}
 	cat_lock_unlock(priv->lock);
 	return result;
-
 }

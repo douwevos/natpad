@@ -34,8 +34,6 @@ G_BEGIN_DECLS
 #define CAT_IS_WEAK_LIST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_WEAK_LIST))
 #define CAT_IS_WEAK_LIST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_WEAK_LIST))
 #define CAT_WEAK_LIST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_WEAK_LIST, CatWeakListClass))
-#define CAT_WEAK_LIST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_WEAK_LIST, CatWeakListPrivate))
-
 
 typedef struct _CatWeakList               CatWeakList;
 typedef struct _CatWeakListPrivate        CatWeakListPrivate;
@@ -44,7 +42,6 @@ typedef struct _CatWeakListClass          CatWeakListClass;
 
 struct _CatWeakList {
 	GObject parent;
-	CatWeakListPrivate *priv;
 };
 
 struct _CatWeakListClass {

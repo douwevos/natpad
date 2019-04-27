@@ -38,6 +38,7 @@ struct _JagBytOpPushIndexPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpPushIndex, jag_byt_op_push_index, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpPushIndex)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -45,16 +46,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_push_index_class_init(JagBytOpPushIndexClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpPushIndexPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_push_index_init(JagBytOpPushIndex *instance) {
-	JagBytOpPushIndexPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_PUSH_INDEX, JagBytOpPushIndexPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -73,7 +70,7 @@ static void l_finalize(GObject *object) {
 JagBytOpPushIndex *jag_byt_op_push_index_new(JagBytOperation operation, int offset, int length, gboolean is_wide, int index, gboolean is_long_or_double) {
 	JagBytOpPushIndex *result = g_object_new(JAG_BYT_TYPE_OP_PUSH_INDEX, NULL);
 	cat_ref_anounce(result);
-	JagBytOpPushIndexPrivate *priv = result->priv;
+	JagBytOpPushIndexPrivate *priv = jag_byt_op_push_index_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, length);
 	priv->is_wide = is_wide;
 	priv->index = index;
@@ -81,9 +78,9 @@ JagBytOpPushIndex *jag_byt_op_push_index_new(JagBytOperation operation, int offs
 	return result;
 }
 
-
 int jag_byt_op_push_index_get_pool_index(JagBytOpPushIndex *op_push_index) {
-	return JAG_BYT_OP_PUSH_INDEX_GET_PRIVATE(op_push_index)->index;
+	JagBytOpPushIndexPrivate *priv = jag_byt_op_push_index_get_instance_private(op_push_index);
+	return priv->index;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
@@ -96,7 +93,8 @@ static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *la
 		case OP_LDC_W : cat_string_wo_append_chars(result, "ldc_w "); break;
 		case OP_LDC2_W : cat_string_wo_append_chars(result, "ldc2_w "); break;
 	}
-	JagBytOpPushIndexPrivate *priv = JAG_BYT_OP_PUSH_INDEX_GET_PRIVATE(self);
+	JagBytOpPushIndex *instance = JAG_BYT_OP_PUSH_INDEX(self);
+	JagBytOpPushIndexPrivate *priv = jag_byt_op_push_index_get_instance_private(instance);
 	cat_string_wo_append_decimal(result, priv->index);
 	return result;
 }

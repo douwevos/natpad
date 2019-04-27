@@ -32,40 +32,33 @@ struct _CatAtomicReferencePrivate {
 	int lock;
 };
 
-G_DEFINE_TYPE (CatAtomicReference, cat_atomic_reference, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(CatAtomicReference, cat_atomic_reference, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_atomic_reference_class_init(CatAtomicReferenceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CatAtomicReferencePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_atomic_reference_init(CatAtomicReference *instance) {
-	CatAtomicReferencePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_ATOMIC_REFERENCE, CatAtomicReferencePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatAtomicReference *instance = CAT_ATOMIC_REFERENCE(object);
-	CatAtomicReferencePrivate *priv = instance->priv;
+	CatAtomicReferencePrivate *priv = cat_atomic_reference_get_instance_private(instance);
 	cat_unref_ptr(priv->value);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(cat_atomic_reference_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(cat_atomic_reference_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -73,7 +66,7 @@ static void l_finalize(GObject *object) {
 CatAtomicReference *cat_atomic_reference_new() {
 	CatAtomicReference *result = g_object_new(CAT_TYPE_ATOMIC_REFERENCE, NULL);
 	cat_ref_anounce(result);
-	CatAtomicReferencePrivate *priv = result->priv;
+	CatAtomicReferencePrivate *priv = cat_atomic_reference_get_instance_private(result);
 	__atomic_store_n(&(priv->lock), 0, __ATOMIC_SEQ_CST);
 	__atomic_store_n((void **) &(priv->value), NULL, __ATOMIC_SEQ_CST);
 	return result;
@@ -83,7 +76,7 @@ CatAtomicReference *cat_atomic_reference_new() {
 CatAtomicReference *cat_atomic_reference_new_val(GObject *initial) {
 	CatAtomicReference *result = g_object_new(CAT_TYPE_ATOMIC_REFERENCE, NULL);
 	cat_ref_anounce(result);
-	CatAtomicReferencePrivate *priv = result->priv;
+	CatAtomicReferencePrivate *priv = cat_atomic_reference_get_instance_private(result);
 	__atomic_store_n(&(priv->lock), 0, __ATOMIC_SEQ_CST);
 	__atomic_store_n((void **) &(priv->value), initial, __ATOMIC_SEQ_CST);
 	cat_ref_ptr(initial);
@@ -93,7 +86,7 @@ CatAtomicReference *cat_atomic_reference_new_val(GObject *initial) {
 
 
 gboolean cat_atomic_reference_compare_set(CatAtomicReference *ref_atomic, GObject *expect, GObject *set) {
-	CatAtomicReferencePrivate *priv = CAT_ATOMIC_REFERENCE_GET_PRIVATE(ref_atomic);
+	CatAtomicReferencePrivate *priv = cat_atomic_reference_get_instance_private(ref_atomic);
 	// set or increase write lock
 	cat_log_trace("ref_atomic=%o, compare=%o, set=%o", ref_atomic, expect, set);
 	while(TRUE) {
@@ -117,7 +110,7 @@ gboolean cat_atomic_reference_compare_set(CatAtomicReference *ref_atomic, GObjec
 
 GObject *cat_atomic_reference_get(CatAtomicReference *ref_atomic) {
 	cat_log_trace("ref_atomic=%o", ref_atomic);
-	CatAtomicReferencePrivate *priv = CAT_ATOMIC_REFERENCE_GET_PRIVATE(ref_atomic);
+	CatAtomicReferencePrivate *priv = cat_atomic_reference_get_instance_private(ref_atomic);
 	// set or increase read lock
 	while(TRUE) {
 		int lock_val = __atomic_load_n(&(priv->lock), __ATOMIC_SEQ_CST);
@@ -141,7 +134,7 @@ GObject *cat_atomic_reference_get(CatAtomicReference *ref_atomic) {
 
 GObject *cat_atomic_reference_get_unsafe(CatAtomicReference *ref_atomic) {
 	cat_log_trace("ref_atomic=%o", ref_atomic);
-	CatAtomicReferencePrivate *priv = CAT_ATOMIC_REFERENCE_GET_PRIVATE(ref_atomic);
+	CatAtomicReferencePrivate *priv = cat_atomic_reference_get_instance_private(ref_atomic);
 	void *result = __atomic_load_n((void **) &(priv->value), __ATOMIC_SEQ_CST);
 	cat_log_debug("result=%o, new_lock=%d", result);
 	return (GObject *) result;
@@ -149,7 +142,7 @@ GObject *cat_atomic_reference_get_unsafe(CatAtomicReference *ref_atomic) {
 
 
 gboolean cat_atomic_reference_set(CatAtomicReference *ref_atomic, GObject *newVal) {
-	CatAtomicReferencePrivate *priv = CAT_ATOMIC_REFERENCE_GET_PRIVATE(ref_atomic);
+	CatAtomicReferencePrivate *priv = cat_atomic_reference_get_instance_private(ref_atomic);
 	gboolean ret = FALSE;
 	// set or increase write lock
 	cat_log_trace("ref_atomic=%o, set=%o", ref_atomic, newVal);

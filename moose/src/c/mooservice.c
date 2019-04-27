@@ -59,33 +59,27 @@ static void l_vip_listener_iface_init(VipIListenerInterface *iface);
 static void l_sequence_iface_init(VipISequenceInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooService, moo_service, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(MooService)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_ISEQUENCE, l_sequence_iface_init);
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_ILISTENER, l_vip_listener_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_service_class_init(MooServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_service_init(MooService *instance) {
-	MooServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_SERVICE, MooServicePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooService *instance = MOO_SERVICE(object);
-	MooServicePrivate *priv = instance->priv;
+	MooServicePrivate *priv = moo_service_get_instance_private(instance);
 	cat_unref_ptr(priv->wor_service);
 	cat_unref_ptr(priv->vip_service);
 	cat_unref_ptr(priv->unique_id_counter);
@@ -109,15 +103,14 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->cow_properties_panel_factory);
 	cat_unref_ptr(priv->module_transaction_listener);
 
-
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -125,7 +118,7 @@ static void l_finalize(GObject *object) {
 MooService *moo_service_new(WorService *wor_service, VipService *vip_service) {
 	MooService *result = g_object_new(MOO_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	MooServicePrivate *priv = result->priv;
+	MooServicePrivate *priv = moo_service_get_instance_private(result);
 	priv->unique_id_counter = cat_atomic_long_new();
 	priv->version_counter = cat_atomic_integer_new();
 	priv->wor_service = cat_ref_ptr(wor_service);
@@ -146,12 +139,6 @@ MooService *moo_service_new(WorService *wor_service, VipService *vip_service) {
 	priv->root_ref = cat_atomic_reference_new_val((GObject *) initial_root);
 	priv->snapshot_ref = cat_atomic_reference_new();
 
-
-
-//	cat_ref_ptr(priv->root_ref);
-//	cat_ref_ptr(priv->root_ref);
-//	cat_ref_ptr(priv->root_ref);
-
 	cat_unref_ptr(initial_root);
 	vip_service_add_listener(vip_service, VIP_ILISTENER(result));
 
@@ -162,7 +149,7 @@ MooService *moo_service_new(WorService *wor_service, VipService *vip_service) {
 
 
 MooTransaction *moo_service_create_transaction(GObject *owner, MooService *moo_service) {
-	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(moo_service);
+	MooServicePrivate *priv = moo_service_get_instance_private(moo_service);
 	MooTransaction *result =
 			moo_transaction_new(owner, priv->transaction_dispatcher, priv->unique_id_counter, priv->version_counter, priv->root_ref);
 	return result;
@@ -183,12 +170,6 @@ gboolean moo_service_add_node(MooService *moo_service, MooNodeWo *module) {
 		if (commit_ok) {
 			result = TRUE;
 			break;
-		} else {
-//			try {
-//				Thread.sleep(100+(retryCnt*200));
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
 		}
 	}
 	cat_unref_ptr(transaction);
@@ -196,75 +177,45 @@ gboolean moo_service_add_node(MooService *moo_service, MooNodeWo *module) {
 }
 
 
-//gboolean moo_service_add_module(MooService *moo_service, VipPath *module_base_path, CatStringWo *a_module_name) {
-//	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(moo_service);
-//
-//	/* scan Viper contents */
-//	VipNodePath *base_node_path = vip_service_open(priv->vip_service, module_base_path);
-//
-//	VipNode *tail = vip_node_path_get_tail(base_node_path);
-//	vip_node_set_scan_recursive(tail, TRUE);
-//
-//	vip_service_scan(priv->vip_service);
-//
-//	/* create module */
-//	MooContentMapWo *edit_con_map = moo_content_map_wo_new();
-//	VipNode *base_node = vip_node_path_get_tail(base_node_path);
-//	MooModuleContentWo *module_content = moo_module_content_wo_new(base_node);
-//	moo_content_map_wo_set(edit_con_map, (MooIContent *) module_content);
-//	cat_unref(module_content);
-//	MooContentMapWo *content_map = moo_content_map_wo_finalize_result(edit_con_map);
-//	long long moose_id = vip_isequence_next((VipISequence *) moo_service);
-//	cat_log_debug("content_map=%o", content_map);
-//	MooNodeWo *module = moo_node_new(moose_id, module_name, NULL, content_map, 0);
-//	//	gboolean didAddModule =
-//	gboolean result =  l_add_node(moo_service, module);
-//	cat_unref(content_map);
-//	cat_unref_ptr(edit_con_map);
-//	cat_unref_ptr(module);
-//	cat_unref_ptr(base_node_path);
-//	return result;
-//}
-
 MooNodeWo *moo_service_get_root_node_ref(MooService *moo_service) {
-	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(moo_service);
+	MooServicePrivate *priv = moo_service_get_instance_private(moo_service);
 	return (MooNodeWo *) cat_atomic_reference_get(priv->root_ref);
 }
 
 MooTransactionDispatcher *moo_service_get_transaction_dispatcher(MooService *moo_service) {
-	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(moo_service);
+	MooServicePrivate *priv = moo_service_get_instance_private(moo_service);
 	return priv->transaction_dispatcher;
 }
 
 WorService *moo_service_get_worm_service(MooService *moo_service) {
-	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(moo_service);
+	MooServicePrivate *priv = moo_service_get_instance_private(moo_service);
 	return priv->wor_service;
 }
 
 VipService *moo_service_get_viper_service(MooService *moo_service) {
-	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(moo_service);
+	MooServicePrivate *priv = moo_service_get_instance_private(moo_service);
 	return priv->vip_service;
 }
 
 MooCowPropertiesContainer *moo_service_get_cow_properties_container(MooService *moo_service) {
-	return MOO_SERVICE_GET_PRIVATE(moo_service)->cow_properties_container;
+	MooServicePrivate *priv = moo_service_get_instance_private(moo_service);
+	return priv->cow_properties_container;
 }
 
 CowPanelModel *moo_service_get_properties_panel_model(MooService *moo_service) {
-	return MOO_SERVICE_GET_PRIVATE(moo_service)->properties_panel_model;
+	MooServicePrivate *priv = moo_service_get_instance_private(moo_service);
+	return priv->properties_panel_model;
 }
-
-
 
 /********************* begin VipIListener implementation *********************/
 
 static void l_viper_snapshot_set(VipIListener *self, struct _VipSnapshot *newSnapshot) {
-	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(self);
+	MooService *instance = MOO_SERVICE(self);
+	MooServicePrivate *priv = moo_service_get_instance_private(instance);
 	MooSetSnapshotRequest *snapshotSetRequest = moo_set_snapshot_request_new(MOO_SERVICE(self), priv->snapshot_ref, newSnapshot);
 	wor_service_post_request(priv->wor_service, (WorRequest *) snapshotSetRequest);
 	cat_unref_ptr(snapshotSetRequest);
 }
-
 
 static void l_vip_listener_iface_init(VipIListenerInterface *iface) {
 	iface->snapshotSet = l_viper_snapshot_set;
@@ -272,16 +223,13 @@ static void l_vip_listener_iface_init(VipIListenerInterface *iface) {
 
 /********************* end VipIListener implementation *********************/
 
-
-
 /********************* begin VipISequence implementation *********************/
 
-
 static long long l_sequence_next(VipISequence *self) {
-	MooServicePrivate *priv = MOO_SERVICE_GET_PRIVATE(self);
+	MooService *instance = MOO_SERVICE(self);
+	MooServicePrivate *priv = moo_service_get_instance_private(instance);
 	return cat_atomic_long_increment(priv->unique_id_counter);
 }
-
 
 static void l_sequence_iface_init(VipISequenceInterface *iface) {
 	iface->next = l_sequence_next;

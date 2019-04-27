@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGVIPJARFILE_H_
 #define JAGVIPJARFILE_H_
 
@@ -35,8 +34,6 @@ G_BEGIN_DECLS
 #define JAG_IS_VIP_JAR_FILE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_VIP_JAR_FILE))
 #define JAG_IS_VIP_JAR_FILE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_VIP_JAR_FILE))
 #define JAG_VIP_JAR_FILE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_VIP_JAR_FILE, JagVipJarFileClass))
-#define JAG_VIP_JAR_FILE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_VIP_JAR_FILE, JagVipJarFilePrivate))
-
 
 typedef struct _JagVipJarFile               JagVipJarFile;
 typedef struct _JagVipJarFilePrivate        JagVipJarFilePrivate;
@@ -45,13 +42,11 @@ typedef struct _JagVipJarFileClass          JagVipJarFileClass;
 
 struct _JagVipJarFile {
 	GObject parent;
-	JagVipJarFilePrivate *priv;
 };
 
 struct _JagVipJarFileClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_vip_jar_file_get_type();
 

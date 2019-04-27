@@ -34,11 +34,8 @@ G_BEGIN_DECLS
 #define MOO_IS_DIRECT_CONTENT_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_DIRECT_CONTENT_WO))
 #define MOO_DIRECT_CONTENT_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_DIRECT_CONTENT_WO, MooDirectContentWoClass))
 
-
 typedef struct _MooDirectContentWo               MooDirectContentWo;
-typedef struct _MooDirectContentWoPrivate        MooDirectContentWoPrivate;
 typedef struct _MooDirectContentWoClass          MooDirectContentWoClass;
-
 
 struct _MooDirectContentWo {
 	CatWo parent;
@@ -56,7 +53,6 @@ MooDirectContentWo *moo_direct_content_wo_new();
 CAT_WO_BASE_H(MooDirectContentWo,moo_direct_content_wo);
 
 CatStringWo *moo_direct_content_wo_key();
-
 
 G_END_DECLS
 

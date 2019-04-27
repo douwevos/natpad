@@ -28,7 +28,6 @@
 #include "../model/shoblockvalue.h"
 #include "../model/sholistvalue.h"
 
-
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "ShoSerializer"
@@ -39,47 +38,40 @@ struct _ShoSerializerPrivate {
 	int indent;
 };
 
-G_DEFINE_TYPE (ShoSerializer, sho_serializer, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(ShoSerializer, sho_serializer, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void sho_serializer_class_init(ShoSerializerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ShoSerializerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void sho_serializer_init(ShoSerializer *instance) {
-	ShoSerializerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, SHO_TYPE_SERIALIZER, ShoSerializerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ShoSerializer *instance = SHO_SERIALIZER(object);
-	ShoSerializerPrivate *priv = instance->priv;
+	ShoSerializerPrivate *priv = sho_serializer_get_instance_private(instance);
 	cat_unref_ptr(priv->model);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(sho_serializer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(sho_serializer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ShoSerializer *sho_serializer_new(ShoModel *model) {
 	ShoSerializer *result = g_object_new(SHO_TYPE_SERIALIZER, NULL);
 	cat_ref_anounce(result);
-	ShoSerializerPrivate *priv = result->priv;
+	ShoSerializerPrivate *priv = sho_serializer_get_instance_private(result);
 	priv->model = cat_ref_ptr(model);
 	priv->indent = 0;
 	return result;
@@ -199,7 +191,6 @@ static void l_serialize_list_value_to_char_array(ShoSerializerPrivate *priv, Cat
 	cat_unref_ptr(iter);
 }
 
-
 static void l_serialize_reference_to_char_array(ShoSerializerPrivate *priv, CatStringWo *e_out, ShoReference *reference, gboolean close_with_semicolon) {
 	CatStringWo *ref_id = sho_reference_get_id(reference);
 	cat_string_wo_append(e_out, ref_id);
@@ -208,12 +199,8 @@ static void l_serialize_reference_to_char_array(ShoSerializerPrivate *priv, CatS
 	l_serialize_value_to_char_array(priv, e_out, value, TRUE);
 }
 
-
-
-
-
 CatStringWo *sho_serialize_to_char_array(ShoSerializer *serializer) {
-	ShoSerializerPrivate *priv = SHO_SERIALIZER_GET_PRIVATE(serializer);
+	ShoSerializerPrivate *priv = sho_serializer_get_instance_private(serializer);
 	CatStringWo *result = cat_string_wo_new();
 
 //	sho_model_create_reference_iterator(priv->model);
@@ -228,5 +215,3 @@ CatStringWo *sho_serialize_to_char_array(ShoSerializer *serializer) {
 
 	return result;
 }
-
-

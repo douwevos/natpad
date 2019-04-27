@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTDECLARATIONSTATEMENT_H_
 #define JAGASTDECLARATIONSTATEMENT_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_DECLARATION_STATEMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_DECLARATION_STATEMENT))
 #define JAG_AST_IS_DECLARATION_STATEMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_DECLARATION_STATEMENT))
 #define JAG_AST_DECLARATION_STATEMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_DECLARATION_STATEMENT, JagAstDeclarationStatementClass))
-#define JAG_AST_DECLARATION_STATEMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_DECLARATION_STATEMENT, JagAstDeclarationStatementPrivate))
 
 typedef struct _JagAstDeclarationStatement               JagAstDeclarationStatement;
 typedef struct _JagAstDeclarationStatementPrivate        JagAstDeclarationStatementPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstDeclarationStatementClass          JagAstDeclarationStatem
 
 struct _JagAstDeclarationStatement {
 	GObject parent;
-	JagAstDeclarationStatementPrivate *priv;
 };
 
 struct _JagAstDeclarationStatementClass {

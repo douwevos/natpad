@@ -34,8 +34,6 @@ static CatS l_s_one_instance = CAT_S_DEF("one-instance");
 static CatS l_s_full_screen = CAT_S_DEF("full-screen");
 static CatS l_s_multiple_resource_editors = CAT_S_DEF("multiple-editors-per-resource");
 
-
-
 struct _ElkDefaultMapperPrivate {
 	void *dummy;
 };

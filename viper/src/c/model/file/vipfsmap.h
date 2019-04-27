@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef VIPFSMAP_H_
 #define VIPFSMAP_H_
 
@@ -36,17 +35,13 @@ G_BEGIN_DECLS
 #define VIP_IS_FS_MAP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_FS_MAP))
 #define VIP_IS_FS_MAP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_FS_MAP))
 #define VIP_FS_MAP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_FS_MAP, VipFSMapClass))
-#define VIP_FS_MAP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_FS_MAP, VipFSMapPrivate))
-
 
 typedef struct _VipFSMap               VipFSMap;
 typedef struct _VipFSMapPrivate        VipFSMapPrivate;
 typedef struct _VipFSMapClass          VipFSMapClass;
 
-
 struct _VipFSMap {
 	GObject parent;
-	VipFSMapPrivate *priv;
 };
 
 struct _VipFSMapClass {
@@ -64,7 +59,6 @@ VipFSMap *vip_fs_map_new_from_fs(VipFS *fs);
 VipPath *vip_fs_map_get_path(VipFSMap *fs_map);
 
 void vip_fs_map_clear_cache(VipFSMap *fs_map);
-
 
 G_END_DECLS
 

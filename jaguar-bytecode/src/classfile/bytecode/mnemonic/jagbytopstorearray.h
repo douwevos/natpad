@@ -36,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_STORE_ARRAY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_STORE_ARRAY))
 #define JAG_BYT_IS_OP_STORE_ARRAY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_STORE_ARRAY))
 #define JAG_BYT_OP_STORE_ARRAY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_STORE_ARRAY, JagBytOpStoreArrayClass))
-#define JAG_BYT_OP_STORE_ARRAY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_STORE_ARRAY, JagBytOpStoreArrayPrivate))
 
 typedef struct _JagBytOpStoreArray               JagBytOpStoreArray;
 typedef struct _JagBytOpStoreArrayPrivate        JagBytOpStoreArrayPrivate;
@@ -45,7 +44,6 @@ typedef struct _JagBytOpStoreArrayClass          JagBytOpStoreArrayClass;
 
 struct _JagBytOpStoreArray {
 	JagBytAbstractMnemonic parent;
-	JagBytOpStoreArrayPrivate *priv;
 };
 
 struct _JagBytOpStoreArrayClass {

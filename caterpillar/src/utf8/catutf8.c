@@ -21,11 +21,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "catutf8.h"
 #include "../catunichararray.h"
 #include "../catlib.h"
-
 
 void cat_utf8_flip_case(CatStringWo *e_text) {
 	const char *source = cat_string_wo_getchars(e_text);

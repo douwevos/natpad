@@ -33,8 +33,6 @@ G_BEGIN_DECLS
 #define JAG_IS_PACKAGE_CONTENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_PACKAGE_CONTENT))
 #define JAG_IS_PACKAGE_CONTENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_PACKAGE_CONTENT))
 #define JAG_PACKAGE_CONTENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_PACKAGE_CONTENT, JagPackageContentClass))
-#define JAG_PACKAGE_CONTENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_PACKAGE_CONTENT, JagPackageContentPrivate))
-
 
 typedef struct _JagPackageContent               JagPackageContent;
 typedef struct _JagPackageContentPrivate        JagPackageContentPrivate;
@@ -43,13 +41,11 @@ typedef struct _JagPackageContentClass          JagPackageContentClass;
 
 struct _JagPackageContent {
 	GObject parent;
-	JagPackageContentPrivate *priv;
 };
 
 struct _JagPackageContentClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_package_content_get_type();
 

@@ -39,64 +39,57 @@ enum {
 static void l_scrollable_iface_init(GtkScrollableInterface *iface) {
 }
 
-G_DEFINE_TYPE_WITH_CODE(ElkCompletionPanel, elk_completion_panel, GTK_TYPE_DRAWING_AREA, {
+G_DEFINE_TYPE_WITH_CODE(ElkCompletionPanel, elk_completion_panel, GTK_TYPE_DRAWING_AREA, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(GTK_TYPE_SCROLLABLE, l_scrollable_iface_init);
 });
 
-static gpointer parent_class = NULL;
+static void l_dispose(GObject *object);
+static void l_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec);
+static void l_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec);
 
-static void _dispose(GObject *object);
-static void _set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec);
-static void _get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec);
-
-static gboolean _widget_draw(GtkWidget *widget, cairo_t *cairo);
-static gboolean _widget_focus_out_event(GtkWidget *widget, GdkEventFocus *event);
-static void _widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation);
-static gboolean _widget_scroll_event(GtkWidget *widget, GdkEventScroll *event);
-static void _widget_realize(GtkWidget *widget);
+static gboolean l_widget_draw(GtkWidget *widget, cairo_t *cairo);
+static gboolean l_widget_focus_out_event(GtkWidget *widget, GdkEventFocus *event);
+static void l_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation);
+static gboolean l_widget_scroll_event(GtkWidget *widget, GdkEventScroll *event);
+static void l_widget_realize(GtkWidget *widget);
 
 
-static gboolean _handle_key_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer panel_as_obj);
-static gboolean _button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj);
-static gboolean _button_release_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj);
+static gboolean l_handle_key_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer panel_as_obj);
+static gboolean l_button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj);
+static gboolean l_button_release_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj);
 
-static gboolean l_button_release_event(GtkWidget *widget, GdkEventButton *event);
+static gboolean l_widget_button_release_event(GtkWidget *widget, GdkEventButton *event);
 
 
-static void _set_hadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment);
-static void _set_hadjustment_values(ElkCompletionPanel *panel);
+static void l_set_hadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment);
+static void l_set_hadjustment_values(ElkCompletionPanel *panel);
 
-static void _set_vadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment);
-static void _set_vadjustment_values(ElkCompletionPanel *panel);
+static void l_set_vadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment);
+static void l_set_vadjustment_values(ElkCompletionPanel *panel);
 
-static void _adjustment_value_changed(GtkAdjustment *adjustment, ElkCompletionPanel *panel);
+static void l_adjustment_value_changed(GtkAdjustment *adjustment, ElkCompletionPanel *panel);
 
 
 static void elk_completion_panel_class_init(ElkCompletionPanelClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->set_property = _set_property;
-	object_class->get_property = _get_property;
-//	GtkDrawingArea *sub_clazz = GTK_DRAWING_AREA_CLAZZ(clazz);
+	object_class->dispose = l_dispose;
+	object_class->set_property = l_set_property;
+	object_class->get_property = l_get_property;
 
 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(clazz);
-	widget_class->draw = _widget_draw;
+	widget_class->draw = l_widget_draw;
 //	widget_class->focus = _widget_focus;
-	widget_class->focus_out_event = _widget_focus_out_event;
-	widget_class->size_allocate = _widget_size_allocate;
-	widget_class->scroll_event = _widget_scroll_event;
-	widget_class->realize = _widget_realize;
+	widget_class->focus_out_event = l_widget_focus_out_event;
+	widget_class->size_allocate = l_widget_size_allocate;
+	widget_class->scroll_event = l_widget_scroll_event;
+	widget_class->realize = l_widget_realize;
 
-
-	widget_class->button_release_event = l_button_release_event;
+	widget_class->button_release_event = l_widget_button_release_event;
 
 	g_object_class_override_property(object_class, PROP_HADJUSTMENT,    "hadjustment");
 	g_object_class_override_property(object_class, PROP_VADJUSTMENT,    "vadjustment");
 	g_object_class_override_property(object_class, PROP_HSCROLL_POLICY, "hscroll-policy");
 	g_object_class_override_property(object_class, PROP_VSCROLL_POLICY, "vscroll-policy");
-
 }
 
 static void elk_completion_panel_init(ElkCompletionPanel *panel) {
@@ -108,14 +101,13 @@ static void elk_completion_panel_init(ElkCompletionPanel *panel) {
 	panel->yoffset = 0;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkCompletionPanel *instance = ELK_COMPLETION_PANEL(object);
 	cat_unref_ptr(instance->a_entries);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_completion_panel_parent_class)->dispose(object);
 	cat_log_detail("end-dispose:%p", object);
 }
-
 
 
 static int l_get_entry_height(GtkWidget *widget) {
@@ -127,7 +119,7 @@ static int l_get_entry_height(GtkWidget *widget) {
 }
 
 
-static void _calulate_dimensions(ElkCompletionPanel *completion_panel, int *twidth, int *theight) {
+static void l_calulate_dimensions(ElkCompletionPanel *completion_panel, int *twidth, int *theight) {
 	GtkWidget *widget = GTK_WIDGET(completion_panel);
 	PangoContext *pango_context = gtk_widget_get_pango_context(widget);
 	PangoLayout *pango_layout = pango_layout_new(pango_context);
@@ -161,7 +153,7 @@ ElkCompletionPanel *elk_completion_panel_new(LeaPanel *editor_panel, CatArrayWo 
 
 	int twidth, theight;
 
-	_calulate_dimensions(result, &twidth, &theight);
+	l_calulate_dimensions(result, &twidth, &theight);
 
 	result->view_width = twidth;
 	result->view_height = theight;
@@ -175,9 +167,9 @@ ElkCompletionPanel *elk_completion_panel_new(LeaPanel *editor_panel, CatArrayWo 
 	gtk_widget_set_can_default(GTK_WIDGET(result), TRUE);
 
 
-	g_signal_connect(result, "key-press-event", G_CALLBACK(_handle_key_event), result);
-	g_signal_connect(result, "button-press-event", G_CALLBACK(_button_press_event), result);
-	g_signal_connect(result, "button-release-event", G_CALLBACK(_button_release_event), result);
+	g_signal_connect(result, "key-press-event", G_CALLBACK(l_handle_key_event), result);
+	g_signal_connect(result, "button-press-event", G_CALLBACK(l_button_press_event), result);
+	g_signal_connect(result, "button-release-event", G_CALLBACK(l_button_release_event), result);
 
 
 	gtk_widget_add_events((GtkWidget *) result, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
@@ -188,7 +180,7 @@ ElkCompletionPanel *elk_completion_panel_new(LeaPanel *editor_panel, CatArrayWo 
 
 
 
-static gboolean _widget_draw(GtkWidget *widget, cairo_t *cairo) {
+static gboolean l_widget_draw(GtkWidget *widget, cairo_t *cairo) {
 	ElkCompletionPanel *panel = ELK_COMPLETION_PANEL(widget);
 
 	GtkAllocation alloc;
@@ -248,30 +240,27 @@ static gboolean _widget_draw(GtkWidget *widget, cairo_t *cairo) {
 }
 
 
-static gboolean _widget_focus_out_event(GtkWidget *widget, GdkEventFocus *event) {
+static gboolean l_widget_focus_out_event(GtkWidget *widget, GdkEventFocus *event) {
 //	GtkWidget *top = gtk_widget_get_toplevel(widget);
 //	gtk_widget_destroy(top);
 	return TRUE;
 }
 
-static void _widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation) {
+static void l_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation) {
 //	gtk_widget_set_allocation(widget, allocation);
 //
 //	if (gtk_widget_get_realized(widget)) {
 //		gdk_window_move_resize(gtk_widget_get_window(widget), allocation->x+1, allocation->y+1, allocation->width, allocation->height);
 //	}
 //	GtkWidgetClass *wclass = GTK_WIDGET_CLASS(parent_class);
-	GTK_WIDGET_CLASS(parent_class)->size_allocate(widget, allocation);
+	GTK_WIDGET_CLASS(elk_completion_panel_parent_class)->size_allocate(widget, allocation);
 
 	ElkCompletionPanel *completion_panel = ELK_COMPLETION_PANEL(widget);
-	_set_hadjustment_values(completion_panel);
-	_set_vadjustment_values(completion_panel);
-
+	l_set_hadjustment_values(completion_panel);
+	l_set_vadjustment_values(completion_panel);
 }
 
-
-
-static gboolean _widget_scroll_event(GtkWidget *widget, GdkEventScroll *event) {
+static gboolean l_widget_scroll_event(GtkWidget *widget, GdkEventScroll *event) {
 
 	g_return_val_if_fail (ELK_IS_COMPLETION_PANEL(widget), FALSE);
 	g_return_val_if_fail (event != NULL, FALSE);
@@ -299,20 +288,16 @@ static gboolean _widget_scroll_event(GtkWidget *widget, GdkEventScroll *event) {
 		return TRUE;
 	}
 	return FALSE;
-
 }
 
-
-static void _widget_realize(GtkWidget *widget) {
-	GTK_WIDGET_CLASS(parent_class)->realize(widget);
+static void l_widget_realize(GtkWidget *widget) {
+	GTK_WIDGET_CLASS(elk_completion_panel_parent_class)->realize(widget);
 	GdkWindow *window = gtk_widget_get_window(widget);
 	/* We select on button_press_mask so that button 4-5 scrolls (mouse-wheel) are trapped */
 	gdk_window_set_events(window, gdk_window_get_events(window) | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
 }
 
-
-
-static gboolean _handle_key_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer panel_as_obj) {
+static gboolean l_handle_key_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer panel_as_obj) {
 	ElkCompletionPanel *completion_panel = ELK_COMPLETION_PANEL(panel_as_obj);
 	int key_val = eev->keyval;
 
@@ -388,7 +373,7 @@ static gboolean _handle_key_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer
 }
 
 
-static gboolean _button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj) {
+static gboolean l_button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj) {
 	ElkCompletionPanel *panel = ELK_COMPLETION_PANEL(_obj);
 
 	int ypos = (int) (eev->y+panel->yoffset);
@@ -401,7 +386,7 @@ static gboolean _button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gpo
 	return TRUE;
 }
 
-static gboolean _button_release_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj) {
+static gboolean l_button_release_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer _obj) {
 	ElkCompletionPanel *panel = ELK_COMPLETION_PANEL(_obj);
 
 	int ypos = (int) (eev->y+panel->yoffset);
@@ -429,19 +414,19 @@ static gboolean _button_release_event(GtkWidget *gwidget, GdkEventButton *eev, g
 }
 
 
-static gboolean l_button_release_event(GtkWidget *widget, GdkEventButton *event) {
-	return _button_release_event(widget, event, widget);
+static gboolean l_widget_button_release_event(GtkWidget *widget, GdkEventButton *event) {
+	return l_button_release_event(widget, event, widget);
 }
 
 
 
-static void _set_hadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment) {
+static void l_set_hadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment) {
 	if (adjustment && panel->hadjustment == adjustment) {
 		return;
 	}
 
 	if (panel->hadjustment != NULL) {
-		g_signal_handlers_disconnect_by_func(panel->hadjustment, _adjustment_value_changed, panel);
+		g_signal_handlers_disconnect_by_func(panel->hadjustment, l_adjustment_value_changed, panel);
 		g_object_unref(panel->hadjustment);
 	}
 
@@ -449,15 +434,15 @@ static void _set_hadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustmen
 		adjustment = gtk_adjustment_new (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	}
 
-	g_signal_connect(adjustment, "value-changed", G_CALLBACK(_adjustment_value_changed), panel);
+	g_signal_connect(adjustment, "value-changed", G_CALLBACK(l_adjustment_value_changed), panel);
 	panel->hadjustment = cat_ref_sink_ptr(adjustment);
-	_set_hadjustment_values(panel);
+	l_set_hadjustment_values(panel);
 
 	g_object_notify(G_OBJECT(panel), "hadjustment");
 }
 
 
-static void _set_hadjustment_values(ElkCompletionPanel *panel) {
+static void l_set_hadjustment_values(ElkCompletionPanel *panel) {
 	int width = gtk_widget_get_allocated_width(GTK_WIDGET(panel));
 	gdouble old_value = gtk_adjustment_get_value (panel->hadjustment);
 //	gdouble new_upper = (gdouble) width;
@@ -482,13 +467,13 @@ static void _set_hadjustment_values(ElkCompletionPanel *panel) {
 
 
 
-static void _set_vadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment) {
+static void l_set_vadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustment) {
 	if (adjustment && panel->vadjustment == adjustment) {
 		return;
 	}
 
 	if (panel->vadjustment != NULL) {
-		g_signal_handlers_disconnect_by_func(panel->vadjustment, _adjustment_value_changed, panel);
+		g_signal_handlers_disconnect_by_func(panel->vadjustment, l_adjustment_value_changed, panel);
 		g_object_unref(panel->vadjustment);
 	}
 
@@ -496,15 +481,15 @@ static void _set_vadjustment(ElkCompletionPanel *panel, GtkAdjustment *adjustmen
 		adjustment = gtk_adjustment_new (0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	}
 
-	g_signal_connect(adjustment, "value-changed", G_CALLBACK(_adjustment_value_changed), panel);
+	g_signal_connect(adjustment, "value-changed", G_CALLBACK(l_adjustment_value_changed), panel);
 	panel->vadjustment = cat_ref_sink_ptr(adjustment);
-	_set_vadjustment_values(panel);
+	l_set_vadjustment_values(panel);
 
 	g_object_notify(G_OBJECT(panel), "vadjustment");
 }
 
 
-static void _set_vadjustment_values(ElkCompletionPanel *panel) {
+static void l_set_vadjustment_values(ElkCompletionPanel *panel) {
 	int height = gtk_widget_get_allocated_height(GTK_WIDGET(panel));
 	gdouble old_value = gtk_adjustment_get_value (panel->vadjustment);
 	gdouble new_upper = (gdouble) (height > panel->view_height ? height : panel->view_height);
@@ -527,10 +512,7 @@ static void _set_vadjustment_values(ElkCompletionPanel *panel) {
 }
 
 
-
-
-
-static void _adjustment_value_changed(GtkAdjustment *adjustment, ElkCompletionPanel *panel) {
+static void l_adjustment_value_changed(GtkAdjustment *adjustment, ElkCompletionPanel *panel) {
 	cat_log_debug("adjustment=%p", adjustment);
 	if (adjustment == panel->hadjustment) {
 		int dx = panel->xoffset;
@@ -556,15 +538,15 @@ static void _adjustment_value_changed(GtkAdjustment *adjustment, ElkCompletionPa
 }
 
 
-static void _set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec) {
+static void l_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec) {
 	ElkCompletionPanel *panel = ELK_COMPLETION_PANEL(object);
 
 	switch (prop_id) {
 		case PROP_HADJUSTMENT : {
-			_set_hadjustment(panel, g_value_get_object(value));
+			l_set_hadjustment(panel, g_value_get_object(value));
 		} break;
 		case PROP_VADJUSTMENT : {
-			_set_vadjustment(panel, g_value_get_object(value));
+			l_set_vadjustment(panel, g_value_get_object(value));
 		} break;
 		case PROP_HSCROLL_POLICY : {
 			panel->hscroll_policy = g_value_get_enum (value);
@@ -581,7 +563,7 @@ static void _set_property(GObject *object, guint prop_id, const GValue *value, G
 }
 
 
-static void _get_property (GObject *object, guint prop_id, GValue *value, GParamSpec *pspec) {
+static void l_get_property (GObject *object, guint prop_id, GValue *value, GParamSpec *pspec) {
 	ElkCompletionPanel *panel = ELK_COMPLETION_PANEL(object);
 
 	switch (prop_id) {
@@ -602,7 +584,6 @@ static void _get_property (GObject *object, guint prop_id, GValue *value, GParam
 		} break;
 	}
 }
-
 
 void elk_completion_panel_set_selected_index(ElkCompletionPanel *panel, int index) {
 	if (panel->selected_entry_idx == index) {
@@ -630,4 +611,3 @@ void elk_completion_panel_set_selected_index(ElkCompletionPanel *panel, int inde
 	GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(panel));
 	gdk_window_invalidate_rect(window, NULL, FALSE);
 }
-

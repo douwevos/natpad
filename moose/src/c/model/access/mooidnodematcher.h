@@ -20,10 +20,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOIDNODEMATCHER_H_
 #define MOOIDNODEMATCHER_H_
-
 
 #include <caterpillar.h>
 
@@ -35,23 +33,18 @@ G_BEGIN_DECLS
 #define MOO_IS_ID_NODE_MATCHER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_ID_NODE_MATCHER))
 #define MOO_IS_ID_NODE_MATCHER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_ID_NODE_MATCHER))
 #define MOO_ID_NODE_MATCHER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_ID_NODE_MATCHER, MooIdNodeMatcherClass))
-#define MOO_ID_NODE_MATCHER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_ID_NODE_MATCHER, MooIdNodeMatcherPrivate))
-
 
 typedef struct _MooIdNodeMatcher               MooIdNodeMatcher;
 typedef struct _MooIdNodeMatcherPrivate        MooIdNodeMatcherPrivate;
 typedef struct _MooIdNodeMatcherClass          MooIdNodeMatcherClass;
 
-
 struct _MooIdNodeMatcher {
 	GObject parent;
-	MooIdNodeMatcherPrivate *priv;
 };
 
 struct _MooIdNodeMatcherClass {
 	GObjectClass parent_class;
 };
-
 
 GType moo_id_node_matcher_get_type();
 
@@ -59,9 +52,6 @@ MooIdNodeMatcher *moo_id_node_matcher_new(long long id);
 
 void moo_id_node_matcher_set_id(MooIdNodeMatcher *node_matcher, long long id);
 
-
 G_END_DECLS
-
-
 
 #endif /* MOOIDNODEMATCHER_H_ */

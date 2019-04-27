@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOMODULECONTENT_H_
 #define MOOMODULECONTENT_H_
 
@@ -31,23 +30,19 @@
 
 G_BEGIN_DECLS
 
-#define MOO_TYPE_MODULE_CONTENT_WO_WO              (moo_module_content_wo_get_type())
-#define MOO_MODULE_CONTENT_WO_WO(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), moo_module_content_wo_get_type(), MooModuleContentWo))
-#define MOO_MODULE_CONTENT_WO_WO_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), MOO_TYPE_MODULE_CONTENT_WO_WO, MooModuleContentWoClass))
-#define MOO_IS_MODULE_CONTENT_WO_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_MODULE_CONTENT_WO_WO))
-#define MOO_IS_MODULE_CONTENT_WO_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_MODULE_CONTENT_WO_WO))
-#define MOO_MODULE_CONTENT_WO_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_MODULE_CONTENT_WO_WO, MooModuleContentWoClass))
-#define MOO_MODULE_CONTENT_WO_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_MODULE_CONTENT_WO_WO, MooModuleContentWoPrivate))
-
+#define MOO_TYPE_MODULE_CONTENT_WO              (moo_module_content_wo_get_type())
+#define MOO_MODULE_CONTENT_WO(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), moo_module_content_wo_get_type(), MooModuleContentWo))
+#define MOO_MODULE_CONTENT_WO_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), MOO_TYPE_MODULE_CONTENT_WO, MooModuleContentWoClass))
+#define MOO_IS_MODULE_CONTENT_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_MODULE_CONTENT_WO))
+#define MOO_IS_MODULE_CONTENT_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_MODULE_CONTENT_WO))
+#define MOO_MODULE_CONTENT_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_MODULE_CONTENT_WO, MooModuleContentWoClass))
 
 typedef struct _MooModuleContentWo               MooModuleContentWo;
 typedef struct _MooModuleContentWoPrivate        MooModuleContentWoPrivate;
 typedef struct _MooModuleContentWoClass          MooModuleContentWoClass;
 
-
 struct _MooModuleContentWo {
 	GObject parent;
-	MooModuleContentWoPrivate *priv;
 };
 
 struct _MooModuleContentWoClass {

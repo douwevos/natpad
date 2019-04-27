@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef LEAKEY_H_
 #define LEAKEY_H_
 
@@ -41,8 +40,6 @@ extern CatS lea_s_key_modifier_super;
 #define LEA_IS_KEY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_KEY))
 #define LEA_IS_KEY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_KEY))
 #define LEA_KEY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_KEY, LeaKeyClass))
-#define LEA_KEY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_KEY, LeaKeyPrivate))
-
 
 typedef struct _LeaKey              LeaKey;
 typedef struct _LeaKeyClass	   	    LeaKeyClass;

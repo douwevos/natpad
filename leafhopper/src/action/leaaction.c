@@ -54,6 +54,7 @@ static void l_key_binding_iface_init(LeaIKeyBindingInterface *_iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(LeaAction, lea_action, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(LeaAction)
 			G_IMPLEMENT_INTERFACE(LEA_TYPE_IKEY_BINDING, l_key_binding_iface_init);
 			G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
@@ -69,8 +70,6 @@ static gboolean l_alculate_actual_visibility(LeaAction *self);
 
 
 static void lea_action_class_init(LeaActionClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaActionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	clazz->refresh = NULL;
@@ -86,7 +85,7 @@ static void lea_action_init(LeaAction *node) {
 
 static void l_dispose(GObject *object) {
 	LeaAction *action = LEA_ACTION(object);
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	if (!priv->disposed) {
 		priv->disposed = TRUE;
 		cat_unref_ptr(priv->default_key_sequence);
@@ -100,7 +99,7 @@ static void l_dispose(GObject *object) {
 }
 
 void lea_action_construct(LeaAction *action, CatStringWo *a_name, CatStringWo *a_label, CatStringWo *a_stock_id) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(LEA_ACTION(action));
+	LeaActionPrivate *priv = lea_action_get_instance_private(LEA_ACTION(action));
 
 	priv->disposed = FALSE;
 	priv->a_name = cat_string_wo_anchor(a_name, 0);
@@ -121,34 +120,38 @@ void lea_action_construct(LeaAction *action, CatStringWo *a_name, CatStringWo *a
 
 
 LeaKeyContext *lea_action_get_key_context(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->key_context;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->key_context;
 }
 
 void lea_action_set_key_context(LeaAction *action, LeaKeyContext *new_key_context) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	cat_ref_swap(priv->key_context, new_key_context);
 }
 
 void lea_action_set_order(LeaAction *action, int order) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	priv->order = order;
 }
 
 int lea_action_get_order(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->order;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->order;
 }
 
 
 CatStringWo *lea_action_get_name(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->a_name;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->a_name;
 }
 
 CatStringWo *lea_action_get_label(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->a_label;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->a_label;
 }
 
 void lea_action_attach(LeaAction *action, LeaIAttachable *attachable) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	cat_weak_list_append(priv->attach_list, (GObject *) attachable);
 	lea_iattachable_sensitivity_set(attachable, priv->is_sensitive);
 	lea_iattachable_toggability_set(attachable, priv->toggable);
@@ -156,23 +159,25 @@ void lea_action_attach(LeaAction *action, LeaIAttachable *attachable) {
 }
 
 void lea_action_detach(LeaAction *action, LeaIAttachable *attachable) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	cat_weak_list_remove(priv->attach_list, (GObject *) attachable);
 }
 
 
 CatStringWo *lea_action_get_stock_id(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->a_stock_id;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->a_stock_id;
 }
 
 static gboolean l_alculate_actual_sensitivity(LeaAction *self) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(self);
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	gboolean is_sensitive = priv->is_sensitive_group && priv->is_sensitive_self;
 	return is_sensitive;
 }
 
 gboolean lea_action_update_sensitivity(LeaAction *action) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	gboolean is_sensitive = LEA_ACTION_GET_CLASS(action)->calculateActualSensitivity(action);
 	if (priv->is_sensitive == is_sensitive) {
 		return FALSE;
@@ -183,7 +188,8 @@ gboolean lea_action_update_sensitivity(LeaAction *action) {
 }
 
 static void l_dispatch_sensitivity_changed(LeaAction *self, gboolean sensitivity) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(self);
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	CatIIterator *iterator = cat_weak_list_iterator(priv->attach_list);
 	while(cat_iiterator_has_next(iterator)) {
 		LeaIAttachable *attachable = (LeaIAttachable *) cat_iiterator_next(iterator);
@@ -193,12 +199,13 @@ static void l_dispatch_sensitivity_changed(LeaAction *self, gboolean sensitivity
 }
 
 gboolean lea_action_is_sensitive(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->is_sensitive;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->is_sensitive;
 }
 
 
 void lea_action_set_sensitive_self(LeaAction *action, gboolean flag) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	if (priv->is_sensitive_self==flag) {
 		return;
 	}
@@ -207,11 +214,12 @@ void lea_action_set_sensitive_self(LeaAction *action, gboolean flag) {
 }
 
 gboolean lea_action_is_sensitive_self(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->is_sensitive_self;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->is_sensitive_self;
 }
 
 void lea_action_set_sensitive_group(LeaAction *action, gboolean flag) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	if (priv->is_sensitive_group==flag) {
 		return;
 	}
@@ -220,19 +228,20 @@ void lea_action_set_sensitive_group(LeaAction *action, gboolean flag) {
 }
 
 gboolean lea_action_is_sensitive_group(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->is_sensitive_self;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->is_sensitive_self;
 }
 
 
-
 static gboolean l_alculate_actual_visibility(LeaAction *self) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(self);
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	gboolean is_visible = priv->is_visible_group && priv->is_visible_self;
 	return is_visible;
 }
 
 gboolean lea_action_update_visibility(LeaAction *action) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	gboolean is_visible = LEA_ACTION_GET_CLASS(action)->calculateActualVisibility(action);
 	if (priv->is_visible == is_visible) {
 		return FALSE;
@@ -243,7 +252,8 @@ gboolean lea_action_update_visibility(LeaAction *action) {
 }
 
 static void l_dispatch_visibility_changed(LeaAction *self, gboolean visibility) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(self);
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	CatIIterator *iterator = cat_weak_list_iterator(priv->attach_list);
 	while(cat_iiterator_has_next(iterator)) {
 		LeaIAttachable *attachable = (LeaIAttachable *) cat_iiterator_next(iterator);
@@ -253,12 +263,13 @@ static void l_dispatch_visibility_changed(LeaAction *self, gboolean visibility) 
 }
 
 gboolean lea_action_is_visible(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->is_visible;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->is_visible;
 }
 
 
 gboolean lea_action_set_visible_self(LeaAction *action, gboolean flag) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	if (priv->is_visible_self==flag) {
 		return FALSE;
 	}
@@ -267,11 +278,12 @@ gboolean lea_action_set_visible_self(LeaAction *action, gboolean flag) {
 }
 
 gboolean lea_action_is_visible_self(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->is_visible_self;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->is_visible_self;
 }
 
 void lea_action_set_visible_group(LeaAction *action, gboolean flag) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	if (priv->is_visible_group==flag) {
 		return;
 	}
@@ -280,11 +292,12 @@ void lea_action_set_visible_group(LeaAction *action, gboolean flag) {
 }
 
 gboolean lea_action_is_visible_group(LeaAction *action) {
-	return LEA_ACTION_GET_PRIVATE(action)->is_visible_self;
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->is_visible_self;
 }
 
 void lea_action_set_toggable(LeaAction *action, gboolean toggable) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	priv->toggable = toggable;
 	CatIIterator *iterator = cat_weak_list_iterator(priv->attach_list);
 	while(cat_iiterator_has_next(iterator)) {
@@ -295,7 +308,7 @@ void lea_action_set_toggable(LeaAction *action, gboolean toggable) {
 }
 
 void lea_action_set_toggled(LeaAction *action, gboolean toggled) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	if (priv->is_toggled == toggled) {
 		return;
 	}
@@ -309,13 +322,13 @@ void lea_action_set_toggled(LeaAction *action, gboolean toggled) {
 }
 
 gboolean lea_action_is_toggled(LeaAction *action) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	return priv->is_toggled;
 }
 
 
 void lea_action_set_default_key_sequence(LeaAction *action, LeaKeySequence *key_sequence) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(action);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	cat_ref_sink_swap(priv->default_key_sequence, key_sequence);
 	if (priv->key_sequence==NULL) {
 		priv->key_sequence = cat_ref_ptr(key_sequence);
@@ -331,8 +344,8 @@ int lea_action_compare(LeaAction *action_a, LeaAction *action_b) {
 	} else if (action_b==NULL) {
 		return 1;
 	}
-	LeaActionPrivate *priv_a = LEA_ACTION_GET_PRIVATE(action_a);
-	LeaActionPrivate *priv_b = LEA_ACTION_GET_PRIVATE(action_b);
+	LeaActionPrivate *priv_a = lea_action_get_instance_private(action_a);
+	LeaActionPrivate *priv_b = lea_action_get_instance_private(action_b);
 	int order_a = priv_a->order;
 	int order_b = priv_b->order;
 	if (order_a < order_b) {
@@ -347,16 +360,21 @@ int lea_action_compare(LeaAction *action_a, LeaAction *action_b) {
 /********************* begin LeaIKeyBinding implementation *********************/
 
 static void l_key_binding_set_key_sequence(LeaIKeyBinding *self, LeaKeySequence *key_sequence) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(self);
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	cat_ref_sink_swap(priv->key_sequence, key_sequence);
 }
 
 static LeaKeySequence *l_key_binding_get_key_sequence(LeaIKeyBinding *self) {
-	return LEA_ACTION_GET_PRIVATE(self)->key_sequence;
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->key_sequence;
 }
 
 static LeaKeySequence *l_key_binding_get_default_key_sequence(LeaIKeyBinding *self) {
-	return LEA_ACTION_GET_PRIVATE(self)->default_key_sequence;
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
+	return priv->default_key_sequence;
 }
 
 static void l_key_binding_activate(LeaIKeyBinding *self) {
@@ -366,7 +384,8 @@ static void l_key_binding_activate(LeaIKeyBinding *self) {
 }
 
 static LeaKeyContext *l_key_binding_get_key_context(LeaIKeyBinding *self) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(self);
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	return priv->key_context;
 }
 
@@ -384,7 +403,8 @@ static void l_key_binding_iface_init(LeaIKeyBindingInterface *iface) {
 /********************* end CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	LeaActionPrivate *priv = LEA_ACTION_GET_PRIVATE(self);
+	LeaAction *action = LEA_ACTION(self);
+	LeaActionPrivate *priv = lea_action_get_instance_private(action);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 
 	cat_string_wo_format(append_to, "%s[%p: name=%o, label=%o, sensitive(m/g/a)=%d/%d/%d, visible(m/g/a)=%d/%d/%d]", iname, self, priv->a_name, priv->a_label, priv->is_sensitive_self, priv->is_sensitive_group, priv->is_sensitive, priv->is_visible_self, priv->is_visible_group, priv->is_visible);

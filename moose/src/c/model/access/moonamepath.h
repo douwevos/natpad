@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOONAMEPATH_H_
 #define MOONAMEPATH_H_
 
@@ -36,8 +35,6 @@ G_BEGIN_DECLS
 #define MOO_IS_NAME_PATH(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_NAME_PATH))
 #define MOO_IS_NAME_PATH_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_NAME_PATH))
 #define MOO_NAME_PATH_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_NAME_PATH, MooNamePathClass))
-#define MOO_NAME_PATH_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_NAME_PATH, MooNamePathPrivate))
-
 
 typedef struct _MooNamePath               MooNamePath;
 typedef struct _MooNamePathPrivate        MooNamePathPrivate;
@@ -46,7 +43,6 @@ typedef struct _MooNamePathClass          MooNamePathClass;
 
 struct _MooNamePath {
 	GObject parent;
-	MooNamePathPrivate *priv;
 };
 
 struct _MooNamePathClass {

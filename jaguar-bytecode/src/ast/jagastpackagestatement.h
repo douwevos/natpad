@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTPACKAGESTATEMENT_H_
 #define JAGASTPACKAGESTATEMENT_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_PACKAGE_STATEMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_PACKAGE_STATEMENT))
 #define JAG_AST_IS_PACKAGE_STATEMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_PACKAGE_STATEMENT))
 #define JAG_AST_PACKAGE_STATEMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_PACKAGE_STATEMENT, JagAstPackageStatementClass))
-#define JAG_AST_PACKAGE_STATEMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_PACKAGE_STATEMENT, JagAstPackageStatementPrivate))
 
 typedef struct _JagAstPackageStatement               JagAstPackageStatement;
 typedef struct _JagAstPackageStatementPrivate        JagAstPackageStatementPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstPackageStatementClass          JagAstPackageStatementClass
 
 struct _JagAstPackageStatement {
 	GObject parent;
-	JagAstPackageStatementPrivate *priv;
 };
 
 struct _JagAstPackageStatementClass {
@@ -58,7 +55,5 @@ GType jag_ast_package_statement_get_type();
 JagAstPackageStatement *jag_ast_package_statement_new(JagAstIdentifier *package_name);
 
 G_END_DECLS
-
-
 
 #endif /* JAGASTPACKAGESTATEMENT_H_ */

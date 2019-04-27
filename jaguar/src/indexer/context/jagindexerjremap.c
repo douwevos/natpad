@@ -42,29 +42,24 @@ struct _JagIndexerJreMapPrivate {
 	CatHashMapWo *e_map;
 };
 
-
-G_DEFINE_TYPE(JagIndexerJreMap, jag_indexer_jre_map, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JagIndexerJreMap, jag_indexer_jre_map, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_indexer_jre_map_class_init(JagIndexerJreMapClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagIndexerJreMapPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_indexer_jre_map_init(JagIndexerJreMap *instance) {
-	JagIndexerJreMapPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_INDEXER_JRE_MAP, JagIndexerJreMapPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagIndexerJreMap *instance = JAG_INDEXER_JRE_MAP(object);
-	JagIndexerJreMapPrivate *priv = instance->priv;
+	JagIndexerJreMapPrivate *priv = jag_indexer_jre_map_get_instance_private(instance);
 	cat_unref_ptr(priv->jar_map);
 	cat_unref_ptr(priv->a_jre_list);
 	cat_unref_ptr(priv->jre_queue);
@@ -87,7 +82,7 @@ static void l_finalize(GObject *object) {
 JagIndexerJreMap *jag_indexer_jre_map_new(JagIndexerJarMap *jar_map, MooService *moo_service, VipService *vip_service, WorService *wor_service) {
 	JagIndexerJreMap *result = g_object_new(JAG_TYPE_INDEXER_JRE_MAP, NULL);
 	cat_ref_anounce(result);
-	JagIndexerJreMapPrivate *priv = result->priv;
+	JagIndexerJreMapPrivate *priv = jag_indexer_jre_map_get_instance_private(result);
 	priv->jar_map = cat_ref_ptr(jar_map);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->vip_service = cat_ref_ptr(vip_service);
@@ -99,9 +94,8 @@ JagIndexerJreMap *jag_indexer_jre_map_new(JagIndexerJarMap *jar_map, MooService 
 	return result;
 }
 
-
 JagJreLink *jag_indexer_jre_map_get_jre_link_ref(JagIndexerJreMap *jre_map, CatStringWo *a_jre_name) {
-	JagIndexerJreMapPrivate *priv = JAG_INDEXER_JRE_MAP_GET_PRIVATE(jre_map);
+	JagIndexerJreMapPrivate *priv = jag_indexer_jre_map_get_instance_private(jre_map);
 	JagJreLink *result = NULL;
 	cat_lock_lock(priv->map_lock);
 	result = (JagJreLink *) cat_hash_map_wo_get(priv->e_map, (GObject *) a_jre_name);
@@ -116,18 +110,15 @@ JagJreLink *jag_indexer_jre_map_get_jre_link_ref(JagIndexerJreMap *jre_map, CatS
 }
 
 
-
-
 void jag_indexer_jre_map_set_jre_list(JagIndexerJreMap *jre_map, CatArrayWo *a_jre_list) {
-	JagIndexerJreMapPrivate *priv = JAG_INDEXER_JRE_MAP_GET_PRIVATE(jre_map);
+	JagIndexerJreMapPrivate *priv = jag_indexer_jre_map_get_instance_private(jre_map);
 	JagUpdateJreListRequest *request = jag_update_jre_list_request_new(jre_map, a_jre_list);
 	wor_queue_post(priv->jre_queue, (WorRequest *) request);
 	cat_unref_ptr(request);
 }
 
-
 void jag_index_jre_map_apply_new_jre_list(JagIndexerJreMap *jre_map, CatArrayWo *a_jre_list) {
-	JagIndexerJreMapPrivate *priv = JAG_INDEXER_JRE_MAP_GET_PRIVATE(jre_map);
+	JagIndexerJreMapPrivate *priv = jag_indexer_jre_map_get_instance_private(jre_map);
 	if (cat_array_wo_equal(priv->a_jre_list, a_jre_list, NULL)) {
 		return;
 	}
@@ -203,4 +194,3 @@ void jag_index_jre_map_apply_new_jre_list(JagIndexerJreMap *jre_map, CatArrayWo 
 	}
 
 }
-

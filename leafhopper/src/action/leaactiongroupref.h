@@ -34,8 +34,6 @@ G_BEGIN_DECLS
 #define LEA_IS_ACTION_GROUP_REF(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_ACTION_GROUP_REF))
 #define LEA_IS_ACTION_GROUP_REF_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_ACTION_GROUP_REF))
 #define LEA_ACTION_GROUP_REF_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_ACTION_GROUP_REF, LeaActionGroupRefClass))
-#define LEA_ACTION_GROUP_REF_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_ACTION_GROUP_REF, LeaActionGroupRefPrivate))
-
 
 typedef struct _LeaActionGroupRef               LeaActionGroupRef;
 typedef struct _LeaActionGroupRefPrivate        LeaActionGroupRefPrivate;
@@ -44,7 +42,6 @@ typedef struct _LeaActionGroupRefClass          LeaActionGroupRefClass;
 
 struct _LeaActionGroupRef {
 	LeaActionGroup parent;
-	LeaActionGroupRefPrivate *priv;
 };
 
 struct _LeaActionGroupRefClass {

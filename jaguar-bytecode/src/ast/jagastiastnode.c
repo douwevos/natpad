@@ -25,7 +25,6 @@
 
 G_DEFINE_INTERFACE(JagAstIAstNode, jag_ast_iast_node, G_TYPE_OBJECT);
 
-
 static void jag_ast_iast_node_default_init(JagAstIAstNodeInterface*klass) {
 }
 

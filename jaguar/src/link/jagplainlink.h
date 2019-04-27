@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_IS_PLAIN_LINK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_PLAIN_LINK))
 #define JAG_PLAIN_LINK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_PLAIN_LINK, JagPlainLinkClass))
 
-
 typedef struct _JagPlainLink               JagPlainLink;
 typedef struct _JagPlainLinkPrivate        JagPlainLinkPrivate;
 typedef struct _JagPlainLinkClass          JagPlainLinkClass;
@@ -48,7 +47,6 @@ struct _JagPlainLink {
 struct _JagPlainLinkClass {
 	JagLinkClass parent_class;
 };
-
 
 GType jag_plain_link_get_type();
 

@@ -21,13 +21,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef WORWORKER_H_
 #define WORWORKER_H_
 
 #include "woriprovider.h"
 #include <caterpillar.h>
-
 
 G_BEGIN_DECLS
 
@@ -37,8 +35,6 @@ G_BEGIN_DECLS
 #define WOR_IS_WORKER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), WOR_TYPE_WORKER))
 #define WOR_IS_WORKER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), WOR_TYPE_WORKER))
 #define WOR_WORKER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), WOR_TYPE_WORKER, WorWorkerClass))
-#define WOR_WORKER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), WOR_TYPE_WORKER, WorWorkerPrivate))
-
 
 typedef struct _WorWorker               WorWorker;
 typedef struct _WorWorkerPrivate        WorWorkerPrivate;
@@ -47,7 +43,6 @@ typedef struct _WorWorkerClass          WorWorkerClass;
 
 struct _WorWorker {
 		GObject parent;
-		WorWorkerPrivate *priv;
 };
 
 struct _WorWorkerClass {

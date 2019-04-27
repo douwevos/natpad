@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOTRANSACTION_H_
 #define MOOTRANSACTION_H_
 
@@ -36,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_TRANSACTION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_TRANSACTION))
 #define MOO_IS_TRANSACTION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_TRANSACTION))
 #define MOO_TRANSACTION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_TRANSACTION, MooTransactionClass))
-#define MOO_TRANSACTION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_TRANSACTION, MooTransactionPrivate))
-
 
 typedef struct _MooTransaction               MooTransaction;
 typedef struct _MooTransactionPrivate        MooTransactionPrivate;
 typedef struct _MooTransactionClass          MooTransactionClass;
 
-
 struct _MooTransaction {
 	GObject parent;
-	MooTransactionPrivate *priv;
 };
 
 struct _MooTransactionClass {
 	GObjectClass parent_class;
 };
-
 
 GType moo_transaction_get_type();
 

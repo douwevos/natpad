@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "leaprovgroupmain.h"
 #include "leaprovided.h"
 
@@ -29,32 +28,22 @@
 #define CAT_LOG_CLAZZ "LeaProvGroupMain"
 #include <logging/catlog.h>
 
-struct _LeaProvGroupMainPrivate {
-	void *dummy;
-};
-
-G_DEFINE_TYPE(LeaProvGroupMain, lea_prov_group_main, LEA_TYPE_ACTION_GROUP)
+G_DEFINE_TYPE(LeaProvGroupMain, lea_prov_group_main, LEA_TYPE_ACTION_GROUP) // @suppress("Unused static function")
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void lea_prov_group_main_class_init(LeaProvGroupMainClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaProvGroupMainPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void lea_prov_group_main_init(LeaProvGroupMain *instance) {
-	LeaProvGroupMainPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, LEA_TYPE_PROV_GROUP_MAIN, LeaProvGroupMainPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	LeaProvGroupMain *instance = LEA_PROV_GROUP_MAIN(object);
-//	LeaProvGroupMainPrivate *priv = instance->priv;
 	G_OBJECT_CLASS(lea_prov_group_main_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -70,7 +59,6 @@ static void l_finalize(GObject *object) {
 LeaProvGroupMain *lea_prov_group_main_new() {
 	LeaProvGroupMain *result = g_object_new(LEA_TYPE_PROV_GROUP_MAIN, NULL);
 	cat_ref_anounce(result);
-//	LeaProvGroupMainPrivate *priv = result->priv;
 	lea_action_group_construct((LeaActionGroup *) result, cat_string_wo_new_with("lea.prov.group.main"), NULL);
 
 	LeaActionGroup *group_file = lea_action_group_new(cat_ref_ptr(lea_prov_file_group_name()), cat_string_wo_new_with("_File"));
@@ -109,12 +97,3 @@ LeaProvGroupMain *lea_prov_group_main_new() {
 
 	return result;
 }
-
-
-
-
-
-
-
-
-

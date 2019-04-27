@@ -57,42 +57,36 @@ struct _VipFSPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipFS, vip_fs, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipFS)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_fs_class_init(VipFSClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipFSPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_fs_init(VipFS *instance) {
-	VipFSPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_FS, VipFSPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipFS *instance = VIP_FS(object);
-	VipFSPrivate *priv = instance->priv;
+	VipFSPrivate *priv = vip_fs_get_instance_private(instance);
 	cat_unref_ptr(priv->path);
 	cat_unref_ptr(priv->dir_content_ref);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_fs_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_fs_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -100,7 +94,7 @@ static void l_finalize(GObject *object) {
 VipFS *vip_fs_new(VipPath *fs_path) {
 	VipFS *result = g_object_new(VIP_TYPE_FS, NULL);
 	cat_ref_anounce(result);
-	VipFSPrivate *priv = result->priv;
+	VipFSPrivate *priv = vip_fs_get_instance_private(result);
 	priv->path = cat_ref_sink_ptr(fs_path);
 
 	priv->type_of_file = VIP_FS_TYPE_NON_EXISTENT;
@@ -119,7 +113,7 @@ VipFS *vip_fs_new(VipPath *fs_path) {
 }
 
 gboolean vip_fs_refresh(VipFS *fs) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 
 	cat_log_detail("path=%O", priv->path);
 
@@ -240,7 +234,7 @@ gboolean vip_fs_refresh(VipFS *fs) {
 
 
 long long vip_fs_get_last_modified(VipFS *fs) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 #ifdef G_OS_WIN32
 	long long result = priv->new_mtime * 1000;
 #else
@@ -253,24 +247,24 @@ long long vip_fs_get_last_modified(VipFS *fs) {
 
 
 long long vip_fs_get_length(VipFS *fs) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 	return priv->length;
 }
 
 VipFSType vip_fs_get_type_of_file(VipFS *fs) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 	return priv->type_of_file;
 }
 
 
 VipPath *vip_fs_get_path(VipFS *fs) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 	return priv->path;
 }
 
 
 CatArrayWo *vip_fs_get_dir_content(VipFS *fs) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 	CatArrayWo *result = NULL;
 	if (priv->dir_content_ref) {
 		result = (CatArrayWo *) cat_atomic_reference_get(priv->dir_content_ref);
@@ -353,7 +347,7 @@ CatArrayWo *vip_fs_get_dir_content(VipFS *fs) {
 }
 
 VipFS *vip_fs_create_file(VipFS *fs, CatStringWo *new_file_name) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 
 	VipPath *child_path = vip_path_create_child(priv->path, new_file_name);
 
@@ -389,22 +383,12 @@ VipFS *vip_fs_create_file(VipFS *fs, CatStringWo *new_file_name) {
 	return child_fs;
 }
 
-
 void vip_fs_clear_dir_content_cache(VipFS *fs) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(fs);
+	VipFSPrivate *priv = vip_fs_get_instance_private(fs);
 	if (priv->dir_content_ref) {
 		cat_atomic_reference_set(priv->dir_content_ref, NULL);
 	}
 }
-
-
-
-
-
-
-
-
-
 
 CatFileInputStream *vip_fs_open_input_stream(CatStringWo *fs_name) {
 	CatFileInputStream *result = NULL;
@@ -435,8 +419,8 @@ gboolean vip_fs_equal(VipFS *fs_a, VipFS *fs_b) {
 	if (fs_a==NULL || fs_b==NULL) {
 		return FALSE;
 	}
-	VipFSPrivate *priv_a = VIP_FS_GET_PRIVATE(fs_a);
-	VipFSPrivate *priv_b = VIP_FS_GET_PRIVATE(fs_b);
+	VipFSPrivate *priv_a = vip_fs_get_instance_private(fs_a);
+	VipFSPrivate *priv_b = vip_fs_get_instance_private(fs_b);
 	return priv_a->is_readable==priv_b->is_readable
 			&& priv_a->length==priv_b->length
 			&& priv_a->mode==priv_b->mode
@@ -452,12 +436,11 @@ gboolean vip_fs_equal(VipFS *fs_a, VipFS *fs_b) {
 }
 
 
-
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	VipFSPrivate *priv = VIP_FS_GET_PRIVATE(self);
+	VipFS *instance = VIP_FS(self);
+	VipFSPrivate *priv = vip_fs_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p:path=%o, tof=%d, length=%ld, mode=%d]", iname, self, vip_path_get_leaf(priv->path), priv->type_of_file, priv->length, priv->mode);
 }

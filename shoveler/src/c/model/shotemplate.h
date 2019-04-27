@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef SHOTEMPLATE_H_
 #define SHOTEMPLATE_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define SHO_IS_TEMPLATE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SHO_TYPE_TEMPLATE))
 #define SHO_IS_TEMPLATE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), SHO_TYPE_TEMPLATE))
 #define SHO_TEMPLATE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), SHO_TYPE_TEMPLATE, ShoTemplateClass))
-#define SHO_TEMPLATE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), SHO_TYPE_TEMPLATE, ShoTemplatePrivate))
 
 typedef struct _ShoTemplate               ShoTemplate;
 typedef struct _ShoTemplatePrivate        ShoTemplatePrivate;
@@ -45,7 +43,6 @@ typedef struct _ShoTemplateClass          ShoTemplateClass;
 
 struct _ShoTemplate {
 	GObject parent;
-	ShoTemplatePrivate *priv;
 };
 
 struct _ShoTemplateClass {

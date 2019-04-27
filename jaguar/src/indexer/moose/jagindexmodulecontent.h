@@ -33,23 +33,18 @@ G_BEGIN_DECLS
 #define JAG_IS_INDEX_MODULE_CONTENT_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_INDEX_MODULE_CONTENT_WO))
 #define JAG_IS_INDEX_MODULE_CONTENT_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_INDEX_MODULE_CONTENT_WO))
 #define JAG_INDEX_MODULE_CONTENT_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_INDEX_MODULE_CONTENT_WO, JagIndexModuleContentClass))
-#define JAG_INDEX_MODULE_CONTENT_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_INDEX_MODULE_CONTENT_WO, JagIndexModuleContentPrivate))
-
 
 typedef struct _JagIndexModuleContent               JagIndexModuleContent;
 typedef struct _JagIndexModuleContentPrivate        JagIndexModuleContentPrivate;
 typedef struct _JagIndexModuleContentClass          JagIndexModuleContentClass;
 
-
 struct _JagIndexModuleContent {
 	GObject parent;
-	JagIndexModuleContentPrivate *priv;
 };
 
 struct _JagIndexModuleContentClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_index_module_content_get_type();
 

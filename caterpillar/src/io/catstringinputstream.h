@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define CAT_IS_STRING_INPUT_STREAM(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_STRING_INPUT_STREAM))
 #define CAT_IS_STRING_INPUT_STREAM_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_STRING_INPUT_STREAM))
 #define CAT_STRING_INPUT_STREAM_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_STRING_INPUT_STREAM, CatStringInputStreamClass))
-#define CAT_STRING_INPUT_STREAM_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_STRING_INPUT_STREAM, CatStringInputStreamPrivate))
 
 typedef struct _CatStringInputStream               CatStringInputStream;
 typedef struct _CatStringInputStreamPrivate        CatStringInputStreamPrivate;
@@ -44,7 +43,6 @@ typedef struct _CatStringInputStreamClass          CatStringInputStreamClass;
 
 struct _CatStringInputStream {
 	GObject parent;
-	CatStringInputStreamPrivate *priv;
 };
 
 struct _CatStringInputStreamClass {

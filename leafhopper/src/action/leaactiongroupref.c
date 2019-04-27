@@ -34,6 +34,7 @@ struct _LeaActionGroupRefPrivate {
 static void l_attachable_iface_init(LeaIAttachableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(LeaActionGroupRef, lea_action_group_ref, LEA_TYPE_ACTION_GROUP, {
+		G_ADD_PRIVATE(LeaActionGroupRef)
 		G_IMPLEMENT_INTERFACE(LEA_TYPE_IATTACHABLE, l_attachable_iface_init);
 //		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
@@ -45,8 +46,6 @@ static gboolean l_calculate_actual_sensitivity(LeaAction *self);
 static gboolean l_calculate_actual_visibility(LeaAction *self);
 
 static void lea_action_group_ref_class_init(LeaActionGroupRefClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaActionGroupRefPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -57,14 +56,12 @@ static void lea_action_group_ref_class_init(LeaActionGroupRefClass *clazz) {
 }
 
 static void lea_action_group_ref_init(LeaActionGroupRef *instance) {
-	LeaActionGroupRefPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, LEA_TYPE_ACTION_GROUP_REF, LeaActionGroupRefPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	LeaActionGroupRef *instance = LEA_ACTION_GROUP_REF(object);
-	LeaActionGroupRefPrivate *priv = instance->priv;
+	LeaActionGroupRefPrivate *priv = lea_action_group_ref_get_instance_private(instance);
 	cat_unref_ptr(priv->e_referenced_groups);
 	G_OBJECT_CLASS(lea_action_group_ref_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -83,7 +80,7 @@ void lea_action_group_ref_add(LeaActionGroupRef *group_ref, LeaActionGroup *to_r
 LeaActionGroupRef *lea_action_group_ref_new(LeaActionGroup *action_group) {
 	LeaActionGroupRef *result = g_object_new(LEA_TYPE_ACTION_GROUP_REF, NULL);
 	cat_ref_anounce(result);
-	LeaActionGroupRefPrivate *priv = result->priv;
+	LeaActionGroupRefPrivate *priv = lea_action_group_ref_get_instance_private(result);
 	priv->e_referenced_groups = cat_array_wo_new();
 
 	if (action_group) {
@@ -102,13 +99,13 @@ LeaActionGroupRef *lea_action_group_ref_new(LeaActionGroup *action_group) {
 
 
 void lea_action_group_ref_add(LeaActionGroupRef *group_ref, LeaActionGroup *to_ref) {
-	LeaActionGroupRefPrivate *priv = LEA_ACTION_GROUP_REF_GET_PRIVATE(group_ref);
+	LeaActionGroupRefPrivate *priv = lea_action_group_ref_get_instance_private(group_ref);
 	cat_array_wo_append(priv->e_referenced_groups, (GObject *) to_ref);
 	lea_action_attach((LeaAction *) group_ref, (LeaIAttachable *) group_ref);
 }
 
 void lea_action_group_ref_remove(LeaActionGroupRef *group_ref, LeaActionGroup *to_ref) {
-	LeaActionGroupRefPrivate *priv = LEA_ACTION_GROUP_REF_GET_PRIVATE(group_ref);
+	LeaActionGroupRefPrivate *priv = lea_action_group_ref_get_instance_private(group_ref);
 	int idx = cat_array_wo_find_index(priv->e_referenced_groups, (GObject *) to_ref, -1);
 	if (idx>=0) {
 		cat_array_wo_remove(priv->e_referenced_groups, idx, NULL);
@@ -117,7 +114,7 @@ void lea_action_group_ref_remove(LeaActionGroupRef *group_ref, LeaActionGroup *t
 }
 
 gboolean lea_action_group_ref_is_empty(LeaActionGroupRef *group_ref) {
-	LeaActionGroupRefPrivate *priv = LEA_ACTION_GROUP_REF_GET_PRIVATE(group_ref);
+	LeaActionGroupRefPrivate *priv = lea_action_group_ref_get_instance_private(group_ref);
 	return cat_array_wo_size(priv->e_referenced_groups)==0;
 }
 
@@ -196,10 +193,9 @@ void lea_action_group_ref_unmerge(LeaActionGroupRef *action_group, LeaActionGrou
 }
 
 
-
-
 static gboolean l_calculate_actual_sensitivity(LeaAction *self) {
-	LeaActionGroupRefPrivate *priv = LEA_ACTION_GROUP_REF_GET_PRIVATE(self);
+	LeaActionGroupRef *group_ref = LEA_ACTION_GROUP_REF(self);
+	LeaActionGroupRefPrivate *priv = lea_action_group_ref_get_instance_private(group_ref);
 	gboolean is_sensitive = LEA_ACTION_CLASS(lea_action_group_ref_parent_class)->calculateActualSensitivity(self);
 	if (is_sensitive) {
 		CatIIterator *iter = cat_array_wo_iterator(priv->e_referenced_groups);
@@ -216,7 +212,8 @@ static gboolean l_calculate_actual_sensitivity(LeaAction *self) {
 }
 
 static gboolean l_calculate_actual_visibility(LeaAction *self) {
-	LeaActionGroupRefPrivate *priv = LEA_ACTION_GROUP_REF_GET_PRIVATE(self);
+	LeaActionGroupRef *group_ref = LEA_ACTION_GROUP_REF(self);
+	LeaActionGroupRefPrivate *priv = lea_action_group_ref_get_instance_private(group_ref);
 	gboolean is_visible = LEA_ACTION_CLASS(lea_action_group_ref_parent_class)->calculateActualVisibility(self);
 	if (is_visible) {
 		CatIIterator *iter = cat_array_wo_iterator(priv->e_referenced_groups);
@@ -234,7 +231,6 @@ static gboolean l_calculate_actual_visibility(LeaAction *self) {
 
 
 /********************* begin LeaIAttachable implementation *********************/
-
 
 static void l_attachable_sensitivity_set(LeaIAttachable *self, gboolean sensitivity) {
 	lea_action_update_sensitivity(LEA_ACTION(self));

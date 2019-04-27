@@ -45,7 +45,8 @@ struct _CatTreePrivate {
 static void l_tree_entry_list_provider_interface_init(CatITreeEntryListProviderInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatTree, cat_tree, G_TYPE_OBJECT, {
-		G_IMPLEMENT_INTERFACE(CAT_TYPE_ITREE_ENTRY_LIST_PROVIDER, l_tree_entry_list_provider_interface_init);
+		G_ADD_PRIVATE(CatTree)
+		G_IMPLEMENT_INTERFACE(CAT_TYPE_ITREE_ENTRY_LIST_PROVIDER, l_tree_entry_list_provider_interface_init)
 });
 
 static void l_dispose(GObject *object);
@@ -53,22 +54,18 @@ static void l_finalize(GObject *object);
 static CatTreeEntryList *l_get_writable_entry_list(CatITreeEntryListProvider *self);
 
 static void cat_tree_class_init(CatTreeClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatTreePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_tree_init(CatTree *instance) {
-	CatTreePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_TREE, CatTreePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatTree *instance = CAT_TREE(object);
-	CatTreePrivate *priv = instance->priv;
+	CatTreePrivate *priv = cat_tree_get_instance_private(instance);
 	cat_unref_ptr(priv->entry_list);
 	cat_unref_ptr(priv->root_reference);
 	G_OBJECT_CLASS(cat_tree_parent_class)->dispose(object);
@@ -86,7 +83,7 @@ static void l_finalize(GObject *object) {
 CatTree *cat_tree_new() {
 	CatTree *result = g_object_new(CAT_TYPE_TREE, NULL);
 	cat_ref_anounce(result);
-	CatTreePrivate *priv = result->priv;
+	CatTreePrivate *priv = cat_tree_get_instance_private(result);
 	priv->entry_list = cat_tree_entry_list_new();
 	CatITreeEntryListProvider *provider = (CatITreeEntryListProvider *) cat_readable_entry_list_provider_new(priv->entry_list);
 	CatReadableTreeNode *tree_node = cat_readable_tree_node_new(provider, 0);
@@ -104,7 +101,7 @@ CatWritableTreeNode *cat_tree_get_writable_root_node(CatTree *tree) {
 
 
 CatReadableTreeNode *cat_tree_get_readable_root_node_ref(CatTree *tree) {
-	CatTreePrivate *priv = CAT_TREE_GET_PRIVATE(tree);
+	CatTreePrivate *priv = cat_tree_get_instance_private(tree);
 	return (CatReadableTreeNode *) cat_atomic_reference_get(priv->root_reference);
 }
 
@@ -137,14 +134,14 @@ static void l_print_from(CatTreePrivate *priv, CatTreeEntry *entry, int level) {
 }
 
 void cat_tree_print(CatTree *tree) {
-	CatTreePrivate *priv = CAT_TREE_GET_PRIVATE(tree);
+	CatTreePrivate *priv = cat_tree_get_instance_private(tree);
 	cat_log_print("OUT", "entry_list=%o", priv->entry_list);
 	CatTreeEntry *entry = cat_tree_entry_list_get_entry(priv->entry_list, 0);
 	l_print_from(priv, entry, 0);
 }
 
 CatReadableTreeNode *cat_tree_submit(CatTree *tree, gboolean pack) {
-	CatTreePrivate *priv = CAT_TREE_GET_PRIVATE(tree);
+	CatTreePrivate *priv = cat_tree_get_instance_private(tree);
 	CatReadableTreeNode *result = NULL;
 	if (!cat_tree_entry_list_is_marked_fixed(priv->entry_list)) {
 		if (pack) {
@@ -168,12 +165,12 @@ CatReadableTreeNode *cat_tree_submit(CatTree *tree, gboolean pack) {
 /********************* begin CatITreeEntryListProvider implementation *********************/
 
 static CatTreeEntryList *l_get_entry_list(CatITreeEntryListProvider *self) {
-	CatTreePrivate *priv = CAT_TREE_GET_PRIVATE(self);
+	CatTreePrivate *priv = cat_tree_get_instance_private(CAT_TREE(self));
 	return priv->entry_list;
 }
 
 static CatTreeEntryList *l_get_writable_entry_list(CatITreeEntryListProvider *self) {
-	CatTreePrivate *priv = CAT_TREE_GET_PRIVATE(self);
+	CatTreePrivate *priv = cat_tree_get_instance_private(CAT_TREE(self));
 	if (cat_tree_entry_list_is_marked_fixed(priv->entry_list)) {
 		CatTreeEntryList *writable = cat_tree_entry_list_ensure_writable(priv->entry_list);
 		cat_unref_ptr(priv->entry_list);

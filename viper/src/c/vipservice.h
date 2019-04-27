@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef VIPSERVICE_H_
 #define VIPSERVICE_H_
 
@@ -47,7 +46,6 @@ G_BEGIN_DECLS
 #define VIP_IS_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), VIP_TYPE_SERVICE))
 #define VIP_IS_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), VIP_TYPE_SERVICE))
 #define VIP_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), VIP_TYPE_SERVICE, VipServiceClass))
-#define VIP_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), VIP_TYPE_SERVICE, VipServicePrivate))
 
 typedef struct _VipService               VipService;
 typedef struct _VipServicePrivate        VipServicePrivate;
@@ -56,7 +54,6 @@ typedef struct _VipServiceClass          VipServiceClass;
 
 struct _VipService {
 	GObject parent;
-	VipServicePrivate *priv;
 };
 
 struct _VipServiceClass {
@@ -67,22 +64,6 @@ struct _VipServiceClass {
 GType vip_service_get_type();
 
 VipService *vip_service_new(WorService *wor_service, VipCdProvider *cd_provider);
-
-//VipResourceMap *vip_service_get_resource_map(VipService *vip_service);
-
-//gboolean vip_service_delete_resource(VipService *vip_service, VipResource *resource);
-
-//gboolean vip_service_move_resource(VipService *vip_service, VipResource *source, VipResource *destination);
-
-//gboolean vip_service_copy_resource(VipService *vip_service, VipResource *source, VipResource *destination);
-
-//gboolean vip_service_rename_resource(VipService *vip_service, VipResource *source, CatStringWo *a_new_name);
-
-//gboolean vip_service_new_folder(VipService *vip_service, VipResource *source, CatStringWo *a_new_folder_name);
-
-//gboolean vip_service_create_directory(VipService *vip_service, VipLockList *lock_list, VipResource *new_directory);
-
-
 
  /** new **/
 
@@ -117,7 +98,6 @@ VipMapperRegistry *vip_service_get_mapper_registry(VipService *service);
 
 
 void vip_service_add_listener(VipService *service, VipIListener *listener);
-
 
 void vip_service_dump_tree(VipService *service);
 

@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "shoparser.h"
 #include "shoscanner.h"
 #include "generated/sholrparser.h"
@@ -35,16 +33,12 @@
 #include <logging/catlog.h>
 
 
-G_DEFINE_TYPE (ShoParser, sho_parser, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE (ShoParser, sho_parser, G_TYPE_OBJECT) // @suppress("Unused static function")
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void sho_parser_class_init(ShoParserClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -55,14 +49,14 @@ static void sho_parser_init(ShoParser *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(sho_parser_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(sho_parser_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -89,7 +83,3 @@ ShoModel *sho_parser_parse(ShoParser *parser, CatIInputStream *stream_in) {
 	cat_unref_ptr(scanner);
 	return result;
 }
-
-
-
-

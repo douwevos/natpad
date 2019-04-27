@@ -28,31 +28,25 @@
 #define CAT_LOG_CLAZZ "ElkCompletionPopup"
 #include <logging/catlog.h>
 
-G_DEFINE_TYPE(ElkCompletionPopup, elk_completion_popup, G_TYPE_OBJECT)
+G_DEFINE_TYPE(ElkCompletionPopup, elk_completion_popup, G_TYPE_OBJECT) // @suppress("Unused static function")
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
 //static gboolean _widget_draw(GtkWidget *widget, cairo_t *cairo);
 
 static void elk_completion_popup_class_init(ElkCompletionPopupClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-
-
+	object_class->dispose = l_dispose;
 }
 
 static void elk_completion_popup_init(ElkCompletionPopup *obj) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkCompletionPopup *instance = ELK_COMPLETION_POPUP(object);
 	cat_unref_ptr(instance->completion_panel);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_completion_popup_parent_class)->dispose(object);
 	cat_log_detail("end-dispose:%p", object);
 }
 
@@ -88,8 +82,6 @@ static void l_size_allocate(GtkWidget *widget, GdkRectangle *allocation, gpointe
 	if (gtk_widget_get_realized(widget)) {
 		gdk_window_move_resize(gtk_widget_get_window(widget), allocation->x+1, allocation->y+1, allocation->width, allocation->height);
 	}
-//	GTK_WIDGET_CLASS(parent_class)->size_allocate(widget, allocation);
-
 
 	if (completion_popup->scrolled_window) {
 		GtkAllocation swalloc;
@@ -174,8 +166,6 @@ ElkCompletionPopup *elk_completion_popup_new(GtkWidget *widget, ElkCompletionPan
 
 	return result;
 }
-
-
 
 
 //static gboolean _widget_draw(GtkWidget *widget, cairo_t *cairo) {

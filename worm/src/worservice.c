@@ -54,35 +54,29 @@ static void l_provider_iface_init(WorIProviderInterface *iface);
 static void l_post_box_iface_init(WorIRequestPostBoxInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(WorService, wor_service, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(WorService)
 		G_IMPLEMENT_INTERFACE(WOR_TYPE_IPROVIDER, l_provider_iface_init);
 		G_IMPLEMENT_INTERFACE(WOR_TYPE_IREQUEST_POST_BOX, l_post_box_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 static void *l_service_run(void *ptr_to_self);
 
 
 static void wor_service_class_init(WorServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(WorServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void wor_service_init(WorService *instance) {
-	WorServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_SERVICE, WorServicePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorService *instance = WOR_SERVICE(object);
-	WorServicePrivate *priv = instance->priv;
+	WorServicePrivate *priv = wor_service_get_instance_private(instance);
 	if (priv->dispatch_lock && priv->consumer_lock) {
 		wor_service_request_shutdown(instance);
 
@@ -117,14 +111,14 @@ static void _dispose(GObject *object) {
 	cat_unref_ptr(priv->e_dispatch_queue);
 	cat_unref_ptr(priv->e_waiting_queue);
 	cat_unref_ptr(priv->e_workers);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(wor_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(wor_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -132,7 +126,7 @@ static void _finalize(GObject *object) {
 WorService *wor_service_new_ext(int nr_of_workers, int load) {
 	WorService *result = g_object_new(WOR_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	WorServicePrivate *priv = result->priv;
+	WorServicePrivate *priv = wor_service_get_instance_private(result);
 	priv->consumer_lock = cat_lock_new();
 	priv->e_default_queue = cat_array_wo_new();
 	priv->e_waiting_queue = cat_array_wo_new();
@@ -158,10 +152,8 @@ WorService *wor_service_new() {
 }
 
 
-
-
 void wor_service_request_shutdown(WorService *service) {
-	WorServicePrivate *priv = service->priv;
+	WorServicePrivate *priv = wor_service_get_instance_private(service);
 	priv->stop_request = TRUE;
 	cat_lock_lock(priv->dispatch_lock);
 	cat_lock_notify_all(priv->dispatch_lock);
@@ -197,7 +189,7 @@ static gboolean l_merge(WorIMergeableRequest *request, CatArrayWo *e_queue) {
 }
 
 void wor_service_post_request(WorService *service, WorRequest *request) {
-	WorServicePrivate *priv = WOR_SERVICE_GET_PRIVATE(service);
+	WorServicePrivate *priv = wor_service_get_instance_private(service);
 	if (priv->stop_request) {
 		return;
 	}
@@ -251,7 +243,7 @@ void wor_service_post_request(WorService *service, WorRequest *request) {
 
 static void *l_service_run(void *ptr_to_self) {
 	WorService *service = WOR_SERVICE(ptr_to_self);
-	WorServicePrivate *priv = WOR_SERVICE_GET_PRIVATE(service);
+	WorServicePrivate *priv = wor_service_get_instance_private(service);
 //	WorRequest *request = NULL;
 	priv->state = WOR_STATE_WAIT;
 //	int64_t end_report = 0l;
@@ -380,7 +372,7 @@ static void *l_service_run(void *ptr_to_self) {
 static WorRequest *l_provider_next_request(WorIProvider *self, int64_t *runtime) {
 	WorRequest *result = NULL;
 	WorService *service = WOR_SERVICE(self);
-	WorServicePrivate *priv = WOR_SERVICE_GET_PRIVATE(service);
+	WorServicePrivate *priv = wor_service_get_instance_private(service);
 	if (priv->load<256) {
 		if (*runtime>250) {
 			int64_t sp = *runtime - ((priv->load * *runtime)/256);
@@ -419,7 +411,7 @@ static WorRequest *l_provider_next_request(WorIProvider *self, int64_t *runtime)
 
 static void l_provider_increase_usage(WorIProvider *self) {
 	WorService *service = WOR_SERVICE(self);
-	WorServicePrivate *priv = WOR_SERVICE_GET_PRIVATE(service);
+	WorServicePrivate *priv = wor_service_get_instance_private(service);
 	cat_lock_lock(priv->consumer_lock);
 	priv->usage++;
 	cat_lock_unlock(priv->consumer_lock);
@@ -427,7 +419,7 @@ static void l_provider_increase_usage(WorIProvider *self) {
 
 static void l_provider_decrease_usage(WorIProvider *self) {
 	WorService *service = WOR_SERVICE(self);
-	WorServicePrivate *priv = WOR_SERVICE_GET_PRIVATE(service);
+	WorServicePrivate *priv = wor_service_get_instance_private(service);
 	cat_lock_lock(priv->consumer_lock);
 	priv->usage--;
 	cat_lock_notify(priv->consumer_lock);
@@ -436,7 +428,7 @@ static void l_provider_decrease_usage(WorIProvider *self) {
 
 static gboolean l_provider_is_active(WorIProvider *self) {
 	WorService *service = WOR_SERVICE(self);
-	WorServicePrivate *priv = WOR_SERVICE_GET_PRIVATE(service);
+	WorServicePrivate *priv = wor_service_get_instance_private(service);
 	return !priv->stop_request;
 }
 

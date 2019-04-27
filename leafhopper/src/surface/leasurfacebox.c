@@ -56,7 +56,7 @@ GType lea_surface_box_entry_get_type();
 
 static void l_entry_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(LeaSurfaceBoxEntry, lea_surface_box_entry, G_TYPE_OBJECT,
+G_DEFINE_TYPE_WITH_CODE(LeaSurfaceBoxEntry, lea_surface_box_entry, G_TYPE_OBJECT, // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_entry_stringable_iface_init)
 );
 

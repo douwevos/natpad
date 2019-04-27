@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTIMPORTSTATEMENT_H_
 #define JAGASTIMPORTSTATEMENT_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_IMPORT_STATEMENT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_IMPORT_STATEMENT))
 #define JAG_AST_IS_IMPORT_STATEMENT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_IMPORT_STATEMENT))
 #define JAG_AST_IMPORT_STATEMENT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_IMPORT_STATEMENT, JagAstImportStatementClass))
-#define JAG_AST_IMPORT_STATEMENT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_IMPORT_STATEMENT, JagAstImportStatementPrivate))
 
 typedef struct _JagAstImportStatement               JagAstImportStatement;
 typedef struct _JagAstImportStatementPrivate        JagAstImportStatementPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstImportStatementClass          JagAstImportStatementClass;
 
 struct _JagAstImportStatement {
 	GObject parent;
-	JagAstImportStatementPrivate *priv;
 };
 
 struct _JagAstImportStatementClass {
@@ -62,8 +59,6 @@ JagBytName *jag_ast_import_statement_get_name(JagAstImportStatement *import_stat
 
 void jag_ast_import_statement_write(JagAstImportStatement *import_statement, JagAstWriter *out);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTIMPORTSTATEMENT_H_ */

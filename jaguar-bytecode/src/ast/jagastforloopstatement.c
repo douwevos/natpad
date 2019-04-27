@@ -39,51 +39,45 @@ struct _JagAstForLoopStatementPrivate {
 static void l_statement_iface_init(JagAstIStatementInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstForLoopStatement, jag_ast_for_loop_statement, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstForLoopStatement)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_ISTATEMENT, l_statement_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_for_loop_statement_class_init(JagAstForLoopStatementClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstForLoopStatementPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_for_loop_statement_init(JagAstForLoopStatement *instance) {
-	JagAstForLoopStatementPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_FOR_LOOP_STATEMENT, JagAstForLoopStatementPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstForLoopStatement *instance = JAG_AST_FOR_LOOP_STATEMENT(object);
-	JagAstForLoopStatementPrivate *priv = instance->priv;
+	JagAstForLoopStatementPrivate *priv = jag_ast_for_loop_statement_get_instance_private(instance);
 	cat_unref_ptr(priv->forInit);
 	cat_unref_ptr(priv->forCondition);
 	cat_unref_ptr(priv->forUpdate);
 	cat_unref_ptr(priv->body);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_for_loop_statement_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_for_loop_statement_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstForLoopStatement *jag_ast_for_loop_statement_new(JagAstIAstNode *forInit, JagAstIExpression *forCondition, JagAstIAstNode *forUpdate, JagAstBlock *body) {
 	JagAstForLoopStatement *result = g_object_new(JAG_AST_TYPE_FOR_LOOP_STATEMENT, NULL);
 	cat_ref_anounce(result);
-	JagAstForLoopStatementPrivate *priv = result->priv;
+	JagAstForLoopStatementPrivate *priv = jag_ast_for_loop_statement_get_instance_private(result);
 	priv->forInit = cat_ref_ptr(forInit);
 	priv->forCondition = cat_ref_ptr(forCondition);
 	priv->forUpdate = cat_ref_ptr(forUpdate);
@@ -93,17 +87,17 @@ JagAstForLoopStatement *jag_ast_for_loop_statement_new(JagAstIAstNode *forInit, 
 }
 
 
-
-
 /********************* start JagAstIStatement implementation *********************/
 
 static void l_statement_set_at_least_line_nr(JagAstIStatement *self, int at_least_line_nr) {
-	JagAstForLoopStatementPrivate *priv = JAG_AST_FOR_LOOP_STATEMENT_GET_PRIVATE(self);
+	JagAstForLoopStatement *instance = JAG_AST_FOR_LOOP_STATEMENT(self);
+	JagAstForLoopStatementPrivate *priv = jag_ast_for_loop_statement_get_instance_private(instance);
 	priv->statement_line_nr = at_least_line_nr;
 }
 
 static void l_statement_write_statement(JagAstIStatement *self, JagAstWriter *out) {
-	JagAstForLoopStatementPrivate *priv = JAG_AST_FOR_LOOP_STATEMENT_GET_PRIVATE(self);
+	JagAstForLoopStatement *instance = JAG_AST_FOR_LOOP_STATEMENT(self);
+	JagAstForLoopStatementPrivate *priv = jag_ast_for_loop_statement_get_instance_private(instance);
 	jag_ast_writer_set_at_least_line_nr(out, priv->statement_line_nr);
 
 	jag_ast_writer_print(out, cat_string_wo_new_with("for("));
@@ -123,8 +117,3 @@ static void l_statement_iface_init(JagAstIStatementInterface *iface) {
 }
 
 /********************* end JagAstIStatement implementation *********************/
-
-
-
-
-

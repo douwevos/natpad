@@ -33,17 +33,13 @@ G_BEGIN_DECLS
 #define LEA_IS_KEY_CONTEXT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), LEA_TYPE_KEY_CONTEXT))
 #define LEA_IS_KEY_CONTEXT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), LEA_TYPE_KEY_CONTEXT))
 #define LEA_KEY_CONTEXT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), LEA_TYPE_KEY_CONTEXT, LeaKeyContextClass))
-#define LEA_KEY_CONTEXT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), LEA_TYPE_KEY_CONTEXT, LeaKeyContextPrivate))
-
 
 typedef struct _LeaKeyContext               LeaKeyContext;
 typedef struct _LeaKeyContextPrivate        LeaKeyContextPrivate;
 typedef struct _LeaKeyContextClass          LeaKeyContextClass;
 
-
 struct _LeaKeyContext {
 	GObject parent;
-	LeaKeyContextPrivate *priv;
 };
 
 struct _LeaKeyContextClass {
@@ -60,7 +56,6 @@ CatStringWo *lea_key_context_get_name(LeaKeyContext *key_context);
 int lea_key_context_hash(LeaKeyContext *key_context);
 
 gboolean lea_key_context_equal(LeaKeyContext *key_context_a, LeaKeyContext *key_context_b);
-
 
 G_END_DECLS
 

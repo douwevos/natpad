@@ -37,23 +37,18 @@ G_BEGIN_DECLS
 #define MOO_IS_GROUP_MAIN(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_GROUP_MAIN))
 #define MOO_IS_GROUP_MAIN_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_GROUP_MAIN))
 #define MOO_GROUP_MAIN_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_GROUP_MAIN, MooGroupMainClass))
-#define MOO_GROUP_MAIN_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_GROUP_MAIN, MooGroupMainPrivate))
-
 
 typedef struct _MooGroupMain               MooGroupMain;
 typedef struct _MooGroupMainPrivate        MooGroupMainPrivate;
 typedef struct _MooGroupMainClass          MooGroupMainClass;
 
-
 struct _MooGroupMain {
 	LeaActionGroup parent;
-	MooGroupMainPrivate *priv;
 };
 
 struct _MooGroupMainClass {
 	LeaActionGroupClass parent_class;
 };
-
 
 GType moo_group_main_get_type();
 

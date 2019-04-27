@@ -38,48 +38,42 @@ struct _JagBytConstantPoolPrivate {
 static void l_constant_provider_iface_init(JagBytIConstantProviderInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytConstantPool, jag_byt_constant_pool, G_TYPE_INITIALLY_UNOWNED, {
+		G_ADD_PRIVATE(JagBytConstantPool)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_ICONSTANT_PROVIDER, l_constant_provider_iface_init);
 });
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_constant_pool_class_init(JagBytConstantPoolClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytConstantPoolPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_constant_pool_init(JagBytConstantPool *instance) {
-	JagBytConstantPoolPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_CONSTANT_POOL, JagBytConstantPoolPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytConstantPool *instance = JAG_BYT_CONSTANT_POOL(object);
-	JagBytConstantPoolPrivate *priv = instance->priv;
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(instance);
 	cat_unref_ptr(priv->a_pool);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_constant_pool_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_constant_pool_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytConstantPool *jag_byt_constant_pool_new(CatArrayWo *a_new_pool) {
 	JagBytConstantPool *result = g_object_new(JAG_BYT_TYPE_CONSTANT_POOL, NULL);
 	cat_ref_anounce(result);
-	JagBytConstantPoolPrivate *priv = result->priv;
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(result);
 	priv->a_pool = cat_ref_ptr(a_new_pool);
 	priv->this_class_index = -1;
 
@@ -95,41 +89,40 @@ JagBytConstantPool *jag_byt_constant_pool_new(CatArrayWo *a_new_pool) {
 	return result;
 }
 
-
 void jag_byt_constant_pool_set_this_class_index(JagBytConstantPool *pool, int this_class_index) {
-	JagBytConstantPoolPrivate *priv = JAG_BYT_CONSTANT_POOL_GET_PRIVATE(pool);
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(pool);
 	priv->this_class_index = this_class_index;
 }
 
-
 int jag_byt_constant_pool_size(JagBytConstantPool *pool) {
-	return cat_array_wo_size(pool->priv->a_pool);
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(pool);
+	return cat_array_wo_size(priv->a_pool);
 }
 
 JagBytIConstant *jag_byt_constant_pool_get_this_class_constant(JagBytConstantPool *pool) {
-	JagBytConstantPoolPrivate *priv = JAG_BYT_CONSTANT_POOL_GET_PRIVATE(pool);
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(pool);
 	return jag_byt_constant_pool_get_unresolved(pool, priv->this_class_index-1);
 }
 
 JagBytIConstant *jag_byt_constant_pool_get_at(JagBytConstantPool *pool, int index) {
-	return (JagBytIConstant *) cat_array_wo_get(pool->priv->a_pool, index);
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(pool);
+	return (JagBytIConstant *) cat_array_wo_get(priv->a_pool, index);
 }
 
 JagBytIConstant *jag_byt_constant_pool_get_unresolved(JagBytConstantPool *pool, int index) {
-	JagBytConstantPoolPrivate *priv = JAG_BYT_CONSTANT_POOL_GET_PRIVATE(pool);
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(pool);
 	return (JagBytIConstant *) cat_array_wo_get(priv->a_pool, index);
 }
 
 
 JagBytIConstant *jag_byt_constant_pool_get_resolved(JagBytConstantPool *pool, int index) {
-	JagBytConstantPoolPrivate *priv = JAG_BYT_CONSTANT_POOL_GET_PRIVATE(pool);
+	JagBytConstantPoolPrivate *priv = jag_byt_constant_pool_get_instance_private(pool);
 	JagBytIConstant *result = (JagBytIConstant *) cat_array_wo_get(priv->a_pool, index);
 	jag_byt_constant_pool_resolve(pool, result);
 	return result;
 }
 
 gboolean jag_byt_constant_pool_resolve(JagBytConstantPool *pool, JagBytIConstant *constant) {
-//	JagBytConstantPoolPrivate *priv = JAG_BYT_CONSTANT_POOL_GET_PRIVATE(pool);
 	if (jag_byt_iconstant_is_resolved(constant)) {
 		return TRUE;
 	}
@@ -242,11 +235,6 @@ CatStringWo *jag_byt_descriptor_as_source(CatStringWo *a_descriptor, CatStringWo
 }
 
 
-
-
-
-
-
 /********************* start JagBytIConstantProvider implementation *********************/
 
 static JagBytIConstant *l_constant_provider_get(JagBytIConstantProvider *self, int index) {
@@ -272,6 +260,3 @@ static void l_constant_provider_iface_init(JagBytIConstantProviderInterface *ifa
 }
 
 /********************* end JagBytIConstantProvider implementation *********************/
-
-
-

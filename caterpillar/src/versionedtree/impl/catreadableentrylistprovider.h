@@ -33,7 +33,6 @@ G_BEGIN_DECLS
 #define CAT_IS_READABLE_ENTRY_LIST_PROVIDER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_READABLE_ENTRY_LIST_PROVIDER))
 #define CAT_IS_READABLE_ENTRY_LIST_PROVIDER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_READABLE_ENTRY_LIST_PROVIDER))
 #define CAT_READABLE_ENTRY_LIST_PROVIDER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_READABLE_ENTRY_LIST_PROVIDER, CatReadableEntryListProviderClass))
-#define CAT_READABLE_ENTRY_LIST_PROVIDER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_READABLE_ENTRY_LIST_PROVIDER, CatReadableEntryListProviderPrivate))
 
 
 typedef struct _CatReadableEntryListProvider               CatReadableEntryListProvider;
@@ -43,7 +42,6 @@ typedef struct _CatReadableEntryListProviderClass          CatReadableEntryListP
 
 struct _CatReadableEntryListProvider {
 	GObject parent;
-	CatReadableEntryListProviderPrivate *priv;
 };
 
 struct _CatReadableEntryListProviderClass {

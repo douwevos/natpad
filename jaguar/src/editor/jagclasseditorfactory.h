@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_IS_CLASS_EDITOR_FACTORY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_CLASS_EDITOR_FACTORY))
 #define JAG_IS_CLASS_EDITOR_FACTORY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_CLASS_EDITOR_FACTORY))
 #define JAG_CLASS_EDITOR_FACTORY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_CLASS_EDITOR_FACTORY, JagClassEditorFactoryClass))
-#define JAG_CLASS_EDITOR_FACTORY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_CLASS_EDITOR_FACTORY, JagClassEditorFactoryPrivate))
 
 
 typedef struct _JagClassEditorFactory               JagClassEditorFactory;
@@ -47,7 +46,6 @@ typedef struct _JagClassEditorFactoryClass          JagClassEditorFactoryClass;
 
 struct _JagClassEditorFactory {
 	GObject parent;
-	JagClassEditorFactoryPrivate *priv;
 };
 
 struct _JagClassEditorFactoryClass {

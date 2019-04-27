@@ -31,56 +31,46 @@ struct _VipNodeScannerPrivate {
 	VipMapperRegistry *mapper_registry;
 };
 
-G_DEFINE_TYPE (VipNodeScanner, vip_node_scanner, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(VipNodeScanner, vip_node_scanner, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_node_scanner_class_init(VipNodeScannerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipNodeScannerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_node_scanner_init(VipNodeScanner *instance) {
-	VipNodeScannerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_NODE_SCANNER, VipNodeScannerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipNodeScanner *instance = VIP_NODE_SCANNER(object);
-	VipNodeScannerPrivate *priv = instance->priv;
+	VipNodeScannerPrivate *priv = vip_node_scanner_get_instance_private(instance);
 	cat_unref_ptr(priv->mapper_registry);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_node_scanner_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_node_scanner_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 VipNodeScanner *vip_node_scanner_new(VipMapperRegistry *mapper_registry) {
 	VipNodeScanner *result = g_object_new(VIP_TYPE_NODE_SCANNER, NULL);
 	cat_ref_anounce(result);
-	VipNodeScannerPrivate *priv = result->priv;
+	VipNodeScannerPrivate *priv = vip_node_scanner_get_instance_private(result);
 	priv->mapper_registry = cat_ref_ptr(mapper_registry);
 	return result;
 }
 
-
-
 void vip_node_scanner_scan(VipNodeScanner *scanner, CatWritableTreeNode *node, gboolean recursive_from_parent) {
-	VipNodeScannerPrivate *priv = VIP_NODE_SCANNER_GET_PRIVATE(scanner);
+	VipNodeScannerPrivate *priv = vip_node_scanner_get_instance_private(scanner);
 	cat_log_debug("scan:node=%o", node);
 	CatArrayWo *stack = cat_array_wo_new();	// <VipIScanWork>
 	VipIScanWork *mainWork = vip_mapper_registry_create_work_for_node(priv->mapper_registry, node, recursive_from_parent, TRUE);

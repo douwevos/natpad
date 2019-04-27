@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "worqueueprivate.h"
 #include "worqueuerequestdelegate.h"
 
@@ -37,29 +36,24 @@ struct _WorQueuePrivate {
 	CatLock *lock;
 };
 
-
-G_DEFINE_TYPE(WorQueue, wor_queue, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(WorQueue, wor_queue, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void wor_queue_class_init(WorQueueClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(WorQueuePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void wor_queue_init(WorQueue *instance) {
-	WorQueuePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, WOR_TYPE_QUEUE, WorQueuePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	WorQueue *instance = WOR_QUEUE(object);
-	WorQueuePrivate *priv = instance->priv;
+	WorQueuePrivate *priv = wor_queue_get_instance_private(instance);
 	cat_unref_ptr(priv->lock);
 	cat_unref_ptr(priv->e_queue);
 	cat_unref_ptr(priv->wor_service);
@@ -78,7 +72,7 @@ static void l_finalize(GObject *object) {
 WorQueue *wor_queue_new(WorService *wor_service) {
 	WorQueue *result = g_object_new(WOR_TYPE_QUEUE, NULL);
 	cat_ref_anounce(result);
-	WorQueuePrivate *priv = result->priv;
+	WorQueuePrivate *priv = wor_queue_get_instance_private(result);
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->semaphore_count = 0;
 	priv->semaphore_size = 1;
@@ -88,7 +82,7 @@ WorQueue *wor_queue_new(WorService *wor_service) {
 }
 
 void wor_queue_set_semaphore_size(WorQueue *queue, int size) {
-	WorQueuePrivate *priv = WOR_QUEUE_GET_PRIVATE(queue);
+	WorQueuePrivate *priv = wor_queue_get_instance_private(queue);
 	cat_lock_lock(priv->lock);
 	priv->semaphore_size = size;
 
@@ -107,7 +101,6 @@ void wor_queue_set_semaphore_size(WorQueue *queue, int size) {
 }
 
 
-
 void wor_queue_post(WorQueue *queue, WorRequest *request) {
 	WorQueueRequestDelegate *request_delegate = wor_queue_request_delegate_new(queue, request, FALSE);
 	cat_log_debug("[%p] post:%o", queue, request_delegate);
@@ -116,7 +109,7 @@ void wor_queue_post(WorQueue *queue, WorRequest *request) {
 }
 
 void wor_queue_post_delayed(WorQueue *queue, WorRequest *request, uint64_t timeout) {
-	WorQueuePrivate *priv = WOR_QUEUE_GET_PRIVATE(queue);
+	WorQueuePrivate *priv = wor_queue_get_instance_private(queue);
 	WorQueueRequestDelegate *request_delegate = wor_queue_request_delegate_new(queue, request, TRUE);
 	wor_request_set_time_out((WorRequest *) request_delegate, timeout);
 	wor_service_post_request(priv->wor_service, (WorRequest *) request_delegate);
@@ -125,7 +118,7 @@ void wor_queue_post_delayed(WorQueue *queue, WorRequest *request, uint64_t timeo
 
 
 void wor_queue_repost(WorQueue *queue, WorQueueRequestDelegate *request_delegate) {
-	WorQueuePrivate *priv = WOR_QUEUE_GET_PRIVATE(queue);
+	WorQueuePrivate *priv = wor_queue_get_instance_private(queue);
 	cat_lock_lock(priv->lock);
 	cat_log_debug("[%p] reposting:%o, sema-count=%d, queue-size=%d", queue, request_delegate, priv->semaphore_count, cat_array_wo_size(priv->e_queue));
 	if (priv->semaphore_count<priv->semaphore_size) {
@@ -139,7 +132,7 @@ void wor_queue_repost(WorQueue *queue, WorQueueRequestDelegate *request_delegate
 }
 
 void wor_queue_forward_next(WorQueue *queue) {
-	WorQueuePrivate *priv = WOR_QUEUE_GET_PRIVATE(queue);
+	WorQueuePrivate *priv = wor_queue_get_instance_private(queue);
 	cat_log_debug("[%p] forward_next, sema-count=%d", queue, priv->semaphore_count);
 	cat_lock_lock(priv->lock);
 	WorRequest *first_entry = NULL;
@@ -153,9 +146,3 @@ void wor_queue_forward_next(WorQueue *queue) {
 	}
 	cat_lock_unlock(priv->lock);
 }
-
-
-
-
-
-

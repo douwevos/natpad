@@ -38,39 +38,32 @@ struct _MooAddProjectDialogPrivate {
 	GtkWidget *ok_but;
 };
 
-G_DEFINE_TYPE(MooAddProjectDialog, moo_add_project_dialog, GTK_TYPE_DIALOG)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooAddProjectDialog, moo_add_project_dialog, GTK_TYPE_DIALOG)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_add_project_dialog_class_init(MooAddProjectDialogClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooAddProjectDialogPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_add_project_dialog_init(MooAddProjectDialog *instance) {
-	MooAddProjectDialogPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ADD_PROJECT_DIALOG, MooAddProjectDialogPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 //	MooAddProjectDialog *instance = MOO_ADD_PROJECT_DIALOG(object);
 //	MooAddProjectDialogPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_add_project_dialog_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_add_project_dialog_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -84,7 +77,7 @@ static void l_button_file(GtkButton *button, gpointer user_data);
 MooAddProjectDialog *moo_add_project_dialog_new() {
 	MooAddProjectDialog *result = g_object_new(MOO_TYPE_ADD_PROJECT_DIALOG, NULL);
 	cat_ref_anounce(result);
-	MooAddProjectDialogPrivate *priv = result->priv;
+	MooAddProjectDialogPrivate *priv = moo_add_project_dialog_get_instance_private(result);
 	priv->base_path_modified = FALSE;
 
 	gtk_window_set_modal(GTK_WINDOW(result), TRUE);
@@ -153,7 +146,6 @@ MooAddProjectDialog *moo_add_project_dialog_new() {
 
 	priv->enrtry_base_path_id = g_signal_connect(entry, "changed", G_CALLBACK(l_base_path_changed), result);
 
-
 	entry = gtk_button_new_with_mnemonic("_File...");
 	g_signal_connect(entry, "clicked", G_CALLBACK(l_button_file), result);
 	gtk_grid_attach((GtkGrid *) grid, entry,2,1,1,1);
@@ -171,21 +163,22 @@ MooAddProjectDialog *moo_add_project_dialog_new() {
 
 
 CatStringWo *moo_add_project_dialog_get_module_name(MooAddProjectDialog *add_project_dialog) {
-	MooAddProjectDialogPrivate *priv = MOO_ADD_PROJECT_DIALOG_GET_PRIVATE(add_project_dialog);
+	MooAddProjectDialogPrivate *priv = moo_add_project_dialog_get_instance_private(add_project_dialog);
 	const char *name = gtk_entry_get_text((GtkEntry *) priv->entry_name);
 	return cat_string_wo_new_with(name);
 
 }
 
 CatStringWo *moo_add_project_dialog_get_base_path(MooAddProjectDialog *add_project_dialog) {
-	MooAddProjectDialogPrivate *priv = MOO_ADD_PROJECT_DIALOG_GET_PRIVATE(add_project_dialog);
+	MooAddProjectDialogPrivate *priv = moo_add_project_dialog_get_instance_private(add_project_dialog);
 	const char *base_path = gtk_entry_get_text((GtkEntry *) priv->entry_base_path);
 	return cat_string_wo_new_with(base_path);
 }
 
 
 static void l_name_changed(GtkEntry *entry, gpointer user_data) {
-//	MooAddProjectDialogPrivate *priv = MOO_ADD_PROJECT_DIALOG_GET_PRIVATE(user_data);
+//	MooAddProjectDialog *instance = MOO_ADD_PROJECT_DIALOG(user_data);
+//	MooAddProjectDialogPrivate *priv = moo_add_project_dialog_get_instance_private(instance);
 //	if (!priv->base_path_modified) {
 //		const char *name = gtk_entry_get_text((GtkEntry *) priv->entry_name);
 //		CatStringWo *a_full_name = pro_configuration_get_workspace_path(priv->pro_configuration);
@@ -205,7 +198,8 @@ static void l_name_changed(GtkEntry *entry, gpointer user_data) {
 }
 
 static void l_base_path_changed(GtkEntry *entry, gpointer user_data) {
-	MooAddProjectDialogPrivate *priv = MOO_ADD_PROJECT_DIALOG_GET_PRIVATE(user_data);
+	MooAddProjectDialog *instance = MOO_ADD_PROJECT_DIALOG(user_data);
+	MooAddProjectDialogPrivate *priv = moo_add_project_dialog_get_instance_private(instance);
 	const char *name = gtk_entry_get_text((GtkEntry *) priv->entry_base_path);
 	if (name==NULL || strlen(name)==0) {
 		priv->base_path_modified = FALSE;
@@ -214,9 +208,8 @@ static void l_base_path_changed(GtkEntry *entry, gpointer user_data) {
 	}
 }
 
-
 static void l_choose_base_dir(MooAddProjectDialog *add_project_dialog) {
-	MooAddProjectDialogPrivate *priv = MOO_ADD_PROJECT_DIALOG_GET_PRIVATE(add_project_dialog);
+	MooAddProjectDialogPrivate *priv = moo_add_project_dialog_get_instance_private(add_project_dialog);
 	GtkWindow *top_window = (GtkWindow *) gtk_widget_get_toplevel(GTK_WIDGET(add_project_dialog));
 	GtkWidget *dialog = gtk_file_chooser_dialog_new((const gchar *) "Select base directory file of project", top_window,
 					(GtkFileChooserAction) GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -261,4 +254,3 @@ int moo_add_project_dialog_run(MooAddProjectDialog *add_project_dialog) {
 	gtk_widget_show_all(GTK_WIDGET(add_project_dialog));
 	return gtk_dialog_run(GTK_DIALOG(add_project_dialog));
 }
-

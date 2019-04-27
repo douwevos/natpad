@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGVIPJARMAP_H_
 #define JAGVIPJARMAP_H_
 
@@ -35,28 +34,22 @@ G_BEGIN_DECLS
 #define JAG_IS_VIP_JAR_MAP(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_VIP_JAR_MAP))
 #define JAG_IS_VIP_JAR_MAP_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_VIP_JAR_MAP))
 #define JAG_VIP_JAR_MAP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_VIP_JAR_MAP, JagVipJarMapClass))
-#define JAG_VIP_JAR_MAP_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_VIP_JAR_MAP, JagVipJarMapPrivate))
-
 
 typedef struct _JagVipJarMap               JagVipJarMap;
 typedef struct _JagVipJarMapPrivate        JagVipJarMapPrivate;
 typedef struct _JagVipJarMapClass          JagVipJarMapClass;
 
-
 struct _JagVipJarMap {
 	GObject parent;
-	JagVipJarMapPrivate *priv;
 };
 
 struct _JagVipJarMapClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_vip_jar_map_get_type();
 
 JagVipJarMap *jag_vip_jar_map_new(VipIFile *mainFile, CatStringWo *a_name, CatArrayWo /* <VipIResource *> */ *a_vipchildren);
-
 
 G_END_DECLS
 

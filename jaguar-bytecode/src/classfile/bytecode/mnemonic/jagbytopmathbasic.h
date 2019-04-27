@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_MATH_BASIC(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_MATH_BASIC))
 #define JAG_BYT_IS_OP_MATH_BASIC_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_MATH_BASIC))
 #define JAG_BYT_OP_MATH_BASIC_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_MATH_BASIC, JagBytOpMathBasicClass))
-#define JAG_BYT_OP_MATH_BASIC_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_MATH_BASIC, JagBytOpMathBasicPrivate))
 
 typedef struct _JagBytOpMathBasic               JagBytOpMathBasic;
 typedef struct _JagBytOpMathBasicPrivate        JagBytOpMathBasicPrivate;
@@ -46,7 +45,6 @@ typedef struct _JagBytOpMathBasicClass          JagBytOpMathBasicClass;
 
 struct _JagBytOpMathBasic {
 	JagBytAbstractMnemonic parent;
-	JagBytOpMathBasicPrivate *priv;
 };
 
 struct _JagBytOpMathBasicClass {

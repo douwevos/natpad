@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "mooaddmodule.h"
 #include "../model/moocontentmapwo.h"
 #include "../model/mooresourcecontentwo.h"
@@ -40,7 +39,7 @@ struct _MooAddModulePrivate {
 	gboolean is_done;
 };
 
-G_DEFINE_TYPE(MooAddModule, moo_add_module, WOR_TYPE_REQUEST);
+G_DEFINE_TYPE_WITH_PRIVATE(MooAddModule, moo_add_module, WOR_TYPE_REQUEST);
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
@@ -48,8 +47,6 @@ static void l_run_request(WorRequest *request);
 
 
 static void moo_add_module_class_init(MooAddModuleClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooAddModulePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -59,14 +56,12 @@ static void moo_add_module_class_init(MooAddModuleClass *clazz) {
 }
 
 static void moo_add_module_init(MooAddModule *instance) {
-	MooAddModulePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ADD_MODULE, MooAddModulePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooAddModule *instance = MOO_ADD_MODULE(object);
-	MooAddModulePrivate *priv = instance->priv;
+	MooAddModulePrivate *priv = moo_add_module_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->node_path);
 	cat_unref_ptr(priv->module);
@@ -87,7 +82,7 @@ MooAddModule *moo_add_module_new(MooService *moo_service, VipNodePath *node_path
 	MooAddModule *result = g_object_new(MOO_TYPE_ADD_MODULE, NULL);
 	cat_ref_anounce(result);
 	wor_request_construct((WorRequest *) result);
-	MooAddModulePrivate *priv = result->priv;
+	MooAddModulePrivate *priv = moo_add_module_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->node_path = cat_ref_ptr(node_path);
 	priv->lock = cat_lock_new();
@@ -97,7 +92,7 @@ MooAddModule *moo_add_module_new(MooService *moo_service, VipNodePath *node_path
 }
 
 void moo_add_module_wait_for_done(MooAddModule *add_module) {
-	MooAddModulePrivate *priv = MOO_ADD_MODULE_GET_PRIVATE(add_module);
+	MooAddModulePrivate *priv = moo_add_module_get_instance_private(add_module);
 	cat_lock_lock(priv->lock);
 	while(!priv->is_done) {
 		cat_lock_wait(priv->lock);
@@ -125,12 +120,11 @@ void moo_add_module_from_path(MooService *moo_service, VipPath *path) {
 
 	}
 	cat_unref_ptr(create_path_request);
-
 }
 
-
 static void l_run_request(WorRequest *request) {
-	MooAddModulePrivate *priv = MOO_ADD_MODULE_GET_PRIVATE(request);
+	MooAddModule *instance = MOO_ADD_MODULE(request);
+	MooAddModulePrivate *priv = moo_add_module_get_instance_private(instance);
 	if (priv->module==NULL) {
 
 		VipNode *tail = vip_node_path_get_tail(priv->node_path);
@@ -172,5 +166,3 @@ static void l_run_request(WorRequest *request) {
 		cat_lock_unlock(priv->lock);
 	}
 }
-
-

@@ -33,30 +33,22 @@ G_BEGIN_DECLS
 #define JAG_IS_PACKAGE_RENDERER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_PACKAGE_RENDERER))
 #define JAG_IS_PACKAGE_RENDERER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_PACKAGE_RENDERER))
 #define JAG_PACKAGE_RENDERER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_PACKAGE_RENDERER, JagPackageRendererClass))
-#define JAG_PACKAGE_RENDERER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_PACKAGE_RENDERER, JagPackageRendererPrivate))
-
 
 typedef struct _JagPackageRenderer               JagPackageRenderer;
-typedef struct _JagPackageRendererPrivate        JagPackageRendererPrivate;
 typedef struct _JagPackageRendererClass          JagPackageRendererClass;
-
 
 struct _JagPackageRenderer {
 	GObject parent;
-	JagPackageRendererPrivate *priv;
 };
 
 struct _JagPackageRendererClass {
 	GObjectClass parent_class;
 };
 
-
 GType jag_package_renderer_get_type();
 
 JagPackageRenderer *jag_package_renderer_new();
 
 G_END_DECLS
-
-
 
 #endif /* JAGPACKAGERENDERER_H_ */

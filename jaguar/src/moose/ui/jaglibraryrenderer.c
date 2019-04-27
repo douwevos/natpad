@@ -65,20 +65,15 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JagLibraryRenderer *jag_library_renderer_new() {
 	JagLibraryRenderer *result = g_object_new(JAG_TYPE_LIBRARY_RENDERER, NULL);
 	cat_ref_anounce(result);
 	return result;
 }
 
-
-
 /********************* begin MooINodeRendererFactory implementation *********************/
 
-
 static void l_update_layout(MooINodeRenderer *self, struct _MooNodeLayout *node_layout) {
-
 }
 
 static void l_paint(MooINodeRenderer *self, cairo_t *cairo, struct _MooNodeLayout *node_layout) {
@@ -103,7 +98,6 @@ static void l_renderer_iface_init(MooINodeRendererInterface *iface) {
 
 /********************* end MooINodeRendererFactory implementation *********************/
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
@@ -116,4 +110,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

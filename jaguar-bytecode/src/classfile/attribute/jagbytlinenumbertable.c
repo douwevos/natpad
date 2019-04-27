@@ -32,45 +32,38 @@ struct _JagBytLineNumberTablePrivate {
 	CatArrayWo *e_entries;
 };
 
-G_DEFINE_TYPE (JagBytLineNumberTable, jag_byt_line_number_table, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytLineNumberTable, jag_byt_line_number_table, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_line_number_table_class_init(JagBytLineNumberTableClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytLineNumberTablePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_line_number_table_init(JagBytLineNumberTable *instance) {
-	JagBytLineNumberTablePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_LINE_NUMBER_TABLE, JagBytLineNumberTablePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytLineNumberTable *instance = JAG_BYT_LINE_NUMBER_TABLE(object);
-	JagBytLineNumberTablePrivate *priv = instance->priv;
+	JagBytLineNumberTablePrivate *priv = jag_byt_line_number_table_get_instance_private(instance);
 	cat_unref_ptr(priv->e_entries);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_line_number_table_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_line_number_table_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 void jag_byt_line_number_table_construct(JagBytLineNumberTable *line_number_table) {
-	JagBytLineNumberTablePrivate *priv = JAG_BYT_LINE_NUMBER_TABLE_GET_PRIVATE(line_number_table);
+	JagBytLineNumberTablePrivate *priv = jag_byt_line_number_table_get_instance_private(line_number_table);
 	priv->e_entries = cat_array_wo_new();
 }
 
@@ -83,13 +76,11 @@ JagBytLineNumberTable *jag_byt_line_number_table_new() {
 
 
 void jag_byt_line_number_table_add(JagBytLineNumberTable *line_number_table, JagBytLineNumberTableEntry *entry) {
-	JagBytLineNumberTablePrivate *priv = JAG_BYT_LINE_NUMBER_TABLE_GET_PRIVATE(line_number_table);
+	JagBytLineNumberTablePrivate *priv = jag_byt_line_number_table_get_instance_private(line_number_table);
 	cat_array_wo_append(priv->e_entries, (GObject *) entry);
 }
 
 CatIIterator *jag_byt_line_number_table_iterator(JagBytLineNumberTable *line_number_table) {
-	JagBytLineNumberTablePrivate *priv = JAG_BYT_LINE_NUMBER_TABLE_GET_PRIVATE(line_number_table);
+	JagBytLineNumberTablePrivate *priv = jag_byt_line_number_table_get_instance_private(line_number_table);
 	return cat_array_wo_iterator(priv->e_entries);
 }
-
-

@@ -49,55 +49,45 @@ struct _CheServicePrivate {
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CheService, che_service, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(CheService)
 		G_IMPLEMENT_INTERFACE(ELK_TYPE_IRESOURCE_HANDLER, l_resource_handler_iface_init);
 });
 
-
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void che_service_class_init(CheServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CheServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void che_service_init(CheService *instance) {
-	CheServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CHE_TYPE_SERVICE, CheServicePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CheService *instance = CHE_SERVICE(object);
-	CheServicePrivate *priv = instance->priv;
+	CheServicePrivate *priv = che_service_get_instance_private(instance);
 	cat_unref_ptr(priv->elk_service);
 	cat_unref_ptr(priv->wor_service);
 	cat_unref_ptr(priv->connector);
 	cat_unref_ptr(priv->arm_connector);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(che_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(che_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
-
-
 
 CheService *che_service_new(WorService *wor_service, ElkService *elk_service) {
 	CheService *result = g_object_new(CHE_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	CheServicePrivate *priv = result->priv;
+	CheServicePrivate *priv = che_service_get_instance_private(result);
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->elk_service = cat_ref_ptr(elk_service);
 	priv->connector = che_editor_connector_new();
@@ -106,15 +96,14 @@ CheService *che_service_new(WorService *wor_service, ElkService *elk_service) {
 }
 
 
-
 CatS che_s_dot_c = CAT_S_DEF(".c");
 CatS che_s_dot_h = CAT_S_DEF(".h");
 CatS che_s_dot_cpp = CAT_S_DEF(".cpp");
 CatS che_s_dot_hpp = CAT_S_DEF(".hpp");
 
-
 static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_enlist_to, MooNodeWo *node) {
-	CheServicePrivate *priv = CHE_SERVICE_GET_PRIVATE(self);
+	CheService *instance = CHE_SERVICE(self);
+	CheServicePrivate *priv = che_service_get_instance_private(instance);
 	MooResourceContentWo *resource_content = (MooResourceContentWo *) moo_node_wo_get_content(node, moo_resource_content_wo_key());
 	if (resource_content!=NULL) {
 		VipNode *node = moo_resource_content_wo_get_viper_node(resource_content);
@@ -149,8 +138,6 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 				cat_array_wo_append(e_enlist_to, (GObject *) editor_factory);
 				cat_unref(editor_factory);
 			}
-
-
 		}
 	}
 }

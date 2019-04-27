@@ -35,22 +35,17 @@ struct _ElkActionSaveAllPrivate {
 	CatArrayWo *a_editor_list;
 };
 
-G_DEFINE_TYPE (ElkActionSaveAll, elk_action_save_all, LEA_TYPE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE(ElkActionSaveAll, elk_action_save_all, LEA_TYPE_ACTION)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 static void l_action_refresh(LeaAction *self);
 
 static void elk_action_save_all_class_init(ElkActionSaveAllClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(ElkActionSaveAllPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 
 	LeaActionClass *action_clazz = LEA_ACTION_CLASS(clazz);
 	action_clazz->action_run = l_action_run;
@@ -58,31 +53,29 @@ static void elk_action_save_all_class_init(ElkActionSaveAllClass *clazz) {
 }
 
 static void elk_action_save_all_init(ElkActionSaveAll *instance) {
-	ElkActionSaveAllPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, ELK_TYPE_ACTION_SAVE_ALL, ElkActionSaveAllPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	ElkActionSaveAll *instance = ELK_ACTION_SAVE_ALL(object);
-	ElkActionSaveAllPrivate *priv = instance->priv;
+	ElkActionSaveAllPrivate *priv = elk_action_save_all_get_instance_private(instance);
 	cat_unref_ptr(priv->service);
 	cat_unref_ptr(priv->a_editor_list);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(elk_action_save_all_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(elk_action_save_all_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 ElkActionSaveAll *elk_action_save_all_new(ElkIService *service) {
 	ElkActionSaveAll *result = g_object_new(ELK_TYPE_ACTION_SAVE_ALL, NULL);
 	cat_ref_anounce(result);
-	ElkActionSaveAllPrivate *priv = result->priv;
+	ElkActionSaveAllPrivate *priv = elk_action_save_all_get_instance_private(result);
 	priv->service = cat_ref_ptr(service);
 	priv->a_editor_list = NULL;
 	lea_action_construct(LEA_ACTION(result), cat_string_wo_new_with("elk.save.all"), cat_string_wo_new_with("Save _All"), cat_string_wo_new_with("document-save"));
@@ -95,13 +88,13 @@ ElkActionSaveAll *elk_action_save_all_new(ElkIService *service) {
 
 static void l_action_run(LeaAction *self) {
 	ElkActionSaveAll *action = ELK_ACTION_SAVE_ALL(self);
-	ElkActionSaveAllPrivate *priv = ELK_ACTION_SAVE_ALL_GET_PRIVATE(action);
+	ElkActionSaveAllPrivate *priv = elk_action_save_all_get_instance_private(action);
 	elk_iservice_save_all_resource_editors(priv->service, NULL);
 }
 
 
 static void l_recheck_list(ElkActionSaveAll *action) {
-	ElkActionSaveAllPrivate *priv = ELK_ACTION_SAVE_ALL_GET_PRIVATE(action);
+	ElkActionSaveAllPrivate *priv = elk_action_save_all_get_instance_private(action);
 	gboolean has_unsaved = FALSE;
 	if (priv->a_editor_list) {
 		CatIIterator *iterator = cat_array_wo_iterator(priv->a_editor_list);
@@ -127,7 +120,7 @@ static void l_action_refresh(LeaAction *self) {
 
 void elk_action_save_all_set_editor_list(ElkActionSaveAll *action, CatArrayWo *a_editor_list) {
 	ElkActionSaveAll *elk_action = ELK_ACTION_SAVE_ALL(action);
-	ElkActionSaveAllPrivate *priv = ELK_ACTION_SAVE_ALL_GET_PRIVATE(elk_action);
+	ElkActionSaveAllPrivate *priv = elk_action_save_all_get_instance_private(elk_action);
 	if (priv->a_editor_list == a_editor_list) {
 		return;
 	}

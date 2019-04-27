@@ -31,56 +31,48 @@ struct _JagScanJarFileWorkPrivate {
 	VipNode *main_node;
 };
 
-
 static void l_scan_work_iface_init(VipIScanWorkInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagScanJarFileWork, jag_scan_jar_file_work, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagScanJarFileWork)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_ISCAN_WORK, l_scan_work_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_scan_jar_file_work_class_init(JagScanJarFileWorkClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagScanJarFileWorkPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_scan_jar_file_work_init(JagScanJarFileWork *instance) {
-	JagScanJarFileWorkPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_SCAN_JAR_FILE_WORK, JagScanJarFileWorkPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagScanJarFileWork *instance = JAG_SCAN_JAR_FILE_WORK(object);
-	JagScanJarFileWorkPrivate *priv = instance->priv;
+	JagScanJarFileWorkPrivate *priv = jag_scan_jar_file_work_get_instance_private(instance);
 	cat_unref_ptr(priv->main_node);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_scan_jar_file_work_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_scan_jar_file_work_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagScanJarFileWork *jag_scan_jar_file_work_new(VipNode *main_node, gboolean validated_by_parent) {
 	JagScanJarFileWork *result = g_object_new(JAG_TYPE_SCAN_JAR_FILE_WORK, NULL);
 	cat_ref_anounce(result);
-	JagScanJarFileWorkPrivate *priv = result->priv;
+	JagScanJarFileWorkPrivate *priv = jag_scan_jar_file_work_get_instance_private(result);
 	priv->main_node = cat_ref_ptr(main_node);
 	return result;
 }
-
 
 /********************* begin VipIScanWork implementation *********************/
 

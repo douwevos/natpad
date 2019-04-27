@@ -37,46 +37,39 @@ struct _TerSyntaxResourcePrivate {
 
 G_DEFINE_TYPE (TerSyntaxResource, ter_syntax_resource, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void ter_syntax_resource_class_init(TerSyntaxResourceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(TerSyntaxResourcePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void ter_syntax_resource_init(TerSyntaxResource *instance) {
-	TerSyntaxResourcePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, TER_TYPE_SYNTAX_RESOURCE, TerSyntaxResourcePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	TerSyntaxResource *instance = TER_SYNTAX_RESOURCE(object);
-	TerSyntaxResourcePrivate *priv = instance->priv;
+	TerSyntaxResourcePrivate *priv = ter_syntax_resource_get_instance_private(instance);
 	cat_unref_ptr(priv->vip_tree_node)
 	cat_unref_ptr(priv->syntax);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(ter_syntax_resource_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(ter_syntax_resource_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 TerSyntaxResource *ter_syntax_resource_new(CatTreeNode *vip_tree_node) {
 	TerSyntaxResource *result = g_object_new(TER_TYPE_SYNTAX_RESOURCE, NULL);
 	cat_ref_anounce(result);
-	TerSyntaxResourcePrivate *priv = result->priv;
+	TerSyntaxResourcePrivate *priv = ter_syntax_resource_get_instance_private(result);
 	cat_log_debug("syntax_resource.priv=%p", priv);
 	priv->vip_tree_node = cat_ref_ptr(vip_tree_node);
 	priv->syntax = NULL;
@@ -84,11 +77,9 @@ TerSyntaxResource *ter_syntax_resource_new(CatTreeNode *vip_tree_node) {
 	return result;
 }
 
-
-
 gboolean ter_syntax_resource_reload_syntax(TerSyntaxResource *syntax_resource) {
 	cat_log_debug("syntax_resource=%p", syntax_resource);
-	TerSyntaxResourcePrivate *priv = TER_SYNTAX_RESOURCE_GET_PRIVATE(syntax_resource);
+	TerSyntaxResourcePrivate *priv = ter_syntax_resource_get_instance_private(syntax_resource);
 	cat_log_debug("syntax_resource.priv=%p", priv);
 	cat_log_debug("priv->vip_tree_node=%p", priv->vip_tree_node);
 	VipNode *vip_node = (VipNode *) cat_tree_node_get_content(priv->vip_tree_node);
@@ -104,14 +95,12 @@ gboolean ter_syntax_resource_reload_syntax(TerSyntaxResource *syntax_resource) {
 	return result;
 }
 
-
 TerSyntax *ter_syntax_resource_get_or_load_syntax(TerSyntaxResource *syntax_resource) {
 	cat_log_debug("syntax_resource=%p", syntax_resource);
-	TerSyntaxResourcePrivate *priv = TER_SYNTAX_RESOURCE_GET_PRIVATE(syntax_resource);
+	TerSyntaxResourcePrivate *priv = ter_syntax_resource_get_instance_private(syntax_resource);
 	cat_log_debug("syntax_resource.priv=%p", priv);
 	if (priv->syntax==NULL) {
 		ter_syntax_resource_reload_syntax(syntax_resource);
 	}
 	return priv->syntax;
 }
-

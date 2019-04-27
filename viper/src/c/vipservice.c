@@ -63,32 +63,26 @@ struct _VipServicePrivate {
 static void l_sequence_iface_init(VipISequenceInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipService, vip_service, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipService)
 		G_IMPLEMENT_INTERFACE(VIP_TYPE_ISEQUENCE, l_sequence_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_service_class_init(VipServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_service_init(VipService *instance) {
-	VipServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_SERVICE, VipServicePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	VipService *instance = VIP_SERVICE(object);
-	VipServicePrivate *priv = instance->priv;
+	VipServicePrivate *priv = vip_service_get_instance_private(instance);
 	cat_unref_ptr(priv->listeners);
 	cat_unref_ptr(priv->id_generator);
 	cat_unref_ptr(priv->mapper_registry);
@@ -97,25 +91,23 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->queue);
 	cat_unref_ptr(priv->tree);
 	cat_unref_ptr(priv->cd_provider);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 VipService *vip_service_new(WorService *wor_service, VipCdProvider *cd_provider) {
 	VipService *result = g_object_new(VIP_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	VipServicePrivate *priv = result->priv;
-
+	VipServicePrivate *priv = vip_service_get_instance_private(result);
 
 	/***** new *****/
-
 	priv->last_submit = 0;
 	priv->listeners = cat_weak_list_new();
 	priv->id_generator = cat_atomic_long_new();
@@ -138,15 +130,12 @@ VipService *vip_service_new(WorService *wor_service, VipCdProvider *cd_provider)
 }
 
 
-
-
 /***************************************** NEW  *****************************************/
 
 VipICdProvider *vip_service_get_cd_provider(VipService *service) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	return (VipICdProvider *) (priv->cd_provider);
 }
-
 
 VipPath *vip_service_get_current_work_directory(VipService *service) {
 	if (service==NULL) {
@@ -155,29 +144,25 @@ VipPath *vip_service_get_current_work_directory(VipService *service) {
 		cat_free_ptr(cwd);
 		return result;
 	}
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	return priv->current_work_directory;
 }
 
-
-
 void vip_service_add_listener(VipService *service, VipIListener *listener) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	cat_weak_list_append_once(priv->listeners, (GObject *) listener);
 	VipSnapshot *snapshot = (VipSnapshot *) cat_atomic_reference_get(priv->snapshot_ref);
 	vip_ilistener_snapshot_set(listener, snapshot);
 	cat_unref_ptr(snapshot);
 }
 
-
 void vip_service_post(VipService *service, WorRequest *request) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	wor_queue_post(priv->queue, request);
 }
 
-
 void vip_service_scan(VipService *service) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	VipScanRequest *vip_scan_request = vip_scan_request_new(service);
 	wor_queue_post(priv->queue, (WorRequest *) vip_scan_request);
 	cat_unref_ptr(vip_scan_request);
@@ -185,14 +170,14 @@ void vip_service_scan(VipService *service) {
 
 
 VipCreatePathRequest *vip_service_create_path(VipService *service, VipPath *full_path) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	VipCreatePathRequest *request = vip_create_path_request_new(service, full_path);
 	wor_queue_post(priv->queue, (WorRequest *) request);
 	return request;
 }
 
 void vip_service_refresh_node(VipService *service, CatReadableTreeNode *node_to_refresh) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	cat_log_debug("node_to_refresh=%o", node_to_refresh);
 	VipRefreshNodeRequest *request = vip_refresh_node_request_new(service, node_to_refresh);
 	wor_queue_post(priv->queue, (WorRequest *) request);
@@ -200,25 +185,24 @@ void vip_service_refresh_node(VipService *service, CatReadableTreeNode *node_to_
 }
 
 VipRenameNodeRequest *vip_service_rename_node(VipService *service, CatReadableTreeNode *node_to_rename, CatStringWo *new_name) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	VipRenameNodeRequest *request = vip_rename_node_request_new(service, node_to_rename, new_name);
 	wor_queue_post(priv->queue, (WorRequest *) request);
 	return request;
 }
 
 VipDeleteNodeRequest *vip_service_delete_node(VipService *service, CatReadableTreeNode *node_to_delete) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	VipDeleteNodeRequest *request = vip_delete_node_request_new(service, node_to_delete);
 	wor_queue_post(priv->queue, (WorRequest *) request);
 	return request;
 }
 
 
-
 #define VIP_SUBMIT_FREQUENCY 1000
 
 void vip_service_submit(VipService *service, gboolean now) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	VipSubmitRequest *request = vip_submit_request_new(service);
 	if (now) {
 		wor_queue_post(priv->queue, (WorRequest *) request);
@@ -239,18 +223,16 @@ void vip_service_submit(VipService *service, gboolean now) {
  * paths_to_copy     CatArray<VipPath*>
  */
 VipCopyOrMoveRequest *vip_service_copy_or_move_to(VipService *service, CatArrayWo *paths_to_copy, gboolean move, CatReadableTreeNode *destination_vip) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	VipCopyOrMoveRequest *request = vip_copy_or_move_request_new(service, paths_to_copy, destination_vip, !move);
 	wor_queue_post(priv->queue, (WorRequest *) request);
 	return request;
 
 }
 
-
-
 void vip_service_start(VipService *service) {
 	cat_log_debug("starting service:%p", service);
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	long long nvipid = cat_atomic_long_increment(priv->id_generator);
 	cat_log_debug("nvipid:%d", nvipid);
 
@@ -281,21 +263,19 @@ void vip_service_start(VipService *service) {
 
 
 CatTree *vip_service_get_tree(VipService *service) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	return priv->tree;
 }
 
 
 VipSnapshot *vip_service_get_snapshot(VipService *service) {
 	cat_log_debug("get snapshot service:%p", service);
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	return (VipSnapshot *) cat_atomic_reference_get(priv->snapshot_ref);
 }
 
-
-
 gboolean vip_service_set_snapshot(VipService *service, VipSnapshot *new_snapshot) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 
 	gboolean result = FALSE;
 
@@ -340,28 +320,24 @@ gboolean vip_service_set_snapshot(VipService *service, VipSnapshot *new_snapshot
 	return result;
 }
 
-
-
 VipMapperRegistry *vip_service_get_mapper_registry(VipService *service) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	return priv->mapper_registry;
 }
 
-
 void vip_service_dump_tree(VipService *service) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(service);
+	VipServicePrivate *priv = vip_service_get_instance_private(service);
 	cat_tree_print(priv->tree);
 }
 
 
 /********************* start VipISequence implementation *********************/
 
-
 static long long l_sequence_next(VipISequence *self) {
-	VipServicePrivate *priv = VIP_SERVICE_GET_PRIVATE(self);
+	VipService *instance = VIP_SERVICE(self);
+	VipServicePrivate *priv = vip_service_get_instance_private(instance);
 	return cat_atomic_long_increment(priv->id_generator);
 }
-
 
 static void l_sequence_iface_init(VipISequenceInterface *iface) {
 	iface->next = l_sequence_next;

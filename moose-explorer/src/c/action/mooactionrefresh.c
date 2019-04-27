@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "mooactionrefresh.h"
 #include "../moonodelayout.h"
 #include <moose.h>
@@ -35,16 +34,13 @@ struct _MooActionRefreshPrivate {
 	MooService *moo_service;
 };
 
-
-G_DEFINE_TYPE(MooActionRefresh, moo_action_refresh, LEA_TYPE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE(MooActionRefresh, moo_action_refresh, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
 static void moo_action_refresh_class_init(MooActionRefreshClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooActionRefreshPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -54,14 +50,12 @@ static void moo_action_refresh_class_init(MooActionRefreshClass *clazz) {
 }
 
 static void moo_action_refresh_init(MooActionRefresh *instance) {
-	MooActionRefreshPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ACTION_REFRESH, MooActionRefreshPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooActionRefresh *instance = MOO_ACTION_REFRESH(object);
-	MooActionRefreshPrivate *priv = instance->priv;
+	MooActionRefreshPrivate *priv = moo_action_refresh_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
 	cat_unref_ptr(priv->selection);
 	G_OBJECT_CLASS(moo_action_refresh_parent_class)->dispose(object);
@@ -75,11 +69,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 MooActionRefresh *moo_action_refresh_new(MooService *moo_service) {
 	MooActionRefresh *result = g_object_new(MOO_TYPE_ACTION_REFRESH, NULL);
 	cat_ref_anounce(result);
-	MooActionRefreshPrivate *priv = result->priv;
+	MooActionRefreshPrivate *priv = moo_action_refresh_get_instance_private(result);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->selection = NULL;
 	lea_action_construct((LeaAction *) result, cat_string_wo_new_with("moose.refresh"), cat_string_wo_new_with("Re_fresh"), cat_string_wo_new_with("view-refresh"));
@@ -87,9 +80,8 @@ MooActionRefresh *moo_action_refresh_new(MooService *moo_service) {
 	return result;
 }
 
-
 void moo_action_refresh_set_selection(MooActionRefresh *action_refresh, CatArrayWo *selection) {
-	MooActionRefreshPrivate *priv = MOO_ACTION_REFRESH_GET_PRIVATE(action_refresh);
+	MooActionRefreshPrivate *priv = moo_action_refresh_get_instance_private(action_refresh);
 	cat_ref_swap(priv->selection, selection);
 	gboolean has_refreshable_selection = FALSE;
 	if (selection) {
@@ -110,11 +102,9 @@ void moo_action_refresh_set_selection(MooActionRefresh *action_refresh, CatArray
 	lea_action_set_sensitive_self((LeaAction *) action_refresh, has_refreshable_selection);
 }
 
-
-
-
 static void l_action_run(LeaAction *self) {
-	MooActionRefreshPrivate *priv = MOO_ACTION_REFRESH_GET_PRIVATE(self);
+	MooActionRefresh *instance = MOO_ACTION_REFRESH(self);
+	MooActionRefreshPrivate *priv = moo_action_refresh_get_instance_private(instance);
 	CatArrayWo *selection = priv->selection;
 	if (selection) {
 		CatIIterator *iter = cat_array_wo_iterator(selection);
@@ -128,18 +118,4 @@ static void l_action_run(LeaAction *self) {
 		}
 		cat_unref_ptr(iter);
 	}
-
-//	if (priv->destination == NULL) {
-//		return;
-//	}
-//	MooNodeWo *node = moo_node_layout_get_node(priv->destination);
-//	MooResourceContentWo *resource_content = (MooResourceContentWo *) moo_node_wo_get_content(node, moo_resource_content_wo_key());
-//	if (resource_content) {
-//		CatReadableTreeNode *tree_vip_node = moo_resource_content_wo_get_node(resource_content);
-//		moo_clipboard_paste_resources(priv->moo_clipboard, tree_vip_node);
-//	}
 }
-
-
-
-

@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOODEFAULTNODERENDERER_H_
 #define MOODEFAULTNODERENDERER_H_
 
@@ -35,17 +34,12 @@ G_BEGIN_DECLS
 #define MOO_IS_DEFAULT_NODE_RENDERER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_DEFAULT_NODE_RENDERER))
 #define MOO_IS_DEFAULT_NODE_RENDERER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_DEFAULT_NODE_RENDERER))
 #define MOO_DEFAULT_NODE_RENDERER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_DEFAULT_NODE_RENDERER, MooDefaultNodeRendererClass))
-#define MOO_DEFAULT_NODE_RENDERER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_DEFAULT_NODE_RENDERER, MooDefaultNodeRendererPrivate))
-
 
 typedef struct _MooDefaultNodeRenderer               MooDefaultNodeRenderer;
-typedef struct _MooDefaultNodeRendererPrivate        MooDefaultNodeRendererPrivate;
 typedef struct _MooDefaultNodeRendererClass          MooDefaultNodeRendererClass;
-
 
 struct _MooDefaultNodeRenderer {
 	GObject parent;
-	MooDefaultNodeRendererPrivate *priv;
 };
 
 struct _MooDefaultNodeRendererClass {
@@ -57,11 +51,9 @@ GType moo_default_node_renderer_get_type();
 
 MooDefaultNodeRenderer *moo_default_node_renderer_new();
 
-
 void moo_default_node_renderer_draw_map(cairo_t *cairo, double xoffset, int yoffset, double size, gboolean as_opened, gboolean with_blue);
 
 void moo_default_renderer_draw_file(cairo_t *cairo, double xoffset, int yoffset, double size);
-
 
 G_END_DECLS
 

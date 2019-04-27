@@ -29,7 +29,6 @@ static void jag_byt_icatch_or_finally_default_init(JagBytICatchOrFinallyInterfac
 }
 
 
-
 int jag_byt_icatch_or_finally_get_handle_pc(JagBytICatchOrFinally *self) {
 	g_return_val_if_fail(JAG_BYT_IS_ICATCH_OR_FINALLY(self), -1);
 	return JAG_BYT_ICATCH_OR_FINALLY_GET_INTERFACE(self)->getHandlePc(self);

@@ -57,40 +57,32 @@ static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface);
 static void l_cow_change_listener_iface_init(CowIChangeListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(TerService, ter_service, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(TerService)
 		G_IMPLEMENT_INTERFACE(ELK_TYPE_IRESOURCE_HANDLER, l_resource_handler_iface_init);
 		G_IMPLEMENT_INTERFACE(COW_TYPE_ICHANGE_LISTENER, l_cow_change_listener_iface_init);
 })
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void ter_service_class_init(TerServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(TerServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void ter_service_init(TerService *instance) {
-	TerServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, TER_TYPE_SERVICE, TerServicePrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	TerService *instance = TER_SERVICE(object);
-	TerServicePrivate *priv = instance->priv;
+	TerServicePrivate *priv = ter_service_get_instance_private(instance);
 
 	if (priv->grammar_map) {
 		g_object_run_dispose(G_OBJECT(priv->grammar_map));
 	}
 	cat_unref_ptr(priv->grammar_map);
-
-
 	cat_unref_ptr(priv->wor_service);
 	cat_unref_ptr(priv->elk_service);
 	cat_unref_ptr(priv->prefs_panel_factory);
@@ -98,14 +90,14 @@ static void _dispose(GObject *object) {
 	cat_unref_ptr(priv->a_ter_preferences);
 	cat_unref_ptr(priv->a_edit_prefs_map);
 	cat_unref_ptr(priv->connector_map);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(ter_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(ter_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -113,10 +105,9 @@ static void _finalize(GObject *object) {
 static CatS l_s_txt_config = CAT_S_DEF("config");
 
 static void l_attach_preferences(TerService *ter_service) {
-	TerServicePrivate *priv = TER_SERVICE_GET_PRIVATE(ter_service);
+	TerServicePrivate *priv = ter_service_get_instance_private(ter_service);
 	ElkPreferencesService *prefs_service = elk_service_get_preferences_service(priv->elk_service);
 	CowPanelModel *panel_model = elk_preferences_service_get_panel_model(prefs_service);
-
 
 	VipPath *shared_path = elk_preferences_services_get_shared_config_map(prefs_service);
 	VipPath *shared_config_path = vip_path_create_child(shared_path, CAT_S(l_s_txt_config));
@@ -135,11 +126,10 @@ static void l_attach_preferences(TerService *ter_service) {
 	cow_ichange_listener_config_changed(COW_ICHANGE_LISTENER(ter_service), (GObject *) elk_preferences_container_get(prefs_container));
 }
 
-
 TerService *ter_service_new(WorService *wor_service, ElkService *elk_service, VipService *vip_service) {
 	TerService *result = g_object_new(TER_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	TerServicePrivate *priv = result->priv;
+	TerServicePrivate *priv = ter_service_get_instance_private(result);
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->elk_service = cat_ref_ptr(elk_service);
 	priv->a_edit_prefs_map = NULL;
@@ -156,7 +146,7 @@ TerService *ter_service_new(WorService *wor_service, ElkService *elk_service, Vi
 
 static TerPrefsClazzWo *l_find_best_document_clazz(ElkIResourceHandler *self, CatStringWo *a_filename) {
 	TerService *service = TER_SERVICE(self);
-	TerServicePrivate *priv = TER_SERVICE_GET_PRIVATE(service);
+	TerServicePrivate *priv = ter_service_get_instance_private(service);
 
 	ElkPreferencesService *prefs_service = elk_service_get_preferences_service(priv->elk_service);
 	ElkPreferencesContainer *prefs_container = elk_preferences_service_get_container(prefs_service);
@@ -168,7 +158,6 @@ static TerPrefsClazzWo *l_find_best_document_clazz(ElkIResourceHandler *self, Ca
 	if (a_ter_prefs==NULL) {
 		return NULL;
 	}
-
 
 	TerPrefsClazzWo *result = NULL;
 	CatHashMapWo *a_clazz_map = ter_preferences_wo_get_document_clazzes(a_ter_prefs);
@@ -201,9 +190,9 @@ static TerPrefsClazzWo *l_find_best_document_clazz(ElkIResourceHandler *self, Ca
 	return result;
 }
 
-
 static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_enlist_to, MooNodeWo *node) {
-	TerServicePrivate *priv = TER_SERVICE_GET_PRIVATE(self);
+	TerService *instance = TER_SERVICE(self);
+	TerServicePrivate *priv = ter_service_get_instance_private(instance);
 	MooResourceContentWo *resource_content = (MooResourceContentWo *) moo_node_wo_get_content(node, moo_resource_content_wo_key());
 	if (resource_content!=NULL) {
 		VipNode *node = moo_resource_content_wo_get_viper_node(resource_content);
@@ -224,7 +213,6 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 	}
 }
 
-
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
 	iface->enlistEditorFactories = l_enlist_editor_factories;
 }
@@ -232,14 +220,13 @@ static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
 /********************* end ElkIResourceHandler implementation *********************/
 
 
-
 /********************* start CowIChangeListener implementation *********************/
 
 
 static void l_config_changed(CowIChangeListener *self, GObject *config) {
 	ElkPreferencesWo *a_elk_prefs = (ElkPreferencesWo *) config;
-	TerService *ter_service = TER_SERVICE(self);
-	TerServicePrivate *priv = TER_SERVICE_GET_PRIVATE(ter_service);
+	TerService *instance = TER_SERVICE(self);
+	TerServicePrivate *priv = ter_service_get_instance_private(instance);
 
 	TerPreferencesWo *a_ter_prefs = NULL;
 	if (a_elk_prefs) {
@@ -269,14 +256,11 @@ static void l_config_changed(CowIChangeListener *self, GObject *config) {
 	}
 	CatHashMapWo *a_editor_prefs_map = cat_hash_map_wo_anchor(e_editor_prefs_map, 0);
 	cat_ref_swap(priv->a_edit_prefs_map, a_editor_prefs_map);
-
 	cat_unref_ptr(a_editor_prefs_map);
 }
-
 
 static void l_cow_change_listener_iface_init(CowIChangeListenerInterface *iface) {
 	iface->configChanged = l_config_changed;
 }
 
 /********************* end CowIChangeListener implementation *********************/
-

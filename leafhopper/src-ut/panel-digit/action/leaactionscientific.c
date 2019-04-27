@@ -28,33 +28,23 @@
 #define CAT_LOG_CLAZZ "LeaActionScientific"
 #include <logging/catlog.h>
 
-struct _LeaActionScientificPrivate {
-	void *dummy;
-};
 
-
-G_DEFINE_TYPE(LeaActionScientific, lea_action_scientific, LEA_TYPE_ACTION)
+G_DEFINE_TYPE(LeaActionScientific, lea_action_scientific, LEA_TYPE_ACTION) // @suppress("Unused static function")
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void lea_action_scientific_class_init(LeaActionScientificClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaActionScientificPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void lea_action_scientific_init(LeaActionScientific *instance) {
-	LeaActionScientificPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, LEA_TYPE_ACTION_SCIENTIFIC, LeaActionScientificPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	LeaActionScientific *instance = LEA_ACTION_SCIENTIFIC(object);
-//	LeaActionScientificPrivate *priv = instance->priv;
 	G_OBJECT_CLASS(lea_action_scientific_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -70,17 +60,6 @@ static void l_finalize(GObject *object) {
 LeaActionScientific *lea_action_scientific_new() {
 	LeaActionScientific *result = g_object_new(LEA_TYPE_ACTION_SCIENTIFIC, NULL);
 	cat_ref_anounce(result);
-//	LeaActionScientificPrivate *priv = result->priv;
 	lea_action_construct((LeaAction *) result, cat_string_wo_new_data("digit.scientific"), cat_string_wo_new_with("S_cientific"), NULL);
 	return result;
 }
-
-
-
-
-
-
-
-
-
-

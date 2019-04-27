@@ -32,15 +32,12 @@ struct _JagLinkPrivate {
 	CatWeakList *reference_by_list;
 };
 
-
-G_DEFINE_TYPE(JagLink, jag_link, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JagLink, jag_link, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_link_class_init(JagLinkClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagLinkPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -52,7 +49,7 @@ static void jag_link_init(JagLink *instance) {
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagLink *instance = JAG_LINK(object);
-	JagLinkPrivate *priv = JAG_LINK_GET_PRIVATE(instance);
+	JagLinkPrivate *priv = jag_link_get_instance_private(instance);
 	cat_unref_ptr(priv->reference_by_list);
 	G_OBJECT_CLASS(jag_link_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -67,23 +64,23 @@ static void l_finalize(GObject *object) {
 
 
 void jag_link_construct(JagLink *link) {
-	JagLinkPrivate *priv = JAG_LINK_GET_PRIVATE(link);
+	JagLinkPrivate *priv = jag_link_get_instance_private(link);
 	priv->reference_by_list = cat_weak_list_new();
 }
 
 
 void jag_link_add_referred_by(JagLink *link, GObject *content) {
-	JagLinkPrivate *priv = JAG_LINK_GET_PRIVATE(link);
+	JagLinkPrivate *priv = jag_link_get_instance_private(link);
 	cat_weak_list_append_once(priv->reference_by_list, content);
 }
 
 void jag_link_remove_referred_by(JagLink *link, GObject *content) {
-	JagLinkPrivate *priv = JAG_LINK_GET_PRIVATE(link);
+	JagLinkPrivate *priv = jag_link_get_instance_private(link);
 	cat_weak_list_remove(priv->reference_by_list, content);
 }
 
 void jag_link_notify(JagLink *link, GObject *notify_data) {
-	JagLinkPrivate *priv = JAG_LINK_GET_PRIVATE(link);
+	JagLinkPrivate *priv = jag_link_get_instance_private(link);
 	CatIIterator *iter = cat_weak_list_iterator(priv->reference_by_list);
 	while(cat_iiterator_has_next(iter)) {
 		GObject *referred_by = cat_iiterator_next(iter);

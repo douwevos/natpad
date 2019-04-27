@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "leakey.h"
 #include <caterpillar.h>
 #include <string.h>
@@ -91,24 +90,24 @@ struct _LeaKeyPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(LeaKey, lea_key, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(LeaKey)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
 static void lea_key_class_init(LeaKeyClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(LeaKeyPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
+	object_class->dispose = l_dispose;
 }
 
 static void lea_key_init(LeaKey *instance) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	LeaKeyPrivate *priv = LEA_KEY_GET_PRIVATE(object);
+	LeaKey *instance = LEA_KEY(object);
+	LeaKeyPrivate *priv = lea_key_get_instance_private(instance);
 	cat_unref_ptr(priv->a_text);
 	cat_log_detail("disposed:%p", object);
 }
@@ -119,7 +118,7 @@ LeaKey *lea_key_new(int key, int modifiers) {
 		key = key - 'a' + 'A';
 	}
 	cat_log_debug("key=%d, modifiers=%d", key, modifiers);
-	LeaKeyPrivate *priv = LEA_KEY_GET_PRIVATE(result);
+	LeaKeyPrivate *priv = lea_key_get_instance_private(result);
 	priv->key = key;
 	priv->modifiers = modifiers;
 	priv->a_text = NULL;
@@ -288,7 +287,7 @@ LeaKey *lea_key_from_string(CatStringWo *a_txt) {
 
 
 CatStringWo *lea_key_get_key_text(LeaKey *key) {
-	LeaKeyPrivate *priv = LEA_KEY_GET_PRIVATE(key);
+	LeaKeyPrivate *priv = lea_key_get_instance_private(key);
 	if (priv->a_text==NULL) {
 		switch(priv->key) {
 			case GDK_KEY_Alt_L : {
@@ -418,7 +417,7 @@ static void l_append_key_string(CatStringWo *e_text, CatStringWo *a_to_append) {
 }
 
 CatStringWo *lea_key_to_string(LeaKey *key) {
-	LeaKeyPrivate *priv = LEA_KEY_GET_PRIVATE(key);
+	LeaKeyPrivate *priv = lea_key_get_instance_private(key);
 	int modifiers = priv->modifiers;
 	CatStringWo *e_result = cat_string_wo_new();
 	if (modifiers & (LEA_KM_SHIFT|LEA_KM_SHIFT_DOWN|LEA_KM_SHIFT_UP)) {
@@ -469,13 +468,13 @@ gboolean lea_key_equal(LeaKey *key_a, LeaKey *key_b) {
 	if (key_a==NULL || key_b==NULL) {
 		return FALSE;
 	}
-	LeaKeyPrivate *priv_a = LEA_KEY_GET_PRIVATE(key_a);
-	LeaKeyPrivate *priv_b = LEA_KEY_GET_PRIVATE(key_b);
+	LeaKeyPrivate *priv_a = lea_key_get_instance_private(key_a);
+	LeaKeyPrivate *priv_b = lea_key_get_instance_private(key_b);
 	return (priv_a->key==priv_b->key) && (priv_a->modifiers==priv_b->modifiers);
 }
 
 int lea_key_hashcode(LeaKey *key) {
-	LeaKeyPrivate *priv = LEA_KEY_GET_PRIVATE(key);
+	LeaKeyPrivate *priv = lea_key_get_instance_private(key);
 	cat_log_detail("key=%d, modifiers=%d", priv->key, priv->modifiers);
 	if (priv->hash_code==0) {
 		priv->hash_code = priv->key + priv->modifiers*3;
@@ -489,9 +488,9 @@ int lea_key_hashcode(LeaKey *key) {
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	LeaKey *key = LEA_KEY(self);
+	LeaKey *instance = LEA_KEY(self);
+	LeaKeyPrivate *priv = lea_key_get_instance_private(instance);
 	CatStringWo *e_rs = cat_string_wo_new();
-	LeaKeyPrivate *priv = LEA_KEY_GET_PRIVATE(key);
 	if (priv->modifiers & LEA_KM_SHIFT) {
 		l_append_key_string(e_rs, CAT_S(lea_s_key_modifier_shift));
 	}
@@ -504,7 +503,7 @@ static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append
 	if (priv->modifiers & LEA_KM_SUPER) {
 		l_append_key_string(e_rs, CAT_S(lea_s_key_modifier_super));
 	}
-	l_append_key_string(e_rs, lea_key_get_key_text(key));
+	l_append_key_string(e_rs, lea_key_get_key_text(instance));
 	cat_string_wo_append(append_to, e_rs);
 	cat_unref_ptr(e_rs);
 }

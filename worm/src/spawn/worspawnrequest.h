@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define WOR_IS_SPAWN_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), WOR_TYPE_SPAWN_REQUEST))
 #define WOR_IS_SPAWN_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), WOR_TYPE_SPAWN_REQUEST))
 #define WOR_SPAWN_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), WOR_TYPE_SPAWN_REQUEST, WorSpawnRequestClass))
-#define WOR_SPAWN_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), WOR_TYPE_SPAWN_REQUEST, WorSpawnRequestPrivate))
 
 typedef struct _WorSpawnRequest               WorSpawnRequest;
 typedef struct _WorSpawnRequestPrivate        WorSpawnRequestPrivate;
@@ -44,7 +43,6 @@ typedef struct _WorSpawnRequestClass          WorSpawnRequestClass;
 
 struct _WorSpawnRequest {
 	WorRequest parent;
-	WorSpawnRequestPrivate *priv;
 };
 
 struct _WorSpawnRequestClass {
@@ -61,6 +59,5 @@ GType wor_spawn_request_get_type();
 void wor_spawn_request_construct(WorSpawnRequest *spawn_request, WorIRequestPostBox *request_post_box);
 
 G_END_DECLS
-
 
 #endif /* WORSPAWNREQUEST_H_ */

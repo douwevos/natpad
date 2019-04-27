@@ -38,12 +38,12 @@ G_BEGIN_DECLS
 
 
 typedef struct _ElkActionExit	   		ElkActionExit;
+typedef struct _ElkActionExitPrivate	ElkActionExitPrivate;
 typedef struct _ElkActionExitClass	  	ElkActionExitClass;
 
 
 struct _ElkActionExit {
 	LeaAction parent;
-	ElkIService *service;
 };
 
 struct _ElkActionExitClass {

@@ -21,8 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "woriconditionobserver.h"
 
 static void wor_icondition_observer_interface_init(gpointer klass) {
@@ -45,7 +43,6 @@ GType wor_icondition_observer_get_type (void) {
 	}
 	return g_define_type_id__volatile;
 }
-
 
 
 void wor_icondition_observer_condition_reporting(WorIConditionObserver *self) {

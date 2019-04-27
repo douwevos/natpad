@@ -36,23 +36,18 @@ G_BEGIN_DECLS
 #define MOO_IS_EXPLORER_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_EXPLORER_SERVICE))
 #define MOO_IS_EXPLORER_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_EXPLORER_SERVICE))
 #define MOO_EXPLORER_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_EXPLORER_SERVICE, MooExplorerServiceClass))
-#define MOO_EXPLORER_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_EXPLORER_SERVICE, MooExplorerServicePrivate))
-
 
 typedef struct _MooExplorerService               MooExplorerService;
 typedef struct _MooExplorerServicePrivate        MooExplorerServicePrivate;
 typedef struct _MooExplorerServiceClass          MooExplorerServiceClass;
 
-
 struct _MooExplorerService {
 	GObject parent;
-	MooExplorerServicePrivate *priv;
 };
 
 struct _MooExplorerServiceClass {
 	GObjectClass parent_class;
 };
-
 
 GType moo_explorer_service_get_type();
 

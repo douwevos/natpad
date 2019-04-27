@@ -34,10 +34,8 @@ G_BEGIN_DECLS
 #define JAG_IS_LIBRARY_RENDERER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_LIBRARY_RENDERER))
 #define JAG_LIBRARY_RENDERER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_LIBRARY_RENDERER, JagLibraryRendererClass))
 
-
 typedef struct _JagLibraryRenderer               JagLibraryRenderer;
 typedef struct _JagLibraryRendererClass          JagLibraryRendererClass;
-
 
 struct _JagLibraryRenderer {
 	GObject parent;
@@ -46,7 +44,6 @@ struct _JagLibraryRenderer {
 struct _JagLibraryRendererClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_library_renderer_get_type();
 

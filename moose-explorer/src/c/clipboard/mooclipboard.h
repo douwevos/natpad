@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOOCLIPBOARD_H_
 #define MOOCLIPBOARD_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define MOO_IS_CLIPBOARD(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_CLIPBOARD))
 #define MOO_IS_CLIPBOARD_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_CLIPBOARD))
 #define MOO_CLIPBOARD_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_CLIPBOARD, MooClipboardClass))
-#define MOO_CLIPBOARD_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_CLIPBOARD, MooClipboardPrivate))
 
 typedef struct _MooClipboard               MooClipboard;
 typedef struct _MooClipboardPrivate        MooClipboardPrivate;
@@ -47,7 +45,6 @@ typedef struct _MooClipboardClass          MooClipboardClass;
 
 struct _MooClipboard {
 	GObject parent;
-	MooClipboardPrivate *priv;
 };
 
 struct _MooClipboardClass {
@@ -67,11 +64,6 @@ void moo_clipboard_cut_or_copy(MooClipboard *moo_clipboard, CatArrayWo *selected
 
 gboolean moo_clipboard_contains_resources(MooClipboard *moo_clipboard);
 
-
-
-void moo_clipboard_set_selection(MooClipboard *moo_clipboard, CatArrayWo *selected);
-
 G_END_DECLS
-
 
 #endif /* MOOCLIPBOARD_H_ */

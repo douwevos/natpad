@@ -36,6 +36,7 @@ struct _JagRefreshCompilerRequestPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagRefreshCompilerRequest, jag_refresh_compiler_request, WOR_TYPE_REQUEST,
+		G_ADD_PRIVATE(JagRefreshCompilerRequest)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
@@ -44,8 +45,6 @@ static void l_finalize(GObject *object);
 static void l_run_request(WorRequest *request);
 
 static void jag_refresh_compiler_request_class_init(JagRefreshCompilerRequestClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagRefreshCompilerRequestPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -60,7 +59,7 @@ static void jag_refresh_compiler_request_init(JagRefreshCompilerRequest *instanc
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagRefreshCompilerRequest *instance = JAG_REFRESH_COMPILER_REQUEST(object);
-	JagRefreshCompilerRequestPrivate *priv = JAG_REFRESH_COMPILER_REQUEST_GET_PRIVATE(instance);
+	JagRefreshCompilerRequestPrivate *priv = jag_refresh_compiler_request_get_instance_private(instance);
 	cat_unref_ptr(priv->jag_moose_service);
 	cat_unref_ptr(priv->module_id_path);
 	G_OBJECT_CLASS(jag_refresh_compiler_request_parent_class)->dispose(object);
@@ -74,11 +73,10 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 JagRefreshCompilerRequest *jag_refresh_compiler_request_new(JagMooseService *jag_moose_service, MooIdPath *module_id_path) {
 	JagRefreshCompilerRequest *result = g_object_new(JAG_TYPE_REFRESH_COMPILER_REQUEST, NULL);
 	cat_ref_anounce(result);
-	JagRefreshCompilerRequestPrivate *priv = JAG_REFRESH_COMPILER_REQUEST_GET_PRIVATE(result);
+	JagRefreshCompilerRequestPrivate *priv = jag_refresh_compiler_request_get_instance_private(result);
 	wor_request_construct((WorRequest *) result);
 	priv->jag_moose_service = cat_ref_ptr(jag_moose_service);
 	priv->module_id_path  = cat_ref_ptr(module_id_path);
@@ -89,7 +87,7 @@ CatS l_s_txt_jre = CAT_S_DEF("JagJre");
 
 static void l_run_request(WorRequest *request) {
 	JagRefreshCompilerRequest *instance = JAG_REFRESH_COMPILER_REQUEST(request);
-	JagRefreshCompilerRequestPrivate *priv = JAG_REFRESH_COMPILER_REQUEST_GET_PRIVATE(instance);
+	JagRefreshCompilerRequestPrivate *priv = jag_refresh_compiler_request_get_instance_private(instance);
 	MooService *moo_service = jag_moose_service_get_moo_service(priv->jag_moose_service);
 	MooTransaction *tx = moo_service_create_transaction((GObject *) request, moo_service);
 	while(moo_transaction_retry(tx)) {
@@ -100,7 +98,6 @@ static void l_run_request(WorRequest *request) {
 		if (e_module_node==NULL) {
 			break;
 		}
-
 
 		MooNodeListWo *e_children = moo_node_wo_get_editable_children(e_module_node);
 
@@ -133,8 +130,6 @@ static void l_run_request(WorRequest *request) {
 			}
 		}
 
-
-
 		int idx;
 		for(idx=moo_node_list_wo_count(e_children)-1; idx>=0; idx--) {
 			MooNodeWo *child = moo_node_list_wo_get_at(e_children, idx);
@@ -163,7 +158,7 @@ static void l_run_request(WorRequest *request) {
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
 	JagRefreshCompilerRequest *instance = JAG_REFRESH_COMPILER_REQUEST(self);
-	JagRefreshCompilerRequestPrivate *priv = JAG_REFRESH_COMPILER_REQUEST_GET_PRIVATE(instance);
+	JagRefreshCompilerRequestPrivate *priv = jag_refresh_compiler_request_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p] path=%o", iname, self, priv->module_id_path);
 }
@@ -173,10 +168,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-
-
-
-
-
-
-

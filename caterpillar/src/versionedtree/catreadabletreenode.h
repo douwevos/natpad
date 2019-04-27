@@ -33,13 +33,10 @@ G_BEGIN_DECLS
 #define CAT_IS_READABLE_TREE_NODE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_READABLE_TREE_NODE))
 #define CAT_IS_READABLE_TREE_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_READABLE_TREE_NODE))
 #define CAT_READABLE_TREE_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_READABLE_TREE_NODE, CatReadableTreeNodeClass))
-#define CAT_READABLE_TREE_NODE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_READABLE_TREE_NODE, CatReadableTreeNodePrivate))
-
 
 typedef struct _CatReadableTreeNode               CatReadableTreeNode;
 typedef struct _CatReadableTreeNodeClass          CatReadableTreeNodeClass;
 typedef struct _CatReadableTreeNodePrivate        CatReadableTreeNodePrivate;
-
 
 struct _CatReadableTreeNode {
 	CatTreeNode parent;

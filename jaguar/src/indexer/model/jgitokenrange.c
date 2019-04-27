@@ -33,8 +33,6 @@ struct _JgiTokenRangePrivate {
 	int last_index;
 };
 
-
-
 #define JGI_TYPE_TOKEN_RANGE_ITER            (jgi_token_range_iter_get_type())
 #define JGI_TOKEN_RANGE_ITER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), jgi_token_range_iter_get_type(), JgiTokenRangeIter))
 #define JGI_TOKEN_RANGE_ITER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), JGI_TYPE_TOKEN_RANGE_ITER, JgiTokenRangeIterClass))
@@ -62,10 +60,9 @@ GType jgi_token_range_iter_get_type(void);
 
 static void l_iterator_interface_init(CatIIteratorInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(JgiTokenRangeIter, jgi_token_range_iter, G_TYPE_OBJECT, {
+G_DEFINE_TYPE_WITH_CODE(JgiTokenRangeIter, jgi_token_range_iter, G_TYPE_OBJECT, { // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_IITERATOR, l_iterator_interface_init);
 });
-
 
 static void l_dispose_iter(GObject *object);
 
@@ -83,70 +80,24 @@ static void l_dispose_iter(GObject *object) {
 }
 
 
-static gboolean l_iter_has_next(CatIIterator *self) {
-	if (self==NULL) {
-		return FALSE;
-	}
-	JgiTokenRangeIter *this = JGI_TOKEN_RANGE_ITER(self);
-	int li = JGI_TOKEN_RANGE_GET_PRIVATE(this->token_range)->last_index;
-	cat_log_trace("_has_next:this->offset=%d", this->offset);
-	return this->offset<=li;
-}
-
-static gboolean l_iter_is_last(CatIIterator *self) {
-	JgiTokenRangeIter *this = JGI_TOKEN_RANGE_ITER(self);
-	int li = JGI_TOKEN_RANGE_GET_PRIVATE(this->token_range)->last_index;
-	return this->offset==li;
-}
-
-static gpointer l_iter_next(CatIIterator *self) {
-	JgiTokenRangeIter *this = JGI_TOKEN_RANGE_ITER(self);
-	cat_log_trace("_iter_next:this->offset=%d", this->offset);
-	CatArrayWo *e_token_list = JGI_TOKEN_RANGE_GET_PRIVATE(this->token_range)->e_token_list;
-	return cat_array_wo_get(e_token_list, this->offset++);
-}
-
-
-static void l_iterator_interface_init(CatIIteratorInterface *iface) {
-	iface->has_next = l_iter_has_next;
-	iface->next = l_iter_next;
-	iface->is_last = l_iter_is_last;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-G_DEFINE_TYPE(JgiTokenRange, jgi_token_range, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JgiTokenRange, jgi_token_range, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jgi_token_range_class_init(JgiTokenRangeClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JgiTokenRangePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jgi_token_range_init(JgiTokenRange *instance) {
-	JgiTokenRangePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JGI_TYPE_TOKEN_RANGE, JgiTokenRangePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JgiTokenRange *instance = JGI_TOKEN_RANGE(object);
-	JgiTokenRangePrivate *priv = instance->priv;
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(instance);
 	cat_unref_ptr(priv->e_token_list);
 	G_OBJECT_CLASS(jgi_token_range_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -163,7 +114,7 @@ static void l_finalize(GObject *object) {
 JgiTokenRange *jgi_token_range_new(CatArrayWo *e_token_list, int first_index, int last_index) {
 	JgiTokenRange *result = g_object_new(JGI_TYPE_TOKEN_RANGE, NULL);
 	cat_ref_anounce(result);
-	JgiTokenRangePrivate *priv = result->priv;
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(result);
 	priv->e_token_list = cat_ref_ptr(e_token_list);
 	priv->first_index = first_index;
 	priv->last_index = last_index;
@@ -171,31 +122,34 @@ JgiTokenRange *jgi_token_range_new(CatArrayWo *e_token_list, int first_index, in
 }
 
 int jgi_token_range_get_first_index(JgiTokenRange *token_range) {
-	return JGI_TOKEN_RANGE_GET_PRIVATE(token_range)->first_index;
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(token_range);
+	return priv->first_index;
 }
 
 int jgi_token_range_get_last_index(JgiTokenRange *token_range) {
-	return JGI_TOKEN_RANGE_GET_PRIVATE(token_range)->last_index;
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(token_range);
+	return priv->last_index;
 }
 
 JagPToken *jgi_token_range_get_first(JgiTokenRange *token_range) {
-	JgiTokenRangePrivate *priv = JGI_TOKEN_RANGE_GET_PRIVATE(token_range);
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(token_range);
 	int f = priv->first_index;
 	return (JagPToken *) cat_array_wo_get(priv->e_token_list, f);
 }
 
 JagPToken *jgi_token_range_get_last(JgiTokenRange *token_range) {
-	JgiTokenRangePrivate *priv = JGI_TOKEN_RANGE_GET_PRIVATE(token_range);
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(token_range);
 	int f = priv->last_index;
 	return (JagPToken *) cat_array_wo_get(priv->e_token_list, f);
 }
 
 CatArrayWo *e_jgi_token_range_get_raw_tokens(JgiTokenRange *token_range) {
-	return JGI_TOKEN_RANGE_GET_PRIVATE(token_range)->e_token_list;
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(token_range);
+	return priv->e_token_list;
 }
 
 void jgi_token_range_dump(JgiTokenRange *token_range) {
-	JgiTokenRangePrivate *priv = JGI_TOKEN_RANGE_GET_PRIVATE(token_range);
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(token_range);
 	int idx;
 	for(idx=priv->first_index; idx<=priv->last_index; idx++) {
 		JagPToken *token = (JagPToken *) cat_array_wo_get(priv->e_token_list, idx);
@@ -203,12 +157,11 @@ void jgi_token_range_dump(JgiTokenRange *token_range) {
 	}
 }
 
-
 CatIIterator *jgi_token_range_iterator(JgiTokenRange *token_range) {
 	if (token_range==NULL) {
 		return NULL;
 	}
-	JgiTokenRangePrivate *priv = JGI_TOKEN_RANGE_GET_PRIVATE(token_range);
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(token_range);
 	JgiTokenRangeIter *result = g_object_new(JGI_TYPE_TOKEN_RANGE_ITER, NULL);
 	cat_ref_anounce(result);
 	result->offset = priv->first_index;
@@ -217,4 +170,37 @@ CatIIterator *jgi_token_range_iterator(JgiTokenRange *token_range) {
 }
 
 
+
+
+static gboolean l_iter_has_next(CatIIterator *self) {
+	if (self==NULL) {
+		return FALSE;
+	}
+	JgiTokenRangeIter *this = JGI_TOKEN_RANGE_ITER(self);
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(this->token_range);
+	int li = priv->last_index;
+	cat_log_trace("_has_next:this->offset=%d", this->offset);
+	return this->offset<=li;
+}
+
+static gboolean l_iter_is_last(CatIIterator *self) {
+	JgiTokenRangeIter *this = JGI_TOKEN_RANGE_ITER(self);
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(this->token_range);
+	int li = priv->last_index;
+	return this->offset==li;
+}
+
+static gpointer l_iter_next(CatIIterator *self) {
+	JgiTokenRangeIter *this = JGI_TOKEN_RANGE_ITER(self);
+	cat_log_trace("_iter_next:this->offset=%d", this->offset);
+	JgiTokenRangePrivate *priv = jgi_token_range_get_instance_private(this->token_range);
+	CatArrayWo *e_token_list = priv->e_token_list;
+	return cat_array_wo_get(e_token_list, this->offset++);
+}
+
+static void l_iterator_interface_init(CatIIteratorInterface *iface) {
+	iface->has_next = l_iter_has_next;
+	iface->next = l_iter_next;
+	iface->is_last = l_iter_is_last;
+}
 

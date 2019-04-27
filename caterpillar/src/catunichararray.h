@@ -37,10 +37,6 @@ G_BEGIN_DECLS
 
 struct _CatUnicharArray {
 	GInitiallyUnowned parent;
-	gunichar *data;
-	int data_size;
-	int size;
-	unsigned int hash;
 };
 
 struct _CatUnicharArrayClass {
@@ -48,7 +44,7 @@ struct _CatUnicharArrayClass {
 };
 
 typedef struct _CatUnicharArray         CatUnicharArray;
-
+typedef struct _CatUnicharArrayPrivate  CatUnicharArrayPrivate;
 typedef struct _CatUnicharArrayClass    CatUnicharArrayClass;
 
 

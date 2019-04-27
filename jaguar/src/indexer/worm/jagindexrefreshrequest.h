@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define JAG_IS_INDEX_REFRESH_REQUEST(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_INDEX_REFRESH_REQUEST))
 #define JAG_IS_INDEX_REFRESH_REQUEST_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_INDEX_REFRESH_REQUEST))
 #define JAG_INDEX_REFRESH_REQUEST_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_INDEX_REFRESH_REQUEST, JagIndexRefreshRequestClass))
-#define JAG_INDEX_REFRESH_REQUEST_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_INDEX_REFRESH_REQUEST, JagIndexRefreshRequestPrivate))
-
 
 typedef struct _JagIndexRefreshRequest               JagIndexRefreshRequest;
 typedef struct _JagIndexRefreshRequestPrivate        JagIndexRefreshRequestPrivate;
 typedef struct _JagIndexRefreshRequestClass          JagIndexRefreshRequestClass;
 
-
 struct _JagIndexRefreshRequest {
 	WorRequest parent;
-	JagIndexRefreshRequestPrivate *priv;
 };
 
 struct _JagIndexRefreshRequestClass {
 	WorRequestClass parent_class;
 };
-
 
 GType jag_index_refresh_request_get_type();
 

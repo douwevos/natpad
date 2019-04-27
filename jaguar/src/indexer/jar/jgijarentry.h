@@ -36,8 +36,6 @@ G_BEGIN_DECLS
 #define JGI_IS_JAR_ENTRY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JGI_TYPE_JAR_ENTRY))
 #define JGI_IS_JAR_ENTRY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JGI_TYPE_JAR_ENTRY))
 #define JGI_JAR_ENTRY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JGI_TYPE_JAR_ENTRY, JgiJarEntryClass))
-#define JGI_JAR_ENTRY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JGI_TYPE_JAR_ENTRY, JgiJarEntryPrivate))
-
 
 typedef struct _JgiJarEntry               JgiJarEntry;
 typedef struct _JgiJarEntryPrivate        JgiJarEntryPrivate;
@@ -46,13 +44,11 @@ typedef struct _JgiJarEntryClass          JgiJarEntryClass;
 
 struct _JgiJarEntry {
 	GObject parent;
-	JgiJarEntryPrivate *priv;
 };
 
 struct _JgiJarEntryClass {
 	GObjectClass parent_class;
 };
-
 
 GType jgi_jar_entry_get_type();
 
@@ -69,9 +65,6 @@ MooNodeWo *jgi_jar_entry_get_moo_node_ref(JgiJarEntry *entry);
 
 void jgi_jar_entry_add_link_listener(JgiJarEntry *entry, JagILinkListener *link_listener);
 void jgi_jar_entry_remove_link_listener(JgiJarEntry *entry, JagILinkListener *link_listener);
-
-
-
 
 G_END_DECLS
 

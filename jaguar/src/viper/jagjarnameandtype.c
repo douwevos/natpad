@@ -38,50 +38,42 @@ struct _JagJarNameAndTypePrivate {
 	int entry_index;
 };
 
-G_DEFINE_TYPE (JagJarNameAndType, jag_jar_name_and_type, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagJarNameAndType, jag_jar_name_and_type, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_jar_name_and_type_class_init(JagJarNameAndTypeClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagJarNameAndTypePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_jar_name_and_type_init(JagJarNameAndType *instance) {
-	JagJarNameAndTypePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_JAR_NAME_AND_TYPE, JagJarNameAndTypePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagJarNameAndType *instance = JAG_JAR_NAME_AND_TYPE(object);
-	JagJarNameAndTypePrivate *priv = instance->priv;
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(instance);
 	cat_unref_ptr(priv->children);
 	cat_unref_ptr(priv->a_name);
 	cat_unref_ptr(priv->resource);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_jar_name_and_type_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_jar_name_and_type_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 JagJarNameAndType *jag_jar_name_and_type_new(CatStringWo *a_name, gboolean is_map) {
 	JagJarNameAndType *result = g_object_new(JAG_TYPE_JAR_NAME_AND_TYPE, NULL);
 	cat_ref_anounce(result);
-	JagJarNameAndTypePrivate *priv = result->priv;
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(result);
 	priv->a_name = cat_ref_ptr(a_name);
 	priv->is_map = is_map;
 	priv->children = NULL;
@@ -93,11 +85,8 @@ JagJarNameAndType *jag_jar_name_and_type_new(CatStringWo *a_name, gboolean is_ma
 	return result;
 }
 
-
-
-
 int jag_jar_name_and_type_hash(JagJarNameAndType *name_and_type) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	return cat_string_wo_hash(priv->a_name) + (priv->is_map ? 13 : 0);
 }
 
@@ -105,13 +94,13 @@ gboolean jag_jar_name_and_type_equal(JagJarNameAndType *name_and_type_a, JagJarN
 	if (name_and_type_a==name_and_type_b) {
 		return TRUE;
 	}
-	JagJarNameAndTypePrivate *priva = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type_a);
-	JagJarNameAndTypePrivate *privb = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type_b);
+	JagJarNameAndTypePrivate *priva = jag_jar_name_and_type_get_instance_private(name_and_type_a);
+	JagJarNameAndTypePrivate *privb = jag_jar_name_and_type_get_instance_private(name_and_type_b);
 	return priva->is_map==privb->is_map && cat_string_wo_equal(priva->a_name, privb->a_name);
 }
 
 JagJarNameAndType *l_add(JagJarNameAndType *name_and_type, CatArrayWo *e_path_entries, int index) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	cat_unref_ptr(priv->resource);
 	JagJarNameAndType *result = NULL;
 	while(result==NULL) {
@@ -161,7 +150,7 @@ JagJarNameAndType *jag_jar_name_and_type_add(JagJarNameAndType *name_and_type, C
 }
 
 VipIResource *jag_jar_name_and_type_get_vip_resource(JagJarNameAndType *name_and_type, VipIFile *mainFile, CatArrayWo *a_parent_path) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	if (priv->resource==NULL) {
 		CatArrayWo *e_vipPath = cat_array_wo_clone(a_parent_path, CAT_CLONE_DEPTH_MAIN);
 		cat_array_wo_append(e_vipPath, (GObject *) priv->a_name);
@@ -189,37 +178,32 @@ VipIResource *jag_jar_name_and_type_get_vip_resource(JagJarNameAndType *name_and
 	return priv->resource;
 }
 
-
 void jag_jar_name_and_type_set_index(JagJarNameAndType *name_and_type, int entry_index) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	priv->entry_index = entry_index;
 }
 
 int jag_jar_name_and_type_get_index(JagJarNameAndType *name_and_type) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	return priv->entry_index;
 }
 
-
 int jag_jar_name_and_type_child_count(JagJarNameAndType *name_and_type) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	return priv->children==NULL ? -1 : cat_hash_set_size(priv->children);
 }
 
-
 CatIIterator *jag_jar_name_and_type_child_iterator(JagJarNameAndType *name_and_type) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	return priv->children==NULL ? NULL : cat_hash_set_iterator(priv->children);
 }
 
-
 gboolean jag_jar_name_and_type_is_map(JagJarNameAndType *name_and_type) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	return priv->is_map;
 }
 
-
 CatStringWo *jag_jar_name_and_type_get_name(JagJarNameAndType *name_and_type) {
-	JagJarNameAndTypePrivate *priv = JAG_JAR_NAME_AND_TYPE_GET_PRIVATE(name_and_type);
+	JagJarNameAndTypePrivate *priv = jag_jar_name_and_type_get_instance_private(name_and_type);
 	return priv->a_name;
 }

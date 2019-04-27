@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTINSTANCEOFEXPRESSION_H_
 #define JAGASTINSTANCEOFEXPRESSION_H_
 
@@ -37,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_INSTANCE_OF_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_INSTANCE_OF_EXPRESSION))
 #define JAG_AST_IS_INSTANCE_OF_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_INSTANCE_OF_EXPRESSION))
 #define JAG_AST_INSTANCE_OF_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_INSTANCE_OF_EXPRESSION, JagAstInstanceOfExpressionClass))
-#define JAG_AST_INSTANCE_OF_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_INSTANCE_OF_EXPRESSION, JagAstInstanceOfExpressionPrivate))
 
 typedef struct _JagAstInstanceOfExpression               JagAstInstanceOfExpression;
 typedef struct _JagAstInstanceOfExpressionPrivate        JagAstInstanceOfExpressionPrivate;
@@ -46,7 +44,6 @@ typedef struct _JagAstInstanceOfExpressionClass          JagAstInstanceOfExpress
 
 struct _JagAstInstanceOfExpression {
 	GObject parent;
-	JagAstInstanceOfExpressionPrivate *priv;
 };
 
 struct _JagAstInstanceOfExpressionClass {
@@ -59,6 +56,5 @@ GType jag_ast_instance_of_expression_get_type();
 JagAstInstanceOfExpression *jag_ast_instance_of_expression_new(JagAstDeclarationType *cast_type, JagAstIExpression *expression);
 
 G_END_DECLS
-
 
 #endif /* JAGASTINSTANCEOFEXPRESSION_H_ */

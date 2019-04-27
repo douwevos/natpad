@@ -34,47 +34,40 @@ struct _JagBytAttributeMapPrivate {
 
 #define MAX_ATTRIBUTE_BLOCK_SIZE     0x200000
 
-G_DEFINE_TYPE (JagBytAttributeMap, jag_byt_attribute_map, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytAttributeMap, jag_byt_attribute_map, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_attribute_map_class_init(JagBytAttributeMapClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytAttributeMapPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_attribute_map_init(JagBytAttributeMap *instance) {
-	JagBytAttributeMapPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_ATTRIBUTE_MAP, JagBytAttributeMapPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytAttributeMap *instance = JAG_BYT_ATTRIBUTE_MAP(object);
-	JagBytAttributeMapPrivate *priv = instance->priv;
+	JagBytAttributeMapPrivate *priv = jag_byt_attribute_map_get_instance_private(instance);
 	cat_unref_ptr(priv->e_map);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_attribute_map_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_attribute_map_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytAttributeMap *jag_byt_attribute_map_new(JagJObjectInputStream *dis, JagBytIConstantProvider *constant_provider, int cnt) {
 	JagBytAttributeMap *result = g_object_new(JAG_BYT_TYPE_ATTRIBUTE_MAP, NULL);
 	cat_ref_anounce(result);
-	JagBytAttributeMapPrivate *priv = result->priv;
+	JagBytAttributeMapPrivate *priv = jag_byt_attribute_map_get_instance_private(result);
 	priv->e_map = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 
 	int idx;
@@ -123,23 +116,21 @@ JagBytAttributeMap *jag_byt_attribute_map_new(JagJObjectInputStream *dis, JagByt
 }
 
 JagBytAttribute *jag_byt_attribute_map_get(JagBytAttributeMap *attribute_map, CatStringWo *a_key) {
-	JagBytAttributeMapPrivate *priv = JAG_BYT_ATTRIBUTE_MAP_GET_PRIVATE(attribute_map);
+	JagBytAttributeMapPrivate *priv = jag_byt_attribute_map_get_instance_private(attribute_map);
 	return (JagBytAttribute *) cat_hash_map_wo_get(priv->e_map, a_key);
 }
 
-
 JagBytAttributeCode *jag_byt_attribute_map_get_code(JagBytAttributeMap *attribute_map) {
-	JagBytAttributeMapPrivate *priv = JAG_BYT_ATTRIBUTE_MAP_GET_PRIVATE(attribute_map);
+	JagBytAttributeMapPrivate *priv = jag_byt_attribute_map_get_instance_private(attribute_map);
 	return (JagBytAttributeCode *) cat_hash_map_wo_get(priv->e_map, CAT_S(jag_txt_attribute_code));
 }
 
 JagBytAttributeConstantValue *jag_byt_attribute_map_get_constant_value(JagBytAttributeMap *attribute_map) {
-	JagBytAttributeMapPrivate *priv = JAG_BYT_ATTRIBUTE_MAP_GET_PRIVATE(attribute_map);
+	JagBytAttributeMapPrivate *priv = jag_byt_attribute_map_get_instance_private(attribute_map);
 	return (JagBytAttributeConstantValue *) cat_hash_map_wo_get(priv->e_map, CAT_S(jag_txt_attribute_constant_value));
 }
 
 JagBytAttributeExceptions *jag_byt_attribute_map_get_exceptions(JagBytAttributeMap *attribute_map) {
-	JagBytAttributeMapPrivate *priv = JAG_BYT_ATTRIBUTE_MAP_GET_PRIVATE(attribute_map);
+	JagBytAttributeMapPrivate *priv = jag_byt_attribute_map_get_instance_private(attribute_map);
 	return (JagBytAttributeExceptions *) cat_hash_map_wo_get(priv->e_map, CAT_S(jag_txt_attribute_exceptions));
 }
-

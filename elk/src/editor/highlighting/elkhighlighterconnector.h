@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define ELK_IS_HIGHLIGHTER_CONNECTOR(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ELK_TYPE_HIGHLIGHTER_CONNECTOR))
 #define ELK_IS_HIGHLIGHTER_CONNECTOR_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), ELK_TYPE_HIGHLIGHTER_CONNECTOR))
 #define ELK_HIGHLIGHTER_CONNECTOR_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), ELK_TYPE_HIGHLIGHTER_CONNECTOR, ElkHighlighterConnectorClass))
-#define ELK_HIGHLIGHTER_CONNECTOR_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), ELK_TYPE_HIGHLIGHTER_CONNECTOR, ElkHighlighterConnectorPrivate))
 
 typedef struct _ElkHighlighterConnector               ElkHighlighterConnector;
 typedef struct _ElkHighlighterConnectorPrivate        ElkHighlighterConnectorPrivate;

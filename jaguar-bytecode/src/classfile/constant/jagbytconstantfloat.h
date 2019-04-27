@@ -21,12 +21,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTFLOAT_H_
 #define JAGBYTCONSTANTFLOAT_H_
 
 #define JAG_BYT_CONSTANT_FLOAT_ID  4
-
 
 #include <caterpillar.h>
 
@@ -38,7 +36,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_FLOAT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_FLOAT))
 #define JAG_BYT_IS_CONSTANT_FLOAT_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_FLOAT))
 #define JAG_BYT_CONSTANT_FLOAT_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_FLOAT, JagBytConstantFloatClass))
-#define JAG_BYT_CONSTANT_FLOAT_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_FLOAT, JagBytConstantFloatPrivate))
 
 typedef struct _JagBytConstantFloat               JagBytConstantFloat;
 typedef struct _JagBytConstantFloatPrivate        JagBytConstantFloatPrivate;
@@ -47,7 +44,6 @@ typedef struct _JagBytConstantFloatClass          JagBytConstantFloatClass;
 
 struct _JagBytConstantFloat {
 	GObject parent;
-	JagBytConstantFloatPrivate *priv;
 };
 
 struct _JagBytConstantFloatClass {
@@ -62,6 +58,5 @@ JagBytConstantFloat *jag_byt_constant_float_new(int32_t value);
 float jag_byt_constant_float_get_value(JagBytConstantFloat *constant_float);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTCONSTANTFLOAT_H_ */

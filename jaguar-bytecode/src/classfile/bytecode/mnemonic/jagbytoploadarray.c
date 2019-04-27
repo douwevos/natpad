@@ -36,45 +36,39 @@ struct _JagBytOpLoadArrayPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpLoadArray, jag_byt_op_load_array, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpLoadArray)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_load_array_class_init(JagBytOpLoadArrayClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytOpLoadArrayPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_load_array_init(JagBytOpLoadArray *instance) {
-	JagBytOpLoadArrayPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_LOAD_ARRAY, JagBytOpLoadArrayPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_load_array_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_load_array_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytOpLoadArray *jag_byt_op_load_array_new(JagBytOperation operation, int offset, JagBytType array_content_type) {
 	JagBytOpLoadArray *result = g_object_new(JAG_BYT_TYPE_OP_LOAD_ARRAY, NULL);
 	cat_ref_anounce(result);
-	JagBytOpLoadArrayPrivate *priv = result->priv;
+	JagBytOpLoadArrayPrivate *priv = jag_byt_op_load_array_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation , offset, 1);
 	priv->array_content_type = array_content_type;
 	return result;
@@ -82,14 +76,16 @@ JagBytOpLoadArray *jag_byt_op_load_array_new(JagBytOperation operation, int offs
 
 
 JagBytType jag_byt_op_load_array_get_load_type(JagBytOpLoadArray *op_load_array) {
-	return JAG_BYT_OP_LOAD_ARRAY_GET_PRIVATE(op_load_array)->array_content_type;
+	JagBytOpLoadArrayPrivate *priv = jag_byt_op_load_array_get_instance_private(op_load_array);
+	return priv->array_content_type;
 }
 
 
 /********************* start JagBytIMnemonic implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpLoadArrayPrivate *priv = JAG_BYT_OP_LOAD_ARRAY_GET_PRIVATE(self);
+	JagBytOpLoadArray *instance = JAG_BYT_OP_LOAD_ARRAY(self);
+	JagBytOpLoadArrayPrivate *priv = jag_byt_op_load_array_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new();
 	switch(priv->array_content_type) {
 		case JAG_BYT_TYPE_INT :
@@ -121,7 +117,6 @@ static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *la
 	}
 	return result;
 }
-
 
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface) {
 	JagBytIMnemonicInterface *p_iface = g_type_interface_peek_parent(iface);

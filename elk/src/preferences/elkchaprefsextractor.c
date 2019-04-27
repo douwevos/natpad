@@ -34,7 +34,7 @@
 static void l_accessor_iface_init(CowIEntryAccessorInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(ElkChaPrefsExtractor, elk_cha_prefs_extractor, G_TYPE_OBJECT,
+G_DEFINE_TYPE_WITH_CODE(ElkChaPrefsExtractor, elk_cha_prefs_extractor, G_TYPE_OBJECT, // @suppress("Unused static function")
 		G_IMPLEMENT_INTERFACE(COW_TYPE_IENTRY_ACCESSOR, l_accessor_iface_init)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );

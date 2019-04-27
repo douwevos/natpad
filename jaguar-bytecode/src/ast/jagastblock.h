@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTBLOCK_H_
 #define JAGASTBLOCK_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_BLOCK(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_BLOCK))
 #define JAG_AST_IS_BLOCK_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_BLOCK))
 #define JAG_AST_BLOCK_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_BLOCK, JagAstBlockClass))
-#define JAG_AST_BLOCK_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_BLOCK, JagAstBlockPrivate))
 
 typedef struct _JagAstBlock               JagAstBlock;
 typedef struct _JagAstBlockPrivate        JagAstBlockPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstBlockClass          JagAstBlockClass;
 
 struct _JagAstBlock {
 	GObject parent;
-	JagAstBlockPrivate *priv;
 };
 
 struct _JagAstBlockClass {
@@ -68,8 +65,6 @@ int jag_ast_block_get_statement_line_nr(JagAstBlock *block);
 
 JagAstIStatement *jag_ast_block_get_statement_at(JagAstBlock *block, int index);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTBLOCK_H_ */

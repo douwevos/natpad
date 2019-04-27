@@ -37,40 +37,33 @@ struct _JagBytTryCatchListPrivate {
 	CatArrayWo *e_list;
 };
 
-G_DEFINE_TYPE (JagBytTryCatchList, jag_byt_try_catch_list, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytTryCatchList, jag_byt_try_catch_list, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_try_catch_list_class_init(JagBytTryCatchListClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytTryCatchListPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_try_catch_list_init(JagBytTryCatchList *instance) {
-	JagBytTryCatchListPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_TRY_CATCH_LIST, JagBytTryCatchListPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytTryCatchList *instance = JAG_BYT_TRY_CATCH_LIST(object);
-	JagBytTryCatchListPrivate *priv = instance->priv;
+	JagBytTryCatchListPrivate *priv = jag_byt_try_catch_list_get_instance_private(instance);
 	cat_unref_ptr(priv->e_list);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_try_catch_list_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_try_catch_list_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -78,7 +71,6 @@ static int l_try_catch_comp(const JagBytTryCatch *ptra, const JagBytTryCatch *pt
 	if(ptra==ptrb) {
 		return 0;
 	}
-
 
 	int start_a = jag_byt_try_catch_get_start_pc((JagBytTryCatch *) ptra);
 	int start_b = jag_byt_try_catch_get_start_pc((JagBytTryCatch *) ptrb);
@@ -108,7 +100,7 @@ static int l_try_catch_comp(const JagBytTryCatch *ptra, const JagBytTryCatch *pt
 JagBytTryCatchList *jag_byt_try_catch_list_new(CatArrayWo *e_attr_code_exceptions, JagBytIConstantProvider *constant_provider) {
 	JagBytTryCatchList *result = g_object_new(JAG_BYT_TYPE_TRY_CATCH_LIST, NULL);
 	cat_ref_anounce(result);
-	JagBytTryCatchListPrivate *priv = result->priv;
+	JagBytTryCatchListPrivate *priv = jag_byt_try_catch_list_get_instance_private(result);
 	priv->e_list = cat_array_wo_new();
 
 	CatArrayWo *e_todo_list = cat_array_wo_new();
@@ -175,16 +167,12 @@ JagBytTryCatchList *jag_byt_try_catch_list_new(CatArrayWo *e_attr_code_exception
 	return result;
 }
 
-
-
 int jag_byt_try_catch_list_count(JagBytTryCatchList *try_catch_list) {
-	JagBytTryCatchListPrivate *priv = JAG_BYT_TRY_CATCH_LIST_GET_PRIVATE(try_catch_list);
+	JagBytTryCatchListPrivate *priv = jag_byt_try_catch_list_get_instance_private(try_catch_list);
 	return cat_array_wo_size(priv->e_list);
 }
 
-
 JagBytTryCatch *jag_byt_try_catch_list_get(JagBytTryCatchList *try_catch_list, int index) {
-	JagBytTryCatchListPrivate *priv = JAG_BYT_TRY_CATCH_LIST_GET_PRIVATE(try_catch_list);
+	JagBytTryCatchListPrivate *priv = jag_byt_try_catch_list_get_instance_private(try_catch_list);
 	return (JagBytTryCatch *) cat_array_wo_get(priv->e_list, index);
 }
-

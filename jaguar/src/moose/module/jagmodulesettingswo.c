@@ -45,32 +45,26 @@ struct _JagModuleSettingsWoPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagModuleSettingsWo, jag_module_settings_wo, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagModuleSettingsWo)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_module_settings_wo_class_init(JagModuleSettingsWoClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagModuleSettingsWoPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_module_settings_wo_init(JagModuleSettingsWo *instance) {
-	JagModuleSettingsWoPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_TYPE_MODULE_SETTINGS_WO, JagModuleSettingsWoPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagModuleSettingsWo *instance = JAG_MODULE_SETTINGS_WO(object);
-	JagModuleSettingsWoPrivate *priv = instance->priv;
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(instance);
 	cat_unref_ptr(priv->source_folders);
 	cat_unref_ptr(priv->lib_paths);
 	cat_unref_ptr(priv->jre_name);
@@ -78,14 +72,14 @@ static void l_dispose(GObject *object) {
 		cat_unref_ptr(priv->wo_info->original);
 		cat_free_ptr(priv->wo_info);
 	}
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_module_settings_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_module_settings_wo_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -93,7 +87,7 @@ static void l_finalize(GObject *object) {
 JagModuleSettingsWo *jag_module_settings_wo_new() {
 	JagModuleSettingsWo *result = g_object_new(JAG_TYPE_MODULE_SETTINGS_WO, NULL);
 	cat_ref_anounce(result);
-	JagModuleSettingsWoPrivate *priv = result->priv;
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(result);
 	priv->version = 1;
 	priv->source_folders = NULL;
 	priv->lib_paths = NULL;
@@ -105,13 +99,13 @@ JagModuleSettingsWo *jag_module_settings_wo_new() {
 
 
 JagModuleSettingsWo *jag_module_settings_wo_ensure_writable(JagModuleSettingsWo *module_settings) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	if (priv->wo_info) {
 		return cat_ref_ptr(module_settings);
 	}
 	JagModuleSettingsWo *result = g_object_new(JAG_TYPE_MODULE_SETTINGS_WO, NULL);
 	cat_ref_anounce(result);
-	JagModuleSettingsWoPrivate *rpriv = result->priv;
+	JagModuleSettingsWoPrivate *rpriv = jag_module_settings_wo_get_instance_private(result);
 	rpriv->source_folders = cat_ref_ptr(priv->source_folders);
 	rpriv->lib_paths = cat_ref_ptr(priv->lib_paths);
 	rpriv->jre_name = cat_ref_ptr(priv->jre_name);
@@ -122,7 +116,7 @@ JagModuleSettingsWo *jag_module_settings_wo_ensure_writable(JagModuleSettingsWo 
 
 
 JagModuleSettingsWo *jag_module_settings_wo_anchor(JagModuleSettingsWo *module_settings, int version) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	if (priv->wo_info==NULL) {
 		return module_settings;
 	}
@@ -145,10 +139,8 @@ JagModuleSettingsWo *jag_module_settings_wo_anchor(JagModuleSettingsWo *module_s
 //		}
 //	}
 
-
-
 	if (priv->wo_info->original) {
-		JagModuleSettingsWoPrivate *opriv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(priv->wo_info->original);
+		JagModuleSettingsWoPrivate *opriv = jag_module_settings_wo_get_instance_private(priv->wo_info->original);
 		gboolean was_modified = priv->source_folders!=opriv->source_folders
 				|| priv->lib_paths!=opriv->lib_paths
 				|| !cat_string_wo_equal(priv->jre_name, opriv->jre_name);
@@ -169,12 +161,12 @@ JagModuleSettingsWo *jag_module_settings_wo_anchor(JagModuleSettingsWo *module_s
 }
 
 gboolean jag_module_settings_wo_is_fixed(JagModuleSettingsWo *module_settings) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	return priv->wo_info==NULL;
 }
 
 JagModuleSettingsWo *jag_module_settings_wo_get_original(JagModuleSettingsWo *e_module_settings) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(e_module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(e_module_settings);
 	if (priv->wo_info) {
 		return priv->wo_info->original;
 	}
@@ -183,7 +175,7 @@ JagModuleSettingsWo *jag_module_settings_wo_get_original(JagModuleSettingsWo *e_
 
 
 CatArrayWo /* <CatArrayWo<CatStringWo>> */ *jag_module_settings_wo_get_source_folders(JagModuleSettingsWo *module_settings) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	return priv->source_folders;
 }
 
@@ -201,10 +193,9 @@ CatStringWo *jag_module_settings_wo_create_flat_path(CatArrayWo *entries) {
 	return result;
 }
 
-
-
 CatStringWo *jag_module_settings_wo_get_jre_name(JagModuleSettingsWo *module_settings) {
-	return JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings)->jre_name;
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
+	return priv->jre_name;
 }
 
 #define CHECK_IF_WRITABLE(rval) \
@@ -215,37 +206,35 @@ CatStringWo *jag_module_settings_wo_get_jre_name(JagModuleSettingsWo *module_set
 
 
 void jag_module_settings_wo_set_jre_name(JagModuleSettingsWo *module_settings, CatStringWo *new_jre_name) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	CHECK_IF_WRITABLE()
 	cat_ref_sink_swap(priv->jre_name, new_jre_name);
 }
 
 void jag_module_settings_wo_set_source_folders(JagModuleSettingsWo *module_settings, CatArrayWo *new_source_folders) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	CHECK_IF_WRITABLE()
 	cat_ref_sink_swap(priv->source_folders, new_source_folders);
 }
 
-
-
 CatArrayWo *jag_module_settings_wo_get_libraries(JagModuleSettingsWo *module_settings) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	return priv->lib_paths;
 
 }
 
 void jag_module_settings_wo_set_libraries(JagModuleSettingsWo *module_settings, CatArrayWo *new_source_folders) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(module_settings);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(module_settings);
 	CHECK_IF_WRITABLE()
 	cat_ref_sink_swap(priv->lib_paths, new_source_folders);
 }
 
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
-	JagModuleSettingsWoPrivate *priv = JAG_MODULE_SETTINGS_WO_GET_PRIVATE(self);
+	JagModuleSettingsWo *instance = JAG_MODULE_SETTINGS_WO(self);
+	JagModuleSettingsWoPrivate *priv = jag_module_settings_wo_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	cat_string_wo_format(append_to, "%s[%p: %s, version=%d, jre_name=%o", iname, self, priv->wo_info ? "editable" : "anchored", priv->version, priv->jre_name);
 }

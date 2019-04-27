@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_IS_BYTECODE_READER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_BYTECODE_READER))
 #define JAG_IS_BYTECODE_READER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_BYTECODE_READER))
 #define JAG_BYTECODE_READER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_BYTECODE_READER, JagBytecodeReaderClass))
-#define JAG_BYTECODE_READER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_BYTECODE_READER, JagBytecodeReaderPrivate))
 
 typedef struct _JagBytecodeReader               JagBytecodeReader;
 typedef struct _JagBytecodeReaderPrivate        JagBytecodeReaderPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytecodeReaderClass          JagBytecodeReaderClass;
 
 struct _JagBytecodeReader {
 	GObject parent;
-	JagBytecodeReaderPrivate *priv;
 };
 
 struct _JagBytecodeReaderClass {

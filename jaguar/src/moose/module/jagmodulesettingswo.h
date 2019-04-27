@@ -33,17 +33,13 @@ G_BEGIN_DECLS
 #define JAG_IS_MODULE_SETTINGS_WO(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_MODULE_SETTINGS_WO))
 #define JAG_IS_MODULE_SETTINGS_WO_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_MODULE_SETTINGS_WO))
 #define JAG_MODULE_SETTINGS_WO_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_MODULE_SETTINGS_WO, JagModuleSettingsWoClass))
-#define JAG_MODULE_SETTINGS_WO_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_MODULE_SETTINGS_WO, JagModuleSettingsWoPrivate))
-
 
 typedef struct _JagModuleSettingsWo               JagModuleSettingsWo;
 typedef struct _JagModuleSettingsWoPrivate        JagModuleSettingsWoPrivate;
 typedef struct _JagModuleSettingsWoClass          JagModuleSettingsWoClass;
 
-
 struct _JagModuleSettingsWo {
 	GObject parent;
-	JagModuleSettingsWoPrivate *priv;
 };
 
 struct _JagModuleSettingsWoClass {
@@ -68,7 +64,6 @@ void jag_module_settings_wo_set_source_folders(JagModuleSettingsWo *e_module_set
 CatArrayWo *jag_module_settings_wo_get_libraries(JagModuleSettingsWo *module_settings);
 
 void jag_module_settings_wo_set_libraries(JagModuleSettingsWo *e_module_settings, CatArrayWo *new_source_folders);
-
 
 
 void jag_module_settings_wo_set_jre_name(JagModuleSettingsWo *e_module_settings, CatStringWo *new_jre_name);

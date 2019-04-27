@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTCONSTANTPOOL_H_
 #define JAGBYTCONSTANTPOOL_H_
 
@@ -48,7 +47,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_CONSTANT_POOL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_CONSTANT_POOL))
 #define JAG_BYT_IS_CONSTANT_POOL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_CONSTANT_POOL))
 #define JAG_BYT_CONSTANT_POOL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_CONSTANT_POOL, JagBytConstantPoolClass))
-#define JAG_BYT_CONSTANT_POOL_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_CONSTANT_POOL, JagBytConstantPoolPrivate))
 
 typedef struct _JagBytConstantPool               JagBytConstantPool;
 typedef struct _JagBytConstantPoolPrivate        JagBytConstantPoolPrivate;
@@ -57,7 +55,6 @@ typedef struct _JagBytConstantPoolClass          JagBytConstantPoolClass;
 
 struct _JagBytConstantPool {
 	GInitiallyUnowned parent;
-	JagBytConstantPoolPrivate *priv;
 };
 
 struct _JagBytConstantPoolClass {

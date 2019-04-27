@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTLINENUMBERTABLE_H_
 #define JAGBYTLINENUMBERTABLE_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_LINE_NUMBER_TABLE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_LINE_NUMBER_TABLE))
 #define JAG_BYT_IS_LINE_NUMBER_TABLE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_LINE_NUMBER_TABLE))
 #define JAG_BYT_LINE_NUMBER_TABLE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_LINE_NUMBER_TABLE, JagBytLineNumberTableClass))
-#define JAG_BYT_LINE_NUMBER_TABLE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_LINE_NUMBER_TABLE, JagBytLineNumberTablePrivate))
 
 typedef struct _JagBytLineNumberTable               JagBytLineNumberTable;
 typedef struct _JagBytLineNumberTablePrivate        JagBytLineNumberTablePrivate;
@@ -45,7 +43,6 @@ typedef struct _JagBytLineNumberTableClass          JagBytLineNumberTableClass;
 
 struct _JagBytLineNumberTable {
 	GObject parent;
-	JagBytLineNumberTablePrivate *priv;
 };
 
 struct _JagBytLineNumberTableClass {
@@ -63,8 +60,6 @@ void jag_byt_line_number_table_add(JagBytLineNumberTable *line_number_table, Jag
 
 CatIIterator *jag_byt_line_number_table_iterator(JagBytLineNumberTable *line_number_table);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTLINENUMBERTABLE_H_ */

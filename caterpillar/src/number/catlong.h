@@ -37,7 +37,6 @@ G_BEGIN_DECLS
 #define CAT_IS_LONG(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_LONG))
 #define CAT_IS_LONG_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_LONG))
 #define CAT_LONG_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_LONG, CatLongClass))
-#define CAT_LONG_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_LONG, CatLongPrivate))
 
 typedef struct _CatLong               CatLong;
 typedef struct _CatLongPrivate        CatLongPrivate;
@@ -46,7 +45,6 @@ typedef struct _CatLongClass          CatLongClass;
 
 struct _CatLong {
 	GObject parent;
-	CatLongPrivate *priv;
 };
 
 struct _CatLongClass {

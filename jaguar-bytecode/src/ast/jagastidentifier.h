@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTIDENTIFIER_H_
 #define JAGASTIDENTIFIER_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_IDENTIFIER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_IDENTIFIER))
 #define JAG_AST_IS_IDENTIFIER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_IDENTIFIER))
 #define JAG_AST_IDENTIFIER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_IDENTIFIER, JagAstIdentifierClass))
-#define JAG_AST_IDENTIFIER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_IDENTIFIER, JagAstIdentifierPrivate))
 
 typedef struct _JagAstIdentifier               JagAstIdentifier;
 typedef struct _JagAstIdentifierPrivate        JagAstIdentifierPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstIdentifierClass          JagAstIdentifierClass;
 
 struct _JagAstIdentifier {
 	GObject parent;
-	JagAstIdentifierPrivate *priv;
 };
 
 struct _JagAstIdentifierClass {
@@ -61,8 +58,6 @@ JagAstIdentifier *jag_ast_identifier_new_from_name(JagBytName *name);
 
 CatStringWo *jag_ast_identifier_get_text(JagAstIdentifier *identifier);
 
-
 G_END_DECLS
-
 
 #endif /* JAGASTIDENTIFIER_H_ */

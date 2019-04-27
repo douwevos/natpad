@@ -41,51 +41,44 @@ struct _JagBytFieldPrivate {
 	JagBytIConstant *value;
 };
 
-G_DEFINE_TYPE(JagBytField, jag_byt_field, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytField, jag_byt_field, G_TYPE_OBJECT)
 
-static gpointer parent_class = NULL;
-
-static void _dispose(GObject *object);
-static void _finalize(GObject *object);
+static void l_dispose(GObject *object);
+static void l_finalize(GObject *object);
 
 static void jag_byt_field_class_init(JagBytFieldClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytFieldPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
-	object_class->finalize = _finalize;
+	object_class->dispose = l_dispose;
+	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_field_init(JagBytField *instance) {
-	JagBytFieldPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_FIELD, JagBytFieldPrivate);
-	instance->priv = priv;
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytField *instance = JAG_BYT_FIELD(object);
-	JagBytFieldPrivate *priv = instance->priv;
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private(instance);
 	cat_unref_ptr(priv->modifiers);
 	cat_unref_ptr(priv->a_name);
 	cat_unref_ptr(priv->attribute_map);
 	cat_unref_ptr(priv->declaration_type);
 	cat_unref_ptr(priv->value);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_field_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
-static void _finalize(GObject *object) {
+static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_field_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytField *jag_byt_field_new(JagBytIConstantProvider *constant_provider, uint16_t accessFlags, uint16_t nameIndex, uint16_t descriptorIndex, JagBytAttributeMap *attribute_map) {
 	JagBytField *result = g_object_new(JAG_BYT_TYPE_FIELD, NULL);
 	cat_ref_anounce(result);
-	JagBytFieldPrivate *priv = result->priv;
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private(result);
 	priv->accessFlags = accessFlags;
 	priv->nameIndex = nameIndex;
 	priv->descriptorIndex = descriptorIndex;
@@ -109,43 +102,35 @@ JagBytField *jag_byt_field_new(JagBytIConstantProvider *constant_provider, uint1
 	return result;
 }
 
-
-
 uint16_t jag_byt_field_get_access_flags(const JagBytField *field) {
-	JagBytFieldPrivate *priv = JAG_BYT_FIELD_GET_PRIVATE(field);
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private((JagBytField *) field);
 	return priv->accessFlags;
 }
 
-
 uint16_t jag_byt_field_get_name_index(const JagBytField *field) {
-	JagBytFieldPrivate *priv = JAG_BYT_FIELD_GET_PRIVATE(field);
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private((JagBytField *) field);
 	return priv->nameIndex;
 }
 
 uint16_t jag_byt_field_get_descriptor_index(const JagBytField *field) {
-	JagBytFieldPrivate *priv = JAG_BYT_FIELD_GET_PRIVATE(field);
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private((JagBytField *) field);
 	return priv->descriptorIndex;
 }
 
 JagAstDeclarationType *jag_byt_field_get_declaration_type(const JagBytField *field) {
-	JagBytFieldPrivate *priv = JAG_BYT_FIELD_GET_PRIVATE(field);
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private((JagBytField *) field);
 	return priv->declaration_type;
 }
 
-
 CatStringWo *jag_byt_field_get_name(const JagBytField *field) {
-	JagBytFieldPrivate *priv = JAG_BYT_FIELD_GET_PRIVATE(field);
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private((JagBytField *) field);
 	return priv->a_name;
 }
 
 JagBytIConstant *jag_byt_field_get_constant_value(const JagBytField *field) {
-	return JAG_BYT_FIELD_GET_PRIVATE(field)->value;
+	JagBytFieldPrivate *priv = jag_byt_field_get_instance_private((JagBytField *) field);
+	return priv->value;
 }
-
-
-
-
-
 
 
 JagAstDeclarationType *jag_byt_field_parse_descriptor(CatStringWo *a_description) {

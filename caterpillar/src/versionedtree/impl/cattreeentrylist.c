@@ -38,13 +38,12 @@ struct _CatTreeEntryListPrivate {
 };
 
 
-G_DEFINE_TYPE(CatTreeEntryList, cat_tree_entry_list, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(CatTreeEntryList, cat_tree_entry_list, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_tree_entry_list_class_init(CatTreeEntryListClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(CatTreeEntryListPrivate));
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
@@ -52,14 +51,12 @@ static void cat_tree_entry_list_class_init(CatTreeEntryListClass *clazz) {
 }
 
 static void cat_tree_entry_list_init(CatTreeEntryList *instance) {
-	CatTreeEntryListPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_TREE_ENTRY_LIST, CatTreeEntryListPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	CatTreeEntryList *instance = CAT_TREE_ENTRY_LIST(object);
-	CatTreeEntryListPrivate *priv = instance->priv;
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(instance);
 	cat_unref_ptr(priv->o_blocks);
 	cat_unref_ptr(priv->block_edit);
 	G_OBJECT_CLASS(cat_tree_entry_list_parent_class)->dispose(object);
@@ -77,7 +74,7 @@ static void l_finalize(GObject *object) {
 CatTreeEntryList *cat_tree_entry_list_new() {
 	CatTreeEntryList *result = g_object_new(CAT_TYPE_TREE_ENTRY_LIST, NULL);
 	cat_ref_anounce(result);
-	CatTreeEntryListPrivate *priv = result->priv;
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(result);
 	priv->o_blocks = cat_array_wo_new();
 	CatTreeBlock *initial_block = cat_tree_block_new();
 	cat_tree_block_create_node(initial_block);
@@ -91,7 +88,7 @@ CatTreeEntryList *cat_tree_entry_list_new() {
 
 
 void cat_tree_entry_list_mark(CatTreeEntryList *entry_list) {
-	CatTreeEntryListPrivate *priv = CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list);
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
 	if (priv->marked_fixed) {
 		return;
 	}
@@ -115,18 +112,19 @@ void cat_tree_entry_list_mark(CatTreeEntryList *entry_list) {
 
 
 gboolean cat_tree_entry_list_is_marked_fixed(CatTreeEntryList *entry_list) {
-	return CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list)->marked_fixed;
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
+	return priv->marked_fixed;
 }
 
 CatTreeEntryList *cat_tree_entry_list_ensure_writable(CatTreeEntryList *entry_list) {
-	CatTreeEntryListPrivate *priv = CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list);
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
 	if (!priv->marked_fixed) {
 		return cat_ref_ptr(entry_list);
 	}
 
 	CatTreeEntryList *result = g_object_new(CAT_TYPE_TREE_ENTRY_LIST, NULL);
 	cat_ref_anounce(result);
-	CatTreeEntryListPrivate *rpriv = result->priv;
+	CatTreeEntryListPrivate *rpriv = cat_tree_entry_list_get_instance_private(result);
 	rpriv->o_blocks = cat_ref_ptr(priv->o_blocks);
 	rpriv->block_edit = cat_ref_ptr(priv->block_edit);
 	rpriv->block_edit_index = priv->block_edit_index;
@@ -136,7 +134,7 @@ CatTreeEntryList *cat_tree_entry_list_ensure_writable(CatTreeEntryList *entry_li
 
 
 int cat_tree_entry_list_create_node(CatTreeEntryList *entry_list) {
-	CatTreeEntryListPrivate *priv = CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list);
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
 
 	if (priv->marked_fixed) {
 		cat_log_fatal("requesting create node on a fixed list");
@@ -269,7 +267,7 @@ void cat_tree_entry_list_remove_entry(CatTreeEntryList *entry_list, int entry_lo
 	if (entry_location == -1 || entry_location == 0) {
 		return;
 	}
-	CatTreeEntryListPrivate *priv = CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list);
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
 	if (priv->marked_fixed) {
 		cat_log_fatal("requesting remove on a fixed list");
 		return;
@@ -347,7 +345,7 @@ CatTreeEntry *cat_tree_entry_list_get_entry(CatTreeEntryList *entry_list, int en
 	if (entry_location == -1) {
 		return NULL;
 	}
-	CatTreeEntryListPrivate *priv = CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list);
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
 	int block_index = entry_location>>CAT_TREE_BLOCK_SHIFT;
 	int entry_index = entry_location % CAT_TREE_BLOCK_SIZE;
 	cat_log_trace("get entry:entry_list=%o, block_index=%d, entry_index=%d, loc=%d", entry_list, block_index, entry_index, entry_location);
@@ -370,7 +368,7 @@ CatTreeEntry *cat_tree_entry_list_get_writable_entry(CatTreeEntryList *entry_lis
 		return NULL;
 	}
 
-	CatTreeEntryListPrivate *priv = CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list);
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
 	if (priv->marked_fixed) {
 		cat_log_fatal("requesting writable entry on a fixed list");
 		return NULL;
@@ -434,7 +432,7 @@ CatTreeEntry *cat_tree_entry_list_get_writable_entry(CatTreeEntryList *entry_lis
 
 
 int cat_tree_entry_list_find_location(CatTreeEntryList *entry_list, CatIMatcher *matcher, int guess_location) {
-	CatTreeEntryListPrivate *priv = CAT_TREE_ENTRY_LIST_GET_PRIVATE(entry_list);
+	CatTreeEntryListPrivate *priv = cat_tree_entry_list_get_instance_private(entry_list);
 
 	if (guess_location!=-1) {
 

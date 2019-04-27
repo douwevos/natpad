@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTATTRIBUTECONSTANTVALUE_H_
 #define JAGBYTATTRIBUTECONSTANTVALUE_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_CONSTANT_VALUE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_CONSTANT_VALUE))
 #define JAG_BYT_IS_ATTRIBUTE_CONSTANT_VALUE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_CONSTANT_VALUE))
 #define JAG_BYT_ATTRIBUTE_CONSTANT_VALUE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_CONSTANT_VALUE, JagBytAttributeConstantValueClass))
-#define JAG_BYT_ATTRIBUTE_CONSTANT_VALUE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_CONSTANT_VALUE, JagBytAttributeConstantValuePrivate))
 
 typedef struct _JagBytAttributeConstantValue               JagBytAttributeConstantValue;
 typedef struct _JagBytAttributeConstantValuePrivate        JagBytAttributeConstantValuePrivate;
@@ -45,7 +43,6 @@ typedef struct _JagBytAttributeConstantValueClass          JagBytAttributeConsta
 
 struct _JagBytAttributeConstantValue {
 	JagBytAttribute parent;
-	JagBytAttributeConstantValuePrivate *priv;
 };
 
 struct _JagBytAttributeConstantValueClass {
@@ -62,6 +59,5 @@ JagBytAttributeConstantValue *jag_byt_attribute_constant_value_new(CatStringWo *
 int jag_byt_attribute_constant_value_get_index(JagBytAttributeConstantValue *constant_value);
 
 G_END_DECLS
-
 
 #endif /* JAGBYTATTRIBUTECONSTANTVALUE_H_ */

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef SHOMODEL_H_
 #define SHOMODEL_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define SHO_IS_MODEL(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SHO_TYPE_MODEL))
 #define SHO_IS_MODEL_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), SHO_TYPE_MODEL))
 #define SHO_MODEL_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), SHO_TYPE_MODEL, ShoModelClass))
-
 
 typedef struct _ShoModel               ShoModel;
 typedef struct _ShoModelPrivate        ShoModelPrivate;

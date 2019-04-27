@@ -58,18 +58,14 @@ struct _MulServicePrivate {
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MulService, mul_service, G_TYPE_OBJECT,{
+		G_ADD_PRIVATE(MulService)
 		G_IMPLEMENT_INTERFACE(ELK_TYPE_IRESOURCE_HANDLER, l_resource_handler_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void mul_service_class_init(MulServiceClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MulServicePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -78,15 +74,12 @@ static void mul_service_class_init(MulServiceClass *clazz) {
 }
 
 static void mul_service_init(MulService *instance) {
-	MulServicePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MUL_TYPE_SERVICE, MulServicePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MulService *instance = MUL_SERVICE(object);
-	MulServicePrivate *priv = instance->priv;
-
+	MulServicePrivate *priv = mul_service_get_instance_private(instance);
 	cat_unref_ptr(priv->php_connector);
 	cat_unref_ptr(priv->eiffel_connector);
 	cat_unref_ptr(priv->vhdl_connector);
@@ -96,21 +89,21 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->elk_service);
 	cat_unref_ptr(priv->wor_service);
 
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(mul_service_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(mul_service_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 MulService *mul_service_new(WorService *wor_service, ElkService *elk_service) {
 	MulService *result = g_object_new(MUL_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
-	MulServicePrivate *priv = result->priv;
+	MulServicePrivate *priv = mul_service_get_instance_private(result);
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->elk_service = cat_ref_ptr(elk_service);
 
@@ -122,9 +115,6 @@ MulService *mul_service_new(WorService *wor_service, ElkService *elk_service) {
 	priv->rust_connector = mul_rust_editor_connector_new();
 	return result;
 }
-
-
-
 
 /********************* start ElkIResourceHandler implementation *********************/
 
@@ -156,9 +146,9 @@ static CatStringWo *l_find_type_of_parser(ElkIResourceHandler *self, CatStringWo
 	return a_result;
 }
 
-
 static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_enlist_to, MooNodeWo *node) {
-	MulServicePrivate *priv = MUL_SERVICE_GET_PRIVATE(self);
+	MulService *instance = MUL_SERVICE(self);
+	MulServicePrivate *priv = mul_service_get_instance_private(instance);
 	MooResourceContentWo *resource_content = (MooResourceContentWo *) moo_node_wo_get_content(node, moo_resource_content_wo_key());
 	if (resource_content!=NULL) {
 		VipNode *node = moo_resource_content_wo_get_viper_node(resource_content);
@@ -195,7 +185,6 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 				cat_array_wo_append(e_enlist_to, (GObject *) factory);
 				cat_unref_ptr(factory);
 			}
-
 		}
 	}
 }
@@ -205,4 +194,3 @@ static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
 }
 
 /********************* end ElkIResourceHandler implementation *********************/
-

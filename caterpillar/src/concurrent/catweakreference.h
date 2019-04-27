@@ -33,7 +33,6 @@ G_BEGIN_DECLS
 #define CAT_IS_WEAK_REFERENCE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CAT_TYPE_WEAK_REFERENCE))
 #define CAT_IS_WEAK_REFERENCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CAT_TYPE_WEAK_REFERENCE))
 #define CAT_WEAK_REFERENCE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_WEAK_REFERENCE, CatWeakReferenceClass))
-#define CAT_WEAK_REFERENCE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CAT_TYPE_WEAK_REFERENCE, CatWeakReferencePrivate))
 
 
 typedef struct _CatWeakReference               CatWeakReference;

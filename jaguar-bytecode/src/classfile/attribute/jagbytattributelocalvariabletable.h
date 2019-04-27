@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTATTRIBUTELOCALVARIABLETABLE_H_
 #define JAGBYTATTRIBUTELOCALVARIABLETABLE_H_
 
@@ -38,7 +37,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_ATTRIBUTE_LOCAL_VARIABLE_TABLE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_ATTRIBUTE_LOCAL_VARIABLE_TABLE))
 #define JAG_BYT_IS_ATTRIBUTE_LOCAL_VARIABLE_TABLE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_ATTRIBUTE_LOCAL_VARIABLE_TABLE))
 #define JAG_BYT_ATTRIBUTE_LOCAL_VARIABLE_TABLE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_ATTRIBUTE_LOCAL_VARIABLE_TABLE, JagBytAttributeLocalVariableTableClass))
-#define JAG_BYT_ATTRIBUTE_LOCAL_VARIABLE_TABLE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_ATTRIBUTE_LOCAL_VARIABLE_TABLE, JagBytAttributeLocalVariableTablePrivate))
 
 typedef struct _JagBytAttributeLocalVariableTable               JagBytAttributeLocalVariableTable;
 typedef struct _JagBytAttributeLocalVariableTablePrivate        JagBytAttributeLocalVariableTablePrivate;
@@ -47,7 +45,6 @@ typedef struct _JagBytAttributeLocalVariableTableClass          JagBytAttributeL
 
 struct _JagBytAttributeLocalVariableTable {
 	JagBytAttribute parent;
-	JagBytAttributeLocalVariableTablePrivate *priv;
 };
 
 struct _JagBytAttributeLocalVariableTableClass {
@@ -65,7 +62,5 @@ JagBytAttributeLocalVariableTable *jag_byt_attribute_local_variable_table_new(Ca
 JagBytLocalVariableTable *jag_byt_attribute_local_variable_table_get_table(JagBytAttributeLocalVariableTable *attr_local_variable_table);
 
 G_END_DECLS
-
-
 
 #endif /* JAGBYTATTRIBUTELOCALVARIABLETABLE_H_ */

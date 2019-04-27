@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "mooexplorer.h"
 #include "moolayoutmodelprivate.h"
 #include <leafhopper.h>
@@ -42,22 +41,16 @@ struct _MooExplorerPrivate {
 static void l_transaction_listener_iface_init(MooITransactionListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooExplorer, moo_explorer, GTK_TYPE_DRAWING_AREA, {
+		G_ADD_PRIVATE(MooExplorer)
 		G_IMPLEMENT_INTERFACE(MOO_TYPE_ITRANSACTION_LISTENER, l_transaction_listener_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static gboolean l_draw(GtkWidget *widget, cairo_t *cr, gpointer view_as_ptr);
 static gboolean l_button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer user_data);
 
-
-
 static void moo_explorer_class_init(MooExplorerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooExplorerPrivate));
-
 	clazz->activateNode = NULL;
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
@@ -66,31 +59,29 @@ static void moo_explorer_class_init(MooExplorerClass *clazz) {
 }
 
 static void moo_explorer_init(MooExplorer *instance) {
-	MooExplorerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_EXPLORER, MooExplorerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooExplorer *instance = MOO_EXPLORER(object);
-	MooExplorerPrivate *priv = instance->priv;
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(instance);
 	cat_unref_ptr(priv->layout_model);
 	cat_unref_ptr(priv->vip_snapshot);
 	cat_unref_ptr(priv->css_provider);
 	cat_log_detail("dispose:%p", parent_class);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_explorer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_explorer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 void moo_explorer_construct(MooExplorer *moo_explorer, MooService *moo_service, MooNodeRenderRegistry *render_registry) {
-	MooExplorerPrivate *priv = MOO_EXPLORER_GET_PRIVATE(moo_explorer);
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(moo_explorer);
 	priv->moo_service = cat_ref_ptr(moo_service);
 	priv->layout_model = moo_layout_model_new(render_registry);
 	priv->vip_snapshot = NULL;
@@ -132,7 +123,6 @@ void moo_explorer_construct(MooExplorer *moo_explorer, MooService *moo_service, 
 	g_signal_connect(moo_explorer, "draw", G_CALLBACK(l_draw), moo_explorer);
 	g_signal_connect(moo_explorer, "button-press-event", G_CALLBACK(l_button_press_event), moo_explorer);
 
-
 	MooTransactionDispatcher *dispatcher = moo_service_get_transaction_dispatcher(moo_service);
 	moo_transaction_dispatcher_add_listener(dispatcher, (MooITransactionListener *) moo_explorer);
 }
@@ -146,13 +136,14 @@ MooExplorer *moo_explorer_new(MooService *moo_service, MooNodeRenderRegistry *re
 }
 
 MooLayoutModel *moo_explorer_get_layout_model(MooExplorer *moo_explorer) {
-	return MOO_EXPLORER_GET_PRIVATE(moo_explorer)->layout_model;
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(moo_explorer);
+	return priv->layout_model;
 }
 
 
 static gboolean l_draw(GtkWidget *widget, cairo_t *cairo, gpointer view_as_ptr) {
 	MooExplorer *view = MOO_EXPLORER(view_as_ptr);
-	MooExplorerPrivate *priv = MOO_EXPLORER_GET_PRIVATE(view);
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(view);
 
 	cairo_save(cairo);
 
@@ -189,7 +180,6 @@ static gboolean l_draw(GtkWidget *widget, cairo_t *cairo, gpointer view_as_ptr) 
 	}
 	cat_log_trace("allocation=%d,%d - %d,%d", allocation.x, allocation.y, allocation.width, allocation.height);
 
-
 //	PangoContext *pango_context = gtk_widget_create_pango_context(widget);
 //	PangoFontMetrics *font_metrics = pango_context_get_metrics(pango_context, NULL, NULL);
 //	double font_height = ((double) (pango_font_metrics_get_ascent(font_metrics) + pango_font_metrics_get_descent(font_metrics)))/PANGO_SCALE;
@@ -200,26 +190,21 @@ static gboolean l_draw(GtkWidget *widget, cairo_t *cairo, gpointer view_as_ptr) 
 //	cairo_rectangle(cairo, 0, 20, 100, 50);
 //	cairo_fill(cairo);
 	PangoContext *pango_context = gtk_widget_create_pango_context(widget);
-
-
 	moo_layout_model_validate(priv->layout_model, cairo, pango_context);
 	moo_layout_model_paint(priv->layout_model, pango_context, cairo);
 
 	cairo_restore(cairo);
-
 	return TRUE;
 }
 
 
-
 static void l_validate_and_paint(MooExplorer *explorer) {
-	MooExplorerPrivate *priv = MOO_EXPLORER_GET_PRIVATE(explorer);
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(explorer);
 
 	cairo_t *cairo = gdk_cairo_create(gtk_widget_get_window((GtkWidget *) explorer));
 	PangoContext *pango_context = gtk_widget_create_pango_context((GtkWidget *) explorer);
 
 	moo_layout_model_validate(priv->layout_model, cairo, pango_context);
-
 
 	int cur_width, cur_height, view_width, view_height;
 	gtk_widget_get_size_request((GtkWidget *) explorer, &cur_width, &cur_height);
@@ -236,14 +221,10 @@ static void l_validate_and_paint(MooExplorer *explorer) {
 //		gtk_widget_set_size_request((GtkWidget *) explorer, view_width, view_height);
 	}
 
-
 //	l_draw((GtkWidget *) explorer, cairo, explorer);
 
 	cairo_destroy(cairo);
 }
-
-
-
 
 static void l_get_view_location(MooExplorer *explorer, int *view_x, int *view_y) {
 	GtkWidget *widget = GTK_WIDGET(explorer);
@@ -275,10 +256,9 @@ static void l_get_mouse_location(MooExplorer *explorer, int *wmx, int *wmy) {
 	cat_log_debug("wmx:%d, y:%d ", *wmx, *wmy);
 }
 
-
 static gboolean l_button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gpointer user_data) {
 	MooExplorer *explorer = MOO_EXPLORER(gwidget);
-	MooExplorerPrivate *priv = MOO_EXPLORER_GET_PRIVATE(explorer);
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(explorer);
 	gtk_widget_grab_focus(gwidget);
 //	int modifiers = eev->state;
 
@@ -309,12 +289,10 @@ static gboolean l_button_press_event(GtkWidget *gwidget, GdkEventButton *eev, gp
 		}
 	}
 
-
 	return TRUE;
 }
 
 /********************* begin MooITransactionListener implementation *********************/
-
 
 typedef struct _NodeSetInfo NodeSetInfo;
 
@@ -326,7 +304,7 @@ struct _NodeSetInfo {
 
 static gboolean l_set_new_root_node(gpointer user_data) {
 	NodeSetInfo *node_set_info = (NodeSetInfo *) user_data;
-	MooExplorerPrivate *priv = MOO_EXPLORER_GET_PRIVATE(node_set_info->explorer);
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(node_set_info->explorer);
 
 	moo_layout_model_set_root_node(priv->layout_model, node_set_info->root_node);
 	cat_ref_swap(priv->vip_snapshot, node_set_info->vip_snapshot);
@@ -352,10 +330,6 @@ static gboolean l_set_new_root_node(gpointer user_data) {
 //		gtk_widget_set_size_request((GtkWidget *) node_set_info->explorer, view_width, view_height);
 	}
 
-
-
-
-
 	l_draw((GtkWidget *) node_set_info->explorer, cairo, node_set_info->explorer);
 
 	cairo_destroy(cairo);
@@ -375,11 +349,10 @@ static void l_snrn_destroy(gpointer data) {
 	g_free(node_set_info);
 }
 
-
-
 static void l_transaction_commited(MooITransactionListener *self, struct _MooTransaction *transaction, struct _MooNodeWo *new_root) {
 	cat_log_debug("transaction commited:new_root=%o", new_root);
-	MooExplorerPrivate *priv = MOO_EXPLORER_GET_PRIVATE(self);
+	MooExplorer *instance = MOO_EXPLORER(self);
+	MooExplorerPrivate *priv = moo_explorer_get_instance_private(instance);
 	VipService *vip_service = moo_service_get_viper_service(priv->moo_service);
 	NodeSetInfo *node_set_info = g_new(NodeSetInfo, 1);
 	node_set_info->explorer = cat_ref_ptr(self);
@@ -388,10 +361,8 @@ static void l_transaction_commited(MooITransactionListener *self, struct _MooTra
 	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, (GSourceFunc) l_set_new_root_node, node_set_info, (GDestroyNotify) l_snrn_destroy);
 }
 
-
 static void l_transaction_listener_iface_init(MooITransactionListenerInterface *iface) {
 	iface->transactionCommited = l_transaction_commited;
 }
-
 
 /********************* end MooITransactionListener implementation *********************/

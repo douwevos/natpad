@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGBYTLOCALVARIABLETABLEENTRY_H_
 #define JAGBYTLOCALVARIABLETABLEENTRY_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_LOCAL_VARIABLE_TABLE_ENTRY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_LOCAL_VARIABLE_TABLE_ENTRY))
 #define JAG_BYT_IS_LOCAL_VARIABLE_TABLE_ENTRY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_LOCAL_VARIABLE_TABLE_ENTRY))
 #define JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_LOCAL_VARIABLE_TABLE_ENTRY, JagBytLocalVariableTableEntryClass))
-#define JAG_BYT_LOCAL_VARIABLE_TABLE_ENTRY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_LOCAL_VARIABLE_TABLE_ENTRY, JagBytLocalVariableTableEntryPrivate))
 
 typedef struct _JagBytLocalVariableTableEntry               JagBytLocalVariableTableEntry;
 typedef struct _JagBytLocalVariableTableEntryPrivate        JagBytLocalVariableTableEntryPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagBytLocalVariableTableEntryClass          JagBytLocalVariableT
 
 struct _JagBytLocalVariableTableEntry {
 	GObject parent;
-	JagBytLocalVariableTableEntryPrivate *priv;
 };
 
 struct _JagBytLocalVariableTableEntryClass {
@@ -68,8 +65,6 @@ JagAstDeclarationType *jag_byt_local_variable_table_entry_get_declaration_type(J
 
 int jag_byt_local_variable_table_entry_get_index(JagBytLocalVariableTableEntry *entry);
 
-
 G_END_DECLS
-
 
 #endif /* JAGBYTLOCALVARIABLETABLEENTRY_H_ */

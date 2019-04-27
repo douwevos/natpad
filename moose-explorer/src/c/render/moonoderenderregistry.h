@@ -20,7 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MOONODERENDERREGISTRY_H_
 #define MOONODERENDERREGISTRY_H_
 
@@ -36,23 +35,18 @@ G_BEGIN_DECLS
 #define MOO_IS_NODE_RENDER_REGISTRY(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOO_TYPE_NODE_RENDER_REGISTRY))
 #define MOO_IS_NODE_RENDER_REGISTRY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MOO_TYPE_NODE_RENDER_REGISTRY))
 #define MOO_NODE_RENDER_REGISTRY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MOO_TYPE_NODE_RENDER_REGISTRY, MooNodeRenderRegistryClass))
-#define MOO_NODE_RENDER_REGISTRY_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOO_TYPE_NODE_RENDER_REGISTRY, MooNodeRenderRegistryPrivate))
-
 
 typedef struct _MooNodeRenderRegistry               MooNodeRenderRegistry;
 typedef struct _MooNodeRenderRegistryPrivate        MooNodeRenderRegistryPrivate;
 typedef struct _MooNodeRenderRegistryClass          MooNodeRenderRegistryClass;
 
-
 struct _MooNodeRenderRegistry {
 	GObject parent;
-	MooNodeRenderRegistryPrivate *priv;
 };
 
 struct _MooNodeRenderRegistryClass {
 	GObjectClass parent_class;
 };
-
 
 GType moo_node_render_registry_get_type();
 
@@ -61,7 +55,6 @@ MooNodeRenderRegistry *moo_node_render_registry_new();
 void moo_node_render_registry_add_render_factory(MooNodeRenderRegistry *registry, MooINodeRendererFactory *factory);
 
 CatArrayWo *moo_node_render_registry_create_renderers_for_node(MooNodeRenderRegistry *registry, MooNodeWo *node);
-
 
 G_END_DECLS
 

@@ -36,61 +36,54 @@ struct _JagBytOpCheckCastPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpCheckCast, jag_byt_op_check_cast, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpCheckCast)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_check_cast_class_init(JagBytOpCheckCastClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytOpCheckCastPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_check_cast_init(JagBytOpCheckCast *instance) {
-	JagBytOpCheckCastPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_CHECK_CAST, JagBytOpCheckCastPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	JagBytOpCheckCast *instance = JAG_BYT_OP_CHECK_CAST(object);
-//	JagBytOpCheckCastPrivate *priv = instance->priv;
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_op_check_cast_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_op_check_cast_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytOpCheckCast *jag_byt_op_check_cast_new(JagBytOperation operation, int offset, int class_pool_index) {
 	JagBytOpCheckCast *result = g_object_new(JAG_BYT_TYPE_OP_CHECK_CAST, NULL);
 	cat_ref_anounce(result);
-	JagBytOpCheckCastPrivate *priv = result->priv;
+	JagBytOpCheckCastPrivate *priv = jag_byt_op_check_cast_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 3);
 	priv->class_pool_index = class_pool_index;
 	return result;
 }
 
 int jag_byt_op_check_cast_get_class_info_pool_index(JagBytOpCheckCast *op_check_cast) {
-	return JAG_BYT_OP_CHECK_CAST_GET_PRIVATE(op_check_cast)->class_pool_index;
+	JagBytOpCheckCastPrivate *priv = jag_byt_op_check_cast_get_instance_private(op_check_cast);
+	return priv->class_pool_index;
 }
 
 /********************* start JagBytIMnemonic implementation *********************/
 
 static CatStringWo *l_to_string(JagBytIMnemonic *self, JagBytLabelRepository *label_repository) {
-	JagBytOpCheckCast *instance = (JagBytOpCheckCast *) self;
-	JagBytOpCheckCastPrivate *priv = instance->priv;
+	JagBytOpCheckCast *instance = JAG_BYT_OP_CHECK_CAST(self);
+	JagBytOpCheckCastPrivate *priv = jag_byt_op_check_cast_get_instance_private(instance);
 	CatStringWo *result = cat_string_wo_new_with("checkcast ");
 	cat_string_wo_append_decimal(result, priv->class_pool_index);
 	return result;

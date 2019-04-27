@@ -37,14 +37,13 @@ G_BEGIN_DECLS
 #define CAT_LOCK_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), CAT_TYPE_LOCK, CatLockClass))
 
 
-typedef struct _CatLock	   	   CatLock;
-typedef struct _CatLockClass   CatLockClass;
+typedef struct _CatLock	   	     CatLock;
+typedef struct _CatLockPrivate	 CatLockPrivate;
+typedef struct _CatLockClass     CatLockClass;
 
 
 struct _CatLock {
 	GObject parent;
-	GMutex mutex;
-	GCond condition;
 };
 
 struct _CatLockClass {

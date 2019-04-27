@@ -35,23 +35,18 @@ G_BEGIN_DECLS
 #define JAG_IS_SRC_FOLDER_UPDATER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_TYPE_SRC_FOLDER_UPDATER))
 #define JAG_IS_SRC_FOLDER_UPDATER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_TYPE_SRC_FOLDER_UPDATER))
 #define JAG_SRC_FOLDER_UPDATER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_TYPE_SRC_FOLDER_UPDATER, JagSrcFolderUpdaterClass))
-#define JAG_SRC_FOLDER_UPDATER_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_TYPE_SRC_FOLDER_UPDATER, JagSrcFolderUpdaterPrivate))
-
 
 typedef struct _JagSrcFolderUpdater               JagSrcFolderUpdater;
 typedef struct _JagSrcFolderUpdaterPrivate        JagSrcFolderUpdaterPrivate;
 typedef struct _JagSrcFolderUpdaterClass          JagSrcFolderUpdaterClass;
 
-
 struct _JagSrcFolderUpdater {
 	GObject parent;
-	JagSrcFolderUpdaterPrivate *priv;
 };
 
 struct _JagSrcFolderUpdaterClass {
 	GObjectClass parent_class;
 };
-
 
 GType jag_src_folder_updater_get_type();
 
@@ -59,7 +54,6 @@ JagSrcFolderUpdater *jag_src_folder_updater_new(VipISequence *moo_id_sequence, M
 		MooIdPath *src_folder_path);
 
 void jag_src_folder_updater_run(JagSrcFolderUpdater *updater);
-
 
 G_END_DECLS
 

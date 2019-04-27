@@ -37,6 +37,7 @@ struct _JagBytOpValueConvertPrivate {
 static void l_imnemonic_iface_init(JagBytIMnemonicInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagBytOpValueConvert, jag_byt_op_value_convert, JAG_BYT_TYPE_ABSTRACT_MNEMONIC, // @suppress("Unused static function")
+		G_ADD_PRIVATE(JagBytOpValueConvert)
 		G_IMPLEMENT_INTERFACE(JAG_BYT_TYPE_IMNEMONIC, l_imnemonic_iface_init)
 );
 
@@ -44,16 +45,12 @@ static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_op_value_convert_class_init(JagBytOpValueConvertClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(JagBytOpValueConvertPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_op_value_convert_init(JagBytOpValueConvert *instance) {
-	JagBytOpValueConvertPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_OP_VALUE_CONVERT, JagBytOpValueConvertPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
@@ -72,7 +69,7 @@ static void l_finalize(GObject *object) {
 JagBytOpValueConvert *jag_byt_op_value_convert_new(JagBytOperation operation, int offset, JagBytType source_type, JagBytType destination_type) {
 	JagBytOpValueConvert *result = g_object_new(JAG_BYT_TYPE_OP_VALUE_CONVERT, NULL);
 	cat_ref_anounce(result);
-	JagBytOpValueConvertPrivate *priv = result->priv;
+	JagBytOpValueConvertPrivate *priv = jag_byt_op_value_convert_get_instance_private(result);
 	jag_byt_abstract_mnemonic_construct((JagBytAbstractMnemonic *) result, operation, offset, 1);
 	priv->source_type = source_type;
 	priv->destination_type = destination_type;

@@ -52,28 +52,24 @@ struct _MooGroupMainPrivate {
 };
 
 
-G_DEFINE_TYPE(MooGroupMain, moo_group_main, LEA_TYPE_ACTION_GROUP)
+G_DEFINE_TYPE_WITH_PRIVATE(MooGroupMain, moo_group_main, LEA_TYPE_ACTION_GROUP)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void moo_group_main_class_init(MooGroupMainClass *clazz) {
-	g_type_class_add_private(clazz, sizeof(MooGroupMainPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void moo_group_main_init(MooGroupMain *instance) {
-	MooGroupMainPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_GROUP_MAIN, MooGroupMainPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooGroupMain *instance = MOO_GROUP_MAIN(object);
-	MooGroupMainPrivate *priv = instance->priv;
+	MooGroupMainPrivate *priv = moo_group_main_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_clipboard);
 	cat_unref_ptr(priv->group_module);
 	cat_unref_ptr(priv->selection);
@@ -94,15 +90,13 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 MooGroupMain *moo_group_main_new(MooService *moo_service, LeaFrame *frame, MooClipboard *clipboard, LeaKeyContext *key_context) {
 	MooGroupMain *result = g_object_new(MOO_TYPE_GROUP_MAIN, NULL);
 	cat_ref_anounce(result);
-	MooGroupMainPrivate *priv = result->priv;
+	MooGroupMainPrivate *priv = moo_group_main_get_instance_private(result);
 	lea_action_group_construct((LeaActionGroup *) result, cat_string_wo_new_with("moo.group.main"), NULL);
 
 	priv->moo_clipboard = cat_ref_ptr(clipboard);
-
 	priv->selection = NULL;
 
 	priv->group_module = moo_group_module_new(moo_service, frame);
@@ -132,16 +126,10 @@ MooGroupMain *moo_group_main_new(MooService *moo_service, LeaFrame *frame, MooCl
 	lea_action_set_order((LeaAction *) priv->action_properties, -1);
 	lea_action_group_add(grp_services, (LeaAction *) priv->action_properties);
 
-
 	cat_unref_ptr(grp_services);
 
-
-
-
 	LeaActionGroup *group_edit = lea_action_group_create_sub((LeaActionGroup *) result, cat_ref_ptr(lea_prov_edit_group_name()), NULL);
-
 	LeaActionGroup *grp_clipboard = lea_action_group_create_sub(group_edit, cat_string_wo_new_with("edit.clipboard.group"), NULL);
-
 	cat_unref(group_edit);
 
 	lea_action_set_order((LeaAction *) grp_clipboard, -3);
@@ -163,9 +151,6 @@ MooGroupMain *moo_group_main_new(MooService *moo_service, LeaFrame *frame, MooCl
 	cat_unref(grp_clipboard);
 
 
-
-
-
 	LeaActionGroup *grp_delete = lea_action_group_create_sub((LeaActionGroup *) group_edit, cat_string_wo_new_with("edit.delete.group"), NULL);
 	lea_action_set_order((LeaAction *) grp_delete, -2);
 
@@ -179,13 +164,12 @@ MooGroupMain *moo_group_main_new(MooService *moo_service, LeaFrame *frame, MooCl
 }
 
 gboolean moo_group_main_set_has_focus(MooGroupMain *group_main, gboolean owner_has_focus) {
-	MooGroupMainPrivate *priv = MOO_GROUP_MAIN_GET_PRIVATE(group_main);
+	MooGroupMainPrivate *priv = moo_group_main_get_instance_private(group_main);
 	gboolean changed = lea_action_set_visible_self((LeaAction *) priv->action_copy, owner_has_focus);
 	gboolean changed2 = lea_action_set_visible_self((LeaAction *) priv->action_paste, owner_has_focus);
 	gboolean changed3 = lea_action_set_visible_self((LeaAction *) priv->action_delete, owner_has_focus);
 	return changed | changed2 | changed3;
 }
-
 
 enum _MooSelectionFlag {
 	MOO_SELECTION_FLAG_NONE,
@@ -200,20 +184,15 @@ typedef enum _MooSelectionFlag MooSelectionFlag;
  * selection    CatArrayWo<MooNodeLayout *>
  */
 void moo_group_main_set_selection(MooGroupMain *group_main, VipSnapshot *vip_snapshot, CatArrayWo *selection) {
-	MooGroupMainPrivate *priv = MOO_GROUP_MAIN_GET_PRIVATE(group_main);
+	MooGroupMainPrivate *priv = moo_group_main_get_instance_private(group_main);
 	if (priv->selection==selection) {
 		return;
 	}
 	cat_ref_swap(priv->selection, selection);
-//
-////	MooSelectionFlag resource_base_flag = MOO_SELECTION_FLAG_NONE;
-//
 	gboolean has_resource = FALSE;
-////	gboolean has_only_resources = TRUE;
 	gboolean resources_have_same_base = TRUE;
-//
 	CatReadableTreeNode *base_node = NULL;
-//
+
 	if (selection) {
 		CatIIterator *iter = cat_array_wo_iterator(selection);
 		while(cat_iiterator_has_next(iter)) {
@@ -227,8 +206,6 @@ void moo_group_main_set_selection(MooGroupMain *group_main, VipSnapshot *vip_sna
 				if (tree_vip_node) {
 					CatReadableTreeNode *tree_parent_node = (CatReadableTreeNode *) cat_tree_node_get_parent_node((CatTreeNode *) tree_vip_node);
 
-	//
-	//				VipNode *par_node = vip_snapshot_find_parent_node(vip_snapshot, vip_node);
 					cat_log_debug("vip_node=%o, par_node=%o", tree_vip_node, tree_parent_node);
 					if (tree_parent_node) {
 						if (base_node==NULL) {
@@ -259,9 +236,4 @@ void moo_group_main_set_selection(MooGroupMain *group_main, VipSnapshot *vip_sna
 	moo_action_refresh_set_selection(priv->action_refresh, selection);
 	moo_action_properties_set_selection(priv->action_properties, selection);
 	moo_action_delete_set_selection(priv->action_delete, selection);
-
-
 }
-
-
-

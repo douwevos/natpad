@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTINFIXEXPRESSION_H_
 #define JAGASTINFIXEXPRESSION_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_INFIX_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_INFIX_EXPRESSION))
 #define JAG_AST_IS_INFIX_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_INFIX_EXPRESSION))
 #define JAG_AST_INFIX_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_INFIX_EXPRESSION, JagAstInfixExpressionClass))
-#define JAG_AST_INFIX_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_INFIX_EXPRESSION, JagAstInfixExpressionPrivate))
 
 typedef struct _JagAstInfixExpression               JagAstInfixExpression;
 typedef struct _JagAstInfixExpressionPrivate        JagAstInfixExpressionPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstInfixExpressionClass          JagAstInfixExpressionClass;
 
 struct _JagAstInfixExpression {
 	GObject parent;
-	JagAstInfixExpressionPrivate *priv;
 };
 
 struct _JagAstInfixExpressionClass {

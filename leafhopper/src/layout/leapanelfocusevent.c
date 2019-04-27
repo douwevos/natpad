@@ -14,20 +14,19 @@
 #define CAT_LOG_CLAZZ "LeaPanelFocusEvent"
 #include "logging/catlog.h"
 
+G_DEFINE_TYPE(LeaPanelFocusEvent, lea_panel_focus_event, LEA_TYPE_EVENT) // @suppress("Unused static function")
 
-G_DEFINE_TYPE(LeaPanelFocusEvent, lea_panel_focus_event, LEA_TYPE_EVENT)
-
-static void _dispose(GObject *object);
+static void l_dispose(GObject *object);
 
 static void lea_panel_focus_event_class_init(LeaPanelFocusEventClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
-	object_class->dispose = _dispose;
+	object_class->dispose = l_dispose;
 }
 
 static void lea_panel_focus_event_init(LeaPanelFocusEvent *node) {
 }
 
-static void _dispose(GObject *object) {
+static void l_dispose(GObject *object) {
 	LeaPanelFocusEvent *instance = LEA_PANEL_FOCUS_EVENT(object);
 	cat_unref_ptr(instance->old_panel_owner);
 	cat_unref_ptr(instance->old_panel);

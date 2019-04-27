@@ -63,7 +63,6 @@ extern CatS ter_s_strings_span_lines;
 extern CatS ter_s_string_esc;
 extern CatS ter_s_string_alt;
 
-
 #define TER_TYPE_GRAMMAR_READER            (ter_grammar_reader_get_type())
 #define TER_GRAMMAR_READER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), ter_grammar_reader_get_type(), TerGrammarReader))
 #define TER_GRAMMAR_READER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TER_TYPE_GRAMMAR_READER, TerGrammarReaderClass))
@@ -71,9 +70,7 @@ extern CatS ter_s_string_alt;
 #define TER_IS_GRAMMAR_READER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TER_TYPE_GRAMMAR_READER))
 #define TER_GRAMMAR_READER_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), TER_TYPE_GRAMMAR_READER, TerGrammarReaderClass))
 
-
 typedef struct _TerGrammarReader	      TerGrammarReader;
-
 typedef struct _TerGrammarReaderClass	  TerGrammarReaderClass;
 
 struct _TerGrammarReader {

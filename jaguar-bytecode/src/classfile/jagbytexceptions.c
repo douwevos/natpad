@@ -32,65 +32,56 @@ struct _JagBytExceptionsPrivate {
 	CatArrayWo *e_names;
 };
 
-G_DEFINE_TYPE (JagBytExceptions, jag_byt_exceptions, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagBytExceptions, jag_byt_exceptions, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_byt_exceptions_class_init(JagBytExceptionsClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagBytExceptionsPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_byt_exceptions_init(JagBytExceptions *instance) {
-	JagBytExceptionsPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_BYT_TYPE_EXCEPTIONS, JagBytExceptionsPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagBytExceptions *instance = JAG_BYT_EXCEPTIONS(object);
-	JagBytExceptionsPrivate *priv = instance->priv;
+	JagBytExceptionsPrivate *priv = jag_byt_exceptions_get_instance_private(instance);
 	cat_unref_ptr(priv->e_names);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_byt_exceptions_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_byt_exceptions_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagBytExceptions *jag_byt_exceptions_new() {
 	JagBytExceptions *result = g_object_new(JAG_BYT_TYPE_EXCEPTIONS, NULL);
 	cat_ref_anounce(result);
-	JagBytExceptionsPrivate *priv = result->priv;
+	JagBytExceptionsPrivate *priv = jag_byt_exceptions_get_instance_private(result);
 	priv->e_names = cat_array_wo_new();
 	return result;
 }
 
 void jag_byt_exceptions_add(JagBytExceptions *exceptions, JagBytName *exception_type_name) {
-	JagBytExceptionsPrivate *priv = JAG_BYT_EXCEPTIONS_GET_PRIVATE(exceptions);
+	JagBytExceptionsPrivate *priv = jag_byt_exceptions_get_instance_private(exceptions);
 	cat_array_wo_append(priv->e_names, (GObject *) exception_type_name);
 }
 
-
-
 int jag_byt_exceptions_count(JagBytExceptions *exceptions) {
-	JagBytExceptionsPrivate *priv = JAG_BYT_EXCEPTIONS_GET_PRIVATE(exceptions);
+	JagBytExceptionsPrivate *priv = jag_byt_exceptions_get_instance_private(exceptions);
 	return cat_array_wo_size(priv->e_names);
 }
 
 JagBytName *jag_byt_exceptions_get(JagBytExceptions *exceptions, int index) {
-	JagBytExceptionsPrivate *priv = JAG_BYT_EXCEPTIONS_GET_PRIVATE(exceptions);
+	JagBytExceptionsPrivate *priv = jag_byt_exceptions_get_instance_private(exceptions);
 	return (JagBytName *) cat_array_wo_get(priv->e_names, index);
 }
 
@@ -101,9 +92,8 @@ gboolean jag_byt_exceptions_equal(JagBytExceptions *exceptions_a, JagBytExceptio
 	if (exceptions_a==NULL || exceptions_b==NULL) {
 		return FALSE;
 	}
-	JagBytExceptionsPrivate *priv_a = JAG_BYT_EXCEPTIONS_GET_PRIVATE(exceptions_a);
-	JagBytExceptionsPrivate *priv_b = JAG_BYT_EXCEPTIONS_GET_PRIVATE(exceptions_b);
+	JagBytExceptionsPrivate *priv_a = jag_byt_exceptions_get_instance_private(exceptions_a);
+	JagBytExceptionsPrivate *priv_b = jag_byt_exceptions_get_instance_private(exceptions_b);
 
 	return cat_array_wo_equal(priv_a->e_names, priv_b->e_names, (GEqualFunc) jag_byt_name_equal);
 }
-

@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef WORSERVICE_H_
 #define WORSERVICE_H_
 
@@ -36,17 +35,13 @@ G_BEGIN_DECLS
 #define WOR_IS_SERVICE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), WOR_TYPE_SERVICE))
 #define WOR_IS_SERVICE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), WOR_TYPE_SERVICE))
 #define WOR_SERVICE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), WOR_TYPE_SERVICE, WorServiceClass))
-#define WOR_SERVICE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), WOR_TYPE_SERVICE, WorServicePrivate))
-
 
 typedef struct _WorService               WorService;
 typedef struct _WorServicePrivate        WorServicePrivate;
 typedef struct _WorServiceClass          WorServiceClass;
 
-
 struct _WorService {
 		GObject parent;
-		WorServicePrivate *priv;
 };
 
 struct _WorServiceClass {

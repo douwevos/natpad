@@ -54,41 +54,35 @@ struct _VipPathPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(VipPath, vip_path, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(VipPath)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void vip_path_class_init(VipPathClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(VipPathPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void vip_path_init(VipPath *instance) {
-	VipPathPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, VIP_TYPE_PATH, VipPathPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%o", object);
 	VipPath *instance = VIP_PATH(object);
-	VipPathPrivate *priv = instance->priv;
+	VipPathPrivate *priv = vip_path_get_instance_private(instance);
 	cat_unref_ptr(priv->a_entries);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(vip_path_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(vip_path_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -106,7 +100,7 @@ VipPath *vip_path_new(const CatStringWo *c_full_path) {
 	cat_log_debug("full_path=%s", cat_string_wo_getchars(c_full_path));
 	VipPath *result = g_object_new(VIP_TYPE_PATH, NULL);
 	cat_ref_anounce(result);
-	VipPathPrivate *priv = result->priv;
+	VipPathPrivate *priv = vip_path_get_instance_private(result);
 
 	priv->drive = NULL;
 	CatArrayWo *e_split = NULL;
@@ -214,7 +208,7 @@ VipPath *vip_path_new_for_uri(CatStringWo *a_full_uri) {
 static VipPath *l_new_with(VipPathDriveType drive_type, CatStringWo *drive, CatArrayWo *c_entries, gboolean is_map) {
 	VipPath *result = g_object_new(VIP_TYPE_PATH, NULL);
 	cat_ref_anounce(result);
-	VipPathPrivate *priv = result->priv;
+	VipPathPrivate *priv = vip_path_get_instance_private(result);
 	priv->drive_type = drive_type;
 	priv->drive = cat_ref_ptr(drive);
 	if (c_entries == NULL) {
@@ -250,7 +244,7 @@ static VipPath *l_new_with(VipPathDriveType drive_type, CatStringWo *drive, CatA
 }
 
 VipPath *vip_path_create_canonical(VipPath *path, VipICdProvider *cd_provider) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	if (priv->is_canonical) {
 		return cat_ref_ptr(path);
 	}
@@ -278,7 +272,8 @@ VipPath *vip_path_create_canonical(VipPath *path, VipICdProvider *cd_provider) {
 
 
 	if (cwd!=NULL) {
-		CatArrayWo *entries = VIP_PATH_GET_PRIVATE(cwd)->a_entries;
+		VipPathPrivate *priv_cwd = vip_path_get_instance_private(cwd);
+		CatArrayWo *entries = priv_cwd->a_entries;
 		cat_array_wo_append_all(new_entries, entries);
 		drive_type = vip_path_get_directory_type(cwd);
 		drive = vip_path_get_drive(cwd);
@@ -318,17 +313,17 @@ VipPath *vip_path_new_from_entries(CatArrayWo *entries) {
 
 
 VipPath *vip_path_create_drive_path(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return l_new_with(priv->drive_type, priv->drive, NULL, TRUE);
 }
 
 CatStringWo *vip_path_get_drive(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return priv->drive;
 }
 
 CatStringWo *vip_path_get_drive_descriptor(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	CatStringWo *buf = cat_string_wo_new();
 #ifdef G_OS_WIN32
 	switch(priv->drive_type) {
@@ -356,15 +351,15 @@ CatStringWo *vip_path_get_drive_descriptor(VipPath *path) {
 
 
 gboolean vip_path_is_canonical(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return priv->is_canonical;
 }
 
 gboolean vip_path_is_a_child(VipPath *path, VipPath *potential_child) {
 	g_return_val_if_fail(vip_path_is_canonical(path), FALSE);
 	g_return_val_if_fail(vip_path_is_canonical(potential_child), FALSE);
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
-	VipPathPrivate *priv_child = VIP_PATH_GET_PRIVATE(potential_child);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
+	VipPathPrivate *priv_child = vip_path_get_instance_private(potential_child);
 	if (priv->drive_type!=priv_child->drive_type) {
 		return FALSE;
 	}
@@ -384,18 +379,18 @@ gboolean vip_path_is_a_child(VipPath *path, VipPath *potential_child) {
 
 
 gboolean vip_path_get_level(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return cat_array_wo_size(priv->a_entries);
 }
 
 VipPathDriveType vip_path_get_directory_type(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return priv->drive_type;
 }
 
 
 VipPath *vip_path_create_parent_path(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	if (cat_array_wo_size(priv->a_entries)>1) {
 		CatArrayWo *new_entries = cat_array_wo_clone(priv->a_entries, CAT_CLONE_DEPTH_MAIN);
 		cat_array_wo_remove_last(new_entries, NULL);
@@ -405,7 +400,7 @@ VipPath *vip_path_create_parent_path(VipPath *path) {
 }
 
 VipPath *vip_path_create_child(VipPath *path, const CatStringWo *new_leaf) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	CatArrayWo *new_entries = cat_array_wo_clone(priv->a_entries, CAT_CLONE_DEPTH_MAIN);
 	cat_array_wo_append(new_entries, (GObject *) new_leaf);
 	return l_new_with(priv->drive_type, priv->drive, new_entries, FALSE);
@@ -413,29 +408,27 @@ VipPath *vip_path_create_child(VipPath *path, const CatStringWo *new_leaf) {
 
 
 int vip_path_count(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return cat_array_wo_size(priv->a_entries);
 }
 
 CatStringWo *vip_path_get_at(VipPath *path, int index) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return (CatStringWo *) cat_array_wo_get(priv->a_entries, index);
 }
 
-
 CatIIterator *vip_path_iterator(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return cat_array_wo_iterator(priv->a_entries);
 }
 
-
 int vip_path_hash(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	return priv->hash_code;
 }
 
 CatStringWo *vip_path_get_leaf(VipPath *path) {
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	if (cat_array_wo_size(priv->a_entries)>0) {
 		return (CatStringWo *) cat_array_wo_get_last(priv->a_entries);
 	}
@@ -449,8 +442,8 @@ gboolean vip_path_equal(VipPath *path_a, VipPath *path_b) {
 	if (path_a==NULL || path_b==NULL) {
 		return FALSE;
 	}
-	VipPathPrivate *priv_a = VIP_PATH_GET_PRIVATE(path_a);
-	VipPathPrivate *priv_b = VIP_PATH_GET_PRIVATE(path_b);
+	VipPathPrivate *priv_a = vip_path_get_instance_private(path_a);
+	VipPathPrivate *priv_b = vip_path_get_instance_private(path_b);
 
 	if (priv_a->is_canonical!=priv_b->is_canonical) {
 		return FALSE;
@@ -486,7 +479,7 @@ CatStringWo *vip_path_to_string(VipPath *path) {
 	if (path==NULL) {
 		return cat_string_wo_new_with(".");
 	}
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 	cat_log_trace("type:%d, path=%p, entries=%p", priv->drive_type, path, priv->a_entries);
 	CatStringWo *e_buf = cat_string_wo_new();
 	CatIIterator *iter = cat_array_wo_iterator(priv->a_entries);
@@ -528,14 +521,12 @@ CatStringWo *vip_path_to_string(VipPath *path) {
 	return e_buf;
 }
 
-
-
 // TODO: what to do if path is not canonical
 CatStringWo *vip_path_as_uri(VipPath *path) {
 	if (path==NULL) {
 		return cat_string_wo_new_with("file:///");
 	}
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(path);
+	VipPathPrivate *priv = vip_path_get_instance_private(path);
 
 	if (!priv->is_canonical) {
 		CatStringWo *ps = vip_path_to_string(path);
@@ -567,12 +558,11 @@ CatStringWo *vip_path_as_uri(VipPath *path) {
 }
 
 
-
 /********************* start CatIStringable implementation *********************/
 
 static void l_stringable_print(CatIStringable *self, struct _CatStringWo *append_to) {
 	VipPath *instance = VIP_PATH(self);
-	VipPathPrivate *priv = VIP_PATH_GET_PRIVATE(instance);
+	VipPathPrivate *priv = vip_path_get_instance_private(instance);
 	const char *iname = g_type_name_from_instance((GTypeInstance *) self);
 	CatStringWo *fpt = vip_path_to_string(instance);
 	cat_string_wo_format(append_to, "%s[%p:canonical=%s, path=%s, drive-type=%d, drive=%o]", iname, self, priv->is_canonical ? "true" : "false", cat_string_wo_getchars(fpt), priv->drive_type, priv->drive);
@@ -584,4 +574,3 @@ static void l_stringable_iface_init(CatIStringableInterface *iface) {
 }
 
 /********************* end CatIStringable implementation *********************/
-

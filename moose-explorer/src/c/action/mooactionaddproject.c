@@ -33,21 +33,15 @@ struct _MooActionAddProjectPrivate {
 	MooService *moo_service;
 };
 
-G_DEFINE_TYPE (MooActionAddProject, moo_action_add_project, LEA_TYPE_ACTION)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(MooActionAddProject, moo_action_add_project, LEA_TYPE_ACTION)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 static void l_action_run(LeaAction *self);
 
-
 CatS moo_s_action_add_project = CAT_S_DEF("moose.add.project");
 
 static void moo_action_add_project_class_init(MooActionAddProjectClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(MooActionAddProjectPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
@@ -57,30 +51,28 @@ static void moo_action_add_project_class_init(MooActionAddProjectClass *clazz) {
 }
 
 static void moo_action_add_project_init(MooActionAddProject *instance) {
-	MooActionAddProjectPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, MOO_TYPE_ACTION_ADD_PROJECT, MooActionAddProjectPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	MooActionAddProject *instance = MOO_ACTION_ADD_PROJECT(object);
-	MooActionAddProjectPrivate *priv = instance->priv;
+	MooActionAddProjectPrivate *priv = moo_action_add_project_get_instance_private(instance);
 	cat_unref_ptr(priv->moo_service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(moo_action_add_project_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(moo_action_add_project_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 MooActionAddProject *moo_action_add_project_new(MooService *moo_service) {
 	MooActionAddProject *result = g_object_new(MOO_TYPE_ACTION_ADD_PROJECT, NULL);
 	cat_ref_anounce(result);
-	MooActionAddProjectPrivate *priv = result->priv;
+	MooActionAddProjectPrivate *priv = moo_action_add_project_get_instance_private(result);
 	lea_action_construct((LeaAction *) result, CAT_S(moo_s_action_add_project), cat_string_wo_new_with("Add _Module"), cat_string_wo_new_with("list-add"));
 	priv->moo_service = cat_ref_ptr(moo_service);
 	return result;
@@ -102,10 +94,11 @@ VipNodePath *l_open_path(MooService *moo_service, VipPath *fullpath) {
 	}
 	cat_unref_ptr(create_path_request);
 	return result;
-	}
+}
 
 static void l_action_run(LeaAction *self) {
-	MooActionAddProjectPrivate *priv = MOO_ACTION_ADD_PROJECT_GET_PRIVATE(self);
+	MooActionAddProject *instance = MOO_ACTION_ADD_PROJECT(self);
+	MooActionAddProjectPrivate *priv = moo_action_add_project_get_instance_private(instance);
 	MooAddProjectDialog *project_dialog = moo_add_project_dialog_new();
 //	while(TRUE) {
 		int result = moo_add_project_dialog_run(project_dialog);
@@ -128,6 +121,3 @@ static void l_action_run(LeaAction *self) {
 	gtk_widget_destroy(GTK_WIDGET(project_dialog));
 	cat_log_debug("finished running add_project");
 }
-
-
-

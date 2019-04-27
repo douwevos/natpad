@@ -38,57 +38,46 @@ static void l_conditional_expression_iface_init(JagAstIConditionalExpressionInte
 static void l_expression_iface_init(JagAstIExpressionInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(JagAstWrappedConditionalExpression, jag_ast_wrapped_conditional_expression, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(JagAstWrappedConditionalExpression)
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_IEXPRESSION, l_expression_iface_init);
 		G_IMPLEMENT_INTERFACE(JAG_AST_TYPE_ICONDITIONAL_EXPRESSION, l_conditional_expression_iface_init);
 });
-
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_wrapped_conditional_expression_class_init(JagAstWrappedConditionalExpressionClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstWrappedConditionalExpressionPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_wrapped_conditional_expression_init(JagAstWrappedConditionalExpression *instance) {
-	JagAstWrappedConditionalExpressionPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_WRAPPED_CONDITIONAL_EXPRESSION, JagAstWrappedConditionalExpressionPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstWrappedConditionalExpression *instance = JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION(object);
-	JagAstWrappedConditionalExpressionPrivate *priv = instance->priv;
+	JagAstWrappedConditionalExpressionPrivate *priv = jag_ast_wrapped_conditional_expression_get_instance_private(instance);
 	cat_unref_ptr(priv->expression)
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_wrapped_conditional_expression_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_wrapped_conditional_expression_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstWrappedConditionalExpression *jag_ast_wrapped_conditional_expression_new(JagAstIExpression *expression) {
 	JagAstWrappedConditionalExpression *result = g_object_new(JAG_AST_TYPE_WRAPPED_CONDITIONAL_EXPRESSION, NULL);
 	cat_ref_anounce(result);
-	JagAstWrappedConditionalExpressionPrivate *priv = result->priv;
+	JagAstWrappedConditionalExpressionPrivate *priv = jag_ast_wrapped_conditional_expression_get_instance_private(result);
 	priv->expression = cat_ref_ptr(expression);
 	return result;
 }
-
-
-
-
 
 JagAstIConditionalExpression *jag_ast_wrapped_conditional_expression_ensure_is_conditional(JagAstIExpression *expression) {
 	if (JAG_AST_IS_ICONDITIONAL_EXPRESSION(expression)) {
@@ -98,12 +87,7 @@ JagAstIConditionalExpression *jag_ast_wrapped_conditional_expression_ensure_is_c
 }
 
 
-
-
-
-
 /********************* start JagAstIConditionalExpression implementation *********************/
-
 
 static JagAstIConditionalExpression *l_conditional_expression_invert(JagAstIConditionalExpression *self) {
 	return (JagAstIConditionalExpression *) jag_ast_unary_expression_create((JagAstIConditionalExpression *) self);
@@ -113,16 +97,16 @@ static void l_conditional_expression_iface_init(JagAstIConditionalExpressionInte
 	iface->invert = l_conditional_expression_invert;
 }
 
-
 static void l_expression_write(JagAstIExpression *self, JagAstWriter *out) {
-	JagAstWrappedConditionalExpressionPrivate *priv = JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION_GET_PRIVATE(self);
+	JagAstWrappedConditionalExpression *instance = JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION(self);
+	JagAstWrappedConditionalExpressionPrivate *priv = jag_ast_wrapped_conditional_expression_get_instance_private(instance);
 	jag_ast_iexpression_write(priv->expression, out);
 }
 
 static gboolean l_expression_equal(JagAstIExpression *self, JagAstIExpression *other) {
 	if (JAG_AST_IS_WRAPPED_CONDITIONAL_EXPRESSION(other)) {
-		JagAstWrappedConditionalExpressionPrivate *priv = JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION_GET_PRIVATE(self);
-		JagAstWrappedConditionalExpressionPrivate *o_priv = JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION_GET_PRIVATE(other);
+		JagAstWrappedConditionalExpressionPrivate *priv = jag_ast_wrapped_conditional_expression_get_instance_private(JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION(self));
+		JagAstWrappedConditionalExpressionPrivate *o_priv = jag_ast_wrapped_conditional_expression_get_instance_private(JAG_AST_WRAPPED_CONDITIONAL_EXPRESSION(other));
 		return jag_ast_iexpression_equal(priv->expression, o_priv->expression);
 	}
 	return FALSE;

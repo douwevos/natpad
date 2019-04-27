@@ -37,47 +37,40 @@ struct _TerUnicharNodePrivate {
 	gushort code_keyword_ns2;
 };
 
-G_DEFINE_TYPE (TerUnicharNode, ter_unichar_node, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(TerUnicharNode, ter_unichar_node, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void ter_unichar_node_class_init(TerUnicharNodeClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(TerUnicharNodePrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void ter_unichar_node_init(TerUnicharNode *instance) {
-	TerUnicharNodePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, TER_TYPE_UNICHAR_NODE, TerUnicharNodePrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	TerUnicharNode *instance = TER_UNICHAR_NODE(object);
-	TerUnicharNodePrivate *priv = instance->priv;
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(instance);
 	cat_unref_ptr(priv->e_children);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(ter_unichar_node_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(ter_unichar_node_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 TerUnicharNode *ter_unichar_node_new(gunichar unichar, gushort level) {
 	TerUnicharNode *result = g_object_new(TER_TYPE_UNICHAR_NODE, NULL);
 	cat_ref_anounce(result);
-	TerUnicharNodePrivate *priv = result->priv;
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(result);
 	priv->unichar = unichar;
 	priv->e_children = NULL;
 	priv->level = level;
@@ -87,9 +80,8 @@ TerUnicharNode *ter_unichar_node_new(gunichar unichar, gushort level) {
 	return result;
 }
 
-
 TerUnicharNode *ter_unichar_node_get(TerUnicharNode *node, gunichar unichar) {
-	TerUnicharNodePrivate *priv = TER_UNICHAR_NODE_GET_PRIVATE(node);
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(node);
 	TerUnicharNode *result = NULL;
 	if (priv->e_children) {
 		CatUnichar *key = cat_unichar_new(unichar);
@@ -100,7 +92,7 @@ TerUnicharNode *ter_unichar_node_get(TerUnicharNode *node, gunichar unichar) {
 }
 
 TerUnicharNode *ter_unichar_node_get_or_create(TerUnicharNode *node, gunichar unichar) {
-	TerUnicharNodePrivate *priv = TER_UNICHAR_NODE_GET_PRIVATE(node);
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(node);
 	TerUnicharNode *result = ter_unichar_node_get(node, unichar);
 	if (result==NULL) {
 		CatUnichar *uchobj = cat_unichar_new(unichar);
@@ -115,20 +107,20 @@ TerUnicharNode *ter_unichar_node_get_or_create(TerUnicharNode *node, gunichar un
 	return result;
 }
 
-
 void ter_unichar_node_set_keyword_ns1(TerUnicharNode *node, gushort code) {
-	TER_UNICHAR_NODE_GET_PRIVATE(node)->code_keyword_ns1 = code;
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(node);
+	priv->code_keyword_ns1 = code;
 }
 
 gushort ter_unichar_node_get_keyword_ns1(TerUnicharNode *node) {
-	return TER_UNICHAR_NODE_GET_PRIVATE(node)->code_keyword_ns1;
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(node);
+	return priv->code_keyword_ns1;
 }
-
 
 gushort ter_unichar_node_get_level(TerUnicharNode *node) {
-	return TER_UNICHAR_NODE_GET_PRIVATE(node)->level;
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(node);
+	return priv->level;
 }
-
 
 void ter_unichar_node_dump(TerUnicharNode *node, CatStringWo *a_indent) {
 	if (a_indent==NULL) {
@@ -136,7 +128,7 @@ void ter_unichar_node_dump(TerUnicharNode *node, CatStringWo *a_indent) {
 	} else {
 		cat_ref_ptr(a_indent);
 	}
-	TerUnicharNodePrivate *priv = TER_UNICHAR_NODE_GET_PRIVATE(node);
+	TerUnicharNodePrivate *priv = ter_unichar_node_get_instance_private(node);
 
 	cat_log_print("DUMP", "%s %p unichar:%d-%c, kw-ns1:%d, kw-ns2:%d, action=%d, level=%d", cat_string_wo_getchars(a_indent), node, priv->unichar, (char) priv->unichar, priv->code_keyword_ns1, priv->code_keyword_ns2, priv->code_action, priv->level);
 	if (priv->e_children) {

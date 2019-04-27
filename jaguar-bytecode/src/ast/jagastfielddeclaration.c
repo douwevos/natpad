@@ -35,50 +35,43 @@ struct _JagAstFieldDeclarationPrivate {
 	JagAstIExpression *value;
 };
 
-G_DEFINE_TYPE (JagAstFieldDeclaration, jag_ast_field_declaration, G_TYPE_OBJECT)
-
-static gpointer parent_class = NULL;
+G_DEFINE_TYPE_WITH_PRIVATE(JagAstFieldDeclaration, jag_ast_field_declaration, G_TYPE_OBJECT)
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void jag_ast_field_declaration_class_init(JagAstFieldDeclarationClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(JagAstFieldDeclarationPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void jag_ast_field_declaration_init(JagAstFieldDeclaration *instance) {
-	JagAstFieldDeclarationPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, JAG_AST_TYPE_FIELD_DECLARATION, JagAstFieldDeclarationPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JagAstFieldDeclaration *instance = JAG_AST_FIELD_DECLARATION(object);
-	JagAstFieldDeclarationPrivate *priv = instance->priv;
+	JagAstFieldDeclarationPrivate *priv = jag_ast_field_declaration_get_instance_private(instance);
 	cat_unref_ptr(priv->modifiers);
 	cat_unref_ptr(priv->fieldDescriptor);
 	cat_unref_ptr(priv->variableName);
 	cat_unref_ptr(priv->value);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(jag_ast_field_declaration_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(jag_ast_field_declaration_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 JagAstFieldDeclaration *jag_ast_field_declaration_new(JagAstModifiers *modifiers, JagAstDeclarationType *fieldDescriptor, JagAstIdentifier *variableName, JagAstIExpression *value) {
 	JagAstFieldDeclaration *result = g_object_new(JAG_AST_TYPE_FIELD_DECLARATION, NULL);
 	cat_ref_anounce(result);
-	JagAstFieldDeclarationPrivate *priv = result->priv;
+	JagAstFieldDeclarationPrivate *priv = jag_ast_field_declaration_get_instance_private(result);
 	priv->modifiers = cat_ref_ptr(modifiers);
 	priv->fieldDescriptor = cat_ref_ptr(fieldDescriptor);
 	priv->variableName = cat_ref_ptr(variableName);
@@ -88,14 +81,13 @@ JagAstFieldDeclaration *jag_ast_field_declaration_new(JagAstModifiers *modifiers
 
 
 JagAstIdentifier *jag_ast_field_declaration_get_variable(JagAstFieldDeclaration *field_declaration) {
-	JagAstFieldDeclarationPrivate *priv = JAG_AST_FIELD_DECLARATION_GET_PRIVATE(field_declaration);
+	JagAstFieldDeclarationPrivate *priv = jag_ast_field_declaration_get_instance_private(field_declaration);
 	return priv->variableName;
 }
 
 
-
 void jag_ast_field_declaration_write(JagAstFieldDeclaration *field_declaration, JagAstWriter *out) {
-	JagAstFieldDeclarationPrivate *priv = JAG_AST_FIELD_DECLARATION_GET_PRIVATE(field_declaration);
+	JagAstFieldDeclarationPrivate *priv = jag_ast_field_declaration_get_instance_private(field_declaration);
 ////		if (modifiers!=null) {
 ////			for(Modifier modifier : modifiers) {
 ////				out.print(modifier.text);

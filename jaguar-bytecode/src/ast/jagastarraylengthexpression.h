@@ -21,7 +21,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef JAGASTARRAYLENGTHEXPRESSION_H_
 #define JAGASTARRAYLENGTHEXPRESSION_H_
 
@@ -36,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_AST_IS_ARRAY_LENGTH_EXPRESSION(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_AST_TYPE_ARRAY_LENGTH_EXPRESSION))
 #define JAG_AST_IS_ARRAY_LENGTH_EXPRESSION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_AST_TYPE_ARRAY_LENGTH_EXPRESSION))
 #define JAG_AST_ARRAY_LENGTH_EXPRESSION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_AST_TYPE_ARRAY_LENGTH_EXPRESSION, JagAstArrayLengthExpressionClass))
-#define JAG_AST_ARRAY_LENGTH_EXPRESSION_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_AST_TYPE_ARRAY_LENGTH_EXPRESSION, JagAstArrayLengthExpressionPrivate))
 
 typedef struct _JagAstArrayLengthExpression               JagAstArrayLengthExpression;
 typedef struct _JagAstArrayLengthExpressionPrivate        JagAstArrayLengthExpressionPrivate;
@@ -45,7 +43,6 @@ typedef struct _JagAstArrayLengthExpressionClass          JagAstArrayLengthExpre
 
 struct _JagAstArrayLengthExpression {
 	GObject parent;
-	JagAstArrayLengthExpressionPrivate *priv;
 };
 
 struct _JagAstArrayLengthExpressionClass {
@@ -58,6 +55,5 @@ GType jag_ast_array_length_expression_get_type();
 JagAstArrayLengthExpression *jag_ast_array_length_expression_new(JagAstIExpression *main_expression);
 
 G_END_DECLS
-
 
 #endif /* JAGASTARRAYLENGTHEXPRESSION_H_ */

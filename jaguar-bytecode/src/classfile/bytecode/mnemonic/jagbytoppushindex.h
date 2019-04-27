@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 #define JAG_BYT_IS_OP_PUSH_INDEX(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), JAG_BYT_TYPE_OP_PUSH_INDEX))
 #define JAG_BYT_IS_OP_PUSH_INDEX_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), JAG_BYT_TYPE_OP_PUSH_INDEX))
 #define JAG_BYT_OP_PUSH_INDEX_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), JAG_BYT_TYPE_OP_PUSH_INDEX, JagBytOpPushIndexClass))
-#define JAG_BYT_OP_PUSH_INDEX_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), JAG_BYT_TYPE_OP_PUSH_INDEX, JagBytOpPushIndexPrivate))
 
 typedef struct _JagBytOpPushIndex               JagBytOpPushIndex;
 typedef struct _JagBytOpPushIndexPrivate        JagBytOpPushIndexPrivate;
@@ -44,7 +43,6 @@ typedef struct _JagBytOpPushIndexClass          JagBytOpPushIndexClass;
 
 struct _JagBytOpPushIndex {
 	JagBytAbstractMnemonic parent;
-	JagBytOpPushIndexPrivate *priv;
 };
 
 struct _JagBytOpPushIndexClass {

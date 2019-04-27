@@ -37,38 +37,32 @@ struct _CatAtomicIntegerPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(CatAtomicInteger, cat_atomic_integer, G_TYPE_OBJECT,{
+		G_ADD_PRIVATE(CatAtomicInteger)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void cat_atomic_integer_class_init(CatAtomicIntegerClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(CatAtomicIntegerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 }
 
 static void cat_atomic_integer_init(CatAtomicInteger *instance) {
-	CatAtomicIntegerPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, CAT_TYPE_ATOMIC_INTEGER, CatAtomicIntegerPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(cat_atomic_integer_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(cat_atomic_integer_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
@@ -76,7 +70,7 @@ static void l_finalize(GObject *object) {
 CatAtomicInteger *cat_atomic_integer_new() {
 	CatAtomicInteger *result = g_object_new(CAT_TYPE_ATOMIC_INTEGER, NULL);
 	cat_ref_anounce(result);
-	CatAtomicIntegerPrivate *priv = result->priv;
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(result);
 	__atomic_store_n(&(priv->value), 0, __ATOMIC_SEQ_CST);
 	return result;
 }
@@ -85,7 +79,7 @@ CatAtomicInteger *cat_atomic_integer_new() {
 CatAtomicInteger *cat_atomic_integer_new_val(int initial) {
 	CatAtomicInteger *result = g_object_new(CAT_TYPE_ATOMIC_INTEGER, NULL);
 	cat_ref_anounce(result);
-	CatAtomicIntegerPrivate *priv = result->priv;
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(result);
 	__atomic_store_n(&(priv->value), initial, __ATOMIC_SEQ_CST);
 	return result;
 }
@@ -93,33 +87,33 @@ CatAtomicInteger *cat_atomic_integer_new_val(int initial) {
 
 
 gboolean cat_atomic_integer_compare_set(CatAtomicInteger *int_atomic, int expect, int set) {
-	CatAtomicIntegerPrivate *priv = CAT_ATOMIC_INTEGER_GET_PRIVATE(int_atomic);
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(int_atomic);
 	return __atomic_compare_exchange_n(&(priv->value), &expect, set, FALSE, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
 int cat_atomic_integer_get(CatAtomicInteger *int_atomic) {
-	CatAtomicIntegerPrivate *priv = CAT_ATOMIC_INTEGER_GET_PRIVATE(int_atomic);
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(int_atomic);
 	return __atomic_load_n(&(priv->value), __ATOMIC_SEQ_CST);
 }
 
 void cat_atomic_integer_set(CatAtomicInteger *int_atomic, int newVal) {
-	CatAtomicIntegerPrivate *priv = CAT_ATOMIC_INTEGER_GET_PRIVATE(int_atomic);
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(int_atomic);
 	__atomic_store_n(&(priv->value), newVal, __ATOMIC_SEQ_CST);
 }
 
 int cat_atomic_integer_add(CatAtomicInteger *int_atomic, int delta) {
-	CatAtomicIntegerPrivate *priv = CAT_ATOMIC_INTEGER_GET_PRIVATE(int_atomic);
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(int_atomic);
 	return __atomic_add_fetch(&(priv->value), delta, __ATOMIC_SEQ_CST);
 }
 
 int cat_atomic_integer_decrement(CatAtomicInteger *int_atomic) {
-	CatAtomicIntegerPrivate *priv = CAT_ATOMIC_INTEGER_GET_PRIVATE(int_atomic);
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(int_atomic);
 	const int delta = 1;
 	return __atomic_sub_fetch(&(priv->value), delta, __ATOMIC_SEQ_CST);
 }
 
 int cat_atomic_integer_increment(CatAtomicInteger *int_atomic) {
-	CatAtomicIntegerPrivate *priv = CAT_ATOMIC_INTEGER_GET_PRIVATE(int_atomic);
+	CatAtomicIntegerPrivate *priv = cat_atomic_integer_get_instance_private(int_atomic);
 	const int delta = 1;
 	return __atomic_add_fetch(&(priv->value), delta, __ATOMIC_SEQ_CST);
 }

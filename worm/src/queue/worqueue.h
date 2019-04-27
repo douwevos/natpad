@@ -35,17 +35,13 @@ G_BEGIN_DECLS
 #define WOR_IS_QUEUE(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), WOR_TYPE_QUEUE))
 #define WOR_IS_QUEUE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), WOR_TYPE_QUEUE))
 #define WOR_QUEUE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), WOR_TYPE_QUEUE, WorQueueClass))
-#define WOR_QUEUE_GET_PRIVATE(obj)  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), WOR_TYPE_QUEUE, WorQueuePrivate))
-
 
 typedef struct _WorQueue               WorQueue;
 typedef struct _WorQueuePrivate        WorQueuePrivate;
 typedef struct _WorQueueClass          WorQueueClass;
 
-
 struct _WorQueue {
 	GObject parent;
-	WorQueuePrivate *priv;
 };
 
 struct _WorQueueClass {

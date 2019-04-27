@@ -45,7 +45,6 @@ struct _TerGrammarMapPrivate {
 	CatLock *lock;
 	CatHashMapWo *e_clazz_path_map;		/* Map<CatStringWo *clazz_name, TerDocumentGlazzGrammar *> */
 	CatHashMapWo *e_syntax_resource_map;	/* Map<Long *, TerSyntaxResource *> */
-
 	TerPreferencesWo *a_ter_prefs;
 };
 
@@ -53,35 +52,26 @@ struct _TerGrammarMapPrivate {
 static void l_cow_change_listener_iface_init(CowIChangeListenerInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(TerGrammarMap, ter_grammar_map, G_TYPE_OBJECT, {
+		G_ADD_PRIVATE(TerGrammarMap)
 		G_IMPLEMENT_INTERFACE(COW_TYPE_ICHANGE_LISTENER, l_cow_change_listener_iface_init);
-
 });
-
-static gpointer parent_class = NULL;
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
 
 static void ter_grammar_map_class_init(TerGrammarMapClass *clazz) {
-	parent_class = g_type_class_peek_parent(clazz);
-	g_type_class_add_private(clazz, sizeof(TerGrammarMapPrivate));
-
-
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
-
 }
 
 static void ter_grammar_map_init(TerGrammarMap *instance) {
-	TerGrammarMapPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE(instance, TER_TYPE_GRAMMAR_MAP, TerGrammarMapPrivate);
-	instance->priv = priv;
 }
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	TerGrammarMap *instance = TER_GRAMMAR_MAP(object);
-	TerGrammarMapPrivate *priv = instance->priv;
+	TerGrammarMapPrivate *priv = ter_grammar_map_get_instance_private(instance);
 	if (priv->preference_service) {
 		CowContainer *container = (CowContainer *) elk_preferences_service_get_container(priv->preference_service);
 		if (container) {
@@ -95,21 +85,21 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->preference_service);
 	cat_unref_ptr(priv->vip_service);
 	cat_unref_ptr(priv->wor_service);
-	G_OBJECT_CLASS(parent_class)->dispose(object);
+	G_OBJECT_CLASS(ter_grammar_map_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
 
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
-	G_OBJECT_CLASS(parent_class)->finalize(object);
+	G_OBJECT_CLASS(ter_grammar_map_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
 
 TerGrammarMap *ter_grammar_map_new(ElkPreferencesService *preference_service, VipService *vip_service, WorService *wor_service) {
 	TerGrammarMap *result = g_object_new(TER_TYPE_GRAMMAR_MAP, NULL);
 	cat_ref_anounce(result);
-	TerGrammarMapPrivate *priv = result->priv;
+	TerGrammarMapPrivate *priv = ter_grammar_map_get_instance_private(result);
 	priv->preference_service = cat_ref_ptr(preference_service);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->wor_service = cat_ref_ptr(wor_service);
@@ -126,11 +116,9 @@ TerGrammarMap *ter_grammar_map_new(ElkPreferencesService *preference_service, Vi
 	return result;
 }
 
-
-
 TerSyntax *ter_grammar_map_get_syntax(TerGrammarMap *grammar_map, CatStringWo *clazz_name) {
 	TerSyntax *result = NULL;
-	TerGrammarMapPrivate *priv = TER_GRAMMAR_MAP_GET_PRIVATE(grammar_map);
+	TerGrammarMapPrivate *priv = ter_grammar_map_get_instance_private(grammar_map);
 	cat_lock_lock(priv->lock);
 
 	TerDocumentClazzGrammar *document_clazz_grammar = (TerDocumentClazzGrammar *) cat_hash_map_wo_get(priv->e_clazz_path_map, clazz_name);
@@ -151,8 +139,6 @@ TerSyntax *ter_grammar_map_get_syntax(TerGrammarMap *grammar_map, CatStringWo *c
 
 static CatS l_s_txt_config = CAT_S_DEF("config");
 
-
-
 static void l_config_changed(CowIChangeListener *listener, GObject *config) {
 	ElkPreferencesWo *a_elk_prefs = ELK_PREFERENCES_WO(config);
 
@@ -162,7 +148,7 @@ static void l_config_changed(CowIChangeListener *listener, GObject *config) {
 	}
 
 	TerGrammarMap *grammar_map = TER_GRAMMAR_MAP(listener);
-	TerGrammarMapPrivate *priv = TER_GRAMMAR_MAP_GET_PRIVATE(grammar_map);
+	TerGrammarMapPrivate *priv = ter_grammar_map_get_instance_private(grammar_map);
 
 	if (priv->a_ter_prefs==a_ter_prefs) {
 		return;
@@ -170,7 +156,6 @@ static void l_config_changed(CowIChangeListener *listener, GObject *config) {
 
 	VipPath *shared_path = elk_preferences_services_get_shared_config_map(priv->preference_service);
 	VipPath *shared_config_path = vip_path_create_child(shared_path, CAT_S(l_s_txt_config));
-
 
 	CatArrayWo *e_changed_clazz_name_list = cat_array_wo_new();
 
@@ -201,7 +186,6 @@ static void l_config_changed(CowIChangeListener *listener, GObject *config) {
 
 			cat_log_debug("loading grammar:%o", grammar_path);
 
-
 			VipCreatePathRequest *create_request = vip_service_create_path(priv->vip_service, grammar_path);
 			VipNodePath *node_path = vip_create_path_request_wait_for_path(create_request);
 			CatTreeNode *node = vip_node_path_get_tail_node(node_path);
@@ -209,7 +193,6 @@ static void l_config_changed(CowIChangeListener *listener, GObject *config) {
 			long long int id = vip_node_get_id(vip_node);
 			CatLong *lid = cat_long_new(id);
 			cat_log_debug("node_path:%o, node=%o", node_path, node);
-
 
 			/* add the document-clazz to the clazz_path_map with the extracted grammar-path */
 			CatStringWo *a_clazz_name = ter_prefs_clazz_wo_get_name(a_ter_clazz);
@@ -226,9 +209,6 @@ static void l_config_changed(CowIChangeListener *listener, GObject *config) {
 					cat_array_wo_append(e_changed_clazz_name_list, (GObject *) a_clazz_name);
 				}
 			}
-
-
-
 
 			/* ensure the grammar-path is part of the syntax_resource_map */
 			TerSyntaxResource *syntax_resource = (TerSyntaxResource *) cat_hash_map_wo_get(priv->e_syntax_resource_map, lid);
@@ -257,12 +237,8 @@ static void l_config_changed(CowIChangeListener *listener, GObject *config) {
 
 	// TODO run through all highlightermaps that have changed
 	cat_unref_ptr(e_changed_clazz_name_list);
-
 }
 
 static void l_cow_change_listener_iface_init(CowIChangeListenerInterface *iface) {
 	iface->configChanged = l_config_changed;
 }
-
-
-
