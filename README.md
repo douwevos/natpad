@@ -7,12 +7,16 @@ Natpad is a Text-editor written in C using GTK
 * **Big files**: Allows loading and editing big files.
 * **Parser**: Parsers for several language included.
 
+## Versions
+
+[Versions](https://github.com/natpad/VERSIONS.md)
+
 ## Building Natpad (LINUX Debian)
 
-Building natpad uses the dung builder. The dung builder can be downloaded here [dung builder](https://github.com/douwevos/dung/releases/download/0.1/dung_0.1.deb). Install the debian package.
+Building natpad uses the dung builder. The dung builder can be downloaded here [dung builder](https://github.com/douwevos/dung/releases/download/0.2/dung_0.2.deb). Install the debian package.
 
 ```
-sudo dpkg -i dung_0.1.dev
+sudo dpkg -i dung_0.2.dev
 ```
 
 Dung is a built system using workspaces. A workspace is described in a description file. Dung workspace description files end with the extension '.hil'. If you clone the natpad git repository you will find several .hil files. 

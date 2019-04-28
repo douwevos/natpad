@@ -82,6 +82,7 @@ static void l_dispose(GObject *object) {
 	ChaLoadFileRequest *instance = CHA_LOAD_FILE_REQUEST(object);
 	ChaLoadFileRequestPrivate *priv = cha_load_file_request_get_instance_private(instance);
 	cat_unref_ptr(priv->document);
+	cat_unref_ptr(priv->map_data);
 	cat_unref_ptr(priv->file);
 	cat_unref_ptr(priv->unwritten_pages);
 	cat_unref_ptr(priv->lines);
@@ -162,6 +163,7 @@ static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 		ChaPageWo *page = (ChaPageWo *) cat_iiterator_next(iter);
 		cha_revision_wo_append_page(e_revision, page);
 	}
+	cat_unref_ptr(iter);
 
 	ChaLoadToken *next_load_token = NULL;
 	if (!set_pages->is_last) {
@@ -187,7 +189,6 @@ static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 		cha_mmap_call_dontneed(set_pages->mmap_data);
 	}
 
-	cat_unref_ptr(iter);
 	cat_unref_ptr(document);
 	cat_unref_ptr(set_pages->mmap_data);
 	cat_unref_ptr(set_pages->disc_pages);
@@ -234,10 +235,9 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 			priv->page_line_count++;
 		}
 
-
-
 		ChaPageWo *new_page = (ChaPageWo *) cha_mmap_page_wo_new(priv->map_data, pg_offset, length, priv->page_line_count);
 		cat_array_wo_append(priv->unwritten_pages, (GObject *) new_page);
+		cat_unref_ptr(new_page);
 
 		priv->page_start = off_line_start;
 		priv->page_line_count = 0;

@@ -114,11 +114,7 @@ static void cha_mmap_page_wo_class_init(ChaMMapPageWoClass *clazz) {
 static void cha_mmap_page_wo_init(ChaMMapPageWo *instance) {
 }
 
-static void l_dispose(GObject *object) {
-	cat_log_detail("dispose:%p", object);
-	ChaMMapPageWo *instance = CHA_MMAP_PAGE_WO(object);
-	ChaMMapPageWoPrivate *priv = cha_mmap_page_wo_get_instance_private(instance);
-	cat_unref_ptr(priv->map);
+static void l_free_lines(ChaMMapPageWoPrivate *priv) {
 	if (priv->lines) {
 		int idx;
 		for(idx=priv->line_count-1; idx>=0; idx--) {
@@ -129,6 +125,14 @@ static void l_dispose(GObject *object) {
 		}
 		cat_free_ptr(priv->lines);
 	}
+}
+
+static void l_dispose(GObject *object) {
+	cat_log_detail("dispose:%p", object);
+	ChaMMapPageWo *instance = CHA_MMAP_PAGE_WO(object);
+	ChaMMapPageWoPrivate *priv = cha_mmap_page_wo_get_instance_private(instance);
+	cat_unref_ptr(priv->map);
+	l_free_lines(priv);
 	G_OBJECT_CLASS(cha_mmap_page_wo_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -277,7 +281,7 @@ static void l_page_release_lines(ChaPageWo *page) {
 	});
 	if (priv->lines_hold_cnt==1) {
 		if (!priv->hold) {
-			cat_free_ptr(priv->lines);
+			l_free_lines(priv);
 		}
 	}
 	priv->lines_hold_cnt--;

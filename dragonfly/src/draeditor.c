@@ -407,11 +407,13 @@ static gboolean l_tab(ChaEditor *editor, gboolean left_shift) {
 void dra_editor_show_auto_complete_popup(DraEditor *editor, DraAcContext *ac_context);
 DraAcContext *dra_editor_create_auto_complete_context(DraEditor *editor);
 
-static void l_selection_done(GtkMenu *menui, void *eev, gpointer data) {
-	DraEditorPrivate *priv = dra_editor_get_instance_private((DraEditor *) data);
-	GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
-	gtk_widget_destroy((GtkWidget *) menu);
-	cat_unref_ptr(priv->context_menu);
+static void l_selection_done(GtkMenu *menui, gpointer data) {
+	DraEditorPrivate *priv = dra_editor_get_instance_private(DRA_EDITOR(data));
+	if (priv->context_menu) {
+		GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
+		gtk_widget_destroy((GtkWidget *) menu);
+		cat_unref_ptr(priv->context_menu);
+	}
 }
 
 static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event) {
