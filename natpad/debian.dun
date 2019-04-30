@@ -2,7 +2,7 @@ module {
 
 	name 'natpad.debian';
 	
-	natpad.version '2.3';
+	natpad.version '2.4';
 	natpad.os.arch 'amd64';
 	
 	

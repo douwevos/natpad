@@ -23,7 +23,7 @@
 #include "jagpscanner.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "JagPScanner"
 #include <logging/catlog.h>
 

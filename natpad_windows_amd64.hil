@@ -30,7 +30,7 @@ workspace {
 	}
 
 	opensuse { 
-		repository 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; 
+		repository 'https://ftp.gwdg.de/pub/opensuse/repositories/windows:/mingw:/win64/openSUSE_Tumbleweed/noarch/'; 
 		package 'mingw64-binutils-.*.noarch.rpm';
 		package 'mingw64-glib2-devel-.*.noarch.rpm';
 		package 'mingw64-gtk3-devel-.*.noarch.rpm';
@@ -141,7 +141,7 @@ workspace {
 
 
 	opensuse { 
-		repository 'http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch'; 
+		repository 'https://ftp.gwdg.de/pub/opensuse/repositories/windows:/mingw:/win64/openSUSE_Tumbleweed/noarch/'; 
 		dir './runtime/';
 		package 'mingw64-gsettings-desktop-schemas-.*.noarch.rpm';
 		package 'mingw64-gtk3-data-.*.noarch.rpm';
@@ -189,7 +189,7 @@ workspace {
 		package 'mingw64-gnome-icon-theme-.*.noarch.rpm';  
 		package 'mingw64-libwinpthread1-.*.noarch.rpm';
 		package 'mingw64-libhunspell-.*.noarch.rpm';
-		package 'mingw64-libstdc\+\+6-.*.noarch.rpm';
+		package 'mingw64-libstdc.*6-.*.noarch.rpm';
 	}
 
 

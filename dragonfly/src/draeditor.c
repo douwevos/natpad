@@ -266,7 +266,7 @@ static void l_open_tag_popup(ChaEditor *editor, ChaLineLocationWo *location, lon
 	DraEditorPrivate *priv = dra_editor_get_instance_private((DraEditor *) editor);
 	CatStringWo *a_line_info_key = priv->slot_key;
 	CatStringWo *text = cat_string_wo_new();
-	cat_log_error("a_line=%O", a_line_info_key);
+	cat_log_debug("a_line=%O", a_line_info_key);
 	if (a_line_info_key) {
 		ChaDocument *document = cha_editor_get_document(editor);
 		ChaRevisionWo *a_revision = cha_document_get_current_revision_ref(document);
@@ -274,13 +274,13 @@ static void l_open_tag_popup(ChaEditor *editor, ChaLineLocationWo *location, lon
 		cha_page_wo_hold_lines(page);
 		ChaLineWo *a_line = cha_page_wo_line_at(page, cha_line_location_wo_get_page_line_index(location));
 
-		cat_log_error("a_line=%O", a_line);
+		cat_log_debug("a_line=%O", a_line);
 
 		DraLineInfoWo *line_info = (DraLineInfoWo *)
 				cha_line_wo_get_slot_content_ref(a_line, -1, (GObject *) a_line_info_key);
 		if (line_info) {
 			CatArrayWo *line_tags = dra_line_info_wo_get_line_tags(line_info);
-			cat_log_error("line_tags=%O", line_tags);
+			cat_log_debug("line_tags=%O", line_tags);
 			if (line_tags) {
 				gboolean is_first = TRUE;
 				CatIIterator *ltag_iter = cat_array_wo_iterator(line_tags);
