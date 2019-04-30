@@ -1,6 +1,7 @@
 # 2.4
 
 * Allow the user to see the different types of line-endings.
+![Line endings](/site/version-2.4/Visible_line_endings.png)
 * Allow the user to change the line-endings of a file
 * Greatly improved stability of loading large files
 * Improve performance of moving cursor and editing in large files
