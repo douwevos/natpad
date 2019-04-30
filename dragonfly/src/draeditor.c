@@ -266,7 +266,7 @@ static void l_open_tag_popup(ChaEditor *editor, ChaLineLocationWo *location, lon
 	DraEditorPrivate *priv = dra_editor_get_instance_private((DraEditor *) editor);
 	CatStringWo *a_line_info_key = priv->slot_key;
 	CatStringWo *text = cat_string_wo_new();
-	cat_log_error("a_line=%O", a_line_info_key);
+	cat_log_debug("a_line=%O", a_line_info_key);
 	if (a_line_info_key) {
 		ChaDocument *document = cha_editor_get_document(editor);
 		ChaRevisionWo *a_revision = cha_document_get_current_revision_ref(document);
@@ -274,13 +274,13 @@ static void l_open_tag_popup(ChaEditor *editor, ChaLineLocationWo *location, lon
 		cha_page_wo_hold_lines(page);
 		ChaLineWo *a_line = cha_page_wo_line_at(page, cha_line_location_wo_get_page_line_index(location));
 
-		cat_log_error("a_line=%O", a_line);
+		cat_log_debug("a_line=%O", a_line);
 
 		DraLineInfoWo *line_info = (DraLineInfoWo *)
 				cha_line_wo_get_slot_content_ref(a_line, -1, (GObject *) a_line_info_key);
 		if (line_info) {
 			CatArrayWo *line_tags = dra_line_info_wo_get_line_tags(line_info);
-			cat_log_error("line_tags=%O", line_tags);
+			cat_log_debug("line_tags=%O", line_tags);
 			if (line_tags) {
 				gboolean is_first = TRUE;
 				CatIIterator *ltag_iter = cat_array_wo_iterator(line_tags);
@@ -407,11 +407,13 @@ static gboolean l_tab(ChaEditor *editor, gboolean left_shift) {
 void dra_editor_show_auto_complete_popup(DraEditor *editor, DraAcContext *ac_context);
 DraAcContext *dra_editor_create_auto_complete_context(DraEditor *editor);
 
-static void l_selection_done(GtkMenu *menui, void *eev, gpointer data) {
-	DraEditorPrivate *priv = dra_editor_get_instance_private((DraEditor *) data);
-	GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
-	gtk_widget_destroy((GtkWidget *) menu);
-	cat_unref_ptr(priv->context_menu);
+static void l_selection_done(GtkMenu *menui, gpointer data) {
+	DraEditorPrivate *priv = dra_editor_get_instance_private(DRA_EDITOR(data));
+	if (priv->context_menu) {
+		GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
+		gtk_widget_destroy((GtkWidget *) menu);
+		cat_unref_ptr(priv->context_menu);
+	}
 }
 
 static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event) {

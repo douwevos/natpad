@@ -82,6 +82,7 @@ static void l_dispose(GObject *object) {
 	ChaLoadFileRequest *instance = CHA_LOAD_FILE_REQUEST(object);
 	ChaLoadFileRequestPrivate *priv = cha_load_file_request_get_instance_private(instance);
 	cat_unref_ptr(priv->document);
+	cat_unref_ptr(priv->map_data);
 	cat_unref_ptr(priv->file);
 	cat_unref_ptr(priv->unwritten_pages);
 	cat_unref_ptr(priv->lines);
@@ -162,6 +163,7 @@ static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 		ChaPageWo *page = (ChaPageWo *) cat_iiterator_next(iter);
 		cha_revision_wo_append_page(e_revision, page);
 	}
+	cat_unref_ptr(iter);
 
 	ChaLoadToken *next_load_token = NULL;
 	if (!set_pages->is_last) {
@@ -187,7 +189,6 @@ static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 		cha_mmap_call_dontneed(set_pages->mmap_data);
 	}
 
-	cat_unref_ptr(iter);
 	cat_unref_ptr(document);
 	cat_unref_ptr(set_pages->mmap_data);
 	cat_unref_ptr(set_pages->disc_pages);
@@ -234,16 +235,15 @@ static gboolean l_scanned_line_big_file_mode(char *off_line_start, char *off_lin
 			priv->page_line_count++;
 		}
 
-
-
 		ChaPageWo *new_page = (ChaPageWo *) cha_mmap_page_wo_new(priv->map_data, pg_offset, length, priv->page_line_count);
 		cat_array_wo_append(priv->unwritten_pages, (GObject *) new_page);
+		cat_unref_ptr(new_page);
 
 		priv->page_start = off_line_start;
 		priv->page_line_count = 0;
 
 		if (cat_array_wo_size(priv->unwritten_pages) > priv->flush_after || is_last_line) {
-			cat_log_error("pg_offset=%ld :: %ld", pg_offset, pg_offset / (1024 * 1024));
+			cat_log_debug("pg_offset=%ld :: %ld", pg_offset, pg_offset / (1024 * 1024));
 			struct l_set_pages *set_pages = g_new(struct l_set_pages, 1);
 			set_pages->document = cat_ref_ptr(priv->document);
 			set_pages->disc_pages = priv->unwritten_pages;
@@ -301,7 +301,7 @@ static gboolean l_scanned_line_full_mode(char *off_line_start, char *off_line_en
 	priv->convert_request.output = NULL;
 
 //	CatStringWo *text = (CatStringWo *) cat_string_wo_new_anchored(off_line_start, off_line_end-off_line_start);
-	cat_log_error("line_end=%d text=%s, is_last_line=%d", line_end, text, is_last_line);
+	cat_log_trace("line_end=%d text=%s, is_last_line=%d", line_end, text, is_last_line);
 	ChaLineWo *line = cha_line_wo_new_anchored(text, line_end);
 	cat_array_wo_append(priv->lines, (GObject *) line);
 
@@ -404,7 +404,7 @@ static void l_run_request(WorRequest *request) {
 	uchardet_data_end(udt);
 	const char *encoding = uchardet_get_charset(udt);
 
-	cat_log_error("encoding=%s, buflen=%d", encoding, buflen);
+	cat_log_debug("encoding=%s, buflen=%d", encoding, buflen);
 
 	ChaDocumentManager *document_manager = cha_document_get_document_manager(priv->document);
 	ChaIConverter *converter = cha_document_manager_get_converter(document_manager, encoding);

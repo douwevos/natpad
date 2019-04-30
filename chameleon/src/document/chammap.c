@@ -67,8 +67,9 @@ static void cha_mmap_init(ChaMMap *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	ChaMMap *instance = CHA_MMAP(object);
-//	ChaMMapPrivate *priv = cha_mmap_get_instance_private(instance);
+	ChaMMap *instance = CHA_MMAP(object);
+	ChaMMapPrivate *priv = cha_mmap_get_instance_private(instance);
+	cat_unref_ptr(priv->file);
 	G_OBJECT_CLASS(cha_mmap_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -76,10 +77,20 @@ static void l_dispose(GObject *object) {
 static void l_finalize(GObject *object) {
 	cat_log_detail("finalize:%p", object);
 	cat_ref_denounce(object);
+	ChaMMap *instance = CHA_MMAP(object);
+	ChaMMapPrivate *priv = cha_mmap_get_instance_private(instance);
+	if (priv->data) {
+#ifdef G_OS_UNIX
+		munmap(priv->data, priv->file_length);
+#else
+		UnmapViewOfFile(priv->data);
+		CloseHandle(priv->filedes);
+#endif
+		priv->data = NULL;
+	}
 	G_OBJECT_CLASS(cha_mmap_parent_class)->finalize(object);
 	cat_log_detail("finalized:%p", object);
 }
-
 
 ChaMMap *cha_mmap_new(GFile *file) {
 	GFileInfo *info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_SIZE, G_FILE_QUERY_INFO_NONE, NULL, NULL);
@@ -90,7 +101,6 @@ ChaMMap *cha_mmap_new(GFile *file) {
 	}
 	goffset file_length = g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_STANDARD_SIZE);
 	cat_unref_ptr(info);
-
 
 	ChaMMap *result = g_object_new(CHA_TYPE_MMAP, NULL);
 	cat_ref_anounce(result);
@@ -110,10 +120,8 @@ ChaMMap *cha_mmap_new(GFile *file) {
 
 //	madvise(priv->data + 1024*1024, priv->file_length-1024*1024, MADV_DONTNEED);
 
-
 	return result;
 }
-
 
 void cha_mmap_call_dontneed(ChaMMap *map) {
 	ChaMMapPrivate *priv = cha_mmap_get_instance_private(map);

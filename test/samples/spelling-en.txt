@@ -1,0 +1,3 @@
+This is a spelling test
+This line should be OK
+This line should be not OK because of anxieaty

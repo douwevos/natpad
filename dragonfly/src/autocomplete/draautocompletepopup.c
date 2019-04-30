@@ -172,9 +172,7 @@ DraAutoCompletePopup *dra_auto_complete_popup_new(DraEditor *editor, DraAutoComp
 	GtkAdjustment *vadj = gtk_scrollable_get_vadjustment((GtkScrollable *) priv->editor);
 	priv->s_vadj = g_signal_connect(vadj, "value-changed", G_CALLBACK(l_adjustment_value_changed), result);
 
-
 	g_signal_connect(priv->popup_window, "destroy", G_CALLBACK(l_destroy), result);
-
 
 	ChaDocument *document = cha_editor_get_document((ChaEditor *) editor);
 	cha_document_add_listener(document, CHA_IDOCUMENT_LISTENER(result));
@@ -231,7 +229,6 @@ static gboolean l_new_event(GtkWidget *gwidget, GdkEvent *eev, gpointer data) {
 }
 
 
-
 static void l_size_allocate(GtkWidget *widget, GdkRectangle *allocation, gpointer data) {
 	DraAutoCompletePopup *ac_popup = DRA_AUTO_COMPLETE_POPUP(data);
 	DraAutoCompletePopupPrivate *priv = dra_auto_complete_popup_get_instance_private(ac_popup);
@@ -286,14 +283,11 @@ static void l_on_new_revision(ChaIDocumentListener *self, ChaRevisionWo *a_new_r
 			}
 		}
 	}
-
 }
-
 
 static void l_document_listener_iface_init(ChaIDocumentListenerInterface *iface) {
 	iface->onNewRevision = l_on_new_revision;
 }
-
 
 /********************* end ChaIDocumentListener implementation *********************/
 

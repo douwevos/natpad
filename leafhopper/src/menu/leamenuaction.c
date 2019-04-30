@@ -58,17 +58,11 @@ static void lea_menu_action_class_init(LeaMenuActionClass *clazz) {
 static void lea_menu_action_init(LeaMenuAction *node) {
 }
 
-static void l_week_notify(gpointer data, GObject *ptr_of_obj) {
-}
-
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	LeaMenuAction *instance = LEA_MENU_ACTION(object);
 	LeaMenuActionPrivate *priv = lea_menu_action_get_instance_private(instance);
-	if (priv->menu_item) {
-		g_object_weak_unref((GObject *) (priv->menu_item), (GWeakNotify) l_week_notify, object);
-		priv->menu_item = NULL;
-	}
+	priv->menu_item = NULL;
 	priv->menu_shell = NULL;
 	cat_unref_ptr(priv->action);
 	cat_unref_ptr(priv->e_children);
@@ -93,20 +87,17 @@ LeaMenuAction *lea_menu_action_new(LeaAction *action, LeaMenuSetupType setupType
 		case LEA_MENU_TYPE_SUB : {
 			priv->menu_shell = gtk_menu_new();
 			priv->menu_item = gtk_menu_item_new_with_mnemonic(label);
-			g_object_weak_ref((GObject *) (priv->menu_item), (GWeakNotify) l_week_notify, result);
 			gtk_menu_item_set_submenu((GtkMenuItem *) priv->menu_item, priv->menu_shell);
 		} break;
 		case LEA_MENU_TYPE_ITEM : {
 			priv->menu_shell = NULL;
 			priv->menu_item = (GtkWidget *) lea_action_menu_item_new(action);
-			g_object_weak_ref((GObject *) (priv->menu_item), (GWeakNotify) l_week_notify, result);
 		} break;
 	}
 	if (priv->menu_item) {
 		gtk_widget_set_sensitive(priv->menu_item, lea_action_is_sensitive(action));
 		g_signal_connect(priv->menu_item, "map", (GCallback) l_widget_map_cb, result);
 	}
-
 
 	lea_action_attach(action, (LeaIAttachable *) result);
 	return result;

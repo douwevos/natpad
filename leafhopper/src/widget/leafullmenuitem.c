@@ -71,8 +71,6 @@ static void lea_full_menu_item_class_init(LeaFullMenuItemClass *clazz) {
 	widget_class->get_preferred_height = l_widget_get_preferred_height;
 	widget_class->get_preferred_height_for_width = l_widget_get_preferred_height_for_width;
 
-
-
 }
 
 static void lea_full_menu_item_init(LeaFullMenuItem *node) {
@@ -133,7 +131,7 @@ static void _update_image(LeaFullMenuItem *item) {
 
 	if (item->image) {
 		gtk_widget_unparent(GTK_WIDGET(item->image));
-		gtk_widget_destroy(GTK_WIDGET(item->image));
+//		gtk_widget_destroy(GTK_WIDGET(item->image));
 		item->image = NULL;
 	}
 
