@@ -92,7 +92,7 @@ static void l_finalize(GObject *object) {
 
 
 
-ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPreferencesService *prefences_service) {
+ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPreferencesService *prefences_service, GApplication *application) {
 	ElkService *result = g_object_new(ELK_TYPE_SERVICE, NULL);
 	cat_ref_anounce(result);
 
@@ -101,6 +101,7 @@ ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPrefere
 
 	result->preferences_service = cat_ref_ptr(prefences_service);
 	result->frame = cat_ref_ptr(frame);
+	result->application = application;
 
 
 	result->vip_service = cat_ref_ptr(moo_service_get_viper_service(moo_service));
@@ -175,19 +176,19 @@ static gboolean l_service_exit(ElkIService *service) {
 		} else {
 			break;
 		}
-
 	}
 	cat_log_debug("finished");
-//	gtk_main_quit();
+	ElkService *eservice = ELK_SERVICE(service);
+	if (eservice->application) {
+		g_application_quit(eservice->application);
+	} else {
+		gtk_main_quit();
+	}
 	return TRUE;
 }
 
 static void l_service_show_preferences(ElkIService *service) {
 	ElkService *elk_service = ELK_SERVICE(service);
-//	ConDialog *dialog = con_dialog_new((GObject *) elk_service->configuration_container, TRUE);
-//	con_dialog_show(dialog);
-//	g_object_run_dispose((GObject *) dialog);
-//	cat_unref_ptr(dialog);
 
 	CowPanelModel *panel_model = elk_preferences_service_get_panel_model(elk_service->preferences_service);
 	ElkPreferencesContainer *container = elk_preferences_service_get_container(elk_service->preferences_service);
@@ -196,11 +197,7 @@ static void l_service_show_preferences(ElkIService *service) {
 	cat_ref_ptr(last_preferences_wo);
 
 	CowDialog *cow_dialog = cow_dialog_new(panel_model, (CowContainer *) container, COW_DIALOG_OK_CANCEL_AND_APPLY);
-
-
     gtk_window_set_transient_for(GTK_WINDOW(cow_dialog), (GtkWindow *) gtk_widget_get_toplevel((GtkWidget *) elk_service->frame));
-
-
 
 	int response = cow_dialog_show(cow_dialog);
 	gboolean keep_open = TRUE;
