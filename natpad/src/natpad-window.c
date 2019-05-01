@@ -175,7 +175,7 @@ NatpadWindow *natpad_window_new(GApplication *application, ElkPreferencesService
 	LeaSurfaceBox *surface_box = lea_surface_handler_get_root(surface_handler);
 
 
-	priv->elk_service = elk_service_new(frame, priv->moo_service, priv->preference_service);
+	priv->elk_service = elk_service_new(frame, priv->moo_service, priv->preference_service, application);
 
 	MooPanelOwner *moo_panel_owner = moo_explorer_service_get_panel_owner(priv->elk_service->moo_explorer_service);
 	MooNodeRenderRegistry *moo_render_registry = moo_panel_owner_get_render_registry(moo_panel_owner);

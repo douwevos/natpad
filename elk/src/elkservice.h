@@ -72,6 +72,7 @@ struct _ElkService {
 	ElkPreferencesService *preferences_service;
 
 	ElkDialogs *dialogs;
+	GApplication *application;
 };
 
 struct _ElkServiceClass {
@@ -81,7 +82,7 @@ struct _ElkServiceClass {
 
 GType elk_service_get_type();
 
-ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPreferencesService *prefences_service);
+ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPreferencesService *prefences_service, GApplication *application);
 
 
 void elk_service_add_resource_handler(ElkService *service, ElkIResourceHandler *resource_handler);
