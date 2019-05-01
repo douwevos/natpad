@@ -117,6 +117,7 @@ static void l_uow_run(ChaUow *self, struct _ChaEditor *editor, ChaDocumentView *
 
 	if (!is_editable) {
 		cha_document_anchor_document(document);
+		cha_document_view_move_view_to_focus(document_view, FALSE);
 	}
 	ChaRevisionWo *a_revision = cha_document_get_current_revision_ref(document);
 	cat_log_debug("invoking mark, cursor=%o", cha_revision_wo_get_cursor(a_revision));
