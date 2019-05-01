@@ -58,6 +58,8 @@ NatpadWindow *natpad_window_new(GApplication *application, ElkPreferencesService
 
 void natpad_window_new_open_file_list(NatpadWindow *window, CatArrayWo *file_list);
 
+void natpad_window_new_open_empty_editor(NatpadWindow *window);
+
 G_END_DECLS
 
 #endif /* NATPAD_WINDOW_H_ */

@@ -360,7 +360,6 @@ static gboolean l_close_window_cb(GtkWidget *widget, GdkEvent *eev, gpointer mai
 void natpad_window_new_open_file_list(NatpadWindow *window, CatArrayWo *file_list) {
 	NatpadWindowPrivate *priv = natpad_window_get_instance_private(window);
 
-
 	CatArrayWo *e_tree_node_array = cat_array_wo_new();
 	int docIdx;
 	for(docIdx=0; docIdx<cat_array_wo_size(file_list); docIdx++) {
@@ -378,6 +377,12 @@ void natpad_window_new_open_file_list(NatpadWindow *window, CatArrayWo *file_lis
 	ELK_ISERVICE_GET_INTERFACE(priv->elk_service)->openResourceList(ELK_ISERVICE(priv->elk_service), e_tree_node_array);
 	cat_unref_ptr(e_tree_node_array);
 }
+
+void natpad_window_new_open_empty_editor(NatpadWindow *window) {
+	NatpadWindowPrivate *priv = natpad_window_get_instance_private(window);
+	ELK_ISERVICE_GET_INTERFACE(priv->elk_service)->createEmptyEditor(ELK_ISERVICE(priv->elk_service));
+}
+
 
 
 /********************* start CatIStringable implementation *********************/
