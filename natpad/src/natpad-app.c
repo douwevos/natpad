@@ -129,8 +129,10 @@ static void l_app_activate(GApplication *application) {
 		gtk_widget_show(GTK_WIDGET(current_window));
 	}
 
-	if (priv->file_list) {
+	if (priv->file_list && cat_array_wo_size(priv->file_list)>0) {
 		natpad_window_new_open_file_list((NatpadWindow *) current_window, priv->file_list);
+	} else {
+		natpad_window_new_open_empty_editor((NatpadWindow *) current_window);
 	}
 
 	gtk_window_present(GTK_WINDOW(current_window));
