@@ -55,6 +55,8 @@ GType dra_action_start_record_get_type();
 
 DraActionStartRecord *dra_action_start_record_new(DraMacroManager *macro_manager);
 
+void dra_action_start_record_set_recording(DraActionStartRecord *action_start, gboolean is_recording);
+
 G_END_DECLS
 
 #endif /* ACTION_MACRO_DRAACTIONSTARTRECORD_H_ */

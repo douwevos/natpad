@@ -86,7 +86,9 @@ static void l_action_run(LeaAction *self) {
 	dra_macro_manager_start_recording(priv->macro_manager);
 }
 
-
+void dra_action_start_record_set_recording(DraActionStartRecord *action_start, gboolean is_recording) {
+	lea_action_set_sensitive_self((LeaAction *) action_start, !is_recording);
+}
 
 /********************* start CatIStringable implementation *********************/
 

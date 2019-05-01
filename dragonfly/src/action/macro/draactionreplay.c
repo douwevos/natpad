@@ -76,6 +76,8 @@ DraActionReplay *dra_action_replay_new(DraMacroManager *macro_manager) {
 	cat_ref_anounce(result);
 	DraActionReplayPrivate *priv = dra_action_replay_get_instance_private(result);
 	lea_action_construct(LEA_ACTION(result), cat_string_wo_new_with("dragonfly.replay"), cat_string_wo_new_with("Replay"), NULL);
+	lea_action_set_default_key_sequence(LEA_ACTION(result), lea_key_sequence_from_string(cat_string_wo_new_with("Ctrl+R")));
+	lea_action_set_sensitive_self((LeaAction *) result, FALSE);
 	priv->macro_manager = cat_ref_ptr(macro_manager);
 	return result;
 }
@@ -87,6 +89,9 @@ static void l_action_run(LeaAction *self) {
 	dra_macro_manager_replay(priv->macro_manager);
 }
 
+void dra_action_replay_set_macro_available(DraActionReplay *action_replay, gboolean macro_available) {
+	lea_action_set_sensitive_self((LeaAction *) action_replay, macro_available);
+}
 
 /********************* start CatIStringable implementation *********************/
 

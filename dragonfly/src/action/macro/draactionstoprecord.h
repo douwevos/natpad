@@ -55,6 +55,8 @@ GType dra_action_stop_record_get_type();
 
 DraActionStopRecord *dra_action_stop_record_new(DraMacroManager *macro_manager);
 
+void dra_action_stop_record_set_recording(DraActionStopRecord *action_record, gboolean is_recording);
+
 G_END_DECLS
 
 #endif /* ACTION_MACRO_DRAACTIONSTOPRECORD_H_ */

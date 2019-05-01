@@ -55,6 +55,8 @@ GType dra_action_replay_get_type();
 
 DraActionReplay *dra_action_replay_new(DraMacroManager *macro_manager);
 
+void dra_action_replay_set_macro_available(DraActionReplay *action_replay, gboolean macro_available);
+
 G_END_DECLS
 
 #endif /* ACTION_MACRO_DRAACTIONREPLAY_H_ */

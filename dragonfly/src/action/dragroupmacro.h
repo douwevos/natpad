@@ -58,7 +58,8 @@ DraGroupMacro *dra_group_macro_new(LeaKeyContext *key_context, DraPanelOwner *pa
 
 void dra_group_macro_set_editor_panel(DraGroupMacro *group_macro, DraEditorPanel *editor_panel);
 
-G_END_DECLS
+void dra_group_macro_on_macro_state(DraGroupMacro *group_macro, gboolean is_recording, gboolean macro_available);
 
+G_END_DECLS
 
 #endif /* ACTION_DRAGROUPMACRO_H_ */

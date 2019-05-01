@@ -118,7 +118,7 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->tag_popup);
 	if (priv->context_menu) {
 		GtkMenuShell *menu = lea_menu_action_get_menu_shell(priv->context_menu);
-		gtk_widget_destroy(menu);
+		gtk_widget_destroy(GTK_WIDGET(menu));
 	}
 	cat_unref_ptr(priv->context_menu);
 

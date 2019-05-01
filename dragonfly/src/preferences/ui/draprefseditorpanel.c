@@ -119,7 +119,7 @@ static void l_big_mode_font_set(GtkFontButton *font_button, gpointer user_data);
 static gboolean l_big_mode_force_ascii_toggled(GtkToggleButton *toggle_button, gpointer user_data);
 
 static gboolean l_font_filter(const PangoFontFamily *family, const PangoFontFace *face, gpointer data) {
-	if (!pango_font_family_is_monospace(family)) {
+	if (!pango_font_family_is_monospace((PangoFontFamily *) family)) {
 		return FALSE;
 	}
 	const char *facename = pango_font_face_get_face_name((PangoFontFace *) face);

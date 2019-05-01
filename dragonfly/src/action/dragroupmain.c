@@ -28,6 +28,7 @@
 #include "dragroupmacro.h"
 #include "draactionprint.h"
 #include "draactionprintpreview.h"
+#include "../macros/draimacromanagerlistener.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -44,18 +45,23 @@ struct _DraGroupMainPrivate {
 	ChaLineEnd line_ends;
 	gboolean line_ends_are_mixed;
 
+	gboolean macro_is_recording;
+	gboolean macro_present;
+
 	DraActionPrint *action_print;
 	DraActionPrintPreview *action_print_preview;
 };
 
 static void l_document_view_listener_iface_init(ChaIDocumentViewListenerInterface *iface);
 static void l_document_listener_iface_init(ChaIDocumentListenerInterface *iface);
+static void l_macro_manager_listener_iface_init(DraIMacroManagerListenerInterface *iface);
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(DraGroupMain, dra_group_main, LEA_TYPE_ACTION_GROUP,
 		G_ADD_PRIVATE(DraGroupMain)
 		G_IMPLEMENT_INTERFACE(CHA_TYPE_IDOCUMENT_VIEW_LISTENER, l_document_view_listener_iface_init)
 		G_IMPLEMENT_INTERFACE(CHA_TYPE_IDOCUMENT_LISTENER, l_document_listener_iface_init)
+		G_IMPLEMENT_INTERFACE(DRA_TYPE_IMACRO_MANAGER_LISTENER, l_macro_manager_listener_iface_init)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init)
 );
 
@@ -273,6 +279,25 @@ static void l_document_listener_iface_init(ChaIDocumentListenerInterface *iface)
 }
 
 /********************* end ChaIDocumentListener implementation *********************/
+
+/********************* start DraIMacroManagerListener implementation *********************/
+
+static void l_on_macro_state(DraIMacroManagerListener *self, gboolean isRecording, gboolean macroAvailable) {
+	DraGroupMain *instance = DRA_GROUP_MAIN(self);
+	DraGroupMainPrivate *priv = dra_group_main_get_instance_private(instance);
+	if (priv->macro_is_recording!=isRecording || priv->macro_present!=macroAvailable) {
+		priv->macro_is_recording = isRecording;
+		priv->macro_present = macroAvailable;
+		dra_group_macro_on_macro_state(priv->group_macro, isRecording, macroAvailable);
+	}
+}
+
+
+static void l_macro_manager_listener_iface_init(DraIMacroManagerListenerInterface *iface) {
+	iface->macroState = l_on_macro_state;
+}
+
+/********************* end DraIMacroManagerListener implementation *********************/
 
 /********************* start CatIStringable implementation *********************/
 

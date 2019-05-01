@@ -31,6 +31,7 @@ struct _DraMacroManagerPrivate {
 	gboolean do_record;
 	CatArrayWo *recorded;
 	DraEditor *editor;
+	CatWeakList *listeners;
 };
 
 static void l_uow_iface_init(ChaIUowListenerInterface *iface);
@@ -60,6 +61,7 @@ static void l_dispose(GObject *object) {
 	DraMacroManagerPrivate *priv = dra_macro_manager_get_instance_private(instance);
 	cat_unref_ptr(priv->editor);
 	cat_unref_ptr(priv->recorded);
+	cat_unref_ptr(priv->listeners);
 	G_OBJECT_CLASS(dra_macro_manager_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -71,7 +73,6 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-
 DraMacroManager *dra_macro_manager_new() {
 	DraMacroManager *result = g_object_new(DRA_TYPE_MACRO_MANAGER, NULL);
 	cat_ref_anounce(result);
@@ -79,8 +80,20 @@ DraMacroManager *dra_macro_manager_new() {
 	priv->do_record = FALSE;
 	priv->editor = NULL;
 	priv->recorded = cat_array_wo_new();
-//	G_OBJECT_construct((GObject *) result);
+	priv->listeners = cat_weak_list_new();
 	return result;
+}
+
+
+void dra_macro_manager_add_listener(DraMacroManager *macro_manager, DraIMacroManagerListener *listener) {
+	DraMacroManagerPrivate *priv = dra_macro_manager_get_instance_private(macro_manager);
+	cat_weak_list_append_once(priv->listeners, (GObject *) listener);
+	dra_imacro_manager_listener_macro_state(listener, priv->do_record, cat_array_wo_size(priv->recorded)>0);
+}
+
+void dra_macro_manager_remove_listener(DraMacroManager *macro_manager, DraIMacroManagerListener *listener) {
+	DraMacroManagerPrivate *priv = dra_macro_manager_get_instance_private(macro_manager);
+	cat_weak_list_remove(priv->listeners, (GObject *) listener);
 }
 
 
@@ -102,17 +115,28 @@ void dra_macro_manager_set_editor(DraMacroManager *macro_manager, DraEditor *new
 	}
 }
 
-
 void dra_macro_manager_start_recording(DraMacroManager *macro_manager) {
 	DraMacroManagerPrivate *priv = dra_macro_manager_get_instance_private(macro_manager);
 	priv->do_record = TRUE;
 	cat_array_wo_clear(priv->recorded);
+	CatIIterator *iter = cat_weak_list_iterator(priv->listeners);
+	while(cat_iiterator_has_next(iter)) {
+		DraIMacroManagerListener *listener = (DraIMacroManagerListener *) cat_iiterator_next(iter);
+		dra_imacro_manager_listener_macro_state(listener, TRUE, FALSE);
+	}
+	cat_unref_ptr(iter);
 }
 
 void dra_macro_manager_stop_recording(DraMacroManager *macro_manager) {
 	DraMacroManagerPrivate *priv = dra_macro_manager_get_instance_private(macro_manager);
 	priv->do_record = FALSE;
-
+	gboolean hasMacro = cat_array_wo_size(priv->recorded)>0;
+	CatIIterator *iter = cat_weak_list_iterator(priv->listeners);
+	while(cat_iiterator_has_next(iter)) {
+		DraIMacroManagerListener *listener = (DraIMacroManagerListener *) cat_iiterator_next(iter);
+		dra_imacro_manager_listener_macro_state(listener, FALSE, hasMacro);
+	}
+	cat_unref_ptr(iter);
 }
 
 void dra_macro_manager_replay(DraMacroManager *macro_manager) {
@@ -132,18 +156,24 @@ void dra_macro_manager_replay(DraMacroManager *macro_manager) {
 	cat_unref_ptr(iter);
 }
 
-
-
 /********************* start ChaIUowListener implementation *********************/
 
 static void l_uow_event(ChaIUowListener *self, ChaUow *uow, ChaDocumentView *document_view, ChaDocument *document) {
 	DraMacroManager *macro_manager = DRA_MACRO_MANAGER(self);
 	DraMacroManagerPrivate *priv = dra_macro_manager_get_instance_private(macro_manager);
 	if (priv->do_record) {
+		gboolean hasMacro = cat_array_wo_size(priv->recorded)>0;
 		cat_array_wo_append(priv->recorded, (GObject *) uow);
+		if (!hasMacro) {
+			CatIIterator *iter = cat_weak_list_iterator(priv->listeners);
+			while(cat_iiterator_has_next(iter)) {
+				DraIMacroManagerListener *listener = (DraIMacroManagerListener *) cat_iiterator_next(iter);
+				dra_imacro_manager_listener_macro_state(listener, TRUE, TRUE);
+			}
+			cat_unref_ptr(iter);
+		}
 	}
 }
-
 
 static void l_uow_iface_init(ChaIUowListenerInterface *iface) {
 	iface->uowEvent = l_uow_event;
