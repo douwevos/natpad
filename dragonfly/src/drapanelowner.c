@@ -23,6 +23,7 @@
 #include "drapanelowner.h"
 #include "draeditor.h"
 #include "drastatusbarcontent.h"
+#include "macros/draimacromanagerlistener.h"
 #include "action/dragroupmain.h"
 #include "document/drabasicaugmentor.h"
 #include <cow.h>
@@ -132,6 +133,7 @@ void dra_panel_owner_construct(DraPanelOwner *panel_owner, LeaFrame *frame, WorS
 	priv->e_panel_list = cat_array_wo_new();
 	priv->macro_manager = dra_macro_manager_new();
 	priv->group_main = dra_group_main_new(priv->key_context, panel_owner);
+	dra_macro_manager_add_listener(priv->macro_manager, DRA_IMACRO_MANAGER_LISTENER(priv->group_main));
 	priv->browsing_index = -1;
 	priv->a_preferences = NULL;
 	priv->last_focus_order_id = 0;

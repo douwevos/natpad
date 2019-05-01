@@ -76,10 +76,10 @@ DraActionStopRecord *dra_action_stop_record_new(DraMacroManager *macro_manager) 
 	cat_ref_anounce(result);
 	DraActionStopRecordPrivate *priv = dra_action_stop_record_get_instance_private(result);
 	lea_action_construct(LEA_ACTION(result), cat_string_wo_new_with("dragonfly.stop.record"), cat_string_wo_new_with("Stop Recording"), NULL);
+	lea_action_set_sensitive_self((LeaAction *) result, FALSE);
 	priv->macro_manager = cat_ref_ptr(macro_manager);
 	return result;
 }
-
 
 static void l_action_run(LeaAction *self) {
 	DraActionStopRecord *action = DRA_ACTION_STOP_RECORD(self);
@@ -87,6 +87,9 @@ static void l_action_run(LeaAction *self) {
 	dra_macro_manager_stop_recording(priv->macro_manager);
 }
 
+void dra_action_stop_record_set_recording(DraActionStopRecord *action_record, gboolean is_recording) {
+	lea_action_set_sensitive_self((LeaAction *) action_record, is_recording);
+}
 
 /********************* start CatIStringable implementation *********************/
 

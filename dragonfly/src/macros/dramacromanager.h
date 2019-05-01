@@ -23,6 +23,7 @@
 #ifndef MACROS_DRAMACROMANAGER_H_
 #define MACROS_DRAMACROMANAGER_H_
 
+#include "draimacromanagerlistener.h"
 #include "../draeditor.h"
 #include <caterpillar.h>
 #include <chameleon.h>
@@ -35,7 +36,6 @@ G_BEGIN_DECLS
 #define DRA_IS_MACRO_MANAGER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), DRA_TYPE_MACRO_MANAGER))
 #define DRA_IS_MACRO_MANAGER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), DRA_TYPE_MACRO_MANAGER))
 #define DRA_MACRO_MANAGER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), DRA_TYPE_MACRO_MANAGER, DraMacroManagerClass))
-
 
 typedef struct _DraMacroManager               DraMacroManager;
 typedef struct _DraMacroManagerPrivate        DraMacroManagerPrivate;
@@ -54,6 +54,9 @@ struct _DraMacroManagerClass {
 GType dra_macro_manager_get_type();
 
 DraMacroManager *dra_macro_manager_new();
+
+void dra_macro_manager_add_listener(DraMacroManager *macro_manager, DraIMacroManagerListener *listener);
+void dra_macro_manager_remove_listener(DraMacroManager *macro_manager, DraIMacroManagerListener *listener);
 
 void dra_macro_manager_set_editor(DraMacroManager *macro_manager, DraEditor *new_editor);
 

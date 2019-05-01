@@ -107,6 +107,14 @@ void dra_group_macro_set_editor_panel(DraGroupMacro *group_macro, DraEditorPanel
 
 }
 
+void dra_group_macro_on_macro_state(DraGroupMacro *group_macro, gboolean is_recording, gboolean macro_available) {
+	cat_log_debug("is_recording=%d macro_available=%d", is_recording, macro_available);
+	DraGroupMacroPrivate *priv = dra_group_macro_get_instance_private(group_macro);
+	dra_action_replay_set_macro_available(priv->action_replay, !is_recording && macro_available);
+	dra_action_start_record_set_recording(priv->action_start_record, is_recording);
+	dra_action_stop_record_set_recording(priv->action_stop_record, is_recording);
+}
+
 
 /********************* start CatIStringable implementation *********************/
 
