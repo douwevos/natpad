@@ -93,6 +93,20 @@ ChaPageListWo *cha_page_list_wo_new() {
 	return result;
 }
 
+ChaPageListWo *cha_page_list_wo_reversion(ChaPageListWo *page_list, int version) {
+	ChaPageListWo *result = g_object_new(CHA_TYPE_PAGE_LIST_WO, NULL);
+	cat_ref_anounce(result);
+	ChaPageListWoPrivate *spriv = cha_page_list_wo_get_instance_private(page_list);
+	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private(result);
+	cat_wo_construct((CatWo *) result, TRUE);
+	priv->page_array = cat_ref_ptr(spriv->page_array);
+	priv->line_ends = spriv->line_ends;
+	priv->line_ends_are_mixed = spriv->line_ends_are_mixed;
+	return cha_page_list_wo_anchor(result, version);
+
+}
+
+
 void cha_page_list_wo_enrich(ChaPageListWo *page_list, ChaEnrichmentDataMapWo *a_map) {
 	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private(page_list);
 	if (priv->enriched_count==0) {
@@ -216,8 +230,6 @@ ChaLineLocationWo *cha_page_list_wo_calculate_line_location_end(const ChaPageLis
 	ChaPageWo *page = (ChaPageWo *) cat_array_wo_get_last(priv->page_array);
 	return cha_line_location_wo_new_with(cat_array_wo_size(priv->page_array)-1, cha_page_wo_line_count(page)-1);
 }
-
-
 
 ChaPageWo *cha_page_list_wo_page_at(ChaPageListWo *page_list, int page_index) {
 	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private(page_list);
@@ -359,6 +371,7 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 	}
 
 	ChaPageListWoPrivate *priv = cha_page_list_wo_get_instance_private((ChaPageListWo *) e_uninitialized);
+	priv->enriched_count = 0;
 	if (original) {
 		ChaPageListWoPrivate *rpriv = cha_page_list_wo_get_instance_private((ChaPageListWo *) original);
 		priv->page_array = cat_ref_ptr(rpriv->page_array);

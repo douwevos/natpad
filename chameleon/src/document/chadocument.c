@@ -221,6 +221,26 @@ static void l_dump(ChaRevisionWo *a_rev) {
 }
 )
 
+cat_log_on_debug(
+static void l_dunp_history(ChaDocumentPrivate *priv) {
+	int count = cat_linked_list_size(priv->e_revision_history);
+
+	ChaRevisionWo *a_rev = (ChaRevisionWo *) cat_atomic_reference_get_unsafe(priv->a_revision_ref);
+	cat_log_print("DUMP", "*active=%p ver:%d", a_rev, cat_wo_get_version((CatWo *) a_rev));
+
+	int idx;
+	for(idx=0; idx<count; idx++) {
+		ChaRevisionWo *rev = (ChaRevisionWo *) cat_linked_list_get(priv->e_revision_history, idx);
+		if (idx==priv->history_index) {
+			cat_log_print("DUMP", "*history[%d]=%p ver:%d", idx, rev, cat_wo_get_version((CatWo *) rev));
+		} else {
+			cat_log_print("DUMP", " history[%d]=%p ver:%d", idx, rev, cat_wo_get_version((CatWo *) rev));
+		}
+	}
+}
+)
+
+
 void cha_document_anchor_document_full(ChaDocument *document, ChaDocumentAnchorMode anchor_mode) {
 	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
 	cat_log_info("anchoring");
@@ -364,6 +384,8 @@ void cha_document_anchor_document_full(ChaDocument *document, ChaDocumentAnchorM
 		cat_unref_ptr(a_new_rev);
 		cat_log_trace("done");
 	}
+
+	cat_log_on_debug(l_dunp_history(priv));
 }
 
 static void l_notify_new_saved_version(CatWeakList *listeners, ChaRevisionWo *a_new_rev_saved);
@@ -459,10 +481,14 @@ void cha_document_unregister_enrichment_slot(ChaDocument *document, GObject *slo
 	cat_unref_ptr(e_map);
 }
 
-static void l_set_history_ref(ChaDocumentPrivate *priv, ChaRevisionWo *a_new_rev) {
+static void l_set_history_ref(ChaDocumentPrivate *priv) {
+	ChaRevisionWo *a_new_rev = (ChaRevisionWo *) cat_linked_list_get(priv->e_revision_history, priv->history_index);
 	ChaRevisionWo *a_rev = (ChaRevisionWo *) cat_atomic_reference_get_unsafe(priv->a_revision_ref);
 	cat_unref_ptr(priv->e_revision);
 	if (a_new_rev != a_rev) {
+		a_new_rev = cha_revision_wo_reversion(a_new_rev, priv->version_seq++);
+		cat_linked_list_set(priv->e_revision_history, priv->history_index, (GObject *) a_new_rev);
+		cat_unref(a_new_rev);
 
 		cha_revision_wo_enrich(a_new_rev, priv->enrichment_map);
 		cat_log_trace("enriched: a_new_rev=%o", a_new_rev);
@@ -482,13 +508,15 @@ static void l_set_history_ref(ChaDocumentPrivate *priv, ChaRevisionWo *a_new_rev
 
 }
 
+
+
 void cha_document_undo(ChaDocument *document) {
 	ChaDocumentPrivate *priv = cha_document_get_instance_private(document);
 	if (priv->history_index>0) {
 		priv->history_index--;
-		ChaRevisionWo *a_new_rev = (ChaRevisionWo *) cat_linked_list_get(priv->e_revision_history, priv->history_index);
-		l_set_history_ref(priv, a_new_rev);
+		l_set_history_ref(priv);
 	}
+	cat_log_on_debug(l_dunp_history(priv));
 }
 
 void cha_document_redo(ChaDocument *document) {
@@ -496,10 +524,12 @@ void cha_document_redo(ChaDocument *document) {
 	int hist_size = cat_linked_list_size(priv->e_revision_history);
 	if (priv->history_index<hist_size-1) {
 		priv->history_index++;
-		ChaRevisionWo *a_new_rev = (ChaRevisionWo *) cat_linked_list_get(priv->e_revision_history, priv->history_index);
-		l_set_history_ref(priv, a_new_rev);
+		l_set_history_ref(priv);
 	}
+	cat_log_on_debug(l_dunp_history(priv));
 }
+
+
 
 void cha_document_get_history_info(const ChaDocument *document, int *history_index, int *history_length) {
 	const ChaDocumentPrivate *priv = cha_document_get_instance_private((ChaDocument *) document);

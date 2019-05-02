@@ -31,7 +31,6 @@
 #include <logging/catlog.h>
 
 struct _ChaRevisionWoPrivate {
-	int version;
 	short enriched_count;
 	ChaEnrichmentData *enrichment_data;
 	ChaCursorWo *cursor;
@@ -115,6 +114,21 @@ ChaRevisionWo *cha_revision_wo_new() {
 	cat_unref_ptr(line);
 	cat_unref_ptr(page);
 	return result;
+}
+
+ChaRevisionWo *cha_revision_wo_reversion(ChaRevisionWo *source, int new_version) {
+	ChaRevisionWo *result = g_object_new(CHA_TYPE_REVISION_WO, NULL);
+	cat_ref_anounce(result);
+	ChaRevisionWoPrivate *spriv = cha_revision_wo_get_instance_private(source);
+	ChaRevisionWoPrivate *priv = cha_revision_wo_get_instance_private(result);
+	cat_wo_construct((CatWo *) result, TRUE);
+	priv->page_list = cha_page_list_wo_reversion(spriv->page_list, new_version);
+	priv->enriched_count = 0;
+	priv->enrichment_data = NULL;
+	priv->cursor = cat_ref_ptr(spriv->cursor);
+	priv->load_token = cat_ref_ptr(spriv->load_token);
+	priv->form =  cat_ref_ptr(spriv->form);
+	return cha_revision_wo_anchor(result, new_version);
 }
 
 int cha_revision_wo_get_content_version(ChaRevisionWo *revision) {
@@ -1627,7 +1641,6 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->cursor = cha_cursor_wo_clone(priv_src->cursor, CAT_CLONE_DEPTH_NONE);
 		priv->enriched_count = 0;
 		priv->page_list = cha_page_list_wo_clone(priv_src->page_list, CAT_CLONE_DEPTH_NONE);
-		priv->version = priv_src->version;
 		priv->enrichment_data = cat_ref_ptr(priv->enrichment_data);
 		priv->form = cha_form_wo_clone(priv_src->form, CAT_CLONE_DEPTH_NONE);
 	} else {

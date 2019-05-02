@@ -291,7 +291,7 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 	if ((update_ctx->cursor_x_pos!=priv->cursor_x_pos) || (update_ctx->cursor_width!=priv->cursor_width)) {
 		priv->cursor_x_pos = update_ctx->cursor_x_pos;
 		priv->cursor_width = update_ctx->cursor_width;
-		update_ctx->cache_dirty = TRUE;
+//		update_ctx->cache_dirty = TRUE;
 		result = TRUE;
 	}
 
@@ -567,6 +567,7 @@ static void l_draw(ChaSubLineCache *sub_line_cache, cairo_t *cr, double clipy, d
 
 
 	if (priv->cursor_x_pos>=0) {
+		cat_log_debug("drawing cursor at:%d", priv->cursor_x_pos);
 		if (priv->cursor_width>0) {
 			/* draw cursor overwrite mode */
 			cairo_set_operator(cr, CAIRO_OPERATOR_DIFFERENCE);

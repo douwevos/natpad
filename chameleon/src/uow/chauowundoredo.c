@@ -81,6 +81,8 @@ static void l_uow_run(ChaUow *self, struct _ChaEditor *editor, ChaDocumentView *
 	ChaUowUndoRedoPrivate *priv = cha_uow_undo_redo_get_instance_private(CHA_UOW_UNDO_REDO(self));
 	ChaDocument *document = cha_document_view_get_document(document_view);
 
+	cha_document_view_remove_selection(document_view);
+
 	if (priv->redo) {
 		cha_document_redo(document);
 	} else {

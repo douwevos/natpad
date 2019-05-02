@@ -60,7 +60,7 @@ struct _ChaRevisionWoClass {
 GType cha_revision_wo_get_type();
 
 ChaRevisionWo *cha_revision_wo_new();
-
+ChaRevisionWo *cha_revision_wo_reversion(ChaRevisionWo *source, int new_version);
 
 int cha_revision_wo_get_content_version(ChaRevisionWo *revision);
 

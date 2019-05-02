@@ -15,6 +15,7 @@ struct _MooIdPathPrivate {
 static void l_stringable_iface_init(CatIStringableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE(MooIdPath, moo_id_path, G_TYPE_INITIALLY_UNOWNED, {
+		G_ADD_PRIVATE(MooIdPath)
 		G_IMPLEMENT_INTERFACE(CAT_TYPE_ISTRINGABLE, l_stringable_iface_init);
 });
 
@@ -54,6 +55,7 @@ MooIdPath *moo_id_path_new() {
 	priv->count = 0;
 	priv->ids = NULL;
 	priv->index_cache = NULL;
+	cat_log_error("id-path=%p", result);
 	return result;
 }
 

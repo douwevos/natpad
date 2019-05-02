@@ -55,6 +55,8 @@ GType cha_page_list_wo_get_type();
 
 ChaPageListWo *cha_page_list_wo_new();
 
+ChaPageListWo *cha_page_list_wo_reversion(ChaPageListWo *page_list, int version);
+
 void cha_page_list_wo_enrich(ChaPageListWo *page_list, ChaEnrichmentDataMapWo *a_map);
 void cha_page_list_wo_impoverish(ChaPageListWo *page_list);
 void cha_page_list_wo_enrichment_remap(ChaPageListWo *page_list, ChaEnrichmentDataMapWo *a_old_map, ChaEnrichmentDataMapWo *a_new_map, int add_idx, int rem_idx);
