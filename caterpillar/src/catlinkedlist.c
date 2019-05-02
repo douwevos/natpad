@@ -319,6 +319,21 @@ GObject *cat_linked_list_get(CatLinkedList *linked_list, int index) {
 }
 
 
+void cat_linked_list_set(CatLinkedList *linked_list, int index, GObject *replacement) {
+	CatLinkedListPrivate *priv = cat_linked_list_get_instance_private(linked_list);
+	CatNode *test_node = priv->head;
+	while(test_node && index>0) {
+		test_node = test_node->next;
+		index--;
+	}
+	if (test_node) {
+		cat_ref_ptr(replacement);
+		cat_unref(test_node->data);
+		test_node->data = replacement;
+	}
+}
+
+
 
 /********************* start CatIStringable implementation *********************/
 

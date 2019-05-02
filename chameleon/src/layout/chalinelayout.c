@@ -226,6 +226,8 @@ gboolean cha_line_layout_set_text(ChaLineLayout *line_layout, CatStringWo *a_tex
 
 gboolean cha_line_layout_set_preedit(ChaLineLayout *line_layout, const CatStringWo *preedit_text, PangoAttrList *predit_attrs, int preedit_cursor, int x_cursor_bytes) {
 	ChaLineLayoutPrivate *priv = cha_line_layout_get_instance_private(line_layout);
+	priv->x_cursor_bytes = x_cursor_bytes;
+	priv->preedit_cursor = preedit_cursor;
 	if (cat_string_wo_equal(priv->preedit_text, preedit_text) && priv->preedit_attrs==predit_attrs && priv->preedit_cursor==preedit_cursor && priv->x_cursor_bytes==x_cursor_bytes) {
 		return FALSE;
 	}
@@ -235,8 +237,6 @@ gboolean cha_line_layout_set_preedit(ChaLineLayout *line_layout, const CatString
 	pango_attr_list_ref(predit_attrs);
 	pango_attr_list_unref(priv->preedit_attrs);
 	priv->preedit_attrs = predit_attrs;
-	priv->preedit_cursor = preedit_cursor;
-	priv->x_cursor_bytes = x_cursor_bytes;
 	cat_unref_ptr(priv->pango_layout);
 	cat_unref_ptr(priv->pango_layout_main_thread);
 	return TRUE;

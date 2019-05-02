@@ -178,7 +178,9 @@ static MooNodeWo *l_refresh_module(JagRefreshModuleRequestPrivate *priv, MooTran
 //	cat_log_debug("shouldRefresh="+shouldRefresh);
 
 	MooIdPath *mainPath = moo_id_path_new();
+	cat_log_error("mainPath=%p", mainPath);
 	cat_ref_sink_ptr(mainPath);
+	cat_log_error("mainPath=%p !", mainPath);
 
 	if (shouldRefresh) {
 		MooNodeWo *e_root_node = moo_node_wo_ensure_editable((MooNodeWo *) tx_node, NULL);

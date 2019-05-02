@@ -67,6 +67,7 @@ void cat_linked_listed_remove_tail(CatLinkedList *linked_list, int from);
 CatIIterator *cat_linked_list_iterator(CatLinkedList *linked_list);
 
 GObject *cat_linked_list_get(CatLinkedList *linked_list, int index);
+void cat_linked_list_set(CatLinkedList *linked_list, int index, GObject *replacement);
 
 G_END_DECLS
 

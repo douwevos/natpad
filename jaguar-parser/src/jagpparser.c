@@ -617,7 +617,6 @@ static void l_accept(JagPParser *parser, JagPTokenKind tk) {
 		JagPIDiagnosticPosition *diag = (JagPIDiagnosticPosition *) jagp_simple_diagnostic_position_new(jagp_ilexer_prev_token(priv->lexer)->cur_end);
 		CatArrayWo *args = cat_array_wo_new();
 //		cat_array_wo_append(args, tk);
-		cat_stacktrace_print();
 		CatStringWo *p = cat_string_wo_new();
 		cat_string_wo_format(p, "expected: %d", tk);
 		l_report_syntax_error(parser, diag, cat_string_wo_getchars(p), args);

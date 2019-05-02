@@ -2249,6 +2249,7 @@ static void l_invalidate_revision(ChaDocumentView *document_view, ChaRevisionWo 
 
 
 				gboolean needs_repaint = cha_sub_line_cache_update(sub_line_cache, &cache_update);
+
 				if (needs_repaint || FORCE_FULL_PAINT==1) {
 					int yposs=(int) (page_sub_line_y-priv->view_y);
 //					if (!priv->in_scroll) {
