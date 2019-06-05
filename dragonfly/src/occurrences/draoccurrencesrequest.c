@@ -123,6 +123,7 @@ static void l_run_request(WorRequest *request) {
 	ChaCursorWo *a_cursor = cha_revision_wo_get_cursor(priv->a_revision);
 	ChaLineLocationWo *a_ll = cha_cursor_wo_get_line_location(a_cursor);
 	ChaPageWo *a_page = cha_revision_wo_page_at(priv->a_revision, cha_line_location_wo_get_page_index(a_ll));
+	cha_page_wo_hold_lines(a_page);
 
 	const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(a_page, cha_line_location_wo_get_page_line_index(a_ll), FALSE);
 
@@ -160,6 +161,7 @@ static void l_run_request(WorRequest *request) {
 	cat_unref_ptr(a_text);
 	cha_utf8_text_cleanup(&utf8_text);
 	cat_ref_ptr(request);
+	cha_page_wo_release_lines(a_page);
 	g_idle_add(l_done, request);
 }
 
