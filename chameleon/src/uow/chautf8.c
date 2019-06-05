@@ -72,6 +72,7 @@ int cha_utf8_prev_char(const char *chrs, int cur_x_next, gunichar *uch) {
 }
 
 
+
 int cha_utf8_next_char(const char *chrs, int cur_x_next, int maxlength, gunichar *uch) {
 	int result = cur_x_next;
 	char c = chrs[result];
@@ -84,17 +85,17 @@ int cha_utf8_next_char(const char *chrs, int cur_x_next, int maxlength, gunichar
 		*uch = c;
 	} else {
 		if ((c & 0xE0) == 0xC0) {
-			result += 1;
-		} else if ((c & 0xF0) == 0xE0) {
 			result += 2;
-		} else if ((c & 0xF8) == 0xF0) {
+		} else if ((c & 0xF0) == 0xE0) {
 			result += 3;
-		} else if ((c & 0xFC) == 0xF8) {
+		} else if ((c & 0xF8) == 0xF0) {
 			result += 4;
-		} else if ((c & 0xFE) == 0xFC) {
+		} else if ((c & 0xFC) == 0xF8) {
 			result += 5;
-		} else if ((c & 0xFF) == 0xFE) {
+		} else if ((c & 0xFE) == 0xFC) {
 			result += 6;
+		} else if ((c & 0xFF) == 0xFE) {
+			result += 7;
 		}
 		if (result>maxlength) {
 			result=maxlength;

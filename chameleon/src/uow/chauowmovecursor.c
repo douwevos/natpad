@@ -61,8 +61,6 @@ static void cha_uow_move_cursor_init(ChaUowMoveCursor *instance) {
 
 static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
-//	ChaUowMoveCursor *instance = CHA_UOW_MOVE_CURSOR(object);
-//	ChaUowMoveCursorPrivate *priv = cha_uow_move_cursor_get_instance_private(instance);
 	G_OBJECT_CLASS(cha_uow_move_cursor_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -116,11 +114,11 @@ static void l_next_column(ChaUowMoveCursor *move_cursor, ChaDocumentView *docume
 	if (sub_x>0) {
 		sub_x++;
 	} else {
+		CatStringWo *text = cha_line_wo_get_text(line);
+		const char *chrs = cat_string_wo_getchars(text);
+		int chrs_len = cat_string_wo_length(text);
+		gunichar uch = 0;
 		if (per_word) {
-			CatStringWo *text = cha_line_wo_get_text(line);
-			const char *chrs = cat_string_wo_getchars(text);
-			int chrs_len = cat_string_wo_length(text);
-			gunichar uch = 0;
 
 			int status = 0;
 			while(cur_x_next<chrs_len) {
@@ -137,9 +135,11 @@ static void l_next_column(ChaUowMoveCursor *move_cursor, ChaDocumentView *docume
 		} else {
 			int trailing;
 			pango_layout_move_cursor_visually(pango_layout, TRUE, cur_x, 0, 1, &cur_x_next, &trailing);
+			cat_log_debug("trailing=%d", trailing);
 		}
+		cat_log_debug("cur_x=%d, cur_x_next=%d, line.byte.cnt=%d", cur_x, cur_x_next, cha_line_wo_byte_count(line));
 		if (cur_x_next == cur_x) {
-			cur_x_next++;
+			cur_x_next = cha_utf8_next_char(chrs, cur_x_next, chrs_len, &uch);
 		}
 
 		cat_log_debug("cur_x=%d, cur_x_next=%d, page_index=%d, page_line_index=%d, cha_revision_wo_page_count(e_revision)=%d", cur_x, cur_x_next, page_index, page_line_index, cha_revision_wo_page_count(e_revision));
@@ -348,7 +348,10 @@ static void l_prev_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 					}
 				}
 			} else {
-				cur_x+=trailing;
+				if (trailing!=0) {
+					CatStringWo *lt = cha_line_wo_get_text(line);
+					cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+				}
 			}
 
 			cat_log_debug("marked-x=%d, cur_x=%d, trailing=%d", marked_x_cursor, cur_x, trailing);
@@ -382,7 +385,10 @@ static void l_prev_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 					}
 
 				} else {
-					cur_x += trailing;
+					if (trailing!=0) {
+						CatStringWo *lt = cha_line_wo_get_text(line);
+						cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+					}
 				}
 				break;
 			}
@@ -481,7 +487,10 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 				}
 
 			} else {
-				cur_x += trailing;
+				if (trailing!=0) {
+					CatStringWo *lt = cha_line_wo_get_text(line);
+					cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+				}
 			}
 			cha_line_layout_unlock(a_line_layout);
 			cat_unref_ptr(a_line_layout);
@@ -513,7 +522,10 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 					}
 
 				} else {
-					cur_x += trailing;
+					if (trailing!=0) {
+						CatStringWo *lt = cha_line_wo_get_text(line);
+						cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+					}
 				}
 				break;
 			}
@@ -680,7 +692,10 @@ static void l_page_down(ChaUowMoveCursor *move_cursor, ChaDocumentView *document
 				}
 			}
 		} else {
-			cur_x += trailing;
+			if (trailing!=0) {
+				CatStringWo *lt = cha_line_wo_get_text(line);
+				cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+			}
 		}
 	} else {
 		page_line_index++;
@@ -745,7 +760,10 @@ static void l_page_down(ChaUowMoveCursor *move_cursor, ChaDocumentView *document
 						}
 					}
 				} else {
-					cur_x += trailing;
+					if (trailing!=0) {
+						CatStringWo *lt = cha_line_wo_get_text(line);
+						cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+					}
 				}
 				visible_lines = -1;
 			}
@@ -835,7 +853,10 @@ static void l_page_up(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_v
 				}
 			}
 		} else {
-			cur_x += trailing;
+			if (trailing!=0) {
+				CatStringWo *lt = cha_line_wo_get_text(line);
+				cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+			}
 		}
 	} else {
 		page_line_index--;
@@ -897,7 +918,10 @@ static void l_page_up(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_v
 						}
 					}
 				} else {
-					cur_x += trailing;
+					if (trailing!=0) {
+						CatStringWo *lt = cha_line_wo_get_text(line);
+						cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
+					}
 				}
 				visible_lines = -1;
 			}
