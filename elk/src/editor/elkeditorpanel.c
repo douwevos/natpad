@@ -215,6 +215,15 @@ static void l_reactivated(DraEditorPanel *editor_panel, gboolean focus_active_an
 		ElkEditorPanelPrivate *priv = elk_editor_panel_get_instance_private((ElkEditorPanel *) editor_panel);
 		ChaDocument *document = elk_document_bin_get_or_create_document(priv->document_bin);
 		cha_document_set_read_only(document, elk_document_bin_update_read_only(priv->document_bin, TRUE));
+
+		LeaSurface *surface = lea_panel_get_surface((LeaPanel *) editor_panel);
+		LeaFrame *frame = lea_surface_get_frame(surface);
+		GtkWidget *top_level = gtk_widget_get_toplevel((GtkWidget *) frame);
+
+		GdkWindow *window = gtk_widget_get_window(top_level);
+		CatStringWo *document_name = elk_document_bin_get_name(priv->document_bin);
+		gdk_window_set_title(window, cat_string_wo_getchars(document_name));
+
 	}
 }
 
