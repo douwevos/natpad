@@ -129,13 +129,13 @@ static gunichar l_advance_raw(DraSpellCheckerPrivate *priv) {
 	} else {
 		if (result < 0x80) {
 			priv->right_column++;
-		} else if (result< (1<<12)) {
+		} else if (result< (1<<11)) {
 			priv->right_column+= 2;
-		} else if (result< (1<<18)) {
+		} else if (result< (1<<16)) {
 			priv->right_column+= 3;
-		} else if (result< (1<<24)) {
+		} else if (result< (1<<21)) {
 			priv->right_column+= 4;
-		} else if (result< (1<<30)) {
+		} else if (result< (1<<26)) {
 			priv->right_column+= 5;
 		} else {
 			priv->right_column+= 6;

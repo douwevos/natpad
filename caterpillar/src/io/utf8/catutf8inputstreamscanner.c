@@ -105,25 +105,25 @@ static inline gunichar _next_char(CatUtf8InputStreamScanner *stream, CatStreamSt
 	if ((int) wc < 0) {
 		*stream_status = CAT_STREAM_CLOSED;
 		return wc;
-	} else if (wc < 0x80) {
+	} else if ((wc & 0x80)==0) {
 		*stream_status = CAT_STREAM_OK;
 		return wc;
 	} else if (wc < 0xc0) {
 		*stream_status = CAT_STREAM_INVALID_ENCODING;
 		return (gunichar) wc;
-	} else if (wc < 0xe0) {
+	} else if ((wc & 0xE0) == 0xC0) {
 		len = 2;
 		wc &= 0x1f;
-	} else if (wc < 0xf0) {
+	} else if ((wc & 0xF0) == 0xE0) {
 		len = 3;
 		wc &= 0x0f;
-	} else if (wc < 0xf8) {
+	} else if ((wc & 0xF8) == 0xF0) {
 		len = 4;
 		wc &= 0x07;
-	} else if (wc < 0xfc) {
+	} else if ((wc & 0xFC) == 0xF8) {
 		len = 5;
 		wc &= 0x03;
-	} else if (wc < 0xfe) {
+	} else if ((wc & 0xFE) == 0xFC) {
 		len = 6;
 		wc &= 0x01;
 	} else {
