@@ -86,7 +86,7 @@ static int l_read(CatIInputStream *self) {
 	CatStringInputStreamPrivate *priv = cat_string_input_stream_get_instance_private(stream);
 	int result = -1;
 	if (priv->index<cat_string_wo_length(priv->e_text)) {
-		result = cat_string_wo_char_at(priv->e_text, priv->index++);
+		result = 0xFF & cat_string_wo_char_at(priv->e_text, priv->index++);
 	}
 	return result;
 }
