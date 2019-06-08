@@ -540,6 +540,7 @@ static gboolean l_key_press_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer
 				} break;
 			}
 			cha_document_view_set_edit_mode(document_view, mode);
+			cha_editor_inform_activity((ChaEditor *) editor);
 		}
 		break;
 		case GDK_KEY_ISO_Left_Tab:
