@@ -31,7 +31,7 @@
 
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_WARN
+#define CAT_LOG_LEVEL CAT_LOG_ALL
 #define CAT_LOG_CLAZZ "ChaLoadFileRequest"
 #include <logging/catlog.h>
 
@@ -178,11 +178,14 @@ static gboolean l_idle_set_loaded_pages(gpointer user_data) {
 	}
 	cha_revision_wo_set_load_token(e_revision, next_load_token);
 	cat_unref_ptr(next_load_token);
+	cat_log_debug("e_revision=%o", e_revision);
 
 	cha_revision_wo_set_line_ends(e_revision, set_pages->line_ends, set_pages->line_ends_are_mixed);
 
 	cha_document_anchor_document_full(document, CHA_DOCUMENT_ANCHOR_MODE_REPLACE_LAST_HISTORY);
-	cha_document_set_saved_revision(document, e_revision);
+	ChaRevisionWo *a_rev = cha_document_get_current_revision_ref(document);
+	cha_document_set_saved_revision(document, a_rev);
+	cat_unref(a_rev);
 	cat_log_debug("set_pages->is_last=%d, document=%o", set_pages->is_last, document);
 
 	if (set_pages->is_last && set_pages->mmap_data) {
