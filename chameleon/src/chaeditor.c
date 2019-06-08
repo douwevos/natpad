@@ -258,6 +258,12 @@ ChaDocumentView *cha_editor_get_document_view(ChaEditor *editor) {
 	return priv->document_view;
 }
 
+void cha_editor_inform_activity(ChaEditor *editor) {
+	ChaEditorPrivate *priv = cha_editor_get_instance_private(editor);
+	cha_blinker_inform_activity(priv->blinker);
+	cha_document_view_invalidate_lines(priv->document_view);
+}
+
 gboolean cha_editor_set_cursor_blink_up(ChaEditor *editor, gboolean blink_up) {
 	ChaEditorPrivate *priv = cha_editor_get_instance_private(editor);
 	gboolean result = FALSE;

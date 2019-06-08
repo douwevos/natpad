@@ -570,10 +570,10 @@ static void l_draw(ChaSubLineCache *sub_line_cache, cairo_t *cr, double clipy, d
 		cat_log_debug("drawing cursor at:%d", priv->cursor_x_pos);
 		if (priv->cursor_width>0) {
 			/* draw cursor overwrite mode */
+
 			cairo_set_operator(cr, CAIRO_OPERATOR_DIFFERENCE);
 			cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
 			cairo_set_line_width(cr, 0.5);
-//			cairo_set_source_rgba(cr, 0.2, 0.2, 0.4, 0.7);
 			int text_left = height;
 			if (priv->line_nr_view_width>0) {
 				text_left += priv->line_nr_view_width;
@@ -581,8 +581,8 @@ static void l_draw(ChaSubLineCache *sub_line_cache, cairo_t *cr, double clipy, d
 			cairo_rectangle(cr, text_left, priv->last_drawn_ypos-2, priv->surface_width-text_left, height+4);
 			cairo_clip(cr);
 
-			cairo_rectangle(cr, priv->cursor_x_pos+text_left+0.5  - priv->view_x, priv->last_drawn_ypos+0.5, priv->cursor_width-1, height-1);
-			cairo_stroke(cr);
+			cairo_rectangle(cr, priv->cursor_x_pos+text_left  - priv->view_x, priv->last_drawn_ypos, priv->cursor_width-1, height-1);
+			cairo_fill(cr);
 
 		} else if (priv->cursor_width==0) {
 			/* draw cursor insert mode */

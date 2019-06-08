@@ -81,6 +81,7 @@ ChaPreferencesWo *cha_editor_get_preferences(const ChaEditor *editor);
 void cha_editor_set_search_service(ChaEditor *editor, struct _ChaSearchService *search_service);
 struct _ChaSearchService *cha_editor_get_search_service(ChaEditor *editor);
 
+void cha_editor_inform_activity(ChaEditor *editor);
 gboolean cha_editor_set_cursor_blink_up(ChaEditor *editor, gboolean blink_up);
 
 gboolean cha_editor_im_filter_keypress(ChaEditor *editor, GdkEventKey *eev);
