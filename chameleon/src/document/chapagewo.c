@@ -280,7 +280,7 @@ void cha_scan_lines(char *text, char *end, ChaScannedLine cha_scanned_line, void
 		}
 	}
 
-	if (keep_running && off_last<end) {
+	if ((keep_running && (off_last<end)) || text==end) {
 		cha_scanned_line(off_last, end, CHA_LINE_END_NONE, data);
 	}
 }

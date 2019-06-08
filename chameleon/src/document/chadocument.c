@@ -486,6 +486,13 @@ static void l_set_history_ref(ChaDocumentPrivate *priv) {
 	ChaRevisionWo *a_rev = (ChaRevisionWo *) cat_atomic_reference_get_unsafe(priv->a_revision_ref);
 	cat_unref_ptr(priv->e_revision);
 	if (a_new_rev != a_rev) {
+
+		ChaRevisionWo *a_rev_saved = cat_atomic_reference_get(priv->a_revision_saved);
+		gboolean is_saved_version = a_rev_saved==a_new_rev;
+
+		cat_log_error("a_rev_saved=%p, a_new_rev=%p, is_saved_version=%d", a_rev_saved, a_new_rev, is_saved_version);
+		cat_unref_ptr(a_rev_saved);
+
 		a_new_rev = cha_revision_wo_reversion(a_new_rev, priv->version_seq++);
 		cat_linked_list_set(priv->e_revision_history, priv->history_index, (GObject *) a_new_rev);
 		cat_unref(a_new_rev);
@@ -500,6 +507,11 @@ static void l_set_history_ref(ChaDocumentPrivate *priv) {
 
 		/* notify listeners */
 		l_notify_new_revision(priv->listeners, a_new_rev);
+		if (is_saved_version) {
+			cat_atomic_reference_set(priv->a_revision_saved, (GObject *) a_new_rev);
+			l_notify_new_saved_version(priv->listeners, a_new_rev);
+		}
+
 	}
 
 	/* notify listeners */
