@@ -33,6 +33,7 @@
 #include "autocomplete/draaccontentrequest.h"
 #include "autocomplete/draactemplateentry.h"
 #include "highlighting/dratagpopup.h"
+#include "occurrences/draoccurrencesrequest.h"
 
 #include "action/macro/draactionreplay.h"
 #include "action/draactionspellsuggest.h"
@@ -186,6 +187,44 @@ void dra_editor_set_focus_active(DraEditor *editor, gboolean focus_active) {
 		gtk_widget_destroy(GTK_WIDGET(popup_window));
 	}
 }
+
+void dra_editor_set_preferences(DraEditor *editor, DraPreferencesWo *a_prefs) {
+	cha_editor_set_preferences((ChaEditor *) editor, (ChaPreferencesWo *) a_prefs);
+	dra_editor_request_mark_occurrences(editor);
+}
+
+void dra_editor_request_mark_occurrences(DraEditor *editor) {
+	ChaPreferencesWo *prefs = cha_editor_get_preferences((ChaEditor *) editor);
+	if (prefs == NULL) {
+		return;
+	}
+	if (cha_preferences_wo_get_mark_occurrences(prefs)) {
+		ChaDocument *document = cha_editor_get_document((ChaEditor *) editor);
+		ChaRevisionWo *a_new_revision = cha_document_get_current_revision_ref(document);
+		if (a_new_revision==NULL) {
+			return;
+		}
+		DraEditorPanel *panel = dra_editor_get_panel(editor);
+		if (panel==NULL) {
+			return;
+		}
+		LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner((LeaPanel *) panel);
+		WorService *wor_service = dra_panel_owner_get_wor_service((DraPanelOwner *) panel_owner);
+		DraOccurrencesRequest *occ_req = dra_occurrences_request_new(editor, a_new_revision);
+		wor_request_set_time_out((WorRequest *) occ_req, cat_date_current_time()+750);
+		wor_service_post_request(wor_service, (WorRequest *) occ_req);
+		cat_unref_ptr(occ_req);
+		cat_unref_ptr(a_new_revision);
+	} else {
+		dra_editor_set_occurrence_text(editor, NULL);
+		DraDocumentView *document_view = (DraDocumentView *) cha_editor_get_document_view((ChaEditor *) editor);
+		if (document_view!=NULL) {
+			dra_document_view_set_occurrences_rset(document_view, NULL);
+			cha_document_view_queue_invalidate_lines((ChaDocumentView *) document_view);
+		}
+	}
+}
+
 
 void dra_editor_set_occurrence_text(DraEditor *editor, CatStringWo *text) {
 	if (text==NULL) {

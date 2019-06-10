@@ -62,6 +62,8 @@ void dra_document_connector_set_spell_helper(DraDocumentConnector *connector, Dr
 void dra_document_connector_increase_usage(DraDocumentConnector *connector);
 gboolean dra_document_connector_decrease_usage(DraDocumentConnector *connector);
 
+void dra_document_connector_post_augment_request(DraDocumentConnector *connector);
+
 G_END_DECLS
 
 #endif /* DOCUMENT_DRADOCUMENTCONNECTOR_H_ */

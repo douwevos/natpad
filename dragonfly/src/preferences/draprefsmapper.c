@@ -78,6 +78,7 @@ DraPrefsMapper *dra_prefs_mapper_new() {
 static CatS l_s_editor = CAT_S_DEF("editor");
 static CatS l_s_blink_cursor = CAT_S_DEF("blink-cursor");
 static CatS l_s_block_selection = CAT_S_DEF("block-selection");
+static CatS l_s_mark_occurrences = CAT_S_DEF("mark-occurrences");
 static CatS l_s_deprecated_scrolling = CAT_S_DEF("deprecated-scrolling");
 static CatS l_s_limit_cursor = CAT_S_DEF("limit-cursor");
 static CatS l_s_highlight_line = CAT_S_DEF("highlight-line");
@@ -119,6 +120,10 @@ void dra_prefs_mapper_model_to_prefs(ShoModel *model, DraPreferencesWo *e_prefs)
 			gboolean block_selection = cha_preferences_wo_get_block_selection(e_cprefs);
 			block_selection = sho_reference_list_get_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_block_selection), block_selection);
 			cha_preferences_wo_set_block_selection(e_cprefs, block_selection);
+
+			gboolean mark_occurrences = cha_preferences_wo_get_mark_occurrences(e_cprefs);
+			mark_occurrences = sho_reference_list_get_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_mark_occurrences), mark_occurrences);
+			cha_preferences_wo_set_mark_occurrences(e_cprefs, mark_occurrences);
 
 			gboolean deprecated_scrolling = cha_preferences_wo_get_deprecated_scrolling(e_cprefs);
 			deprecated_scrolling = sho_reference_list_get_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_deprecated_scrolling), deprecated_scrolling);
@@ -269,6 +274,7 @@ void dra_prefs_mapper_prefs_to_model(DraPreferencesWo *prefs, ShoModel *model) {
 			ChaPreferencesWo *cprefs = (ChaPreferencesWo *) prefs;
 			sho_reference_list_set_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_blink_cursor), cha_preferences_wo_get_blink_cursor(cprefs));
 			sho_reference_list_set_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_block_selection), cha_preferences_wo_get_block_selection(cprefs));
+			sho_reference_list_set_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_mark_occurrences), cha_preferences_wo_get_mark_occurrences(cprefs));
 			sho_reference_list_set_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_deprecated_scrolling), cha_preferences_wo_get_deprecated_scrolling(cprefs));
 			sho_reference_list_set_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_limit_cursor), cha_preferences_wo_get_limit_cursor(cprefs));
 			sho_reference_list_set_boolean((ShoReferenceList *) val_editor, CAT_S(l_s_highlight_line), cha_preferences_wo_get_highlight_current_line(cprefs));

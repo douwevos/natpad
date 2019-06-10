@@ -113,6 +113,21 @@ gboolean dra_document_connector_decrease_usage(DraDocumentConnector *connector) 
 	return priv->usage_count==0;
 }
 
+static void l_post_augment_request(DraDocumentConnector *connector, ChaRevisionWo *a_new_revision) {
+	DraDocumentConnectorPrivate *priv = dra_document_connector_get_instance_private(connector);
+	DraIConnectorRequestFactoryInterface *iface = DRA_ICONNECTOR_REQUEST_FACTORY_GET_INTERFACE(priv->factory);
+	DraAugmentRequest *request = iface->createRequest(priv->factory, priv->document, a_new_revision);
+	dra_augment_request_set_spell_helper(request, priv->spell_helper);
+	wor_service_post_request(priv->wor_service, WOR_REQUEST(request));
+	cat_unref_ptr(request);
+}
+
+void dra_document_connector_post_augment_request(DraDocumentConnector *connector) {
+	DraDocumentConnectorPrivate *priv = dra_document_connector_get_instance_private(connector);
+	ChaRevisionWo *a_revision = cha_document_get_current_revision_ref(priv->document);
+	l_post_augment_request(connector, a_revision);
+	cat_unref_ptr(a_revision);
+}
 
 /********************* start ChaIDocumentListener implementation *********************/
 
@@ -123,11 +138,7 @@ static void l_document_new_revision(ChaIDocumentListener *self, ChaRevisionWo *a
 		int content_version = cha_revision_wo_get_page_list_version(a_new_revision);
 		if (priv->last_content_version<content_version) {
 			priv->last_content_version = content_version;
-			DraIConnectorRequestFactoryInterface *iface = DRA_ICONNECTOR_REQUEST_FACTORY_GET_INTERFACE(priv->factory);
-			DraAugmentRequest *request = iface->createRequest(priv->factory, priv->document, a_new_revision);
-			dra_augment_request_set_spell_helper(request, priv->spell_helper);
-			wor_service_post_request(priv->wor_service, WOR_REQUEST(request));
-			cat_unref_ptr(request);
+			l_post_augment_request(instance, a_new_revision);
 		}
 	}
 }

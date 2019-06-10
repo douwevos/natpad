@@ -106,6 +106,7 @@ void dra_connector_map_reconfigure(DraConnectorMap *connector_map, DraPreference
 		while(cat_iiterator_has_next(iter)) {
 			DraDocumentConnector *doc_conn = (DraDocumentConnector *) cat_iiterator_next(iter);
 			dra_document_connector_set_spell_helper(doc_conn, new_spell_helper);
+			dra_document_connector_post_augment_request(doc_conn);
 		}
 		cat_unref_ptr(iter);
 		cat_lock_unlock(priv->lock);
