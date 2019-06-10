@@ -62,6 +62,10 @@ DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map,
 
 struct _DraEditorPanel *dra_editor_get_panel(DraEditor *editor);
 
+void dra_editor_set_preferences(DraEditor *editor, DraPreferencesWo *a_prefs);
+
+void dra_editor_request_mark_occurrences(DraEditor *editor);
+
 void dra_editor_set_occurrence_text(DraEditor *editor, CatStringWo *text);
 
 void dra_editor_set_focus_active(DraEditor *editor, gboolean focus_active);

@@ -319,7 +319,7 @@ static gboolean l_panel_close(LeaPanel *panel) {
 
 static void l_reconfigure(DraEditorPanel *editor_panel, DraPreferencesWo *a_prefs) {
 	DraEditorPanelPrivate *priv = dra_editor_panel_get_instance_private(editor_panel);
-	cha_editor_set_preferences((ChaEditor *) priv->editor, (ChaPreferencesWo *) a_prefs);
+	dra_editor_set_preferences(priv->editor, a_prefs);
 }
 
 
@@ -352,13 +352,17 @@ static void l_on_new_revision(ChaIDocumentListener *self, ChaRevisionWo *a_new_r
 		}
 	}
 
-	DraPanelOwner *panel_owner = DRA_PANEL_OWNER(lea_panel_get_panel_owner((LeaPanel *) self));
-	WorService *wor_service = dra_panel_owner_get_wor_service(panel_owner);
-	DraOccurrencesRequest *occ_req = dra_occurrences_request_new(priv->editor, a_new_revision);
-	wor_request_set_time_out((WorRequest *) occ_req, cat_date_current_time()+750);
-	wor_service_post_request(wor_service, (WorRequest *) occ_req);
-	cat_unref_ptr(occ_req);
+	dra_editor_request_mark_occurrences(priv->editor);
 
+//	DraPanelOwner *panel_owner = DRA_PANEL_OWNER(lea_panel_get_panel_owner((LeaPanel *) self));
+//	ChaPreferencesWo *prefs = cha_editor_get_preferences((ChaEditor *) priv->editor);
+//	if (cha_preferences_wo_get_mark_occurrences(prefs)) {
+//		WorService *wor_service = dra_panel_owner_get_wor_service(panel_owner);
+//		DraOccurrencesRequest *occ_req = dra_occurrences_request_new(priv->editor, a_new_revision);
+//		wor_request_set_time_out((WorRequest *) occ_req, cat_date_current_time()+750);
+//		wor_service_post_request(wor_service, (WorRequest *) occ_req);
+//		cat_unref_ptr(occ_req);
+//	}
 }
 
 static void l_on_new_saved_revision(ChaIDocumentListener *self, ChaRevisionWo *a_new_revision) {

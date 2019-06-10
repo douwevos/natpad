@@ -175,6 +175,8 @@ PangoContext *cha_document_view_get_pango_context(ChaDocumentView *document_view
 
 gboolean cha_document_view_check_cache_boundaries(ChaDocumentView *document_view);
 
+void cha_document_view_queue_invalidate_lines(ChaDocumentView *document_view);
+
 void cha_document_view_invalidate_lines(ChaDocumentView *document_view);
 void cha_document_view_draw(ChaDocumentView *document_view, cairo_t *cr);
 

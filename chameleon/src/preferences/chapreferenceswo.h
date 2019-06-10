@@ -62,6 +62,7 @@ gboolean cha_preferences_wo_get_show_line_numbers(const ChaPreferencesWo *prefs)
 gboolean cha_preferences_wo_get_limit_cursor(const ChaPreferencesWo *prefs);
 gboolean cha_preferences_wo_get_highlight_current_line(const ChaPreferencesWo *prefs);
 gboolean cha_preferences_wo_get_block_selection(const ChaPreferencesWo *prefs);
+gboolean cha_preferences_wo_get_mark_occurrences(const ChaPreferencesWo *prefs);
 gboolean cha_preferences_wo_get_deprecated_scrolling(const ChaPreferencesWo *prefs);
 gboolean cha_preferences_wo_get_escape_key(const ChaPreferencesWo *prefs);
 int cha_preferences_wo_get_tab_size(const ChaPreferencesWo *prefs);
@@ -83,6 +84,7 @@ void cha_preferences_wo_set_show_line_numbers(ChaPreferencesWo *e_prefs, gboolea
 void cha_preferences_wo_set_limit_cursor(ChaPreferencesWo *e_prefs, gboolean limit_cursor);
 void cha_preferences_wo_set_highlight_current_line(ChaPreferencesWo *e_prefs, gboolean highlight_current_line);
 void cha_preferences_wo_set_block_selection(ChaPreferencesWo *e_prefs, gboolean block_selection);
+void cha_preferences_wo_set_mark_occurrences(ChaPreferencesWo *e_prefs, gboolean mark_occurrences);
 void cha_preferences_wo_set_deprecated_scrolling(ChaPreferencesWo *e_prefs, gboolean deprecated_scrolling);
 void cha_preferences_wo_set_tab_size(ChaPreferencesWo *e_prefs, int tab_size);
 

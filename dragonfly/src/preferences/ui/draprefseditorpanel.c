@@ -51,6 +51,8 @@ struct _DraPrefsEditorPanelPrivate {
 	unsigned long s_deprecated_scrolling;
 	GtkWidget *w_cb_block_selection;
 	unsigned long s_block_selection;
+	GtkWidget *w_cb_mark_occurrences;
+	unsigned long s_mark_occurrences;
 	GtkWidget *w_sb_tab_size;
 	unsigned long s_tab_size;
 	GtkWidget *w_fb_font;
@@ -112,6 +114,7 @@ static gboolean l_limit_cursor_toggled(GtkToggleButton *toggle_button, gpointer 
 static gboolean l_highlight_current_line_toggled(GtkToggleButton *toggle_button, gpointer user_data);
 static gboolean l_deprecated_scrolling_toggled(GtkToggleButton *toggle_button, gpointer user_data);
 static gboolean l_block_selection_toggled(GtkToggleButton *toggle_button, gpointer user_data);
+static gboolean l_mark_occurrences_toggled(GtkToggleButton *toggle_button, gpointer user_data);
 static void l_tab_size_changed(GtkSpinButton *text_entry, gpointer user_data);
 static void l_font_set(GtkFontButton *font_button, gpointer user_data);
 
@@ -170,6 +173,8 @@ DraPrefsEditorPanel *dra_prefs_editor_panel_new(CowIEntryAccessor *entry_accesso
 	priv->s_deprecated_scrolling = g_signal_connect(priv->w_cb_deprecated_scrolling, "toggled", G_CALLBACK(l_deprecated_scrolling_toggled), result);
 	priv->w_cb_block_selection = (GtkWidget *) gtk_builder_get_object(builder, "cb_block_selection");
 	priv->s_block_selection = g_signal_connect(priv->w_cb_block_selection, "toggled", G_CALLBACK(l_block_selection_toggled), result);
+	priv->w_cb_mark_occurrences = (GtkWidget *) gtk_builder_get_object(builder, "cb_mark_occurrences");
+	priv->s_mark_occurrences = g_signal_connect(priv->w_cb_mark_occurrences, "toggled", G_CALLBACK(l_mark_occurrences_toggled), result);
 	priv->w_sb_tab_size = (GtkWidget *) gtk_builder_get_object(builder, "sb_tab_size");
 	priv->s_tab_size = g_signal_connect(priv->w_sb_tab_size, "value_changed", G_CALLBACK(l_tab_size_changed), result);
 	priv->w_fb_font = (GtkWidget *) gtk_builder_get_object(builder, "fb_font");
@@ -249,6 +254,14 @@ static gboolean l_block_selection_toggled(GtkToggleButton *toggle_button, gpoint
 	return l_notify_modification(panel);
 }
 
+static gboolean l_mark_occurrences_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
+	DraPrefsEditorPanel *panel = DRA_PREFS_EDITOR_PANEL(user_data);
+	DraPrefsEditorPanelPrivate *priv = dra_prefs_editor_panel_get_instance_private(panel);
+	cha_preferences_wo_set_mark_occurrences(priv->e_ast_prefs, gtk_toggle_button_get_active(toggle_button));
+	return l_notify_modification(panel);
+}
+
+
 static void l_tab_size_changed(GtkSpinButton *text_entry, gpointer user_data) {
 	DraPrefsEditorPanel *panel = DRA_PREFS_EDITOR_PANEL(user_data);
 	DraPrefsEditorPanelPrivate *priv = dra_prefs_editor_panel_get_instance_private(panel);
@@ -285,8 +298,6 @@ static gboolean l_big_mode_force_ascii_toggled(GtkToggleButton *toggle_button, g
 static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	DraPrefsEditorPanelPrivate *priv = dra_prefs_editor_panel_get_instance_private(panel);
 
-
-
 	g_signal_handler_block(priv->w_cb_blink_cursor, priv->s_blink_cursor);
 	g_signal_handler_block(priv->w_cb_show_whitespace, priv->s_show_whitespace);
 	g_signal_handler_block(priv->w_cb_wrap_lines, priv->s_wrap_lines);
@@ -295,6 +306,7 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	g_signal_handler_block(priv->w_cb_highlight_current_line, priv->s_highlight_current_line);
 	g_signal_handler_block(priv->w_cb_deprecated_scrolling, priv->s_deprecated_scrolling);
 	g_signal_handler_block(priv->w_cb_block_selection, priv->s_block_selection);
+	g_signal_handler_block(priv->w_cb_mark_occurrences, priv->s_mark_occurrences);
 	g_signal_handler_block(priv->w_sb_tab_size, priv->s_tab_size);
 	g_signal_handler_block(priv->w_fb_font, priv->s_font);
 	g_signal_handler_block(priv->w_fb_big_mode_font, priv->s_big_mode_font);
@@ -310,6 +322,7 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	gtk_widget_set_sensitive(priv->w_cb_highlight_current_line, has_prefs);
 	gtk_widget_set_sensitive(priv->w_cb_deprecated_scrolling, has_prefs);
 	gtk_widget_set_sensitive(priv->w_cb_block_selection, has_prefs);
+	gtk_widget_set_sensitive(priv->w_cb_mark_occurrences, has_prefs);
 	gtk_widget_set_sensitive(priv->w_sb_tab_size, has_prefs);
 	gtk_widget_set_sensitive(priv->w_fb_font, has_prefs);
 	gtk_widget_set_sensitive(priv->w_fb_big_mode_font, has_prefs);
@@ -324,6 +337,7 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_cb_highlight_current_line), cha_preferences_wo_get_highlight_current_line(priv->e_ast_prefs));
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_cb_deprecated_scrolling), cha_preferences_wo_get_deprecated_scrolling(priv->e_ast_prefs));
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_cb_block_selection), cha_preferences_wo_get_block_selection(priv->e_ast_prefs));
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_cb_mark_occurrences), cha_preferences_wo_get_mark_occurrences(priv->e_ast_prefs));
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(priv->w_sb_tab_size), cha_preferences_wo_get_tab_size(priv->e_ast_prefs));
 		CatStringWo *font_name = cha_preferences_wo_get_font_name(priv->e_ast_prefs);
 		if (font_name) {
@@ -344,6 +358,7 @@ static void l_refresh_form(DraPrefsEditorPanel *panel) {
 	g_signal_handler_unblock(priv->w_cb_highlight_current_line, priv->s_highlight_current_line);
 	g_signal_handler_unblock(priv->w_cb_deprecated_scrolling, priv->s_deprecated_scrolling);
 	g_signal_handler_unblock(priv->w_cb_block_selection, priv->s_block_selection);
+	g_signal_handler_unblock(priv->w_cb_mark_occurrences, priv->s_mark_occurrences);
 	g_signal_handler_unblock(priv->w_sb_tab_size, priv->s_tab_size);
 	g_signal_handler_unblock(priv->w_fb_font, priv->s_font);
 	g_signal_handler_unblock(priv->w_fb_big_mode_font, priv->s_big_mode_font);

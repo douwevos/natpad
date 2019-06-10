@@ -35,6 +35,7 @@ struct _ChaPreferencesWoPrivate {
 	gboolean limit_to_text;
 	gboolean highlight_current_line;
 	gboolean block_mode;
+	gboolean mark_occurrences;
 	int tab_size;
 	gboolean escape_key;
 	gboolean deprecated_scrolling;
@@ -145,6 +146,11 @@ gboolean cha_preferences_wo_get_block_selection(const ChaPreferencesWo *prefs) {
 	return priv->block_mode;
 }
 
+gboolean cha_preferences_wo_get_mark_occurrences(const ChaPreferencesWo *prefs) {
+	const ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private((ChaPreferencesWo *) prefs);
+	return priv->mark_occurrences;
+}
+
 gboolean cha_preferences_wo_get_deprecated_scrolling(const ChaPreferencesWo *prefs) {
 	const ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private((ChaPreferencesWo *) prefs);
 	return priv->deprecated_scrolling;
@@ -243,6 +249,11 @@ void cha_preferences_wo_set_block_selection(ChaPreferencesWo *e_prefs, gboolean 
 	priv->block_mode = block_selection;
 }
 
+void cha_preferences_wo_set_mark_occurrences(ChaPreferencesWo *e_prefs, gboolean mark_occurrences) {
+	ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private(e_prefs);
+	CHECK_IF_WRITABLE();
+	priv->mark_occurrences = mark_occurrences;
+}
 void cha_preferences_wo_set_deprecated_scrolling(ChaPreferencesWo *e_prefs, gboolean deprecated_scrolling) {
 	ChaPreferencesWoPrivate *priv = cha_preferences_wo_get_instance_private(e_prefs);
 	CHECK_IF_WRITABLE();
@@ -317,6 +328,7 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 		priv->limit_to_text = rpriv->limit_to_text;
 		priv->highlight_current_line = rpriv->highlight_current_line;
 		priv->block_mode = rpriv->block_mode;
+		priv->mark_occurrences = rpriv->mark_occurrences;
 		priv->tab_size = rpriv->tab_size;
 		priv->escape_key = rpriv->escape_key;
 		priv->deprecated_scrolling = rpriv->deprecated_scrolling;
@@ -338,6 +350,7 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 		priv->limit_to_text = TRUE;
 		priv->highlight_current_line = TRUE;
 		priv->block_mode = FALSE;
+		priv->mark_occurrences = TRUE;
 		priv->tab_size = 4;
 		priv->escape_key = FALSE;
 		priv->deprecated_scrolling = FALSE;
@@ -378,6 +391,7 @@ static gboolean l_equal(const CatWo *wo_a, const CatWo *wo_b) {
 			&& (priv_a->limit_to_text == priv_b->limit_to_text)
 			&& (priv_a->highlight_current_line == priv_b->highlight_current_line)
 			&& (priv_a->block_mode == priv_b->block_mode)
+			&& (priv_a->mark_occurrences == priv_b->mark_occurrences)
 			&& (priv_a->tab_size == priv_b->tab_size)
 			&& (priv_a->escape_key == priv_b->escape_key)
 			&& (priv_a->deprecated_scrolling == priv_b->deprecated_scrolling)
@@ -405,6 +419,7 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->limit_to_text = priv_src->limit_to_text;
 		priv->highlight_current_line = priv_src->highlight_current_line;
 		priv->block_mode = priv_src->block_mode;
+		priv->mark_occurrences = priv_src->mark_occurrences;
 		priv->tab_size = priv_src->tab_size;
 		priv->escape_key = priv_src->escape_key;
 		priv->deprecated_scrolling = priv_src->deprecated_scrolling;
@@ -422,6 +437,7 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->limit_to_text = TRUE;
 		priv->highlight_current_line = TRUE;
 		priv->block_mode = FALSE;
+		priv->mark_occurrences = TRUE;
 		priv->tab_size = 4;
 		priv->escape_key = FALSE;
 		priv->deprecated_scrolling = FALSE;
