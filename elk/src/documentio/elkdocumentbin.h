@@ -53,7 +53,7 @@ struct _ElkDocumentBinClass {
 
 GType elk_document_bin_get_type();
 
-ElkDocumentBin *elk_document_bin_new(ChaDocumentManager *document_manager, VipService *vip_service, VipIFile *vip_file);
+ElkDocumentBin *elk_document_bin_new(ChaDocumentManager *document_manager, VipService *vip_service, VipIResource *vip_file);
 ElkDocumentBin *elk_document_bin_new_empty(ChaDocumentManager *document_manager, VipService *vip_service, int number);
 
 

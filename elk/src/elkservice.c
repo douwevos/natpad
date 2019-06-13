@@ -475,6 +475,9 @@ static void l_service_open_new_file_editor(ElkIService *service, MooNodeWo *moo_
 						ElkDocumentBin *document_bin = elk_document_io_open_document_for_file(elk_service->document_io, VIP_IFILE(vip_res));
 						editor = (GtkWidget *) elk_editor_panel_new((LeaIPanelOwner *) elk_service->panel_owner, document_bin, NULL);
 						elk_editor_panel_set_moose_node((ElkEditorPanel *) editor, moo_node);
+					} else if (VIP_IS_VIRTUAL_RESOURCE(vip_res)) {
+						ElkDocumentBin *document_bin = elk_document_io_open_new_document(elk_service->document_io);
+
 					}
 				}
 			}

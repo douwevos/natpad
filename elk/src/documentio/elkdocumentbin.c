@@ -32,7 +32,7 @@
 struct _ElkDocumentBinPrivate {
 	ChaDocumentManager *document_manager;
 	VipService *vip_service;
-	VipIFile *vip_file;
+	VipIResource *vip_resource;
 	GFile *tmp_file;
 	ChaDocument *document;
 	int usage;
@@ -66,7 +66,7 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->document);
 	cat_unref_ptr(priv->document_manager);
 	cat_unref_ptr(priv->vip_service);
-	cat_unref_ptr(priv->vip_file);
+	cat_unref_ptr(priv->vip_resource);
 	G_OBJECT_CLASS(elk_document_bin_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -78,12 +78,12 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-ElkDocumentBin *elk_document_bin_new(ChaDocumentManager *document_manager, VipService *vip_service, VipIFile *vip_file) {
+ElkDocumentBin *elk_document_bin_new(ChaDocumentManager *document_manager, VipService *vip_service, VipIResource *vip_resource) {
 	ElkDocumentBin *result = g_object_new(ELK_TYPE_DOCUMENT_BIN, NULL);
 	cat_ref_anounce(result);
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private(result);
 	priv->document_manager = cat_ref_ptr(document_manager);
-	priv->vip_file = cat_ref_ptr(vip_file);
+	priv->vip_resource = cat_ref_ptr(vip_resource);
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->file_is_read_only = TRUE;
 	priv->document = NULL;
@@ -93,13 +93,12 @@ ElkDocumentBin *elk_document_bin_new(ChaDocumentManager *document_manager, VipSe
 	return result;
 }
 
-
 ElkDocumentBin *elk_document_bin_new_empty(ChaDocumentManager *document_manager, VipService *vip_service, int nr) {
 	ElkDocumentBin *result = g_object_new(ELK_TYPE_DOCUMENT_BIN, NULL);
 	cat_ref_anounce(result);
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private(result);
 	priv->document_manager = cat_ref_ptr(document_manager);
-	priv->vip_file = NULL;
+	priv->vip_resource = NULL;
 	priv->vip_service = cat_ref_ptr(vip_service);
 	priv->document = NULL;
 	priv->tmp_file = NULL;
@@ -142,10 +141,10 @@ ChaDocumentManager *elk_document_bin_get_document_manager(ElkDocumentBin *docume
 gboolean elk_document_bin_update_read_only(ElkDocumentBin *document_bin, gboolean do_udpate) {
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private(document_bin);
 	if (do_udpate) {
-		if (priv->vip_file) {
-			if (VIP_IS_FS_FILE(priv->vip_file)) {
+		if (priv->vip_resource) {
+			if (VIP_IS_FS_FILE(priv->vip_resource)) {
 				GFile *file = NULL;
-				VipPath *path = vip_fs_file_get_path((VipFSFile *) priv->vip_file);
+				VipPath *path = vip_fs_file_get_path((VipFSFile *) priv->vip_resource);
 				CatStringWo *t = vip_path_to_string(path);
 				file = g_file_new_for_path(cat_string_wo_getchars(t));
 				cat_unref_ptr(t);
@@ -156,7 +155,7 @@ gboolean elk_document_bin_update_read_only(ElkDocumentBin *document_bin, gboolea
 					priv->file_is_read_only = !g_file_info_get_attribute_boolean(info, G_FILE_ATTRIBUTE_ACCESS_CAN_WRITE);
 					cat_unref_ptr(info);
 				} else {
-					priv->file_is_read_only = TRUE;
+					priv->file_is_read_only = FALSE;
 				}
 			}
 		}
@@ -167,10 +166,10 @@ gboolean elk_document_bin_update_read_only(ElkDocumentBin *document_bin, gboolea
 
 static void l_load(ElkDocumentBin *document_bin, GError **error) {
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private(document_bin);
-	if (priv->vip_file) {
-		if (VIP_IS_FS_FILE(priv->vip_file)) {
+	if (priv->vip_resource) {
+		if (VIP_IS_FS_FILE(priv->vip_resource)) {
 			GFile *file = NULL;
-			VipPath *path = vip_fs_file_get_path((VipFSFile *) priv->vip_file);
+			VipPath *path = vip_fs_file_get_path((VipFSFile *) priv->vip_resource);
 			CatStringWo *t = vip_path_to_string(path);
 			file = g_file_new_for_path(cat_string_wo_getchars(t));
 
@@ -182,9 +181,9 @@ static void l_load(ElkDocumentBin *document_bin, GError **error) {
 			cat_unref_ptr(info);
 
 			cat_unref_ptr(t);
-		} else {
+		} else if (VIP_IS_IFILE(priv->vip_resource)){
 			cat_unref_ptr(priv->tmp_file);
-			CatStringWo *resource_name = vip_iresource_get_name((VipIResource *) priv->vip_file);
+			CatStringWo *resource_name = vip_iresource_get_name((VipIResource *) priv->vip_resource);
 			GFile *tmp_file = NULL;
 			GFileIOStream *out_io_stream = NULL;
 			int last_dot_idx = cat_string_wo_last_index_of(resource_name, '.');
@@ -201,7 +200,7 @@ static void l_load(ElkDocumentBin *document_bin, GError **error) {
 			if (*error!=NULL) {
 				GOutputStream *out_stream = g_io_stream_get_output_stream((GIOStream *) out_io_stream);
 
-				CatIInputStream *in_stream = vip_ifile_open_input_stream(priv->vip_file);
+				CatIInputStream *in_stream = vip_ifile_open_input_stream(priv->vip_resource);
 				void *buffer = g_slice_alloc(65536);
 
 				while(TRUE) {
@@ -257,10 +256,10 @@ void elk_document_bin_revert(ElkDocumentBin *document_bin) {
 void elk_document_bin_store(ElkDocumentBin *document_bin, ChaIOAsync *async) {
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private(document_bin);
 	if (priv->document) {
-		if (priv->vip_file) {
-			if (VIP_IS_FS_FILE(priv->vip_file)) {
+		if (priv->vip_resource) {
+			if (VIP_IS_FS_FILE(priv->vip_resource)) {
 				GFile *file = NULL;
-				VipPath *path = vip_fs_file_get_path((VipFSFile *) priv->vip_file);
+				VipPath *path = vip_fs_file_get_path((VipFSFile *) priv->vip_resource);
 				CatStringWo *t = vip_path_to_string(path);
 				file = g_file_new_for_path(cat_string_wo_getchars(t));
 				cha_document_manager_write(priv->document_manager, priv->document, file, NULL, async);
@@ -288,7 +287,7 @@ void elk_document_bin_set_path(ElkDocumentBin *document_bin, CatStringWo *path) 
 	VipNode *node = vip_node_path_get_tail(np);
 	VipIResource *resource = vip_node_get_content(node);
 	if (VIP_IS_IFILE(resource)) {
-		cat_ref_swap(priv->vip_file, resource);
+		cat_ref_swap(priv->vip_resource, resource);
 	} else {
 		cat_log_warn("NOT A FILE:%o", resource);
 	}
@@ -299,14 +298,14 @@ void elk_document_bin_set_path(ElkDocumentBin *document_bin, CatStringWo *path) 
 gboolean elk_document_bin_has_file(const ElkDocumentBin *document_bin) {
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private((ElkDocumentBin *) document_bin);
 	cat_log_debug("priv->vip_file=%o", priv->vip_file);
-	return priv->vip_file!=NULL;
+	return priv->vip_resource!=NULL;
 }
 
 CatStringWo *elk_document_bin_get_name(ElkDocumentBin *document_bin) {
 	ElkDocumentBinPrivate *priv = elk_document_bin_get_instance_private(document_bin);
 	CatStringWo *result = NULL;
-	if (priv->vip_file) {
-		result = vip_iresource_get_name((VipIResource *) priv->vip_file);
+	if (priv->vip_resource) {
+		result = vip_iresource_get_name((VipIResource *) priv->vip_resource);
 	} else {
 		result = priv->untitled_name;
 	}
