@@ -26,6 +26,7 @@
 #include "../vippathprivate.h"
 #include "../model/access/vipnodenamematcher.h"
 #include "../model/file/vipfsmap.h"
+#include "../model/file/vipfsfile.h"
 #include "../model/vipimap.h"
 #include "../model/vipiresource.h"
 #include "../model/vipvirtualresource.h"
@@ -203,15 +204,20 @@ static CatArrayWo *l_creat_path_entries(VipCreatePathRequest *request, VipPath *
 					cat_unref_ptr(e_enlisted);
 					cat_unref_ptr(iter);
 				}
-				if (childContent == NULL) {
+				// TODO invalid path if content is not VipVirtualResource
+			}
+			if (childContent == NULL) {
+				if (idx==fp_count-1) {
+					childContent = vip_fs_file_new(full_path);
+					cat_log_error("vip_fs_file_new full_path=%o", full_path);
+				} else {
 					childContent = (VipIResource *) vip_virtual_resource_new(a_entry);
 				}
-			} else {
-				// TODO invalid path if content is not VipVirtualResource
-				childContent = (VipIResource *) vip_virtual_resource_new(a_entry);
 			}
 
 			long long next_vip_id = vip_isequence_next((VipISequence *) priv->vip_service);
+			cat_log_error("childContent=%p", childContent);
+			cat_log_error("childContent=%o", childContent);
 			vip_node = vip_node_new(next_vip_id, childContent);
 			childNode = cat_writable_tree_node_append_child(cdNode);
 			cat_writable_tree_node_set_content(childNode, (GObject *) vip_node);
