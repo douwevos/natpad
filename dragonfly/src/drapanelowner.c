@@ -138,7 +138,10 @@ void dra_panel_owner_construct(DraPanelOwner *panel_owner, LeaFrame *frame, WorS
 	priv->a_preferences = NULL;
 	priv->last_focus_order_id = 0;
 	priv->request_before_close = TRUE;
-	priv->w_status_bar_content = dra_status_bar_content_new();
+	LeaAction *toggle_word_wrap = dra_group_main_get_action_toggle_word_wrap(priv->group_main);
+	LeaAction *toggle_show_whitespace = dra_group_main_get_action_toggle_show_whitespace(priv->group_main);
+	LeaAction *toggle_mark_occurrences = dra_group_main_get_action_toggle_mark_occurrences(priv->group_main);
+	priv->w_status_bar_content = dra_status_bar_content_new(toggle_word_wrap, toggle_show_whitespace, toggle_mark_occurrences);
 	priv->search_service = cha_search_service_new();
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->connector_map = dra_connector_map_new(wor_service);
@@ -159,6 +162,7 @@ void dra_panel_owner_set_configuration(DraPanelOwner *panel_owner, DraPreference
 	DraPanelOwnerPrivate *priv = dra_panel_owner_get_instance_private(panel_owner);
 	cat_ref_swap(priv->a_preferences, a_prefs);
 	dra_connector_map_reconfigure(priv->connector_map, a_prefs);
+	dra_group_main_reconfigure(priv->group_main, a_prefs);
 	CatIIterator *iterator = cat_array_wo_iterator(priv->e_panel_list);
 	while(cat_iiterator_has_next(iterator)) {
 		DraEditorPanel *editor = DRA_EDITOR_PANEL(cat_iiterator_next(iterator));

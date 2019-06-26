@@ -35,6 +35,7 @@ struct _DraStatusBarContentPrivate {
 	GtkWidget *w_lab_mode;
 	GtkWidget *w_lab_read_only;
 	GtkWidget *w_lab_encoding;
+	GtkImage *w_img_word_wrap;
 	ChaCursorWo *last_cursor;
 	CatStringWo *last_encoding_name;
 	ChaEditMode edit_mode;
@@ -80,10 +81,10 @@ static void l_finalize(GObject *object) {
 }
 
 
-DraStatusBarContent *dra_status_bar_content_new() {
+DraStatusBarContent *dra_status_bar_content_new(LeaAction *action_toggle_word_wrap, LeaAction *action_toggle_show_whitespaces, LeaAction *action_toggle_mark_occurrences) {
 	DraStatusBarContent *result = g_object_new(DRA_TYPE_STATUS_BAR_CONTENT,
             "orientation", GTK_ORIENTATION_HORIZONTAL,
-            "spacing",     4, NULL);
+            "spacing",     2, NULL);
 	cat_ref_anounce(result);
 	DraStatusBarContentPrivate *priv = dra_status_bar_content_get_instance_private(result);
 //	GTK_BOX_construct((GtkBox *) result);
@@ -104,8 +105,17 @@ DraStatusBarContent *dra_status_bar_content_new() {
 
 	gtk_widget_set_size_request((GtkWidget *) result, 300, 20);
 
+
+	LeaToggleImage *ti = lea_toggle_image_new(action_toggle_word_wrap, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/line_wrap_96.png");
+	gtk_box_pack_start((GtkBox *) result, ti, FALSE,TRUE,1);
+	LeaToggleImage *ti_ws = lea_toggle_image_new(action_toggle_show_whitespaces, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/show_whitespaces_96.png");
+	gtk_box_pack_start((GtkBox *) result, ti_ws, FALSE,TRUE,1);
+	LeaToggleImage *ti_mo = lea_toggle_image_new(action_toggle_mark_occurrences, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/mark_occurrences_96.png");
+	gtk_box_pack_start((GtkBox *) result, ti_mo, FALSE,TRUE,1);
+
 	return result;
 }
+
 
 static void l_update_cursor_location(DraStatusBarContent *status_bar_content) {
 	DraStatusBarContentPrivate *priv = dra_status_bar_content_get_instance_private(status_bar_content);

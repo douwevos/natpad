@@ -102,12 +102,18 @@ static void l_widget_unrealize(GtkWidget *widget);
 static void l_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation);
 static gboolean l_widget_draw(GtkWidget *widget, cairo_t *cr);
 static gboolean l_widget_focus(GtkWidget *widget, GtkDirectionType direction);
+static void l_editor_toggle_word_wrap(ChaEditor *editor);
+static void l_editor_toggle_show_whitespace(ChaEditor *editor);
+static void l_editor_toggle_mark_occurrences(ChaEditor *editor);
 
 static void cha_editor_class_init(ChaEditorClass *clazz) {
 	clazz->initializeDocumentView = NULL;
 	clazz->markerClicked = NULL;
 	clazz->markerOver = NULL;
 	clazz->markerOut = NULL;
+	clazz->toggleWordWrap = l_editor_toggle_word_wrap;
+	clazz->toggleShowWhitespace = l_editor_toggle_show_whitespace;
+	clazz->toggleMarkOccurrences = l_editor_toggle_mark_occurrences;
 
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
@@ -330,6 +336,19 @@ ChaPreferencesWo *cha_editor_get_preferences(const ChaEditor *editor) {
 	const ChaEditorPrivate *priv = cha_editor_get_instance_private((ChaEditor *) editor);
 	return priv->a_preferences;
 }
+
+void cha_editor_toggle_word_wrap(ChaEditor *editor) {
+	CHA_EDITOR_GET_CLASS(editor)->toggleWordWrap(editor);
+}
+
+void cha_editor_toggle_show_whitespace(ChaEditor *editor) {
+	CHA_EDITOR_GET_CLASS(editor)->toggleShowWhitespace(editor);
+}
+
+void cha_editor_toggle_mark_occurrences(ChaEditor *editor) {
+	CHA_EDITOR_GET_CLASS(editor)->toggleMarkOccurrences(editor);
+}
+
 
 void cha_editor_set_search_service(ChaEditor *editor, struct _ChaSearchService *search_service) {
 	ChaEditorPrivate *priv = cha_editor_get_instance_private(editor);
@@ -1138,6 +1157,50 @@ static gboolean l_widget_draw(GtkWidget *widget, cairo_t *cr) {
 static gboolean l_widget_focus(GtkWidget *widget, GtkDirectionType direction) {
 	gtk_widget_grab_focus(widget);
 	return TRUE;
+}
+
+typedef void (*ApplyTogglePreferencessFlag)(ChaEditor *editor, ChaPreferencesWo *e_prefs);
+
+static void l_toggle_preferences_flag(ChaEditor *editor, ApplyTogglePreferencessFlag apply_cb) {
+	ChaEditorPrivate *priv = cha_editor_get_instance_private(editor);
+	gboolean wrap_lines = cha_preferences_wo_get_wrap_lines(priv->a_preferences);
+	ChaPreferencesWo *e_prefs = cha_preferences_wo_create_editable(priv->a_preferences);
+	cha_preferences_wo_set_wrap_lines(e_prefs, !wrap_lines);
+
+	apply_cb(editor, e_prefs);
+
+	int version = cat_wo_get_version((CatWo *) priv->a_preferences);
+	ChaPreferencesWo *a_new_prefs = cha_preferences_wo_anchor(e_prefs, version+1);
+	cha_editor_set_preferences(editor, a_new_prefs);
+	cat_unref_ptr(a_new_prefs);
+}
+
+
+static void l_apply_toggle_word_wrap(ChaEditor *editor, ChaPreferencesWo *e_prefs) {
+	gboolean wrap_lines = cha_preferences_wo_get_wrap_lines(e_prefs);
+	cha_preferences_wo_set_wrap_lines(e_prefs, !wrap_lines);
+}
+
+static void l_editor_toggle_word_wrap(ChaEditor *editor) {
+	l_toggle_preferences_flag(editor, l_apply_toggle_word_wrap);
+}
+
+static void l_apply_toggle_show_whitespace(ChaEditor *editor, ChaPreferencesWo *e_prefs) {
+	gboolean show_whitespace = cha_preferences_wo_get_show_whitespace(e_prefs);
+	cha_preferences_wo_set_show_whitespace(e_prefs, !show_whitespace);
+}
+
+static void l_editor_toggle_show_whitespace(ChaEditor *editor) {
+	l_toggle_preferences_flag(editor, l_apply_toggle_show_whitespace);
+}
+
+static void l_apply_toggle_mark_occurrences(ChaEditor *editor, ChaPreferencesWo *e_prefs) {
+	gboolean mark_occurrences = cha_preferences_wo_get_mark_occurrences(e_prefs);
+	cha_preferences_wo_set_mark_occurrences(e_prefs, !mark_occurrences);
+}
+
+static void l_editor_toggle_mark_occurrences(ChaEditor *editor) {
+	l_toggle_preferences_flag(editor, l_apply_toggle_mark_occurrences);
 }
 
 

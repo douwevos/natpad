@@ -139,12 +139,8 @@ static gboolean l_key_release_event(GtkWidget *gwidget, GdkEventKey *eev, gpoint
 static gboolean l_button_press_event_cb(GtkWidget *gwidget, GdkEventButton *eev, gpointer data);
 static gboolean l_focus_out_event_cb(GtkWidget *widget, GdkEvent *event, gpointer data);
 
-
-
-DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service) {
-	DraEditor *result = g_object_new(DRA_TYPE_EDITOR, NULL);
-	cat_ref_anounce(result);
-	DraEditorPrivate *priv = dra_editor_get_instance_private(result);
+void dra_editor_construct(DraEditor *instance, ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service) {
+	DraEditorPrivate *priv = dra_editor_get_instance_private(instance);
 	priv->connector_map = cat_ref_ptr(connector_map);
 	priv->context_editor = NULL;
 	priv->auto_complete_popup = NULL;
@@ -165,14 +161,20 @@ DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map,
 	}
 
 
-	g_signal_connect(result, "key-press-event", G_CALLBACK(l_key_press_event), result);
-	g_signal_connect(result, "key-release-event", G_CALLBACK(l_key_release_event), result);
+	g_signal_connect(instance, "key-press-event", G_CALLBACK(l_key_press_event), instance);
+	g_signal_connect(instance, "key-release-event", G_CALLBACK(l_key_release_event), instance);
 
-	g_signal_connect(result, "button-press-event", G_CALLBACK(l_button_press_event_cb), result);
-	g_signal_connect(result, "focus-out-event", G_CALLBACK(l_focus_out_event_cb), result);
+	g_signal_connect(instance, "button-press-event", G_CALLBACK(l_button_press_event_cb), instance);
+	g_signal_connect(instance, "focus-out-event", G_CALLBACK(l_focus_out_event_cb), instance);
 
-	cha_editor_construct((ChaEditor *) result, document, CHA_EDITOR_FLAG_DEFAULT_MOUSE_HANDLING);
+	cha_editor_construct((ChaEditor *) instance, document, CHA_EDITOR_FLAG_DEFAULT_MOUSE_HANDLING);
 
+}
+
+DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service) {
+	DraEditor *result = g_object_new(DRA_TYPE_EDITOR, NULL);
+	cat_ref_anounce(result);
+	dra_editor_construct(result, document, connector_map, connector_factory, wor_service);
 	return result;
 }
 

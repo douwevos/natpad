@@ -62,6 +62,9 @@ struct _ChaEditorClass {
 	void (*markerClicked)(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 	void (*markerOver)(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 	void (*markerOut)(ChaEditor *editor);
+	void (*toggleWordWrap)(ChaEditor *editor);
+	void (*toggleShowWhitespace)(ChaEditor *editor);
+	void (*toggleMarkOccurrences)(ChaEditor *editor);
 };
 
 
@@ -77,6 +80,10 @@ ChaDocumentView *cha_editor_get_document_view(ChaEditor *editor);
 
 void cha_editor_set_preferences(ChaEditor *editor, ChaPreferencesWo *a_prefs);
 ChaPreferencesWo *cha_editor_get_preferences(const ChaEditor *editor);
+
+void cha_editor_toggle_word_wrap(ChaEditor *editor);
+void cha_editor_toggle_show_whitespace(ChaEditor *editor);
+void cha_editor_toggle_mark_occurrences(ChaEditor *editor);
 
 void cha_editor_set_search_service(ChaEditor *editor, struct _ChaSearchService *search_service);
 struct _ChaSearchService *cha_editor_get_search_service(ChaEditor *editor);

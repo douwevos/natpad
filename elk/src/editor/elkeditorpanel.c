@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "elkeditorpanel.h"
+#include "elkeditor.h"
 #include "elkpanelowner.h"
 #include "elkasyncmoonodeupdater.h"
 #include "../dialog/elkdialogs.h"
@@ -50,6 +51,7 @@ static GtkResponseType l_do_save_request(DraEditorPanel *editor_panel);
 static void l_save(DraEditorPanel *editor_panel, gboolean do_save_as, ChaIOAsync *async_response);
 static void l_revert(DraEditorPanel *editor);
 static void l_reactivated(DraEditorPanel *editor_panel, gboolean focus_active_and_set);
+static DraEditor *l_init_editor(DraEditorPanel *editor_panel, ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *request_factory, WorService *wor_service);
 
 static void l_panel_closing(LeaPanel *panel);
 
@@ -65,6 +67,7 @@ static void elk_editor_panel_class_init(ElkEditorPanelClass *clazz) {
 	dra_class->save = l_save;
 	dra_class->revert = l_revert;
 	dra_class->reactivated = l_reactivated;
+	dra_class->initEditor = l_init_editor;
 
 	LeaPanelClass *lea_class = LEA_PANEL_CLASS(clazz);
 	lea_class->closing = l_panel_closing;
@@ -226,6 +229,11 @@ static void l_reactivated(DraEditorPanel *editor_panel, gboolean focus_active_an
 
 	}
 }
+
+static DraEditor *l_init_editor(DraEditorPanel *editor_panel, ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *request_factory, WorService *wor_service) {
+	return elk_editor_new(document, connector_map, request_factory, wor_service);
+}
+
 
 
 /********************* start CatIStringable implementation *********************/

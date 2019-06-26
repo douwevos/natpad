@@ -24,6 +24,7 @@
 #define DRASTATUSBARCONTENT_H_
 
 #include "draeditorpanel.h"
+#include <leafhopper.h>
 #include <gtk/gtk.h>
 #include <caterpillar.h>
 
@@ -53,7 +54,7 @@ struct _DraStatusBarContentClass {
 
 GType dra_status_bar_content_get_type();
 
-DraStatusBarContent *dra_status_bar_content_new();
+DraStatusBarContent *dra_status_bar_content_new(LeaAction *action_toggle_word_wrap, LeaAction *action_toggle_show_whitespaces, LeaAction *action_toggle_mark_occurrences);
 
 void dra_status_bar_content_set_active_editor_panel(DraStatusBarContent *status_bar_content, DraEditorPanel *editor_panel);
 

@@ -61,9 +61,11 @@ LeaStatusBar *lea_status_bar_new() {
 	LeaStatusBarPrivate *priv = lea_status_bar_get_instance_private(result);
 	cat_ref_anounce(result);
 	GtkWidget *w_lab1 = gtk_label_new("Natpad 2015");
-	gtk_misc_set_alignment((GtkMisc *) w_lab1, 0, 0.5);
+//	gtk_misc_set_alignment((GtkMisc *) w_lab1, 0, 0.5);
+	gtk_label_set_xalign((GtkLabel *) w_lab1, 0);
 
-	priv->w_context_box = gtk_alignment_new(0.0,0.0,1.0,1.0);
+
+	priv->w_context_box = gtk_grid_new();
 
 	gtk_widget_set_size_request(priv->w_context_box, 400, 20);
 
@@ -80,17 +82,16 @@ LeaStatusBar *lea_status_bar_new() {
 
 void lea_status_bar_set_context_widget(LeaStatusBar *status_bar, GtkWidget *widget) {
 	LeaStatusBarPrivate *priv = lea_status_bar_get_instance_private(status_bar);
-	GtkWidget *cur_child = gtk_bin_get_child((GtkBin *) priv->w_context_box);
+	GtkWidget *cur_child = gtk_paned_get_child2((GtkPaned *) status_bar);
 	if (cur_child==widget) {
 		return;
 	}
 	if (cur_child) {
-		gtk_container_remove((GtkContainer*) priv->w_context_box, cur_child);
+		gtk_container_remove((GtkContainer*) status_bar, cur_child);
 	}
 	cat_log_debug("widget=%o", widget);
 	if (widget) {
-		gtk_container_add((GtkContainer*) priv->w_context_box, widget);
+		gtk_paned_pack2((GtkPaned *) status_bar, widget, FALSE, FALSE);
 	}
-	gtk_widget_show_all(priv->w_context_box);
-
+	gtk_widget_show_all((GtkWidget *) status_bar);
 }
