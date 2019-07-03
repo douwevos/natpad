@@ -65,6 +65,7 @@ void dra_group_main_context_menu(DraGroupMain *group_main, LeaActionGroup *ctx_m
 LeaAction *dra_group_main_get_action_toggle_word_wrap(DraGroupMain *group_main);
 LeaAction *dra_group_main_get_action_toggle_show_whitespace(DraGroupMain *group_main);
 LeaAction *dra_group_main_get_action_toggle_mark_occurrences(DraGroupMain *group_main);
+LeaAction *dra_group_main_get_action_toggle_spelling(DraGroupMain *group_main);
 
 void dra_group_main_reconfigure(DraGroupMain *group_main, DraPreferencesWo *a_prefs);
 

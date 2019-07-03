@@ -126,10 +126,11 @@ typedef void (*ApplyPrefsChange)(ElkPanelOwner *panel_owner, DraPreferencesWo *e
 static void l_basic_prefs_operation(ElkPanelOwner *panel_owner, ApplyPrefsChange apply_changes) {
 	ElkPanelOwnerPrivate *priv = elk_panel_owner_get_instance_private(panel_owner);
 	ElkPreferencesContainer *container = elk_preferences_service_get_container(priv->elk_pref_service);
-	ElkPreferencesWo *e_prefs = elk_preferences_container_get_editable(container);
+	ElkPreferencesWo *e_prefs = elk_preferences_container_get(container);
 	e_prefs = elk_preferences_wo_clone(e_prefs, CAT_CLONE_DEPTH_MAIN);
 	DraPreferencesWo *dra_prefs = (DraPreferencesWo *) cow_ientry_accessor_get(priv->dra_prefs_accessor, e_prefs);
 	cat_log_error("dra_prefs=%p, e_prefs=%p", dra_prefs, e_prefs);
+	cat_log_error("edit prefs:%O", e_prefs);
 	DraPreferencesWo *e_dra_prefs = NULL;
 	if (dra_prefs) {
 		e_dra_prefs = dra_preferences_wo_clone(dra_prefs, CAT_CLONE_DEPTH_MAIN);
@@ -138,12 +139,15 @@ static void l_basic_prefs_operation(ElkPanelOwner *panel_owner, ApplyPrefsChange
 	}
 	apply_changes(panel_owner, e_dra_prefs);
 	cow_ientry_accessor_set(priv->dra_prefs_accessor, e_prefs, e_dra_prefs);
+	cat_log_error("edit prefs:%O", e_prefs);
 	elk_preferences_container_set(container, e_prefs);
 
 	ElkPreferencesWo *new_prefs = elk_preferences_container_get_fixed(container);
 	cat_log_error("new prefs:%O", new_prefs);
 //	elk_preferences_container_set(container, new_prefs);
 	elk_preferences_service_save(priv->elk_pref_service);
+	cat_unref_ptr(e_dra_prefs)
+	cat_unref_ptr(e_prefs)
 }
 
 void l_toggle_word_wrap_apply(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs) {
@@ -173,6 +177,15 @@ void elk_panel_owner_toggle_mark_occurrences(ElkPanelOwner *panel_owner) {
 	l_basic_prefs_operation(panel_owner, l_toggle_mark_occurrences_apply);
 }
 
+void l_toggle_mark_toggle_spelling(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs) {
+	DraPrefsSpellingWo *e_spelling = dra_preferences_wo_get_editable_spelling(e_prefs);
+	gboolean spelling_enabled = dra_prefs_spelling_wo_is_enabled(e_spelling);
+	dra_prefs_spelling_wo_set_enabled(e_spelling, !spelling_enabled);
+}
+
+void elk_panel_owner_toggle_spelling(ElkPanelOwner *panel_owner) {
+	l_basic_prefs_operation(panel_owner, l_toggle_mark_toggle_spelling);
+}
 
 static void l_notify_new_editor_list(ElkPanelOwner *panel_owner) {
 	CatArrayWo *enlisted = dra_panel_owner_enlist_all((DraPanelOwner *) panel_owner, NULL);

@@ -141,7 +141,8 @@ void dra_panel_owner_construct(DraPanelOwner *panel_owner, LeaFrame *frame, WorS
 	LeaAction *toggle_word_wrap = dra_group_main_get_action_toggle_word_wrap(priv->group_main);
 	LeaAction *toggle_show_whitespace = dra_group_main_get_action_toggle_show_whitespace(priv->group_main);
 	LeaAction *toggle_mark_occurrences = dra_group_main_get_action_toggle_mark_occurrences(priv->group_main);
-	priv->w_status_bar_content = dra_status_bar_content_new(toggle_word_wrap, toggle_show_whitespace, toggle_mark_occurrences);
+	LeaAction *toggle_spelling = dra_group_main_get_action_toggle_spelling(priv->group_main);
+	priv->w_status_bar_content = dra_status_bar_content_new(toggle_word_wrap, toggle_show_whitespace, toggle_mark_occurrences, toggle_spelling);
 	priv->search_service = cha_search_service_new();
 	priv->wor_service = cat_ref_ptr(wor_service);
 	priv->connector_map = dra_connector_map_new(wor_service);

@@ -72,6 +72,7 @@ static void l_dispose(GObject *object) {
 	cat_log_indent_level++;
 	ElkPreferencesWo *instance = ELK_PREFERENCES_WO(object);
 	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private(instance);
+	cat_log_error("dispose:%p, sub-map=%p", object, priv->sub_map);
 	cat_unref_ptr(priv->sub_map);
 	G_OBJECT_CLASS(elk_preferences_wo_parent_class)->dispose(object);
 	cat_log_indent_level--;
@@ -89,6 +90,7 @@ static void l_finalize(GObject *object) {
 ElkPreferencesWo *elk_preferences_wo_new() {
 	ElkPreferencesWo *result = g_object_new(ELK_TYPE_PREFERENCES_WO, NULL);
 	cat_ref_anounce(result);
+	cat_log_error("anounce-new:%p", result);
 	cat_wo_construct((CatWo *) result, TRUE);
 	return result;
 }
@@ -143,6 +145,7 @@ void elk_preferences_wo_set_sub(ElkPreferencesWo *e_prefs, CatStringWo *key, GOb
 	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private(e_prefs);
 	CHECK_IF_WRITABLE();
 	if (cat_hash_map_wo_is_anchored(priv->sub_map)) {
+		cat_log_error("set-sub:%p, current-map=%p", e_prefs, priv->sub_map);
 		CatHashMapWo *new_map = cat_hash_map_wo_create_editable(priv->sub_map);
 		cat_unref_ptr(priv->sub_map);
 		priv->sub_map = new_map;
@@ -181,6 +184,7 @@ void elk_preferences_wo_dump(ElkPreferencesWo *prefs) {
 static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, struct CatWoInfo *info) {
 	if (e_uninitialized==NULL) {
 		e_uninitialized = g_object_new(ELK_TYPE_PREFERENCES_WO, NULL);
+		cat_log_error("anounce-construct_editable:%p", e_uninitialized);
 		cat_ref_anounce(e_uninitialized);
 	}
 
@@ -191,11 +195,13 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 		priv->multiple_editors_per_resource = rpriv->multiple_editors_per_resource;
 		priv->one_instance = rpriv->one_instance;
 		priv->full_screen = rpriv->full_screen;
+		cat_log_error("constr-editable:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->sub_map = cat_hash_map_wo_create_editable(rpriv->sub_map);
 	} else {
 		priv->full_screen = TRUE;
 		priv->multiple_editors_per_resource = FALSE;
 		priv->one_instance = TRUE;
+		cat_log_error("constr-editable:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->sub_map = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 	}
 
@@ -204,6 +210,7 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 
 static void l_anchor_children(CatWo *wo, int version) {
 	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private((ElkPreferencesWo *) wo);
+	cat_log_error("priv->sub_map=%p, ref-cnt = %d", priv->sub_map, ((GObject *) (priv->sub_map))->ref_count);
 	priv->sub_map = cat_hash_map_wo_anchor(priv->sub_map, version);
 
 }
@@ -232,12 +239,15 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 	if (e_uninitialized==NULL) {
 		e_uninitialized = g_object_new(ELK_TYPE_PREFERENCES_WO, NULL);
 		cat_ref_anounce(e_uninitialized);
+		cat_log_error("anounced-clone-content:%p", e_uninitialized);
 	}
 
 	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private(ELK_PREFERENCES_WO(e_uninitialized));
 	if (wo_source) {
 		ElkPreferencesWoPrivate *priv_src = elk_preferences_wo_get_instance_private(ELK_PREFERENCES_WO(wo_source));
+		cat_log_error("clone-content:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->sub_map = cat_hash_map_wo_clone(priv_src->sub_map, CAT_CLONE_DEPTH_NONE);
+		cat_log_error("clone-content:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->full_screen = priv_src->full_screen;
 		priv->multiple_editors_per_resource = priv_src->multiple_editors_per_resource;
 		priv->one_instance = priv_src->one_instance;
@@ -245,7 +255,9 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->full_screen = TRUE;
 		priv->multiple_editors_per_resource = FALSE;
 		priv->one_instance = TRUE;
+		cat_log_error("clone-content:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->sub_map = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
+		cat_log_error("clone-content:%p, current-map=%p", e_uninitialized, priv->sub_map);
 	}
 
 	CatWoClass *wocls = CAT_WO_CLASS(elk_preferences_wo_parent_class);

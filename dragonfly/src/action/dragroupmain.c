@@ -31,6 +31,7 @@
 #include "draactiontogglewordwrap.h"
 #include "draactiontoggleshowwhitespace.h"
 #include "draactiontogglemarkoccurrences.h"
+#include "draactiontogglespelling.h"
 #include "../macros/draimacromanagerlistener.h"
 
 #include <logging/catlogdefs.h>
@@ -58,6 +59,7 @@ struct _DraGroupMainPrivate {
 	DraActionToggleWordWrap *action_toggle_word_wrap;
 	DraActionToggleShowWhitespace *action_toggle_show_whitespace;
 	DraActionToggleMarkOccurrences *action_toggle_mark_occurrences;
+	DraActionToggleSpelling *action_toggle_spelling;
 };
 
 static void l_document_view_listener_iface_init(ChaIDocumentViewListenerInterface *iface);
@@ -101,6 +103,7 @@ static void l_dispose(GObject *object) {
 	cat_unref_ptr(priv->action_toggle_word_wrap);
 	cat_unref_ptr(priv->action_toggle_show_whitespace);
 	cat_unref_ptr(priv->action_toggle_mark_occurrences);
+	cat_unref_ptr(priv->action_toggle_spelling);
 	cat_unref_ptr(priv->focused_editor_panel);
 	G_OBJECT_CLASS(dra_group_main_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
@@ -143,6 +146,9 @@ DraGroupMain *dra_group_main_new(LeaKeyContext *key_context, DraPanelOwner *pane
 	priv->action_toggle_mark_occurrences = dra_action_toggle_mark_occurrences_new();
 	lea_action_set_order((LeaAction *) priv->action_toggle_mark_occurrences, 302);
 
+	priv->action_toggle_spelling = dra_action_toggle_spelling_new();
+	lea_action_set_order((LeaAction *) priv->action_toggle_spelling, 303);
+
 	cat_unref(grp_print);
 	cat_unref(grp_file);
 
@@ -184,11 +190,17 @@ LeaAction *dra_group_main_get_action_toggle_mark_occurrences(DraGroupMain *group
 	return (LeaAction *) priv->action_toggle_mark_occurrences;
 }
 
+LeaAction *dra_group_main_get_action_toggle_spelling(DraGroupMain *group_main) {
+	DraGroupMainPrivate *priv = dra_group_main_get_instance_private(group_main);
+	return (LeaAction *) priv->action_toggle_spelling;
+}
+
 void dra_group_main_reconfigure(DraGroupMain *group_main, DraPreferencesWo *a_prefs) {
 	DraGroupMainPrivate *priv = dra_group_main_get_instance_private(group_main);
 	dra_action_toggle_word_wrap_reconfigured(priv->action_toggle_word_wrap, a_prefs);
 	dra_action_toggle_show_whitespace_reconfigured(priv->action_toggle_show_whitespace, a_prefs);
 	dra_action_toggle_mark_occurrences_reconfigured(priv->action_toggle_mark_occurrences, a_prefs);
+	dra_action_toggle_spelling_reconfigured(priv->action_toggle_spelling, a_prefs);
 }
 
 
@@ -251,6 +263,7 @@ void dra_group_main_set_editor_panel(DraGroupMain *group_main, DraEditorPanel *e
 	dra_action_toggle_word_wrap_set_editor_panel(priv->action_toggle_word_wrap, editor_panel);
 	dra_action_toggle_show_whitespace_set_editor_panel(priv->action_toggle_show_whitespace, editor_panel);
 	dra_action_toggle_mark_occurrences_set_editor_panel(priv->action_toggle_mark_occurrences, editor_panel);
+	dra_action_toggle_spelling_set_editor_panel(priv->action_toggle_spelling, editor_panel);
 
 	dra_group_edit_set_editor_panel(priv->group_edit, editor_panel);
 	dra_group_edit_set_history_info(priv->group_edit, history_index, history_size);

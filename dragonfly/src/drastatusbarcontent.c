@@ -81,7 +81,8 @@ static void l_finalize(GObject *object) {
 }
 
 
-DraStatusBarContent *dra_status_bar_content_new(LeaAction *action_toggle_word_wrap, LeaAction *action_toggle_show_whitespaces, LeaAction *action_toggle_mark_occurrences) {
+DraStatusBarContent *dra_status_bar_content_new(LeaAction *action_toggle_word_wrap, LeaAction *action_toggle_show_whitespaces
+		, LeaAction *action_toggle_mark_occurrences, LeaAction *action_toggle_spelling) {
 	DraStatusBarContent *result = g_object_new(DRA_TYPE_STATUS_BAR_CONTENT,
             "orientation", GTK_ORIENTATION_HORIZONTAL,
             "spacing",     2, NULL);
@@ -112,6 +113,8 @@ DraStatusBarContent *dra_status_bar_content_new(LeaAction *action_toggle_word_wr
 	gtk_box_pack_start((GtkBox *) result, ti_ws, FALSE,TRUE,1);
 	LeaToggleImage *ti_mo = lea_toggle_image_new(action_toggle_mark_occurrences, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/mark_occurrences_96.png");
 	gtk_box_pack_start((GtkBox *) result, ti_mo, FALSE,TRUE,1);
+	LeaToggleImage *ti_sp = lea_toggle_image_new(action_toggle_spelling, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/check_spelling_96.png");
+	gtk_box_pack_start((GtkBox *) result, ti_sp, FALSE,TRUE,1);
 
 	return result;
 }

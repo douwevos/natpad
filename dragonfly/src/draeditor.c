@@ -40,6 +40,7 @@
 
 #include "dradocumentview.h"
 #include "document/draconnectormap.h"
+#include "preferences/draprefsspellingwo.h"
 
 
 
@@ -82,6 +83,7 @@ static void l_marker_clicked(ChaEditor *editor, ChaLineLocationWo *location, lon
 static void l_marker_over(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 static void l_marker_out(ChaEditor *editor);
 static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event);
+static void l_editor_toggle_spelling(DraEditor *editor);
 
 
 static void dra_editor_class_init(DraEditorClass *clazz) {
@@ -96,6 +98,7 @@ static void dra_editor_class_init(DraEditorClass *clazz) {
 	cha_clazz->markerOut = l_marker_out;
 
 	clazz->showContextMenu = l_show_context_menu;
+	clazz->toggleSpelling = l_editor_toggle_spelling;
 }
 
 static void dra_editor_init(DraEditor *instance) {
@@ -195,6 +198,10 @@ void dra_editor_set_preferences(DraEditor *editor, DraPreferencesWo *a_prefs) {
 	dra_editor_request_mark_occurrences(editor);
 }
 
+void dra_editor_toggle_spelling(DraEditor *editor) {
+	DRA_EDITOR_GET_CLASS(editor)->toggleSpelling(editor);
+}
+
 void dra_editor_request_mark_occurrences(DraEditor *editor) {
 	ChaPreferencesWo *prefs = cha_editor_get_preferences((ChaEditor *) editor);
 	if (prefs == NULL) {
@@ -202,12 +209,12 @@ void dra_editor_request_mark_occurrences(DraEditor *editor) {
 	}
 	if (cha_preferences_wo_get_mark_occurrences(prefs)) {
 		ChaDocument *document = cha_editor_get_document((ChaEditor *) editor);
-		ChaRevisionWo *a_new_revision = cha_document_get_current_revision_ref(document);
-		if (a_new_revision==NULL) {
-			return;
-		}
 		DraEditorPanel *panel = dra_editor_get_panel(editor);
 		if (panel==NULL) {
+			return;
+		}
+		ChaRevisionWo *a_new_revision = cha_document_get_current_revision_ref(document);
+		if (a_new_revision==NULL) {
 			return;
 		}
 		LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner((LeaPanel *) panel);
@@ -981,6 +988,35 @@ static gboolean l_enable_kill(DraEditor *editor) {
 //	gtk_window_move (GTK_WINDOW (completion_popup->popup_window), completion_popup->xpos, completion_popup->ypos);
 	return FALSE;
 }
+
+
+
+typedef void (*ApplyTogglePreferencessFlag)(ChaEditor *editor, ChaPreferencesWo *e_prefs);
+
+static void l_toggle_preferences_flag(DraEditor *editor, ApplyTogglePreferencessFlag apply_cb) {
+	ChaPreferencesWo *a_prefs = cha_editor_get_preferences((ChaEditor *) editor);
+	gboolean wrap_lines = cha_preferences_wo_get_wrap_lines(a_prefs);
+	ChaPreferencesWo *e_prefs = cha_preferences_wo_create_editable(a_prefs);
+	cha_preferences_wo_set_wrap_lines(e_prefs, !wrap_lines);
+
+	apply_cb(editor, e_prefs);
+
+	int version = cat_wo_get_version((CatWo *) a_prefs);
+	ChaPreferencesWo *a_new_prefs = cha_preferences_wo_anchor(e_prefs, version+1);
+	cha_editor_set_preferences(editor, a_new_prefs);
+	cat_unref_ptr(a_new_prefs);
+}
+
+static void l_apply_toggle_spelling(DraEditor *editor, DraPreferencesWo *e_prefs) {
+	DraPrefsSpellingWo *e_spelling = dra_preferences_wo_get_editable_spelling(e_prefs);
+	gboolean spelling_enabled = dra_prefs_spelling_wo_is_enabled(e_spelling);
+	dra_prefs_spelling_wo_set_enabled(e_spelling, spelling_enabled);
+}
+
+static void l_editor_toggle_spelling(DraEditor *editor) {
+	l_toggle_preferences_flag(editor, l_apply_toggle_spelling);
+}
+
 
 /********************* start CatIStringable implementation *********************/
 

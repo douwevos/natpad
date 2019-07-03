@@ -41,16 +41,22 @@ static void l_finalize(GObject *object);
 static void l_toggle_word_wrap(ChaEditor *editor);
 static void l_toggle_show_whitespace(ChaEditor *editor);
 static void l_toggle_mark_occurrences(ChaEditor *editor);
+static void l_toggle_spelling(DraEditor *editor);
 
 static void elk_editor_class_init(ElkEditorClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 
-	ChaEditorClass *cha_class = DRA_EDITOR_CLASS(clazz);
+	ChaEditorClass *cha_class = CHA_EDITOR_CLASS(clazz);
 	cha_class->toggleWordWrap = l_toggle_word_wrap;
 	cha_class->toggleShowWhitespace = l_toggle_show_whitespace;
 	cha_class->toggleMarkOccurrences = l_toggle_mark_occurrences;
+
+
+	DraEditorClass *dra_class = DRA_EDITOR_CLASS(clazz);
+	dra_class->toggleSpelling = l_toggle_spelling;
+
 }
 
 static void elk_editor_init(ElkEditor *instance) {
@@ -97,3 +103,8 @@ static void l_toggle_mark_occurrences(ChaEditor *editor) {
 	elk_panel_owner_toggle_mark_occurrences(panel_owner);
 }
 
+static void l_toggle_spelling(DraEditor *editor) {
+	DraEditorPanel *editor_panel = dra_editor_get_panel((DraEditor *) editor);
+	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner(editor_panel);
+	elk_panel_owner_toggle_spelling(panel_owner);
+}
