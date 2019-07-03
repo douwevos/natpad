@@ -23,7 +23,7 @@
 #include "draactiontogglemarkoccurrences.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "DraActionToggleMarkOccurrences"
 #include <logging/catlog.h>
 
@@ -84,16 +84,15 @@ void dra_action_toggle_mark_occurrences_set_editor_panel(DraActionToggleMarkOccu
 	lea_action_set_sensitive_self(LEA_ACTION(action), editor_panel!=NULL);
 	if (editor_panel!=NULL) {
 		DraEditor *editor = dra_editor_panel_get_editor(editor_panel);
-		ChaPreferencesWo *prefs = cha_editor_get_preferences(editor);
+		ChaPreferencesWo *prefs = cha_editor_get_preferences((ChaEditor *) editor);
 		dra_action_toggle_mark_occurrences_reconfigured(action, (DraPreferencesWo *) prefs);
 	}
 }
 
 void dra_action_toggle_mark_occurrences_reconfigured(DraActionToggleMarkOccurrences *action, DraPreferencesWo *a_prefs) {
-	DraActionToggleMarkOccurrencesPrivate *priv = dra_action_toggle_mark_occurrences_get_instance_private(action);
 	gboolean mark_occurrences = a_prefs==NULL ? FALSE : cha_preferences_wo_get_mark_occurrences((ChaPreferencesWo *) a_prefs);
-	cat_log_error("mark_occurrences=%d", mark_occurrences);
-	lea_action_set_toggled(action, mark_occurrences);
+	cat_log_debug("mark_occurrences=%d", mark_occurrences);
+	lea_action_set_toggled((LeaAction *) action, mark_occurrences);
 }
 
 

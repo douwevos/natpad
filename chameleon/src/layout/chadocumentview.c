@@ -1832,8 +1832,6 @@ static void l_replace_pages_on_hold(ChaDocumentViewPrivate *priv, CatArrayWo *ne
 }
 
 
-
-
 static gboolean l_invalidate_lines(ChaDocumentView *document_view) {
 	ChaDocumentViewPrivate *priv = cha_document_view_get_instance_private(document_view);
 	if (priv->invalidate_count==0) {
@@ -1854,7 +1852,7 @@ void cha_document_view_queue_invalidate_lines(ChaDocumentView *document_view) {
 	ChaDocumentViewPrivate *priv = cha_document_view_get_instance_private(document_view);
 	priv->invalidate_count++;
 //	l_invalidate_lines(document_view);
-	g_idle_add_full(G_PRIORITY_HIGH, l_invalidate_lines, document_view, NULL);
+	g_idle_add_full(G_PRIORITY_HIGH, (GSourceFunc) l_invalidate_lines, document_view, NULL);
 }
 
 

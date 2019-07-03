@@ -23,7 +23,7 @@
 #include "draactiontoggleshowwhitespace.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "DraActionToggleShowWhitespace"
 #include <logging/catlog.h>
 
@@ -84,16 +84,15 @@ void dra_action_toggle_show_whitespace_set_editor_panel(DraActionToggleShowWhite
 	lea_action_set_sensitive_self(LEA_ACTION(action), editor_panel!=NULL);
 	if (editor_panel!=NULL) {
 		DraEditor *editor = dra_editor_panel_get_editor(editor_panel);
-		ChaPreferencesWo *prefs = cha_editor_get_preferences(editor);
+		ChaPreferencesWo *prefs = cha_editor_get_preferences((ChaEditor *) editor);
 		dra_action_toggle_show_whitespace_reconfigured(action, (DraPreferencesWo *) prefs);
 	}
 }
 
 void dra_action_toggle_show_whitespace_reconfigured(DraActionToggleShowWhitespace *action, DraPreferencesWo *a_prefs) {
-	DraActionToggleShowWhitespacePrivate *priv = dra_action_toggle_show_whitespace_get_instance_private(action);
 	gboolean show_whitespace = a_prefs==NULL ? FALSE : cha_preferences_wo_get_show_whitespace((ChaPreferencesWo *) a_prefs);
-	cat_log_error("show_whitespace=%d", show_whitespace);
-	lea_action_set_toggled(action, show_whitespace);
+	cat_log_debug("show_whitespace=%d", show_whitespace);
+	lea_action_set_toggled((LeaAction *) action, show_whitespace);
 }
 
 

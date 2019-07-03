@@ -23,7 +23,7 @@
 #include "draactiontogglespelling.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "DraActionToggleSpelling"
 #include <logging/catlog.h>
 
@@ -85,20 +85,19 @@ void dra_action_toggle_spelling_set_editor_panel(DraActionToggleSpelling *action
 	lea_action_set_sensitive_self(LEA_ACTION(action), editor_panel!=NULL);
 	if (editor_panel!=NULL) {
 		DraEditor *editor = dra_editor_panel_get_editor(editor_panel);
-		DraPreferencesWo *prefs = (DraPreferencesWo *) cha_editor_get_preferences(editor);
+		DraPreferencesWo *prefs = (DraPreferencesWo *) cha_editor_get_preferences((ChaEditor *) editor);
 		dra_action_toggle_spelling_reconfigured(action, (DraPreferencesWo *) prefs);
 	}
 }
 
 void dra_action_toggle_spelling_reconfigured(DraActionToggleSpelling *action, DraPreferencesWo *a_prefs) {
-	DraActionToggleSpellingPrivate *priv = dra_action_toggle_spelling_get_instance_private(action);
 	gboolean spelling = FALSE;
 	if (a_prefs) {
 		DraPrefsSpellingWo *prefs_spelling = dra_preferences_wo_get_spelling(a_prefs);
 		spelling = dra_prefs_spelling_wo_is_enabled(prefs_spelling);
 	}
-	cat_log_error("spelling=%d", spelling);
-	lea_action_set_toggled(action, spelling);
+	cat_log_debug("spelling=%d", spelling);
+	lea_action_set_toggled((LeaAction *) action, spelling);
 }
 
 
@@ -106,6 +105,6 @@ static void l_action_run(LeaAction *self) {
 	DraActionToggleSpellingPrivate *priv = dra_action_toggle_spelling_get_instance_private(DRA_ACTION_TOGGLE_SPELLING(self));
 	if (priv->editor_panel) {
 		DraEditor *editor = dra_editor_panel_get_editor(priv->editor_panel);
-		dra_editor_toggle_spelling((ChaEditor *) editor);
+		dra_editor_toggle_spelling(editor);
 	}
 }

@@ -97,8 +97,8 @@ static void l_action_run(LeaAction *self) {
 
 	gtk_about_dialog_set_logo(about_dlg, logo);
 	gtk_about_dialog_set_program_name(about_dlg, "Natpad");
-	gtk_about_dialog_set_version(about_dlg, "2.4");
-	gtk_about_dialog_set_website(about_dlg, "http://www.natpad.net");
+	gtk_about_dialog_set_version(about_dlg, "2.5");
+	gtk_about_dialog_set_website(about_dlg, "https://github.com/douwevos/natpad");
 	gtk_about_dialog_set_comments(about_dlg, "Natpad Text-editor");
 	gtk_about_dialog_set_license_type(about_dlg, GTK_LICENSE_GPL_2_0);
 	gtk_dialog_run(GTK_DIALOG(w_about));

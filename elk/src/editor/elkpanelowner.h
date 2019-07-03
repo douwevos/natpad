@@ -66,6 +66,7 @@ MooService *elk_panel_owner_get_moose_service(ElkPanelOwner *panel_owner);
 void elk_panel_owner_toggle_word_wrap(ElkPanelOwner *panel_owner);
 void elk_panel_owner_toggle_show_whitespace(ElkPanelOwner *panel_owner);
 void elk_panel_owner_toggle_mark_occurrences(ElkPanelOwner *panel_owner);
+void elk_panel_owner_toggle_spelling(ElkPanelOwner *panel_owner);
 
 G_END_DECLS
 

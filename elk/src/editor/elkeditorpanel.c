@@ -231,7 +231,7 @@ static void l_reactivated(DraEditorPanel *editor_panel, gboolean focus_active_an
 }
 
 static DraEditor *l_init_editor(DraEditorPanel *editor_panel, ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *request_factory, WorService *wor_service) {
-	return elk_editor_new(document, connector_map, request_factory, wor_service);
+	return (DraEditor *) elk_editor_new(document, connector_map, request_factory, wor_service);
 }
 
 

@@ -209,15 +209,14 @@ static CatArrayWo *l_creat_path_entries(VipCreatePathRequest *request, VipPath *
 			if (childContent == NULL) {
 				if (idx==fp_count-1) {
 					childContent = vip_fs_file_new(full_path);
-					cat_log_error("vip_fs_file_new full_path=%o", full_path);
+					cat_log_debug("vip_fs_file_new full_path=%o", full_path);
 				} else {
 					childContent = (VipIResource *) vip_virtual_resource_new(a_entry);
 				}
 			}
 
 			long long next_vip_id = vip_isequence_next((VipISequence *) priv->vip_service);
-			cat_log_error("childContent=%p", childContent);
-			cat_log_error("childContent=%o", childContent);
+			cat_log_debug("childContent=%o", childContent);
 			vip_node = vip_node_new(next_vip_id, childContent);
 			childNode = cat_writable_tree_node_append_child(cdNode);
 			cat_writable_tree_node_set_content(childNode, (GObject *) vip_node);
