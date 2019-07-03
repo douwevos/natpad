@@ -52,17 +52,22 @@ struct _DraEditor {
 struct _DraEditorClass {
 	ChaEditorClass parent_class;
 	void (*showContextMenu)(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event);
+	void (*toggleSpelling)(DraEditor *editor);
 };
 
 struct _DraEditorPanel;
 
 GType dra_editor_get_type();
 
+void dra_editor_construct(DraEditor *instance, ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service);
+
 DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service);
 
 struct _DraEditorPanel *dra_editor_get_panel(DraEditor *editor);
 
 void dra_editor_set_preferences(DraEditor *editor, DraPreferencesWo *a_prefs);
+
+void dra_editor_toggle_spelling(DraEditor *editor);
 
 void dra_editor_request_mark_occurrences(DraEditor *editor);
 

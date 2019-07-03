@@ -41,6 +41,7 @@
 #include "action/leaactionmenuitem.h"
 
 #include "widget/leascrolledwindow.h"
+#include "widget/leatoggleimage.h"
 
 #include "dialog/leabasicinputdialog.h"
 

@@ -35,6 +35,7 @@ struct _ElkPanelOwnerPrivate {
 	ElkDialogs *dialogs;
 	MooService *moo_servie;
 	CowIEntryAccessor *dra_prefs_accessor;
+	ElkPreferencesService *elk_pref_service;
 };
 
 static void l_cow_listener_iface_init(CowIChangeListenerInterface *iface);
@@ -75,7 +76,7 @@ static void l_dispose(GObject *object) {
 		lea_frame_unmerge_action_group(frame, (LeaActionGroup *) priv->group_main);
 		cat_unref_ptr(priv->group_main);
 	}
-
+	cat_unref_ptr(priv->elk_pref_service);
 	cat_unref_ptr(priv->group_main);
 	cat_unref_ptr(priv->dialogs);
 	G_OBJECT_CLASS(elk_panel_owner_parent_class)->dispose(object);
@@ -100,6 +101,7 @@ ElkPanelOwner *elk_panel_owner_new(ElkIService *elk_service, MooService *moo_ser
 	priv->moo_servie = cat_ref_ptr(moo_service);
 
 	ElkPreferencesService *elk_pref_service = elk_service_get_preferences_service((ElkService *) elk_service);
+	priv->elk_pref_service = cat_ref_ptr(elk_pref_service);
 	priv->dra_prefs_accessor = elk_preferences_services_get_chameleon_prefs_accessor(elk_pref_service);
 
 	DraSpellHelper *spell_helper = dra_panel_owner_get_spell_helper((DraPanelOwner *) result);
@@ -116,6 +118,73 @@ ElkDialogs *elk_panel_owner_get_dialogs(ElkPanelOwner *panel_owner) {
 MooService *elk_panel_owner_get_moose_service(ElkPanelOwner *panel_owner) {
 	ElkPanelOwnerPrivate *priv = elk_panel_owner_get_instance_private(panel_owner);
 	return priv->moo_servie;
+}
+
+
+typedef void (*ApplyPrefsChange)(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs);
+
+static void l_basic_prefs_operation(ElkPanelOwner *panel_owner, ApplyPrefsChange apply_changes) {
+	ElkPanelOwnerPrivate *priv = elk_panel_owner_get_instance_private(panel_owner);
+	ElkPreferencesContainer *container = elk_preferences_service_get_container(priv->elk_pref_service);
+	ElkPreferencesWo *e_prefs = elk_preferences_container_get(container);
+	e_prefs = elk_preferences_wo_clone(e_prefs, CAT_CLONE_DEPTH_MAIN);
+	DraPreferencesWo *dra_prefs = (DraPreferencesWo *) cow_ientry_accessor_get(priv->dra_prefs_accessor, e_prefs);
+	cat_log_error("dra_prefs=%p, e_prefs=%p", dra_prefs, e_prefs);
+	cat_log_error("edit prefs:%O", e_prefs);
+	DraPreferencesWo *e_dra_prefs = NULL;
+	if (dra_prefs) {
+		e_dra_prefs = dra_preferences_wo_clone(dra_prefs, CAT_CLONE_DEPTH_MAIN);
+	} else {
+		e_dra_prefs = dra_preferences_wo_new();
+	}
+	apply_changes(panel_owner, e_dra_prefs);
+	cow_ientry_accessor_set(priv->dra_prefs_accessor, e_prefs, e_dra_prefs);
+	cat_log_error("edit prefs:%O", e_prefs);
+	elk_preferences_container_set(container, e_prefs);
+
+	ElkPreferencesWo *new_prefs = elk_preferences_container_get_fixed(container);
+	cat_log_error("new prefs:%O", new_prefs);
+//	elk_preferences_container_set(container, new_prefs);
+	elk_preferences_service_save(priv->elk_pref_service);
+	cat_unref_ptr(e_dra_prefs)
+	cat_unref_ptr(e_prefs)
+}
+
+void l_toggle_word_wrap_apply(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs) {
+	gboolean wrap = cha_preferences_wo_get_wrap_lines((ChaPreferencesWo *) e_prefs);
+	cha_preferences_wo_set_wrap_lines((ChaPreferencesWo *) e_prefs, !wrap);
+}
+
+void elk_panel_owner_toggle_word_wrap(ElkPanelOwner *panel_owner) {
+	l_basic_prefs_operation(panel_owner, l_toggle_word_wrap_apply);
+}
+
+void l_toggle_show_whitespace_apply(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs) {
+	gboolean show_whitespace = cha_preferences_wo_get_show_whitespace((ChaPreferencesWo *) e_prefs);
+	cha_preferences_wo_set_show_whitespace((ChaPreferencesWo *) e_prefs, !show_whitespace);
+}
+
+void elk_panel_owner_toggle_show_whitespace(ElkPanelOwner *panel_owner) {
+	l_basic_prefs_operation(panel_owner, l_toggle_show_whitespace_apply);
+}
+
+void l_toggle_mark_occurrences_apply(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs) {
+	gboolean mark_occurrences = cha_preferences_wo_get_mark_occurrences((ChaPreferencesWo *) e_prefs);
+	cha_preferences_wo_set_mark_occurrences((ChaPreferencesWo *) e_prefs, !mark_occurrences);
+}
+
+void elk_panel_owner_toggle_mark_occurrences(ElkPanelOwner *panel_owner) {
+	l_basic_prefs_operation(panel_owner, l_toggle_mark_occurrences_apply);
+}
+
+void l_toggle_mark_toggle_spelling(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs) {
+	DraPrefsSpellingWo *e_spelling = dra_preferences_wo_get_editable_spelling(e_prefs);
+	gboolean spelling_enabled = dra_prefs_spelling_wo_is_enabled(e_spelling);
+	dra_prefs_spelling_wo_set_enabled(e_spelling, !spelling_enabled);
+}
+
+void elk_panel_owner_toggle_spelling(ElkPanelOwner *panel_owner) {
+	l_basic_prefs_operation(panel_owner, l_toggle_mark_toggle_spelling);
 }
 
 static void l_notify_new_editor_list(ElkPanelOwner *panel_owner) {
@@ -175,7 +244,7 @@ static void l_config_changed(CowIChangeListener *self, GObject *new_config) {
 	ElkPanelOwnerPrivate *priv = elk_panel_owner_get_instance_private(instance);
 
 	DraPreferencesWo *dra_prefs = (DraPreferencesWo *) cow_ientry_accessor_get(priv->dra_prefs_accessor, new_config);
-	cat_log_trace("dra_prefs=%O", dra_prefs);
+	cat_log_error("dra_prefs=%O", dra_prefs);
 	dra_panel_owner_set_configuration((DraPanelOwner *) instance, dra_prefs);
 }
 

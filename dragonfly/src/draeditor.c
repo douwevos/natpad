@@ -40,6 +40,7 @@
 
 #include "dradocumentview.h"
 #include "document/draconnectormap.h"
+#include "preferences/draprefsspellingwo.h"
 
 
 
@@ -82,6 +83,7 @@ static void l_marker_clicked(ChaEditor *editor, ChaLineLocationWo *location, lon
 static void l_marker_over(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 static void l_marker_out(ChaEditor *editor);
 static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event);
+static void l_editor_toggle_spelling(DraEditor *editor);
 
 
 static void dra_editor_class_init(DraEditorClass *clazz) {
@@ -96,6 +98,7 @@ static void dra_editor_class_init(DraEditorClass *clazz) {
 	cha_clazz->markerOut = l_marker_out;
 
 	clazz->showContextMenu = l_show_context_menu;
+	clazz->toggleSpelling = l_editor_toggle_spelling;
 }
 
 static void dra_editor_init(DraEditor *instance) {
@@ -139,12 +142,8 @@ static gboolean l_key_release_event(GtkWidget *gwidget, GdkEventKey *eev, gpoint
 static gboolean l_button_press_event_cb(GtkWidget *gwidget, GdkEventButton *eev, gpointer data);
 static gboolean l_focus_out_event_cb(GtkWidget *widget, GdkEvent *event, gpointer data);
 
-
-
-DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service) {
-	DraEditor *result = g_object_new(DRA_TYPE_EDITOR, NULL);
-	cat_ref_anounce(result);
-	DraEditorPrivate *priv = dra_editor_get_instance_private(result);
+void dra_editor_construct(DraEditor *instance, ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service) {
+	DraEditorPrivate *priv = dra_editor_get_instance_private(instance);
 	priv->connector_map = cat_ref_ptr(connector_map);
 	priv->context_editor = NULL;
 	priv->auto_complete_popup = NULL;
@@ -165,14 +164,20 @@ DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map,
 	}
 
 
-	g_signal_connect(result, "key-press-event", G_CALLBACK(l_key_press_event), result);
-	g_signal_connect(result, "key-release-event", G_CALLBACK(l_key_release_event), result);
+	g_signal_connect(instance, "key-press-event", G_CALLBACK(l_key_press_event), instance);
+	g_signal_connect(instance, "key-release-event", G_CALLBACK(l_key_release_event), instance);
 
-	g_signal_connect(result, "button-press-event", G_CALLBACK(l_button_press_event_cb), result);
-	g_signal_connect(result, "focus-out-event", G_CALLBACK(l_focus_out_event_cb), result);
+	g_signal_connect(instance, "button-press-event", G_CALLBACK(l_button_press_event_cb), instance);
+	g_signal_connect(instance, "focus-out-event", G_CALLBACK(l_focus_out_event_cb), instance);
 
-	cha_editor_construct((ChaEditor *) result, document, CHA_EDITOR_FLAG_DEFAULT_MOUSE_HANDLING);
+	cha_editor_construct((ChaEditor *) instance, document, CHA_EDITOR_FLAG_DEFAULT_MOUSE_HANDLING);
 
+}
+
+DraEditor *dra_editor_new(ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service) {
+	DraEditor *result = g_object_new(DRA_TYPE_EDITOR, NULL);
+	cat_ref_anounce(result);
+	dra_editor_construct(result, document, connector_map, connector_factory, wor_service);
 	return result;
 }
 
@@ -193,6 +198,10 @@ void dra_editor_set_preferences(DraEditor *editor, DraPreferencesWo *a_prefs) {
 	dra_editor_request_mark_occurrences(editor);
 }
 
+void dra_editor_toggle_spelling(DraEditor *editor) {
+	DRA_EDITOR_GET_CLASS(editor)->toggleSpelling(editor);
+}
+
 void dra_editor_request_mark_occurrences(DraEditor *editor) {
 	ChaPreferencesWo *prefs = cha_editor_get_preferences((ChaEditor *) editor);
 	if (prefs == NULL) {
@@ -200,12 +209,12 @@ void dra_editor_request_mark_occurrences(DraEditor *editor) {
 	}
 	if (cha_preferences_wo_get_mark_occurrences(prefs)) {
 		ChaDocument *document = cha_editor_get_document((ChaEditor *) editor);
-		ChaRevisionWo *a_new_revision = cha_document_get_current_revision_ref(document);
-		if (a_new_revision==NULL) {
-			return;
-		}
 		DraEditorPanel *panel = dra_editor_get_panel(editor);
 		if (panel==NULL) {
+			return;
+		}
+		ChaRevisionWo *a_new_revision = cha_document_get_current_revision_ref(document);
+		if (a_new_revision==NULL) {
 			return;
 		}
 		LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner((LeaPanel *) panel);
@@ -979,6 +988,35 @@ static gboolean l_enable_kill(DraEditor *editor) {
 //	gtk_window_move (GTK_WINDOW (completion_popup->popup_window), completion_popup->xpos, completion_popup->ypos);
 	return FALSE;
 }
+
+
+
+typedef void (*ApplyTogglePreferencessFlag)(ChaEditor *editor, ChaPreferencesWo *e_prefs);
+
+static void l_toggle_preferences_flag(DraEditor *editor, ApplyTogglePreferencessFlag apply_cb) {
+	ChaPreferencesWo *a_prefs = cha_editor_get_preferences((ChaEditor *) editor);
+	gboolean wrap_lines = cha_preferences_wo_get_wrap_lines(a_prefs);
+	ChaPreferencesWo *e_prefs = cha_preferences_wo_create_editable(a_prefs);
+	cha_preferences_wo_set_wrap_lines(e_prefs, !wrap_lines);
+
+	apply_cb(editor, e_prefs);
+
+	int version = cat_wo_get_version((CatWo *) a_prefs);
+	ChaPreferencesWo *a_new_prefs = cha_preferences_wo_anchor(e_prefs, version+1);
+	cha_editor_set_preferences(editor, a_new_prefs);
+	cat_unref_ptr(a_new_prefs);
+}
+
+static void l_apply_toggle_spelling(DraEditor *editor, DraPreferencesWo *e_prefs) {
+	DraPrefsSpellingWo *e_spelling = dra_preferences_wo_get_editable_spelling(e_prefs);
+	gboolean spelling_enabled = dra_prefs_spelling_wo_is_enabled(e_spelling);
+	dra_prefs_spelling_wo_set_enabled(e_spelling, spelling_enabled);
+}
+
+static void l_editor_toggle_spelling(DraEditor *editor) {
+	l_toggle_preferences_flag(editor, l_apply_toggle_spelling);
+}
+
 
 /********************* start CatIStringable implementation *********************/
 

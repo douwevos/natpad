@@ -129,7 +129,7 @@ void dra_editor_panel_construct(DraEditorPanel *editor_panel, LeaIPanelOwner *pa
 	WorService *wor_service = dra_panel_owner_get_wor_service(dra_panel_owner);
 
 	if (editor_pan_class->initEditor) {
-		priv->editor = editor_pan_class->initEditor(document, connector_map, request_factory);
+		priv->editor = editor_pan_class->initEditor(editor_panel, document, connector_map, request_factory, wor_service);
 	} else {
 		priv->editor = dra_editor_new(document, connector_map, request_factory, wor_service);
 	}

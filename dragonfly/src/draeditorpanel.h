@@ -52,7 +52,7 @@ struct _DraEditorPanel {
 
 struct _DraEditorPanelClass {
 	LeaPanelClass parent_class;
-	DraEditor *(*initEditor)(ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *request_factory);
+	DraEditor *(*initEditor)(DraEditorPanel *editor_panel, ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *request_factory, WorService *wor_service);
 	DraContextEditor *(*createContextEditor)(DraEditorPanel *editor_panel);
 	void (*reconfigure)(DraEditorPanel *editor_panel, DraPreferencesWo *a_preferences);
 	void (*reactivated)(DraEditorPanel *editor_panel, gboolean focus_active_and_set);

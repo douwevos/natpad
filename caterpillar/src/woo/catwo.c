@@ -191,6 +191,7 @@ CatWo *cat_wo_clone(const CatWo *wo_source, CatCloneDepth clone_depth) {
 	}
 
 	CatWo *result = (CatWo *) g_object_new(G_OBJECT(wo_source)->g_type_instance.g_class->g_type, NULL);
+	cat_ref_anounce(result);
 	CatWoPrivate *priv = cat_wo_get_instance_private(result);
 	priv->version = cat_wo_get_version(wo_source);
 	priv->wo_info = NULL;
