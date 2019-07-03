@@ -27,7 +27,7 @@
 #define SIZE   20
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "LeaToggleImage"
 #include <logging/catlog.h>
 
@@ -109,7 +109,7 @@ LeaToggleImage *lea_toggle_image_new(LeaAction *action, const char *image_file_n
 	cat_ref_anounce(result);
 	LeaToggleImagePrivate *priv = lea_toggle_image_get_instance_private(result);
 	priv->action = cat_ref_ptr(action);
-	priv->surface = cairo_image_surface_create_from_png(image_file_name /*"/home/dvos/natpad-workspace/natpad/natpad/dist/icons/line_wrap_96.png"*/);
+	priv->surface = cairo_image_surface_create_from_png(image_file_name);
 
 	gtk_widget_set_events((GtkWidget *) result, gtk_widget_get_events((GtkWidget *) result)
 												 | GDK_BUTTON_PRESS_MASK
@@ -125,7 +125,7 @@ LeaToggleImage *lea_toggle_image_new(LeaAction *action, const char *image_file_n
 
 	lea_action_attach(action, (LeaIAttachable *) result);
 
-	cat_log_error("priv->surface=%p", priv->surface);
+	cat_log_debug("priv->surface=%p", priv->surface);
 	return result;
 }
 
@@ -160,8 +160,6 @@ static gboolean l_mouse_motion(GtkWidget *widget, GdkEventMotion *eev, GObject *
 		return TRUE;
 	}
 	LeaToggleImagePrivate *priv = lea_toggle_image_get_instance_private(LEA_TOGGLE_IMAGE(widget));
-	int wmx = (int) eev->x;
-	int wmy = (int) eev->y;
 	priv->hovering = TRUE;
 	gtk_widget_queue_draw(widget);
 	return TRUE;
@@ -180,40 +178,30 @@ static gboolean l_leave_notify(GtkWidget *widget, GdkEventCrossing *eev, gpointe
 
 
 static void l_widget_get_preferred_width(GtkWidget *widget, gint *minimum_width, gint *natural_width) {
-	LeaToggleImagePrivate *priv = lea_toggle_image_get_instance_private(LEA_TOGGLE_IMAGE(widget));
 //	int width = cairo_image_surface_get_width(priv->surface);
 	int width = SIZE;
-	cat_log_error("width=%d", width);
+	cat_log_debug("width=%d", width);
 	*minimum_width = SIZE;
 	*natural_width = width;
 }
 
 static void l_widget_get_preferred_height(GtkWidget *widget, gint *minimum_height, gint *natural_height) {
-	LeaToggleImagePrivate *priv = lea_toggle_image_get_instance_private(LEA_TOGGLE_IMAGE(widget));
 //	int height = cairo_image_surface_get_height(priv->surface);
 	int height = SIZE;
-	cat_log_error("height=%d", height);
+	cat_log_debug("height=%d", height);
 	*minimum_height = SIZE;
 	*natural_height = height;
 }
 
 static void l_widget_get_preferred_height_for_width(GtkWidget *widget, gint width, gint *minimum_height, gint *natural_height) {
-	LeaToggleImagePrivate *priv = lea_toggle_image_get_instance_private(LEA_TOGGLE_IMAGE(widget));
-	int height = cairo_image_surface_get_height(priv->surface);
-	cat_log_error("height=%d", height);
 	*minimum_height = width;
 	*natural_height = width;
 }
 
 static void l_widget_get_preferred_width_for_height(GtkWidget *widget, gint height, gint *minimum_width, gint *natural_width) {
-	LeaToggleImagePrivate *priv = lea_toggle_image_get_instance_private(LEA_TOGGLE_IMAGE(widget));
-	int width = cairo_image_surface_get_width(priv->surface);
-	cat_log_error("width=%d", width);
 	*minimum_width = height;
 	*natural_width = height;
 }
-
-
 
 
 static void l_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation) {
@@ -280,7 +268,7 @@ static cairo_surface_t *l_scale_surface(cairo_surface_t *surface, int width, int
 	} else {
 		scale = h_scale;
 	}
-	cat_log_error("w_scale=%f, h_scale=%f, scale=%f", w_scale, h_scale, scale);
+	cat_log_debug("w_scale=%f, h_scale=%f, scale=%f", w_scale, h_scale, scale);
 
 	cairo_t *cr = cairo_create(result);
 	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);

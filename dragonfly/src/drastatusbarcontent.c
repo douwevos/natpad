@@ -106,16 +106,14 @@ DraStatusBarContent *dra_status_bar_content_new(LeaAction *action_toggle_word_wr
 
 	gtk_widget_set_size_request((GtkWidget *) result, 300, 20);
 
-
-	LeaToggleImage *ti = lea_toggle_image_new(action_toggle_word_wrap, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/line_wrap_96.png");
-	gtk_box_pack_start((GtkBox *) result, ti, FALSE,TRUE,1);
-	LeaToggleImage *ti_ws = lea_toggle_image_new(action_toggle_show_whitespaces, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/show_whitespaces_96.png");
-	gtk_box_pack_start((GtkBox *) result, ti_ws, FALSE,TRUE,1);
-	LeaToggleImage *ti_mo = lea_toggle_image_new(action_toggle_mark_occurrences, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/mark_occurrences_96.png");
-	gtk_box_pack_start((GtkBox *) result, ti_mo, FALSE,TRUE,1);
-	LeaToggleImage *ti_sp = lea_toggle_image_new(action_toggle_spelling, "/home/dvos/natpad-workspace/natpad/natpad/dist/icons/check_spelling_96.png");
-	gtk_box_pack_start((GtkBox *) result, ti_sp, FALSE,TRUE,1);
-
+	LeaToggleImage *ti = lea_toggle_image_new(action_toggle_word_wrap, "/usr/share/natpad/icons/line_wrap_96.png");
+	gtk_box_pack_start((GtkBox *) result, (GtkWidget *) ti, FALSE,TRUE,1);
+	LeaToggleImage *ti_ws = lea_toggle_image_new(action_toggle_show_whitespaces, "/usr/share/natpad/icons/show_whitespaces_96.png");
+	gtk_box_pack_start((GtkBox *) result, (GtkWidget *) ti_ws, FALSE,TRUE,1);
+	LeaToggleImage *ti_mo = lea_toggle_image_new(action_toggle_mark_occurrences, "/usr/share/natpad/icons/mark_occurrences_96.png");
+	gtk_box_pack_start((GtkBox *) result, (GtkWidget *) ti_mo, FALSE,TRUE,1);
+	LeaToggleImage *ti_sp = lea_toggle_image_new(action_toggle_spelling, "/usr/share/natpad/icons/check_spelling_96.png");
+	gtk_box_pack_start((GtkBox *) result, (GtkWidget *) ti_sp, FALSE,TRUE,1);
 	return result;
 }
 

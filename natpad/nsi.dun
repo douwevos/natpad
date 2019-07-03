@@ -2,7 +2,7 @@ module {
 
 	name 'natpad.nsi';
 	
-	natpad.version '2.2';
+	natpad.version '2.5';
 	natpad.os.arch 'amd64';
 	
 	

@@ -991,7 +991,7 @@ static gboolean l_enable_kill(DraEditor *editor) {
 
 
 
-typedef void (*ApplyTogglePreferencessFlag)(ChaEditor *editor, ChaPreferencesWo *e_prefs);
+typedef void (*ApplyTogglePreferencessFlag)(DraEditor *editor, ChaPreferencesWo *e_prefs);
 
 static void l_toggle_preferences_flag(DraEditor *editor, ApplyTogglePreferencessFlag apply_cb) {
 	ChaPreferencesWo *a_prefs = cha_editor_get_preferences((ChaEditor *) editor);

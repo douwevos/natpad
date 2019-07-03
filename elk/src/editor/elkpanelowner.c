@@ -129,8 +129,8 @@ static void l_basic_prefs_operation(ElkPanelOwner *panel_owner, ApplyPrefsChange
 	ElkPreferencesWo *e_prefs = elk_preferences_container_get(container);
 	e_prefs = elk_preferences_wo_clone(e_prefs, CAT_CLONE_DEPTH_MAIN);
 	DraPreferencesWo *dra_prefs = (DraPreferencesWo *) cow_ientry_accessor_get(priv->dra_prefs_accessor, e_prefs);
-	cat_log_error("dra_prefs=%p, e_prefs=%p", dra_prefs, e_prefs);
-	cat_log_error("edit prefs:%O", e_prefs);
+	cat_log_debug("dra_prefs=%p, e_prefs=%p", dra_prefs, e_prefs);
+	cat_log_debug("edit prefs:%O", e_prefs);
 	DraPreferencesWo *e_dra_prefs = NULL;
 	if (dra_prefs) {
 		e_dra_prefs = dra_preferences_wo_clone(dra_prefs, CAT_CLONE_DEPTH_MAIN);
@@ -139,12 +139,9 @@ static void l_basic_prefs_operation(ElkPanelOwner *panel_owner, ApplyPrefsChange
 	}
 	apply_changes(panel_owner, e_dra_prefs);
 	cow_ientry_accessor_set(priv->dra_prefs_accessor, e_prefs, e_dra_prefs);
-	cat_log_error("edit prefs:%O", e_prefs);
+	cat_log_debug("edit prefs:%O", e_prefs);
 	elk_preferences_container_set(container, e_prefs);
-
-	ElkPreferencesWo *new_prefs = elk_preferences_container_get_fixed(container);
-	cat_log_error("new prefs:%O", new_prefs);
-//	elk_preferences_container_set(container, new_prefs);
+	elk_preferences_container_get_fixed(container);
 	elk_preferences_service_save(priv->elk_pref_service);
 	cat_unref_ptr(e_dra_prefs)
 	cat_unref_ptr(e_prefs)
@@ -244,7 +241,7 @@ static void l_config_changed(CowIChangeListener *self, GObject *new_config) {
 	ElkPanelOwnerPrivate *priv = elk_panel_owner_get_instance_private(instance);
 
 	DraPreferencesWo *dra_prefs = (DraPreferencesWo *) cow_ientry_accessor_get(priv->dra_prefs_accessor, new_config);
-	cat_log_error("dra_prefs=%O", dra_prefs);
+	cat_log_debug("dra_prefs=%O", dra_prefs);
 	dra_panel_owner_set_configuration((DraPanelOwner *) instance, dra_prefs);
 }
 

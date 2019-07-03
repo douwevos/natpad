@@ -21,9 +21,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "elkeditor.h"
+#include "elkpanelowner.h"
 
 #include <logging/catlogdefs.h>
-#define CAT_LOG_LEVEL CAT_LOG_ALL
+#define CAT_LOG_LEVEL CAT_LOG_WARN
 #define CAT_LOG_CLAZZ "ElkEditor"
 #include <logging/catlog.h>
 
@@ -80,31 +81,30 @@ static void l_finalize(GObject *object) {
 ElkEditor *elk_editor_new(ChaDocument *document, DraConnectorMap *connector_map, DraIConnectorRequestFactory *connector_factory, WorService *wor_service) {
 	ElkEditor *result = g_object_new(ELK_TYPE_EDITOR, NULL);
 	cat_ref_anounce(result);
-	ElkEditorPrivate *priv = elk_editor_get_instance_private(result);
-	dra_editor_construct(result, document, connector_map, connector_factory, wor_service);
+	dra_editor_construct((DraEditor *) result, document, connector_map, connector_factory, wor_service);
 	return result;
 }
 
 static void l_toggle_word_wrap(ChaEditor *editor) {
 	DraEditorPanel *editor_panel = dra_editor_get_panel((DraEditor *) editor);
-	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner(editor_panel);
-	elk_panel_owner_toggle_word_wrap(panel_owner);
+	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner((LeaPanel *) editor_panel);
+	elk_panel_owner_toggle_word_wrap((ElkPanelOwner *) panel_owner);
 }
 
 static void l_toggle_show_whitespace(ChaEditor *editor) {
 	DraEditorPanel *editor_panel = dra_editor_get_panel((DraEditor *) editor);
-	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner(editor_panel);
-	elk_panel_owner_toggle_show_whitespace(panel_owner);
+	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner((LeaPanel *) editor_panel);
+	elk_panel_owner_toggle_show_whitespace((ElkPanelOwner *) panel_owner);
 }
 
 static void l_toggle_mark_occurrences(ChaEditor *editor) {
 	DraEditorPanel *editor_panel = dra_editor_get_panel((DraEditor *) editor);
-	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner(editor_panel);
-	elk_panel_owner_toggle_mark_occurrences(panel_owner);
+	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner((LeaPanel *) editor_panel);
+	elk_panel_owner_toggle_mark_occurrences((ElkPanelOwner *) panel_owner);
 }
 
 static void l_toggle_spelling(DraEditor *editor) {
 	DraEditorPanel *editor_panel = dra_editor_get_panel((DraEditor *) editor);
-	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner(editor_panel);
-	elk_panel_owner_toggle_spelling(panel_owner);
+	LeaIPanelOwner *panel_owner = lea_panel_get_panel_owner((LeaPanel *) editor_panel);
+	elk_panel_owner_toggle_spelling((ElkPanelOwner *) panel_owner);
 }

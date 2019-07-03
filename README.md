@@ -9,7 +9,7 @@ Natpad is a Text-editor written in C using GTK
 
 ## Versions
 
-[Versions](https://github.com/natpad/VERSIONS.md)
+[Versions](https://github.com/douwevos/natpad/blob/master/VERSIONS.md)
 
 ## Building Natpad (LINUX Debian)
 

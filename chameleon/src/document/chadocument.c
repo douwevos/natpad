@@ -487,7 +487,7 @@ static void l_set_history_ref(ChaDocumentPrivate *priv) {
 	cat_unref_ptr(priv->e_revision);
 	if (a_new_rev != a_rev) {
 
-		ChaRevisionWo *a_rev_saved = cat_atomic_reference_get(priv->a_revision_saved);
+		ChaRevisionWo *a_rev_saved = (ChaRevisionWo *) cat_atomic_reference_get(priv->a_revision_saved);
 		gboolean is_saved_version = a_rev_saved==a_new_rev;
 
 		cat_log_error("a_rev_saved=%p, a_new_rev=%p, is_saved_version=%d", a_rev_saved, a_new_rev, is_saved_version);

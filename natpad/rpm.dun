@@ -2,7 +2,7 @@ module {
 
 	name 'natpad.rpm';
 	
-	natpad.version '2.3';
+	natpad.version '2.5';
 	natpad.os.arch 'x86_64';
 	
 	
