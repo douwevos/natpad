@@ -1454,7 +1454,8 @@ static long long int l_location_to_view_y(ChaDocumentView *document_view, ChaRev
 	pango_layout_line_get_pixel_extents(pango_line, NULL, &sub_line_rect);
 	int baseline = pango_layout_get_baseline(pango_layout)/PANGO_SCALE;
 	sub_line_rect.y += baseline;
-	result += sub_line_rect.y;
+	cat_log_debug("baseline=%d, sub_line_rect.y=%d, cursor_sub_line_idx=%d", baseline, sub_line_rect.y, cursor_sub_line_idx);
+	result += sub_line_rect.y + priv->ctx.line_height*cursor_sub_line_idx;
 	*o_line_height = priv->ctx.line_height;
 	*view_x_cursor = cursor_xpos/PANGO_SCALE;
 
