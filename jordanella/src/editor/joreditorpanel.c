@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "joreditorpanel.h"
+#include "jorcontexteditor.h"
 
 #include <logging/catlogdefs.h>
 #define CAT_LOG_LEVEL CAT_LOG_WARN
@@ -28,7 +29,7 @@
 #include <logging/catlog.h>
 
 struct _JorEditorPanelPrivate {
-	void *dummy;
+	JorEditorConnector *connector;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -40,14 +41,15 @@ G_DEFINE_TYPE_WITH_CODE(JorEditorPanel, jor_editor_panel, ELK_TYPE_EDITOR_PANEL,
 
 static void l_dispose(GObject *object);
 static void l_finalize(GObject *object);
-//static DraContextEditor *l_create_context_editor(DraEditorPanel *editor_panel);
+static DraContextEditor *l_create_context_editor(DraEditorPanel *editor_panel);
 
 static void jor_editor_panel_class_init(JorEditorPanelClass *clazz) {
 	GObjectClass *object_class = G_OBJECT_CLASS(clazz);
 	object_class->dispose = l_dispose;
 	object_class->finalize = l_finalize;
 
-//	dra_class->createContextEditor = l_create_context_editor;
+	DraEditorPanelClass *dra_class = DRA_EDITOR_PANEL_CLASS(clazz);
+	dra_class->createContextEditor = l_create_context_editor;
 }
 
 static void jor_editor_panel_init(JorEditorPanel *instance) {
@@ -57,6 +59,7 @@ static void l_dispose(GObject *object) {
 	cat_log_detail("dispose:%p", object);
 	JorEditorPanel *instance = JOR_EDITOR_PANEL(object);
 	JorEditorPanelPrivate *priv = jor_editor_panel_get_instance_private(instance);
+	cat_unref_ptr(priv->connector);
 	G_OBJECT_CLASS(jor_editor_panel_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -73,8 +76,14 @@ JorEditorPanel *jor_editor_panel_new(LeaIPanelOwner *panel_owner, ElkDocumentBin
 	JorEditorPanel *result = g_object_new(JOR_TYPE_EDITOR_PANEL, NULL);
 	cat_ref_anounce(result);
 	JorEditorPanelPrivate *priv = jor_editor_panel_get_instance_private(result);
+	priv->connector = cat_ref_ptr(connector);
 	elk_editor_panel_construct((ElkEditorPanel *) result, panel_owner, document_bin, (DraIConnectorRequestFactory *) connector);
 	return result;
+}
+
+static DraContextEditor *l_create_context_editor(DraEditorPanel *editor_panel) {
+	JorEditorPanelPrivate *priv = jor_editor_panel_get_instance_private((JorEditorPanel *) editor_panel);
+	return (DraContextEditor *) jor_context_editor_new(editor_panel, priv->connector);
 }
 
 

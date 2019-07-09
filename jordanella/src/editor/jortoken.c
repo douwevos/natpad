@@ -58,13 +58,15 @@ static void l_finalize(GObject *object) {
 	cat_log_detail("finalized:%p", object);
 }
 
-JorToken *jor_token_new(int code, int start_column, long long start_row, int end_column, long long end_row) {
+JorToken *jor_token_new(int code, int start_column, int start_offset, long long start_row, int end_column, int end_offset, long long end_row) {
 	JorToken *result = g_object_new(JOR_TYPE_TOKEN, NULL);
 	cat_ref_anounce(result);
 	result->code = code;
 	result->start_column = start_column;
+	result->start_offset = start_offset;
 	result->start_row = start_row;
 	result->end_column = end_column;
+	result->end_offset = end_offset;
 	result->end_row = end_row;
 	return result;
 }
