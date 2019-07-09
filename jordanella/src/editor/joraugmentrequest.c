@@ -540,10 +540,13 @@ static gboolean l_run_augment(DraAugmentRequest *request, ChaRevisionWo *a_revis
 				break;
 			}
 		}
+		cat_unref_ptr(token);
 	}
 
-
 	cat_unref_ptr(utf8_scanner);
+
+	cat_unref_ptr(context.scanner);
+	cat_unref_ptr(context.state_stack);
 
 	return TRUE;
 }

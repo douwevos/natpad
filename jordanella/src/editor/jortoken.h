@@ -60,8 +60,10 @@ struct _JorToken {
 	GObject parent;
 	int code;
 	int start_column;
+	int start_offset;
 	long long start_row;
 	int end_column;
+	int end_offset;
 	long long end_row;
 };
 
@@ -72,7 +74,7 @@ struct _JorTokenClass {
 
 GType jor_token_get_type();
 
-JorToken *jor_token_new(int code, int start_column, long long start_row, int end_column, long long end_row);
+JorToken *jor_token_new(int code, int start_column, int start_offset, long long start_row, int end_column, int end_offset, long long end_row);
 
 const char *jor_token_code_as_text(int code);
 
