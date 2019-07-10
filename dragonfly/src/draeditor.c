@@ -82,7 +82,7 @@ static ChaDocumentView *l_initialize_document_view(ChaEditor *editor, ChaDocumen
 static void l_marker_clicked(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 static void l_marker_over(ChaEditor *editor, ChaLineLocationWo *location, long long y_marker_view);
 static void l_marker_out(ChaEditor *editor);
-static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event);
+static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, GdkEvent *event);
 static void l_editor_toggle_spelling(DraEditor *editor);
 
 
@@ -464,7 +464,7 @@ static void l_selection_done(GtkMenu *menui, gpointer data) {
 	}
 }
 
-static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event) {
+static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, GdkEvent *event) {
 	DraEditorPrivate *priv = dra_editor_get_instance_private(editor);
 
 	if (priv->context_menu) {
@@ -474,6 +474,44 @@ static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos
 	}
 
 	if (priv->context_menu == NULL) {
+
+
+		ChaDocumentView *document_view = cha_editor_get_document_view((ChaEditor *) editor);
+		ChaDocument *document = cha_document_view_get_document(document_view);
+		DraLineTagWo *spell_tag = NULL;
+		if (cursor) {
+			ChaRevisionWo *a_rev = cha_document_get_current_revision_ref(document);
+
+			ChaLineWo *line_wo = cha_revision_wo_line_at_location(a_rev, cha_cursor_wo_get_line_location(cursor));
+			DraLineInfoWo *line_info = (DraLineInfoWo *)
+						cha_line_wo_get_slot_content_ref(line_wo, -1, (GObject *) priv->slot_key);
+			if (line_info) {
+				CatArrayWo *line_tags = dra_line_info_wo_get_line_tags(line_info);
+				if (line_tags) {
+					int xcursor = cha_cursor_wo_get_x_cursor_bytes(cursor);
+					CatIIterator *iter = cat_array_wo_iterator(line_tags);
+					while(cat_iiterator_has_next(iter)) {
+						DraLineTagWo *tag = (DraLineTagWo *) cat_iiterator_next(iter);
+						if (dra_line_tag_wo_get_tag_type(tag)==DRA_TAG_TYPE_SPELL_ERROR) {
+							int start;
+							int end;
+							dra_line_tag_wo_get_start_and_end_index(tag, &start, &end);
+							if (xcursor>=start && xcursor<end) {
+								spell_tag = cat_ref_ptr(tag);
+								break;
+							}
+						}
+					}
+					cat_unref_ptr(iter);
+				}
+				cat_unref_ptr(line_info);
+			}
+			cat_unref_ptr(line_wo);
+			cat_unref_ptr(a_rev);
+		}
+
+
+
 
 		DraEditorPanel *editor_panel = dra_editor_get_panel(editor);
 		DraPanelOwner *panel_owner = (DraPanelOwner *) lea_panel_get_panel_owner((LeaPanel *) editor_panel);
@@ -526,6 +564,7 @@ static void l_show_context_menu(DraEditor *editor, ChaCursorWo *cursor, int xpos
 
 
 	gtk_widget_show_all((GtkWidget *) menu);
+
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), event);
 }
 
@@ -573,6 +612,12 @@ static gboolean l_key_press_event(GtkWidget *gwidget, GdkEventKey *eev, gpointer
 	ChaUow *uow = NULL;
 
 	switch (key_val) {
+		case GDK_KEY_Menu : {
+			ChaDocument *document = cha_editor_get_document(editor);
+			ChaRevisionWo *a_rev = cha_document_get_current_revision_ref(document);
+			ChaCursorWo *cursor = cha_revision_wo_get_cursor(a_rev);
+			DRA_EDITOR_GET_CLASS(editor)->showContextMenu(editor, cursor, eev);
+		} break;
 		case GDK_KEY_Insert : {
 			ChaDocumentView *document_view = cha_editor_get_document_view((ChaEditor *) data);
 			ChaEditMode mode = cha_document_view_get_edit_mode(document_view);
@@ -771,47 +816,14 @@ static gboolean l_button_press_event_cb(GtkWidget *gwidget, GdkEventButton *eev,
 
 	if (eev->button==3) {
 		DraEditorClass *editor_class = DRA_EDITOR_GET_CLASS(editor);
-
 		int xmouse = eev->x;
 		int ymouse = eev->y;
 
 		ChaDocumentView *document_view = cha_editor_get_document_view((ChaEditor *) editor);
 		ChaDocument *document = cha_document_view_get_document(document_view);
 		ChaCursorWo *cursor = cha_document_view_cursor_at_xy(document_view, xmouse, ymouse);
-		DraLineTagWo *spell_tag = NULL;
-		if (cursor) {
-			ChaRevisionWo *a_rev = cha_document_get_current_revision_ref(document);
 
-			ChaLineWo *line_wo = cha_revision_wo_line_at_location(a_rev, cha_cursor_wo_get_line_location(cursor));
-			DraLineInfoWo *line_info = (DraLineInfoWo *)
-						cha_line_wo_get_slot_content_ref(line_wo, -1, (GObject *) priv->slot_key);
-			if (line_info) {
-				CatArrayWo *line_tags = dra_line_info_wo_get_line_tags(line_info);
-				if (line_tags) {
-					int xcursor = cha_cursor_wo_get_x_cursor_bytes(cursor);
-					CatIIterator *iter = cat_array_wo_iterator(line_tags);
-					while(cat_iiterator_has_next(iter)) {
-						DraLineTagWo *tag = (DraLineTagWo *) cat_iiterator_next(iter);
-						if (dra_line_tag_wo_get_tag_type(tag)==DRA_TAG_TYPE_SPELL_ERROR) {
-							int start;
-							int end;
-							dra_line_tag_wo_get_start_and_end_index(tag, &start, &end);
-							if (xcursor>=start && xcursor<end) {
-								spell_tag = cat_ref_ptr(tag);
-								break;
-							}
-						}
-					}
-					cat_unref_ptr(iter);
-				}
-				cat_unref_ptr(line_info);
-			}
-			cat_unref_ptr(line_wo);
-			cat_unref_ptr(a_rev);
-		}
-
-		editor_class->showContextMenu(editor, cursor, (int) eev->x, (int) eev->y, spell_tag, (GdkEvent *) eev);
-		cat_unref_ptr(spell_tag);
+		editor_class->showContextMenu(editor, cursor, (GdkEvent *) eev);
 		cat_unref_ptr(cursor);
 		return TRUE;
 	}

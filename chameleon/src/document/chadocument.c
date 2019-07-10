@@ -490,7 +490,7 @@ static void l_set_history_ref(ChaDocumentPrivate *priv) {
 		ChaRevisionWo *a_rev_saved = (ChaRevisionWo *) cat_atomic_reference_get(priv->a_revision_saved);
 		gboolean is_saved_version = a_rev_saved==a_new_rev;
 
-		cat_log_error("a_rev_saved=%p, a_new_rev=%p, is_saved_version=%d", a_rev_saved, a_new_rev, is_saved_version);
+		cat_log_debug("a_rev_saved=%p, a_new_rev=%p, is_saved_version=%d", a_rev_saved, a_new_rev, is_saved_version);
 		cat_unref_ptr(a_rev_saved);
 
 		a_new_rev = cha_revision_wo_reversion(a_new_rev, priv->version_seq++);
