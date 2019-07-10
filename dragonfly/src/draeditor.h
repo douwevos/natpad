@@ -51,7 +51,7 @@ struct _DraEditor {
 
 struct _DraEditorClass {
 	ChaEditorClass parent_class;
-	void (*showContextMenu)(DraEditor *editor, ChaCursorWo *cursor, int xpos, int ypos, DraLineTagWo *spell_tag, GdkEvent *event);
+	void (*showContextMenu)(DraEditor *editor, ChaCursorWo *cursor, GdkEvent *event);
 	void (*toggleSpelling)(DraEditor *editor);
 };
 
