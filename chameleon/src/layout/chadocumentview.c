@@ -670,8 +670,6 @@ gboolean cha_document_view_layout_page(ChaDocumentView *document_view, ChaPageWo
 				/* run the fast road */
 				const ChaUtf8Text utf8_text = cha_page_wo_utf8_at(a_page, line_idx, allow_fast_track);
 
-				cat_log_trace("do_fast_layout=%d", do_fast_layout);
-
 				if (allow_fast_track && utf8_text.only_ascii) {
 					if (!utf8_text.has_tabs) {
 						line_width = char_width * utf8_text.text_len;
@@ -1170,15 +1168,8 @@ ChaLineLocationWo *cha_document_view_cursor_at_marker(ChaDocumentView *document_
 			}
 			sub_line_count = pango_layout_get_line_count(pango_layout);
 			int sub_line_idx;
-			int baseline = pango_layout_get_baseline(pango_layout)/PANGO_SCALE;
 			for(sub_line_idx=0; sub_line_idx<sub_line_count; sub_line_idx++) {
-				PangoLayoutLine *pango_line = pango_layout_get_line_readonly(pango_layout, sub_line_idx);
-				PangoRectangle inkt_rect;
-				pango_layout_line_get_pixel_extents(pango_line, NULL, &inkt_rect);
-				inkt_rect.y += baseline;
-
-				cat_log_debug("inkt_rect=%d,%d, baseline=%d",inkt_rect.y, inkt_rect.height, baseline);
-				if (y>=inkt_rect.y && y<=inkt_rect.y+priv->ctx.line_height) {
+				if (y>=0 && y<=priv->ctx.line_height) {
 					result = cha_line_location_wo_new();
 					cha_line_location_wo_set_page_index(result, page_idx);
 					cha_line_location_wo_set_page_line_index(result, line_idx);
@@ -1344,15 +1335,10 @@ ChaCursorWo *cha_document_view_cursor_at_xy(ChaDocumentView *document_view, int 
 			}
 			sub_line_count = pango_layout_get_line_count(pango_layout);
 			int sub_line_idx;
-			int baseline = pango_layout_get_baseline(pango_layout)/PANGO_SCALE;
 			for(sub_line_idx=0; sub_line_idx<sub_line_count; sub_line_idx++) {
 				PangoLayoutLine *pango_line = pango_layout_get_line_readonly(pango_layout, sub_line_idx);
-				PangoRectangle inkt_rect;
-				pango_layout_line_get_pixel_extents(pango_line, NULL, &inkt_rect);
-				inkt_rect.y += baseline;
 
-				cat_log_debug("inkt_rect=%d,%d, baseline=%d",inkt_rect.y, inkt_rect.height, baseline);
-				if (y>=inkt_rect.y && y<=inkt_rect.y+priv->ctx.line_height) {
+				if (y>=0 && y<=priv->ctx.line_height) {
 					int index=0;
 					int x_sub = 0;
 					int trailing = 0;
@@ -1373,7 +1359,10 @@ ChaCursorWo *cha_document_view_cursor_at_xy(ChaDocumentView *document_view, int 
 						}
 
 					} else {
-						index += trailing;
+						if (trailing!=0) {
+							CatStringWo *lt = cha_line_wo_get_text(line);
+							index = cat_string_wo_unichar_next_offset(lt, index);
+						}
 					}
 
 

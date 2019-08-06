@@ -392,7 +392,6 @@ static gboolean l_update(ChaSubLineCache *sub_line_cache, ChaSubLineCacheUpdate 
 
 		/* draw text*/
 		cairo_move_to(cairo, -update_ctx->view_x, baseline);
-
 		pango_cairo_show_layout_line(cairo, pango_line);
 
 		if (update_ctx->show_whitespace) {
