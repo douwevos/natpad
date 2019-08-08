@@ -58,11 +58,13 @@ ElkPreferencesWo *elk_preferences_wo_new();
 gboolean elk_preferences_wo_one_instance(ElkPreferencesWo *prefs);
 gboolean elk_preferences_wo_full_screen(ElkPreferencesWo *prefs);
 gboolean elk_preferences_wo_multiple_resource_editors(ElkPreferencesWo *prefs);
+gboolean elk_preferences_wo_backup_files(ElkPreferencesWo *prefs);
 GObject *elk_preferences_wo_get_sub(ElkPreferencesWo *prefs, CatStringWo *key);
 
 void elk_preferences_wo_set_one_instance(ElkPreferencesWo *e_prefs, gboolean one_instance);
 void elk_preferences_wo_set_full_screen(ElkPreferencesWo *e_prefs, gboolean full_screen);
 void elk_preferences_wo_set_multiple_resource_editors(ElkPreferencesWo *e_prefs, gboolean multiple_resource_editors);
+void elk_preferences_wo_set_backup_files(ElkPreferencesWo *e_prefs, gboolean do_backup);
 void elk_preferences_wo_set_sub(ElkPreferencesWo *e_prefs, CatStringWo *key, GObject *sub);
 
 void elk_preferences_wo_dump(ElkPreferencesWo *prefs);

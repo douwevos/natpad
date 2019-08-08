@@ -142,6 +142,7 @@ static GtkResponseType l_do_save_request(DraEditorPanel *editor_panel) {
 static void l_save(DraEditorPanel *editor_panel, gboolean do_save_as, ChaIOAsync *async_response) {
 	ElkEditorPanelPrivate *priv = elk_editor_panel_get_instance_private((ElkEditorPanel *) editor_panel);
 	ElkPanelOwner *panel_owner = (ElkPanelOwner *) lea_panel_get_panel_owner((LeaPanel *) editor_panel);
+	gboolean create_backup = elk_panel_owner_create_backups(panel_owner);
 	ElkAsyncMooNodeUpdater *moo_node_updater = elk_async_moo_node_updater_new((ElkEditorPanel *) editor_panel, async_response);
 	if (!elk_document_bin_has_file(priv->document_bin) || do_save_as) {
 		ElkDialogs *dialogs = elk_panel_owner_get_dialogs(panel_owner);
@@ -156,10 +157,10 @@ static void l_save(DraEditorPanel *editor_panel, gboolean do_save_as, ChaIOAsync
 				ChaCharsetConverterFactory *converter_factory = cha_document_manager_get_converter_factory(doc_manager);
 				converter = cha_charset_converter_factory_get(converter_factory, cat_string_wo_getchars(save_dialog.selected_charset));
 			}
-			elk_document_bin_store_as(priv->document_bin, save_name, converter, (ChaIOAsync *) moo_node_updater);
+			elk_document_bin_store_as(priv->document_bin, create_backup, save_name, converter, (ChaIOAsync *) moo_node_updater);
 		}
 	} else {
-		elk_document_bin_store(priv->document_bin, (ChaIOAsync *) moo_node_updater);
+		elk_document_bin_store(priv->document_bin, create_backup, (ChaIOAsync *) moo_node_updater);
 	}
 	cat_unref_ptr(moo_node_updater);
 }

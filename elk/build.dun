@@ -13,6 +13,8 @@ module {
 	}
 
 	compile {
+		XmlToHInclude { file './src/preferences/ui/elkglademain.glade'; }
+	
 		cc {
 			natpad.cc.args {}
 			src { path './src/'; }  

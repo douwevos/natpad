@@ -34,6 +34,7 @@ struct _ChaWriteFileRequestPrivate {
 	GFile *file;
 	ChaIConverter *output_converter;
 	ChaIOAsync *async;
+	gboolean create_backup;
 };
 
 static void l_stringable_iface_init(CatIStringableInterface *iface);
@@ -80,7 +81,7 @@ static void l_finalize(GObject *object) {
 }
 
 
-ChaWriteFileRequest *cha_write_file_request_new(ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async) {
+ChaWriteFileRequest *cha_write_file_request_new(ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async, gboolean create_backup) {
 	ChaWriteFileRequest *result = g_object_new(CHA_TYPE_WRITE_FILE_REQUEST, NULL);
 	cat_ref_anounce(result);
 	ChaWriteFileRequestPrivate *priv = cha_write_file_request_get_instance_private(result);
@@ -89,6 +90,7 @@ ChaWriteFileRequest *cha_write_file_request_new(ChaDocument *document, GFile *fi
 	priv->file = cat_ref_ptr(file);
 	priv->output_converter = cat_ref_ptr(output_converter);
 	priv->async = cat_ref_ptr(async);
+	priv->create_backup = create_backup;
 	return result;
 }
 
@@ -96,7 +98,7 @@ static void l_run_request(WorRequest *request) {
 	ChaWriteFileRequest *instance = CHA_WRITE_FILE_REQUEST(request);
 	ChaWriteFileRequestPrivate *priv = cha_write_file_request_get_instance_private(instance);
 	ChaRevisionWo *rev = cha_document_get_current_revision_ref(priv->document);
-	GFileOutputStream *out_stream = g_file_replace(priv->file, NULL, TRUE, 0, NULL, NULL);
+	GFileOutputStream *out_stream = g_file_replace(priv->file, NULL, priv->create_backup, 0, NULL, NULL);
 	ChaWriteReq write_req;
 	write_req.error = NULL;
 	write_req.out_stream = (GOutputStream *) out_stream;

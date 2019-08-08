@@ -104,9 +104,9 @@ void cha_document_manager_load(ChaDocumentManager *document_manager, ChaDocument
 	cat_unref_ptr(load_file_req);
 }
 
-void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async) {
+void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async, gboolean create_backup) {
 	ChaDocumentManagerPrivate *priv = cha_document_manager_get_instance_private(document_manager);
-	ChaWriteFileRequest *write_file_req = cha_write_file_request_new(document, file, output_converter, async);
+	ChaWriteFileRequest *write_file_req = cha_write_file_request_new(document, file, output_converter, async, create_backup);
 	wor_service_post_request(priv->wor_service, (WorRequest *) write_file_req);
 	cat_unref_ptr(write_file_req);
 }
