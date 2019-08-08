@@ -65,7 +65,7 @@ ChaCharsetConverterFactory *cha_document_manager_get_converter_factory(ChaDocume
 
 void cha_document_manager_load(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file);
 
-void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async);
+void cha_document_manager_write(ChaDocumentManager *document_manager, ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async, gboolean create_backup);
 
 void cha_document_manager_post(ChaDocumentManager *document_manager, WorRequest *request);
 

@@ -33,6 +33,7 @@
 static CatS l_s_one_instance = CAT_S_DEF("one-instance");
 static CatS l_s_full_screen = CAT_S_DEF("full-screen");
 static CatS l_s_multiple_resource_editors = CAT_S_DEF("multiple-editors-per-resource");
+static CatS l_s_backup_files = CAT_S_DEF("create-backup-files");
 
 struct _ElkDefaultMapperPrivate {
 	void *dummy;
@@ -106,12 +107,14 @@ static void l_models_to_prefs(ElkIPreferencesMapper *self, ShoModel *model, ElkP
 	gboolean one_instance = sho_reference_list_get_boolean((ShoReferenceList *) model, CAT_S(l_s_one_instance), TRUE);
 	gboolean full_screen = sho_reference_list_get_boolean((ShoReferenceList *) model, CAT_S(l_s_full_screen), TRUE);
 	gboolean multiple_res_editors = sho_reference_list_get_boolean((ShoReferenceList *) model, CAT_S(l_s_multiple_resource_editors), FALSE);
+	gboolean backup_files = sho_reference_list_get_boolean((ShoReferenceList *) model, CAT_S(l_s_backup_files), FALSE);
 
 	cat_log_debug("one_instance=%d, full_screen=%d", one_instance, full_screen);
 
 	elk_preferences_wo_set_one_instance(e_prefs, one_instance);
 	elk_preferences_wo_set_full_screen(e_prefs, full_screen);
 	elk_preferences_wo_set_multiple_resource_editors(e_prefs, multiple_res_editors);
+	elk_preferences_wo_set_backup_files(e_prefs, backup_files);
 
 	DraPreferencesWo *e_dra_prefs = (DraPreferencesWo *) elk_preferences_wo_get_sub(e_prefs, CAT_S(elk_s_editor_prefs));
 	if (e_dra_prefs==NULL) {
@@ -138,6 +141,7 @@ static void l_prefs_to_model(ElkIPreferencesMapper *self, ElkPreferencesWo *pref
 	sho_reference_list_set_boolean((ShoReferenceList *) model, CAT_S(l_s_one_instance), elk_preferences_wo_one_instance(prefs));
 	sho_reference_list_set_boolean((ShoReferenceList *) model, CAT_S(l_s_full_screen), elk_preferences_wo_full_screen(prefs));
 	sho_reference_list_set_boolean((ShoReferenceList *) model, CAT_S(l_s_multiple_resource_editors), elk_preferences_wo_multiple_resource_editors(prefs));
+	sho_reference_list_set_boolean((ShoReferenceList *) model, CAT_S(l_s_backup_files), elk_preferences_wo_backup_files(prefs));
 
 	DraPreferencesWo *dra_prefs = (DraPreferencesWo *) elk_preferences_wo_get_sub(prefs, CAT_S(elk_s_editor_prefs));
 	if (dra_prefs) {

@@ -184,6 +184,13 @@ void elk_panel_owner_toggle_spelling(ElkPanelOwner *panel_owner) {
 	l_basic_prefs_operation(panel_owner, l_toggle_mark_toggle_spelling);
 }
 
+gboolean elk_panel_owner_create_backups(ElkPanelOwner *panel_owner) {
+	ElkPanelOwnerPrivate *priv = elk_panel_owner_get_instance_private(panel_owner);
+	ElkPreferencesContainer *container = elk_preferences_service_get_container(priv->elk_pref_service);
+	ElkPreferencesWo *e_prefs = elk_preferences_container_get(container);
+	return elk_preferences_wo_backup_files(e_prefs);
+}
+
 static void l_notify_new_editor_list(ElkPanelOwner *panel_owner) {
 	CatArrayWo *enlisted = dra_panel_owner_enlist_all((DraPanelOwner *) panel_owner, NULL);
 	enlisted = cat_array_wo_anchor(enlisted, 0);

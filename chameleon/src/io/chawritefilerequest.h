@@ -55,7 +55,7 @@ struct _ChaWriteFileRequestClass {
 
 GType cha_write_file_request_get_type();
 
-ChaWriteFileRequest *cha_write_file_request_new(ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async);
+ChaWriteFileRequest *cha_write_file_request_new(ChaDocument *document, GFile *file, ChaIConverter *output_converter, ChaIOAsync *async, gboolean create_backup);
 
 G_END_DECLS
 

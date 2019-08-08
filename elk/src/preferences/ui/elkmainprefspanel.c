@@ -39,6 +39,8 @@ struct _ElkMainPrefsPanelPrivate {
 	gulong s_chk_full_screen;
 	GtkWidget *w_chk_multiple_resource_editors;
 	gulong s_chk_multiple_resource_editors;
+	GtkWidget *w_chk_backup_files;
+	gulong s_chk_backup_files;
 
 };
 
@@ -84,6 +86,7 @@ static void l_finalize(GObject *object) {
 static gboolean l_one_instance_toggled(GtkToggleButton *toggle_button, gpointer user_data);
 static gboolean l_full_screen_toggled(GtkToggleButton *toggle_button, gpointer user_data);
 static gboolean l_multiple_resource_editors_toggled(GtkToggleButton *toggle_button, gpointer user_data);
+static gboolean l_backup_files_toggled(GtkToggleButton *toggle_button, gpointer user_data);
 
 
 ElkMainPrefsPanel *elk_main_prefs_panel_new() {
@@ -106,10 +109,12 @@ ElkMainPrefsPanel *elk_main_prefs_panel_new() {
 	priv->w_chk_one_instance = (GtkWidget *) gtk_builder_get_object(builder, "chk_one_instance");
 	priv->w_chk_full_screen = (GtkWidget *) gtk_builder_get_object(builder, "chk_full_screen");
 	priv->w_chk_multiple_resource_editors = (GtkWidget *) gtk_builder_get_object(builder, "chk_multiple_resource_editors");
+	priv->w_chk_backup_files = (GtkWidget *) gtk_builder_get_object(builder, "chk_backup_files");
 
 	priv->s_chk_one_instance = g_signal_connect(priv->w_chk_one_instance, "toggled", G_CALLBACK(l_one_instance_toggled), result);
 	priv->s_chk_full_screen = g_signal_connect(priv->w_chk_full_screen, "toggled", G_CALLBACK(l_full_screen_toggled), result);
 	priv->s_chk_multiple_resource_editors = g_signal_connect(priv->w_chk_multiple_resource_editors, "toggled", G_CALLBACK(l_multiple_resource_editors_toggled), result);
+	priv->s_chk_backup_files = g_signal_connect(priv->w_chk_backup_files, "toggled", G_CALLBACK(l_backup_files_toggled), result);
 
 	return result;
 }
@@ -140,6 +145,14 @@ static gboolean l_multiple_resource_editors_toggled(GtkToggleButton *toggle_butt
 	return TRUE;
 }
 
+static gboolean l_backup_files_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
+	ElkMainPrefsPanel *instance = ELK_MAIN_PREFS_PANEL(user_data);
+	ElkMainPrefsPanelPrivate *priv = elk_main_prefs_panel_get_instance_private(instance);
+	elk_preferences_wo_set_backup_files(priv->e_prefs, gtk_toggle_button_get_active(toggle_button));
+	cow_panel_set_configuration((CowPanel *) instance, (GObject *) priv->e_prefs);
+	return TRUE;
+}
+
 
 static void l_panel_reconfigure(CowPanel *self, GObject *config) {
 	ElkMainPrefsPanel *instance = ELK_MAIN_PREFS_PANEL(self);
@@ -156,23 +169,28 @@ static void l_panel_reconfigure(CowPanel *self, GObject *config) {
 	gboolean one_instance = FALSE;
 	gboolean full_screen = FALSE;
 	gboolean multiple_resource_editors = FALSE;
+	gboolean backup_files = FALSE;
 	if (e_prefs) {
 		one_instance = elk_preferences_wo_one_instance(e_prefs);
 		full_screen = elk_preferences_wo_full_screen(e_prefs);
 		multiple_resource_editors = elk_preferences_wo_multiple_resource_editors(e_prefs);
+		backup_files = elk_preferences_wo_backup_files(e_prefs);
 	}
 
 	g_signal_handler_block(priv->w_chk_one_instance, priv->s_chk_one_instance);
 	g_signal_handler_block(priv->w_chk_full_screen, priv->s_chk_full_screen);
 	g_signal_handler_block(priv->w_chk_multiple_resource_editors, priv->s_chk_multiple_resource_editors);
+	g_signal_handler_block(priv->w_chk_backup_files, priv->s_chk_backup_files);
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_chk_one_instance), one_instance);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_chk_full_screen), full_screen);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_chk_multiple_resource_editors), multiple_resource_editors);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->w_chk_backup_files), backup_files);
 
 	g_signal_handler_unblock(priv->w_chk_one_instance, priv->s_chk_one_instance);
 	g_signal_handler_unblock(priv->w_chk_full_screen, priv->s_chk_full_screen);
 	g_signal_handler_unblock(priv->w_chk_multiple_resource_editors, priv->s_chk_multiple_resource_editors);
+	g_signal_handler_unblock(priv->w_chk_backup_files, priv->s_chk_backup_files);
 
 }
 

@@ -35,6 +35,7 @@ struct _ElkPreferencesWoPrivate {
 	gboolean one_instance;
 	gboolean full_screen;
 	gboolean multiple_editors_per_resource;
+	gboolean backup_files;
 	CatHashMapWo *sub_map;
 };
 
@@ -111,6 +112,11 @@ gboolean elk_preferences_wo_multiple_resource_editors(ElkPreferencesWo *prefs) {
 	return priv->multiple_editors_per_resource;
 }
 
+gboolean elk_preferences_wo_backup_files(ElkPreferencesWo *prefs) {
+	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private(prefs);
+	return priv->backup_files;
+}
+
 GObject *elk_preferences_wo_get_sub(ElkPreferencesWo *prefs, CatStringWo *key) {
 	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private(prefs);
 	return cat_hash_map_wo_get(priv->sub_map, key);
@@ -164,6 +170,15 @@ void elk_preferences_wo_set_multiple_resource_editors(ElkPreferencesWo *e_prefs,
 	priv->multiple_editors_per_resource = multiple_resource_editors;
 }
 
+void elk_preferences_wo_set_backup_files(ElkPreferencesWo *e_prefs, gboolean backup_files) {
+	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private(e_prefs);
+	if (priv->backup_files==backup_files) {
+		return;
+	}
+	CHECK_IF_WRITABLE();
+	priv->backup_files = backup_files;
+}
+
 void elk_preferences_wo_dump(ElkPreferencesWo *prefs) {
 	ElkPreferencesWoPrivate *priv = elk_preferences_wo_get_instance_private(prefs);
 	cat_log_print("DUMP", "prefs=%p(%d), priv->sub_map=%p", prefs, ((GObject *) prefs)->ref_count, priv->sub_map);
@@ -195,12 +210,14 @@ static CatWo *l_construct_editable(CatWo *e_uninitialized, CatWo *original, stru
 		priv->multiple_editors_per_resource = rpriv->multiple_editors_per_resource;
 		priv->one_instance = rpriv->one_instance;
 		priv->full_screen = rpriv->full_screen;
+		priv->backup_files = rpriv->backup_files;
 		cat_log_debug("constr-editable:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->sub_map = cat_hash_map_wo_create_editable(rpriv->sub_map);
 	} else {
 		priv->full_screen = TRUE;
 		priv->multiple_editors_per_resource = FALSE;
 		priv->one_instance = TRUE;
+		priv->backup_files = TRUE;
 		cat_log_debug("constr-editable:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->sub_map = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 	}
@@ -228,6 +245,7 @@ static gboolean l_equal(const CatWo *wo_a, const CatWo *wo_b) {
 	if ((priv_a->full_screen==priv_b->full_screen)
 			&& (priv_a->multiple_editors_per_resource==priv_b->multiple_editors_per_resource)
 			&& (priv_a->one_instance==priv_b->one_instance)
+			&& (priv_a->backup_files==priv_b->backup_files)
 			&& (cat_hash_map_wo_equal(priv_a->sub_map, priv_b->sub_map, NULL))) {
 		return TRUE;
 	}
@@ -251,10 +269,12 @@ static CatWo *l_clone_content(CatWo *e_uninitialized, const CatWo *wo_source) {
 		priv->full_screen = priv_src->full_screen;
 		priv->multiple_editors_per_resource = priv_src->multiple_editors_per_resource;
 		priv->one_instance = priv_src->one_instance;
+		priv->backup_files = priv_src->backup_files;
 	} else {
 		priv->full_screen = TRUE;
 		priv->multiple_editors_per_resource = FALSE;
 		priv->one_instance = TRUE;
+		priv->backup_files = TRUE;
 		cat_log_debug("clone-content:%p, current-map=%p", e_uninitialized, priv->sub_map);
 		priv->sub_map = cat_hash_map_wo_new((GHashFunc) cat_string_wo_hash, (GEqualFunc) cat_string_wo_equal);
 		cat_log_debug("clone-content:%p, current-map=%p", e_uninitialized, priv->sub_map);

@@ -68,6 +68,8 @@ void elk_panel_owner_toggle_show_whitespace(ElkPanelOwner *panel_owner);
 void elk_panel_owner_toggle_mark_occurrences(ElkPanelOwner *panel_owner);
 void elk_panel_owner_toggle_spelling(ElkPanelOwner *panel_owner);
 
+gboolean elk_panel_owner_create_backups(ElkPanelOwner *panel_owner);
+
 G_END_DECLS
 
 #endif /* EDITOR_ELKPANELOWNER_H_ */
