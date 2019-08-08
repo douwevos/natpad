@@ -298,7 +298,7 @@ static void l_prev_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 	int cur_x = cha_cursor_wo_get_x_cursor_bytes(e_cursor);
 	int x_sub = 0;
 	cat_log_debug("cur_x=%d, layout_line->start_index=%d, ll_end=%d", cur_x, layout_line->start_index, ll_end);
-	if (cur_x>=layout_line->start_index && cur_x<=ll_end) {
+	if (cur_x>=layout_line->start_index && cur_x<ll_end) {
 		/* we are on the first (sub)line of the pango-layout we need to move to the last line of the preceding pango-layout */
 		cat_log_debug("page_line_index=%d", page_line_index);
 		if (page_line_index>0) {
@@ -366,9 +366,9 @@ static void l_prev_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 		int line_idx;
 		for(line_idx=1; line_idx<line_count; line_idx++) {
 			PangoLayoutLine *layout_line = pango_layout_get_line_readonly(pango_layout, line_idx);
-			ll_end = layout_line->start_index+layout_line->length + ((line_count==line_idx) ? 1 : 0);
+			ll_end = layout_line->start_index+layout_line->length + ((line_count==line_idx+1) ? 1 : 0);
 			cat_log_debug("[%d] cur_x=%d, layout_line=%d/%d, ll_end=%d", line_idx, cur_x, layout_line->start_index, layout_line->length, ll_end);
-			if (cur_x>=layout_line->start_index && cur_x<=ll_end) {
+			if (cur_x>=layout_line->start_index && cur_x<ll_end) {
 				PangoLayoutLine *layout_line = pango_layout_get_line_readonly(pango_layout, line_idx-1);
 				int trailing;
 				if (!pango_layout_line_x_to_index(layout_line, marked_x_cursor, &cur_x, &trailing)) {
@@ -427,12 +427,13 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 
 	int line_count = pango_layout_get_line_count(pango_layout);
 	PangoLayoutLine *layout_line = pango_layout_get_line_readonly(pango_layout, line_count-1);
-	int ll_end = layout_line->start_index+layout_line->length + ((line_count==1) ? 1 : 0);
+//	int ll_end = layout_line->start_index+layout_line->length + ((line_count==1) ? 1 : 0);
+	int ll_end = layout_line->start_index+layout_line->length + 1;
 	int cur_x = cha_cursor_wo_get_x_cursor_bytes(e_cursor);
 	int x_sub = 0;
 
 	cat_log_debug("cur_x=%d, layout_line->start_index=%d, ll_end=%d, page_index=%d, page_line_idx=%d", cur_x, layout_line->start_index, ll_end, page_index, page_line_index);
-	if (cur_x>=layout_line->start_index && cur_x<=ll_end) {
+	if (cur_x>=layout_line->start_index && cur_x<ll_end) {
 		/* we are on the last (sub)line of the pango-layout we need to move to the first line of the next pango-layout */
 		if (page_line_index<cha_page_wo_line_count(page)-1) {
 			/* we are not on the first line of the current page thus we can stay on this page */
@@ -500,9 +501,11 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 		int line_count = pango_layout_get_line_count(pango_layout);
 		int line_idx;
 		for(line_idx=0; line_idx<line_count-1; line_idx++) {
+
 			PangoLayoutLine *layout_line = pango_layout_get_line_readonly(pango_layout, line_idx);
-			ll_end = layout_line->start_index+layout_line->length + ((line_count==1) ? 1 : 0);
-			if (cur_x>=layout_line->start_index && cur_x<=ll_end) {
+			ll_end = layout_line->start_index+layout_line->length;
+			cat_log_debug("line_idx=%d, start_index=%d, length=%d, ll_end=%d", line_idx, layout_line->start_index, layout_line->length, ll_end);
+			if (cur_x>=layout_line->start_index && cur_x<ll_end) {
 				PangoLayoutLine *layout_line = pango_layout_get_line_readonly(pango_layout, line_idx+1);
 				int trailing;
 				if (!pango_layout_line_x_to_index(layout_line, marked_x_cursor, &cur_x, &trailing)) {
@@ -522,6 +525,7 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 					}
 
 				} else {
+					cat_log_debug("trailing=%d", trailing);
 					if (trailing!=0) {
 						CatStringWo *lt = cha_line_wo_get_text(line);
 						cur_x = cat_string_wo_unichar_next_offset(lt, cur_x);
@@ -534,6 +538,7 @@ static void l_next_row(ChaUowMoveCursor *move_cursor, ChaDocumentView *document_
 
 	cha_cursor_wo_set_x_sub(e_cursor, x_sub);
 	cha_cursor_wo_set_x_cursor_bytes(e_cursor, cur_x);
+	cat_log_debug("e_cursor=%O", e_cursor);
 	cha_line_layout_unlock(a_line_layout);
 	cat_unref_ptr(a_line_layout);
 	cat_unref_ptr(line);
@@ -593,8 +598,12 @@ static void l_end_of_line(ChaUowMoveCursor *move_cursor, ChaDocumentView *docume
 	int cur_x = cha_cursor_wo_get_x_cursor_bytes(e_cursor);
 	int sub_line;
 	pango_layout_index_to_line_x(pango_layout, cur_x, FALSE, &sub_line, NULL);
+	cat_log_debug("sub_line=%d", sub_line);
 	PangoLayoutLine *layout_line = pango_layout_get_line_readonly(pango_layout, sub_line);
 	cur_x = layout_line->start_index+layout_line->length;
+	if (pango_layout_get_line_count(pango_layout)-1!=sub_line) {
+		cur_x--;
+	}
 
 	cha_cursor_wo_set_x_cursor_bytes(e_cursor, cur_x);
 	cha_cursor_wo_set_x_sub(e_cursor, 0);
