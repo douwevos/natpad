@@ -112,7 +112,7 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 }
 
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
-	iface->enlistEditorFactories = l_enlist_editor_factories;
+	iface->matchEditorFactories = l_enlist_editor_factories;
 }
 
 /********************* end ElkIResourceHandler implementation *********************/

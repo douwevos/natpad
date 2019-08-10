@@ -120,6 +120,13 @@ MooService *elk_panel_owner_get_moose_service(ElkPanelOwner *panel_owner) {
 	return priv->moo_servie;
 }
 
+void elk_panel_owner_resource_handlers_updated(ElkPanelOwner *panel_owner) {
+	ElkPanelOwnerPrivate *priv = elk_panel_owner_get_instance_private(panel_owner);
+	elk_group_main_resource_handlers_updated(priv->group_main);
+	LeaFrame *frame = dra_panel_owner_get_frame((DraPanelOwner *) panel_owner);
+	lea_frame_merge_action_group(frame, (LeaActionGroup *) priv->group_main);
+}
+
 
 typedef void (*ApplyPrefsChange)(ElkPanelOwner *panel_owner, DraPreferencesWo *e_prefs);
 

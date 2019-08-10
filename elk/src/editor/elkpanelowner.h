@@ -63,6 +63,9 @@ ElkDialogs *elk_panel_owner_get_dialogs(ElkPanelOwner *panel_owner);
 
 MooService *elk_panel_owner_get_moose_service(ElkPanelOwner *panel_owner);
 
+void elk_panel_owner_resource_handlers_updated(ElkPanelOwner *panel_owner);
+
+
 void elk_panel_owner_toggle_word_wrap(ElkPanelOwner *panel_owner);
 void elk_panel_owner_toggle_show_whitespace(ElkPanelOwner *panel_owner);
 void elk_panel_owner_toggle_mark_occurrences(ElkPanelOwner *panel_owner);

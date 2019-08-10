@@ -23,6 +23,7 @@
 
 #include "elkactionabout.h"
 #include "elkgroupfile.h"
+#include "elkgroupnew.h"
 #include "elkactionnew.h"
 #include "elkactionopen.h"
 #include "elkactionrevert.h"
@@ -45,6 +46,8 @@
 struct _ElkGroupFilePrivate {
 	ElkIService *service;
 	DraEditorPanel *focused_editor;
+
+	ElkGroupNew *group_new;
 
 	ElkActionNew *action_new;
 	ElkActionOpen *action_open;
@@ -109,9 +112,18 @@ ElkGroupFile *elk_group_file_new(ElkIService *service) {
 	priv->service = cat_ref_ptr(service);
 	priv->focused_editor = NULL;
 
+	LeaActionGroup *grp_new = lea_action_group_create_sub((LeaActionGroup *) result, cat_string_wo_new_with("elk.file.new.group"), NULL);
+	lea_action_set_order((LeaAction *) grp_new, -100);
+
+	priv->group_new = elk_group_new_new(service);
+	lea_action_group_add((LeaActionGroup *) grp_new, (LeaAction *) priv->group_new);
+
 	priv->action_new = elk_action_new_new(service);
 	lea_action_set_order((LeaAction *) priv->action_new, -100);
-	lea_action_group_add((LeaActionGroup *) result, (LeaAction *) priv->action_new);
+	lea_action_group_add((LeaActionGroup *) grp_new, (LeaAction *) priv->action_new);
+
+	cat_unref(grp_new);
+
 
 
 	LeaActionGroup *grp_open = lea_action_group_create_sub((LeaActionGroup *) result, cat_string_wo_new_with("elk.file.open.group"), NULL);
@@ -163,6 +175,12 @@ ElkGroupFile *elk_group_file_new(ElkIService *service) {
 
 	return result;
 }
+
+void elk_group_file_resource_handlers_updated(ElkGroupFile *group) {
+	ElkGroupFilePrivate *priv = elk_group_file_get_instance_private(group);
+	elk_group_new_resource_handlers_updated(priv->group_new);
+}
+
 
 void elk_group_file_set_editor_panel(ElkGroupFile *group, DraEditorPanel *editor_panel) {
 	ElkGroupFilePrivate *priv = elk_group_file_get_instance_private(group);

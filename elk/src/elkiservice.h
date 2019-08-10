@@ -24,6 +24,7 @@
 #ifndef ELKISERVICE_H_
 #define ELKISERVICE_H_
 
+#include "editor/elkiresourceeditorfactory.h"
 #include <caterpillar.h>
 #include <viper.h>
 #include <moose.h>
@@ -49,7 +50,8 @@ struct _ElkIServiceInterface {
 	 */
 	void (*openResourceList)(ElkIService *self, CatArrayWo *resource_list);
 	void (*openNewFileEditor)(ElkIService *self, MooNodeWo *moo_node);
-	GtkWidget *(*createEmptyEditor)(ElkIService *self);
+	void (*createEmptyEditor)(ElkIService *self);
+	void (*createEmptyEditorFor)(ElkIService *self, ElkIResourceEditorFactory *factory);
 
 
 	gboolean (*closeMultipleResourceEditors)(ElkIService *self, CatArrayWo *selected_editors); /* selected_editors is optional */
@@ -66,7 +68,8 @@ void elk_iservice_show_preferences(ElkIService *self);
 void elk_iservice_select_and_open_resources(ElkIService *self);
 
 
-GtkWidget *elk_iservice_create_empty_editor(ElkIService *self);
+void elk_iservice_create_empty_editor(ElkIService *self);
+void elk_iservice_create_empty_editor_for(ElkIService *self, ElkIResourceEditorFactory *factory);
 
 
 gboolean elk_iservice_save_all_resource_editors(ElkIService *self, CatArrayWo *selected_editors);
