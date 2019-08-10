@@ -51,11 +51,7 @@ static void my_g_log_default_handler(const gchar *log_domain, GLogLevelFlags log
 //
 }
 
-
-
 int main(int argc, char **argv) {
-
-//	putenv("UBUNTU_MENUPROXY=");	// otherwise it crashes on Ubuntu
 	g_log_set_handler("GLib-GObject", G_LOG_LEVEL_CRITICAL, (GLogFunc) my_g_log_default_handler, NULL);
 	g_log_set_handler("GLib-GObject", G_LOG_LEVEL_WARNING, (GLogFunc) my_g_log_default_handler, NULL);
 	g_log_set_handler("Gdk", G_LOG_LEVEL_CRITICAL, (GLogFunc) my_g_log_default_handler, NULL);
@@ -64,8 +60,6 @@ int main(int argc, char **argv) {
 	g_log_set_handler("Gtk", G_LOG_LEVEL_WARNING, (GLogFunc) my_g_log_default_handler, NULL);
 	g_log_set_handler(NULL, G_LOG_LEVEL_CRITICAL, (GLogFunc) my_g_log_default_handler, NULL);
 	g_log_set_handler(NULL, G_LOG_LEVEL_WARNING, (GLogFunc) my_g_log_default_handler, NULL);
-//
-//	daemon(-1,-1);
 
 	NatpadApp *natpad_app = natpad_app_new();
 	int status = g_application_run((GApplication *) natpad_app, argc, argv);
@@ -83,8 +77,5 @@ int main(int argc, char **argv) {
 #endif
 
 	cat_log_info("Goodbye");
-
-
 	return status;
 }
-
