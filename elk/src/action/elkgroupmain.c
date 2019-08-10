@@ -109,6 +109,12 @@ ElkGroupMain *elk_group_main_new(ElkIService *service, VipService *vip_service, 
 	return result;
 }
 
+void elk_group_main_resource_handlers_updated(ElkGroupMain *group) {
+	ElkGroupMainPrivate *priv = elk_group_main_get_instance_private(group);
+	elk_group_file_resource_handlers_updated(priv->group_file);
+}
+
+
 void elk_group_main_set_editor_panel(ElkGroupMain *group, DraEditorPanel *editor_panel) {
 	ElkGroupMainPrivate *priv = elk_group_main_get_instance_private(group);
 	elk_group_file_set_editor_panel(priv->group_file, editor_panel);

@@ -96,7 +96,12 @@ static GtkWidget *l_create_editor(ElkIResourceEditorFactory *self, MooNodeWo *mo
 
 	cat_log_debug("this=%p, priv->io=%o, priv=%p", self , priv->document_io, priv);
 
-	ElkDocumentBin *document_bin = elk_document_io_open_document_for_file(priv->document_io, priv->document_file);
+	ElkDocumentBin *document_bin = NULL;
+	if (priv->document_file == NULL) {
+		document_bin = elk_document_io_open_new_document(priv->document_io);
+	} else {
+		document_bin = elk_document_io_open_document_for_file(priv->document_io, priv->document_file);
+	}
 	JorEditorPanel *result = jor_editor_panel_new(priv->panel_owner, document_bin, priv->connector);
 	elk_editor_panel_set_moose_node((ElkEditorPanel *) result, moo_node);
 	return (GtkWidget *) result;
@@ -106,7 +111,7 @@ static GtkWidget *l_create_outline(ElkIResourceEditorFactory *self, MooNodeWo *m
 	JorEditorFactoryPrivate *priv = jor_editor_factory_get_instance_private((JorEditorFactory *) self);
 
 
-	ElkDocumentBin *document_bin = elk_document_io_open_document_for_file(priv->document_io, priv->document_file);
+//	ElkDocumentBin *document_bin = elk_document_io_open_document_for_file(priv->document_io, priv->document_file);
 //	JorOutlinePanel *result = jor_outline_panel_new(priv->panel_owner, document_bin, priv->higlighter_map, priv->accessor);
 ////	jor_outline_panel_set_moose_node((ElkEditorPanel *) result, moo_node);
 //	return (GtkWidget *) result;

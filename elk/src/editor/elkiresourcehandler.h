@@ -42,19 +42,12 @@ typedef struct _ElkIResourceHandlerInterface      ElkIResourceHandlerInterface;
 struct _ElkIResourceHandlerInterface {
   GTypeInterface parent_iface;
 
-//  int (*matchScoreFile)(ElkIResourceHandler *self, MonIFile *mon_file);
-//  AstEditor *(*createFileEditor)(ElkIResourceHandler *self, MonIFile *mon_file);
-
-  void (*enlistEditorFactories)(ElkIResourceHandler *self, CatArrayWo *e_enlist_to, MooNodeWo *node);
+  void (*matchEditorFactories)(ElkIResourceHandler *self, CatArrayWo *e_enlist_to, MooNodeWo *node);
+  void (*emptyEditorFactories)(ElkIResourceHandler *self, CatHashMapWo *e_enlist_to);
 };
 
 GType elk_iresource_handler_get_type (void);
 
-
-//int elk_iresource_handler_match_score_file(ElkIResourceHandler *self, MonIFile *mon_file);
-
-
 G_END_DECLS
-
 
 #endif /* ELKIRESOURCEHANDLER_H_ */

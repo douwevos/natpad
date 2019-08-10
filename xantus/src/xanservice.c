@@ -112,8 +112,19 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 	}
 }
 
+static void l_empty_editor_factories(ElkIResourceHandler *self, CatHashMapWo *e_enlist_to) {
+	XanServicePrivate *priv = xan_service_get_instance_private(XAN_SERVICE(self));
+	ElkService *elk_service = (ElkService *) priv->elk_service;
+	ElkDocumentIO *document_io = priv->elk_service->document_io;
+	XanEditorFactory *factory = xan_editor_factory_new((LeaIPanelOwner *) elk_service->panel_owner, priv->connector, document_io, NULL);
+	CatStringWo *json = cat_string_wo_new_anchored("XML", 3);
+	cat_hash_map_wo_put(e_enlist_to, json, factory);
+}
+
+
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
-	iface->enlistEditorFactories = l_enlist_editor_factories;
+	iface->matchEditorFactories = l_enlist_editor_factories;
+	iface->emptyEditorFactories = l_empty_editor_factories;
 }
 
 /********************* end ElkIResourceHandler implementation *********************/

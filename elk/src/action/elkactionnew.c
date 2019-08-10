@@ -31,6 +31,7 @@
 
 struct _ElkActionNewPrivate {
 	ElkIService *service;
+	ElkIResourceEditorFactory *factory;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(ElkActionNew, elk_action_new, LEA_TYPE_ACTION)
@@ -56,6 +57,7 @@ static void l_dispose(GObject *object) {
 	ElkActionNew *instance = ELK_ACTION_NEW(object);
 	ElkActionNewPrivate *priv = elk_action_new_get_instance_private(instance);
 	cat_unref_ptr(priv->service);
+	cat_unref_ptr(priv->factory);
 	G_OBJECT_CLASS(elk_action_new_parent_class)->dispose(object);
 	cat_log_detail("disposed:%p", object);
 }
@@ -72,14 +74,33 @@ ElkActionNew *elk_action_new_new(ElkIService *service) {
 	cat_ref_anounce(result);
 	ElkActionNewPrivate *priv = elk_action_new_get_instance_private(result);
 	priv->service = cat_ref_ptr(service);
+	priv->factory = NULL;
 	lea_action_construct((LeaAction *) result, cat_string_wo_new_with("elk.new.empty"), cat_string_wo_new_with("_New"), cat_string_wo_new_with("document-new"));
 	lea_action_set_default_key_sequence(LEA_ACTION(result), lea_key_sequence_from_string(cat_string_wo_new_with("Ctrl+N")));
 	return result;
 }
 
+ElkActionNew *elk_action_new_for_new(ElkIService *service, CatStringWo *name, ElkIResourceEditorFactory *factory) {
+	ElkActionNew *result = g_object_new(ELK_TYPE_ACTION_NEW, NULL);
+	cat_ref_anounce(result);
+	ElkActionNewPrivate *priv = elk_action_new_get_instance_private(result);
+	priv->service = cat_ref_ptr(service);
+	priv->factory = cat_ref_ptr(factory);
+	CatStringWo *n = cat_string_wo_new_with("elk.new.empty.for.");
+	cat_string_wo_append(n, name);
+	n = cat_string_wo_anchor(n,0);
+	lea_action_construct((LeaAction *) result, n, name, cat_string_wo_new_with("document-new"));
+	return result;
+}
+
+
 static void l_action_run(LeaAction *self) {
 	ElkActionNew *action = ELK_ACTION_NEW(self);
 	ElkActionNewPrivate *priv = elk_action_new_get_instance_private(action);
 	cat_log_debug("calling select_and_open_resources");
-	elk_iservice_create_empty_editor(priv->service);
+	if (priv->factory) {
+		elk_iservice_create_empty_editor_for(priv->service, priv->factory);
+	} else {
+		elk_iservice_create_empty_editor(priv->service);
+	}
 }

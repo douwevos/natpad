@@ -99,6 +99,7 @@ ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPrefere
 //	VipService *vip_service = moo_service_get_viper_service(moo_service);
 //	VipCdProvider *cd_provider = vip_service_get_cd_provider(vip_service);
 
+	result->e_resource_handlers = cat_array_wo_new();
 	result->preferences_service = cat_ref_ptr(prefences_service);
 	result->frame = cat_ref_ptr(frame);
 	result->application = application;
@@ -116,7 +117,6 @@ ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPrefere
 	result->document_io = elk_document_io_new(result->vip_service, document_manager);
 	cat_unref_ptr(document_manager);
 
-	result->e_resource_handlers = cat_array_wo_new();
 
 
 	ElkPreferencesContainer *prefs_container = elk_preferences_service_get_container(result->preferences_service);
@@ -143,14 +143,35 @@ void elk_service_remove_resource_handler(ElkService *service, ElkIResourceHandle
 	}
 }
 
+
+void elk_service_resource_handlers_updated(ElkService *elk_service) {
+	elk_panel_owner_resource_handlers_updated(elk_service->panel_owner);
+}
+
+
 CatArrayWo *elk_service_enlist_editor_factories(ElkService *service, MooNodeWo *moo_node) {
 	CatArrayWo *e_result = cat_array_wo_new();
 	CatIIterator *iter = cat_array_wo_iterator(service->e_resource_handlers);
 	while(cat_iiterator_has_next(iter)) {
 		ElkIResourceHandler *res_handler = cat_iiterator_next(iter);
 		ElkIResourceHandlerInterface *iface = ELK_IRESOURCE_HANDLER_GET_INTERFACE(res_handler);
-		if (iface->enlistEditorFactories) {
-			iface->enlistEditorFactories(res_handler, e_result, moo_node);
+		if (iface->matchEditorFactories) {
+			iface->matchEditorFactories(res_handler, e_result, moo_node);
+		}
+	}
+	cat_unref_ptr(iter);
+	return e_result;
+}
+
+
+CatHashMapWo *elk_service_enlist_empty_editor_factories(ElkService *service) {
+	CatHashMapWo *e_result = cat_hash_map_wo_new(cat_string_wo_hash, cat_string_wo_equal);
+	CatIIterator *iter = cat_array_wo_iterator(service->e_resource_handlers);
+	while(cat_iiterator_has_next(iter)) {
+		ElkIResourceHandler *res_handler = cat_iiterator_next(iter);
+		ElkIResourceHandlerInterface *iface = ELK_IRESOURCE_HANDLER_GET_INTERFACE(res_handler);
+		if (iface->emptyEditorFactories) {
+			iface->emptyEditorFactories(res_handler, e_result);
 		}
 	}
 	cat_unref_ptr(iter);
@@ -518,7 +539,8 @@ static void l_service_open_new_file_editor(ElkIService *service, MooNodeWo *moo_
 }
 
 
-static GtkWidget *l_service_create_empty_editor(ElkIService *service) {
+
+static void l_service_create_empty_editor(ElkIService *service) {
 	ElkService *elk_service = ELK_SERVICE(service);
 	LeaFrame *frame = elk_service->frame;
 
@@ -576,8 +598,109 @@ static GtkWidget *l_service_create_empty_editor(ElkIService *service) {
 
 	lea_surface_set_selected_tab(surface, (GtkWidget *) editor_panel);
 	cat_unref_ptr(new_child);
+}
 
-	return (GtkWidget *) editor_panel;
+
+static void l_service_create_empty_editor_for(ElkIService *service, ElkIResourceEditorFactory *factory) {
+	ElkService *elk_service = ELK_SERVICE(service);
+	LeaFrame *frame = elk_service->frame;
+
+	ElkDocumentBin *document_bin = elk_document_io_open_new_document(elk_service->document_io);
+//	ElkEditorPanel *editor_panel = elk_editor_panel_new((LeaIPanelOwner *) elk_service->panel_owner, document_bin, NULL);
+//
+//	LeaSurface *surface = lea_panel_get_surface(LEA_PANEL(editor_panel));
+//	if (surface==NULL) {
+//		LeaSurfaceHandler *surface_handler = lea_frame_get_surface_handler(frame);
+//		surface = lea_surface_handler_find_matching_surface(surface_handler, (LeaMatchFunc) l_editor_region_match_cb, NULL);
+//		if (surface == NULL) {
+//			surface = lea_surface_handler_create_surface(surface_handler);
+//			if (gtk_widget_get_parent(GTK_WIDGET(surface)) == NULL) {
+//				gtk_container_add(GTK_CONTAINER(frame), GTK_WIDGET(surface));
+//			}
+//		}
+//		LeaSurfaceTabModel *tab_model = lea_surface_get_tab_model(surface);
+//		LeaSurfaceTab *new_tab = lea_surface_tab_new((GtkWidget *) editor_panel, NULL);
+//		lea_surface_tab_model_add_tab(tab_model, new_tab);
+//		cat_unref_ptr(new_tab);
+//	}
+////	cat_unref(editor_panel);
+	MooTransaction *tx = moo_service_create_transaction((GObject *) elk_service, elk_service->moo_service);
+//
+//
+//
+	MooContentMapWo *e_content_map = moo_content_map_wo_new();
+	MooDirectContentWo *direct_content = moo_direct_content_wo_new();
+	moo_content_map_wo_set(e_content_map, (MooIContent *) direct_content);
+	cat_unref_ptr(direct_content);
+
+	MooResourceContentWo *rc_content = moo_resource_content_wo_new(NULL, NULL);
+	moo_content_map_wo_set(e_content_map, (MooIContent *) rc_content);
+	moo_content_map_wo_create_link(e_content_map, moo_iservices_content_key(), moo_resource_content_wo_key());
+	cat_log_debug("editable_cmap=%o", e_content_map);
+	cat_unref_ptr(rc_content);
+
+	long long next_moo_id = vip_isequence_next((VipISequence *) elk_service->moo_service);
+	MooNodeWo *moo_node = moo_node_wo_new(next_moo_id, elk_document_bin_get_name(document_bin), NULL, e_content_map, 120);
+	cat_unref_ptr(e_content_map);
+
+	while(TRUE) {
+		moo_transaction_begin(tx);
+		MooNodeWo *root_node = moo_transaction_get_tx_root_node(tx);
+
+		MooNodeWo *e_root_node = moo_node_wo_ensure_editable(root_node, NULL);
+		moo_node_wo_append_child(e_root_node, moo_node);
+		if (moo_transaction_commit(tx, e_root_node)) {
+			break;
+		}
+	}
+	cat_unref_ptr(tx);
+
+	GtkWidget *editor = NULL;
+	GtkWidget *outline = NULL;
+
+	ElkIResourceEditorFactoryInterface *factory_class = ELK_IRESOURCE_EDITOR_FACTORY_GET_INTERFACE(factory);
+	editor = factory_class->createEditor(factory, moo_node);
+	if (factory_class->createOutline) {
+		outline = factory_class->createOutline(factory, moo_node, editor);
+	}
+
+	if (editor) {
+		LeaSurface *surface = lea_panel_get_surface(LEA_PANEL(editor));
+		if (surface==NULL) {
+			LeaFrame *frame = elk_service->frame;
+			LeaSurfaceHandler *surface_handler = lea_frame_get_surface_handler(frame);
+			surface = lea_surface_handler_find_matching_surface(surface_handler, (LeaMatchFunc) l_editor_region_match_cb, NULL);
+			if (surface == NULL) {
+				surface = lea_surface_handler_create_surface(surface_handler);
+				if (gtk_widget_get_parent(GTK_WIDGET(surface)) == NULL) {
+					gtk_container_add(GTK_CONTAINER(frame), GTK_WIDGET(surface));
+				}
+			}
+			LeaSurfaceTabModel *tab_model = lea_surface_get_tab_model(surface);
+			LeaSurfaceTab *new_tab = lea_surface_tab_new(editor, NULL);
+			lea_surface_tab_model_add_tab(tab_model, new_tab);
+			cat_unref_ptr(new_tab);
+
+			if (outline) {
+				new_tab = lea_surface_tab_new(outline, cat_string_wo_new("outline"));
+				lea_surface_tab_model_add_tab(tab_model, new_tab);
+				cat_unref_ptr(new_tab);
+			}
+
+
+		}
+		lea_surface_set_selected_tab(surface, editor);
+		gtk_widget_grab_focus(editor);
+
+		g_idle_add((GSourceFunc) l_grb_foc, editor);
+	}
+
+
+//	elk_editor_panel_set_moose_node(editor_panel, new_child);
+//
+//	lea_surface_set_selected_tab(surface, (GtkWidget *) editor_panel);
+//	cat_unref_ptr(new_child);
+
 }
 
 static gboolean l_service_select_and_save_resource_editors(ElkIService *service, CatArrayWo *selected_editors) {
@@ -693,6 +816,7 @@ static void l_service_iface_init(ElkIServiceInterface *iface) {
 //	iface->openResourceEditor = l_service_open_resource_editor;
 	iface->openNewFileEditor = l_service_open_new_file_editor;
 	iface->createEmptyEditor = l_service_create_empty_editor;
+	iface->createEmptyEditorFor = l_service_create_empty_editor_for;
 	iface->closeMultipleResourceEditors = l_service_close_multiple_resource_editors;
 	iface->saveAllResourceEditors = l_service_save_all_resource_editors;
 }

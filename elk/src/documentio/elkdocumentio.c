@@ -111,7 +111,6 @@ ElkDocumentBin *elk_document_io_open_new_document(ElkDocumentIO *document_io) {
 	VipPath *file_path = vip_path_new(name);
 	cat_log_debug("file_path=%o", file_path);
 	ElkDocumentBin *result = (ElkDocumentBin *) cat_hash_map_wo_get(priv->e_document_map, file_path);
-	// TODO unref file_path ??
 	if (result==NULL) {
 		result = elk_document_bin_new_empty(priv->document_manager, priv->vip_service, nr);
 		cat_hash_map_wo_put(priv->e_document_map, (GObject *) file_path, (GObject *) result);

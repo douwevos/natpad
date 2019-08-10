@@ -84,8 +84,11 @@ GType elk_service_get_type();
 
 ElkService *elk_service_new(LeaFrame *frame, MooService *moo_service, ElkPreferencesService *prefences_service, GApplication *application);
 
+CatHashMapWo *elk_service_enlist_empty_editor_factories(ElkService *service);
 
 void elk_service_add_resource_handler(ElkService *service, ElkIResourceHandler *resource_handler);
+void elk_service_resource_handlers_updated(ElkService *elk_service);
+
 
 void elk_service_remove_resource_handler(ElkService *service, ElkIResourceHandler *resource_handler);
 

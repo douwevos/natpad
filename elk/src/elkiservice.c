@@ -66,9 +66,14 @@ void elk_iservice_select_and_open_resources(ElkIService *self) {
 
 
 
-GtkWidget *elk_iservice_create_empty_editor(ElkIService *self) {
-	g_return_val_if_fail(ELK_IS_ISERVICE(self), FALSE);
-	return ELK_ISERVICE_GET_INTERFACE(self)->createEmptyEditor(self);
+void elk_iservice_create_empty_editor(ElkIService *self) {
+	g_return_if_fail(ELK_IS_ISERVICE(self));
+	ELK_ISERVICE_GET_INTERFACE(self)->createEmptyEditor(self);
+}
+
+void elk_iservice_create_empty_editor_for(ElkIService *self, ElkIResourceEditorFactory *factory) {
+	g_return_if_fail(ELK_IS_ISERVICE(self));
+	ELK_ISERVICE_GET_INTERFACE(self)->createEmptyEditorFor(self, factory);
 }
 
 

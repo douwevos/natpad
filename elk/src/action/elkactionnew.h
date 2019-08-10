@@ -25,6 +25,7 @@
 #define ELKACTIONNEW_H_
 
 #include "../elkiservice.h"
+#include "../editor/elkiresourceeditorfactory.h"
 #include <leafhopper.h>
 #include <caterpillar.h>
 
@@ -54,6 +55,7 @@ struct _ElkActionNewClass {
 GType elk_action_new_get_type();
 
 ElkActionNew *elk_action_new_new(ElkIService *service);
+ElkActionNew *elk_action_new_for_new(ElkIService *service, CatStringWo *name, ElkIResourceEditorFactory *factory);
 
 G_END_DECLS
 

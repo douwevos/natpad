@@ -61,6 +61,8 @@ void elk_group_file_set_editor_panel(ElkGroupFile *group, DraEditorPanel *editor
 
 void elk_group_file_set_editor_list(ElkGroupFile *group, CatArrayWo *a_editor_list);
 
+void elk_group_file_resource_handlers_updated(ElkGroupFile *group);
+
 G_END_DECLS
 
 #endif /* ELKGROUPFILE_H_ */

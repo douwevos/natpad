@@ -103,7 +103,6 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 			if (cat_string_wo_endswith(a_name, CAT_S(jor_s_ext_json))) {
 				ElkService *elk_service = (ElkService *) priv->elk_service;
 				ElkDocumentIO *document_io = priv->elk_service->document_io;
-				ElkPreferencesService *prefs_service = elk_service_get_preferences_service(elk_service);
 				JorEditorFactory *factory = jor_editor_factory_new((LeaIPanelOwner *) elk_service->panel_owner, priv->connector, document_io, file_to_open);
 				cat_array_wo_append(e_enlist_to, (GObject *) factory);
 				cat_unref_ptr(factory);
@@ -112,8 +111,18 @@ static void l_enlist_editor_factories(ElkIResourceHandler *self, CatArrayWo *e_e
 	}
 }
 
+static void l_empty_editor_factories(ElkIResourceHandler *self, CatHashMapWo *e_enlist_to) {
+	JorServicePrivate *priv = jor_service_get_instance_private(JOR_SERVICE(self));
+	ElkService *elk_service = (ElkService *) priv->elk_service;
+	ElkDocumentIO *document_io = priv->elk_service->document_io;
+	JorEditorFactory *factory = jor_editor_factory_new((LeaIPanelOwner *) elk_service->panel_owner, priv->connector, document_io, NULL);
+	CatStringWo *json = cat_string_wo_new_anchored("JSON", 4);
+	cat_hash_map_wo_put(e_enlist_to, json, factory);
+}
+
 static void l_resource_handler_iface_init(ElkIResourceHandlerInterface *iface) {
-	iface->enlistEditorFactories = l_enlist_editor_factories;
+	iface->matchEditorFactories = l_enlist_editor_factories;
+	iface->emptyEditorFactories = l_empty_editor_factories;
 }
 
 /********************* end ElkIResourceHandler implementation *********************/
