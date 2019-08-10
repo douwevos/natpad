@@ -3,5 +3,5 @@
     section="Applications/Editors"\
     title="Natpad"\
     longtitle="Light-weight GNOME text editor"\
-    icon="/usr/share/pixmaps/natpad_32.xpm"\
+    icon="/usr/share/pixmaps/natpad.svg"\
     command="/usr/bin/natpad"

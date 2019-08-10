@@ -5,6 +5,6 @@ Terminal=false
 Type=Application
 StartupNotify=true
 MimeType=text/plain;
-Icon=natpad_32
+Icon=natpad
 Categories=GNOME;GTK;Utility;TextEditor;
 X-Ubuntu-Gettext-Domain=natpad

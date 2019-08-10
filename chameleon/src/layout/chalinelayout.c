@@ -45,7 +45,6 @@ struct _ChaLineLayoutPrivate {
 	CatLock *lock;
 
 	int width;
-//	int height;
 	int sub_line_count;
 
 	gboolean is_main_context;

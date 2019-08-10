@@ -35,6 +35,7 @@ module {
 			from {
 				path '[%distPath%]/icons';
 				include '.*.xpm';
+				include '.*.svg';
 			}
 			todir '[%archivePath%]/usr/share/pixmaps';
 		}
